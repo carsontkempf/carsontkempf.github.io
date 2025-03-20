@@ -12,3 +12,10 @@ gist:
 kramdown:
   math_engine: mathjax
   syntax_highlighter: rouge
+collections:
+  topic1:
+    output: true
+    permalink: /topic1/:path/
+  topic2:
+    output: true
+    permalink: /topic2/:path/
