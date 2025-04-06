@@ -3,6 +3,7 @@ layout: post
 title: "Research on MCP's and AI Agents"
 date: 2025-04-06 12:00:00 -0000
 categories: [Research, AI]
+permalink: /mcp/
 tags: [MCP, AI, Agents, Research]
 ---
 
