@@ -1,14 +1,13 @@
 /*
 Error: Invalid CSS after "... site.theme }}"": expected "{", was ";"
-        on line 4 of style.scss
+        on line 3 of style.scss
 
 1: ---
 2: ---
-3: 
-4: @import "{{ site.theme }}";
+3: @import "{{ site.theme }}";
 
 Backtrace:
-style.scss:4
+style.scss:3
 /Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:1308:in 'Sass::SCSS::Parser.expected'
 /Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:1238:in 'Sass::SCSS::Parser#expected'
 /Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:1233:in 'Sass::SCSS::Parser#tok!'
@@ -32,4 +31,4 @@ style.scss:4
 body:before {
   white-space: pre;
   font-family: monospace;
-  content: "Error: Invalid CSS after \"... site.theme }}\"\": expected \"{\", was \";\"\A         on line 4 of style.scss\A \A 1: ---\A 2: ---\A 3: \A 4: @import \"{{ site.theme }}\";"; }
+  content: "Error: Invalid CSS after \"... site.theme }}\"\": expected \"{\", was \";\"\A         on line 3 of style.scss\A \A 1: ---\A 2: ---\A 3: @import \"{{ site.theme }}\";"; }
