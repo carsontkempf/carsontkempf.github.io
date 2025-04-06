@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Resume
-permalink: ""
 ---
 # 👋 Hi there! I'm Carson Kempf
 
