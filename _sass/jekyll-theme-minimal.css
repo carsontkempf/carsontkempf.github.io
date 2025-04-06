@@ -1,0 +1,51 @@
+/*
+Error: File to import not found or unreadable: rouge-github.
+        on line 2 of jekyll-theme-minimal.scss
+
+1: @import "fonts";
+2: @import "rouge-github";
+3: 
+4: body {
+5:   background-color: #fff;
+6:   padding:50px;
+7:   font: 14px/1.5 "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+Backtrace:
+jekyll-theme-minimal.scss:2
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/import_node.rb:67:in 'Sass::Tree::ImportNode#import'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/import_node.rb:28:in 'Sass::Tree::ImportNode#imported_file'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/import_node.rb:37:in 'Sass::Tree::ImportNode#css_import?'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/perform.rb:310:in 'Sass::Tree::Visitors::Perform#visit_import'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/base.rb:36:in 'Sass::Tree::Visitors::Base#visit'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/perform.rb:158:in 'block in Sass::Tree::Visitors::Perform#visit'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/stack.rb:79:in 'block in Sass::Stack#with_base'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/stack.rb:135:in 'Sass::Stack#with_frame'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/stack.rb:79:in 'Sass::Stack#with_base'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/perform.rb:158:in 'Sass::Tree::Visitors::Perform#visit'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/base.rb:52:in 'block in Sass::Tree::Visitors::Base#visit_children'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/base.rb:52:in 'Array#map'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/base.rb:52:in 'Sass::Tree::Visitors::Base#visit_children'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/perform.rb:167:in 'block in Sass::Tree::Visitors::Perform#visit_children'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/perform.rb:179:in 'Sass::Tree::Visitors::Perform#with_environment'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/perform.rb:166:in 'Sass::Tree::Visitors::Perform#visit_children'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/base.rb:36:in 'block in Sass::Tree::Visitors::Base#visit'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/perform.rb:186:in 'Sass::Tree::Visitors::Perform#visit_root'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/base.rb:36:in 'Sass::Tree::Visitors::Base#visit'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/perform.rb:157:in 'Sass::Tree::Visitors::Perform#visit'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/visitors/perform.rb:10:in 'Sass::Tree::Visitors::Perform.visit'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/root_node.rb:36:in 'Sass::Tree::RootNode#css_tree'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/root_node.rb:29:in 'Sass::Tree::RootNode#render_with_sourcemap'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/engine.rb:389:in 'Sass::Engine#_render_with_sourcemap'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/engine.rb:307:in 'Sass::Engine#render_with_sourcemap'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/exec/sass_scss.rb:387:in 'Sass::Exec::SassScss#run'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/exec/sass_scss.rb:63:in 'Sass::Exec::SassScss#process_result'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/exec/base.rb:50:in 'Sass::Exec::Base#parse'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/exec/base.rb:18:in 'Sass::Exec::Base#parse!'
+/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/bin/sass:13:in '<top (required)>'
+/Users/ctk/.gem/ruby/3.4.1/bin/sass:25:in 'Kernel#load'
+/Users/ctk/.gem/ruby/3.4.1/bin/sass:25:in '<main>'
+*/
+body:before {
+  white-space: pre;
+  font-family: monospace;
+  content: "Error: File to import not found or unreadable: rouge-github.\A         on line 2 of jekyll-theme-minimal.scss\A \A 1: @import \"fonts\";\A 2: @import \"rouge-github\";\A 3: \A 4: body {\A 5:   background-color: #fff;\A 6:   padding:50px;\A 7:   font: 14px/1.5 \"Noto Sans\", \"Helvetica Neue\", Helvetica, Arial, sans-serif;"; }
