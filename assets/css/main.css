@@ -5,7 +5,7 @@ Error: Invalid CSS after "...-theme-minimal"": expected "{", was ";"
 1: ---
 2: ---
 3: 
-4: @import "../_scss/jekyll-theme-minimal";
+4: @import "jekyll-theme-minimal";
 
 Backtrace:
 main.scss:4
@@ -32,4 +32,4 @@ main.scss:4
 body:before {
   white-space: pre;
   font-family: monospace;
-  content: "Error: Invalid CSS after \"...-theme-minimal\"\": expected \"{\", was \";\"\A         on line 4 of main.scss\A \A 1: ---\A 2: ---\A 3: \A 4: @import \"../_scss/jekyll-theme-minimal\";"; }
+  content: "Error: Invalid CSS after \"...-theme-minimal\"\": expected \"{\", was \";\"\A         on line 4 of main.scss\A \A 1: ---\A 2: ---\A 3: \A 4: @import \"jekyll-theme-minimal\";"; }
