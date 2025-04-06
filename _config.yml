@@ -22,7 +22,7 @@ title: Carson Kempf
 email: ctkfdp@umsystem.edu
 description: >- # this means to ignore newlines until "baseurl:"
   My site for my reflections on all types of projects
-baseurl: "carsontkempf.github.io/docs" # the subpath of your site, e.g. /blog
+baseurl: "carsontkempf.github.io" # the subpath of your site, e.g. /blog
 url: "https://carsontkempf.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: no
 github_username:  carsontkempf
