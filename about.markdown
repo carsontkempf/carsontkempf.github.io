@@ -1,3 +1,8 @@
+---
+layout: page
+title: About
+permalink: /about/
+---
 # 👋 Hi there! I'm Carson Kempf
 
 I'm a Computer Science student at Missouri University of Science and Technology, graduating in December 2025, with a minor in Philosophy. I have a strong passion for databases, Python programming, and application development, focusing on backend frameworks.
