@@ -1,6 +1,6 @@
 /*
 Error: Invalid CSS after "...-theme-minimal"": expected "{", was ";"
-        on line 4 of style.scss
+        on line 4 of style.scss.liquid
 
 1: ---
 2: ---
@@ -8,7 +8,7 @@ Error: Invalid CSS after "...-theme-minimal"": expected "{", was ";"
 4: @import "jekyll-theme-minimal";
 
 Backtrace:
-style.scss:4
+style.scss.liquid:4
 /Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:1308:in 'Sass::SCSS::Parser.expected'
 /Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:1238:in 'Sass::SCSS::Parser#expected'
 /Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:1233:in 'Sass::SCSS::Parser#tok!'
