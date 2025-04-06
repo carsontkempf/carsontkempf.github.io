@@ -2,42 +2,11 @@
 layout: default
 title: Resume
 ---
-# 👋 Hi there! I'm Carson Kempf
+## 🛠️ Projects in Progress
 
-I'm a Computer Science student at Missouri University of Science and Technology, graduating in December 2025, with a minor in Philosophy. I have a strong passion for databases, Python programming, and application development, focusing on backend frameworks.
+* just kidding
 
-## 🌟 What I Do
-
-- **Backend Development**: Skilled in building robust web applications using Django and Flask.
-- **Database Design**: Experienced in designing efficient databases using entity-relationship models.
-- **Python Programming**: Proficient in Python for both application development and scripting.
-- **API Development**: Developing with APIs to integrate various services and data sources.
-- **MCP Study**: Utilizing APIs and OpenAI to create capable AI agents.
-
-## 🌱 About Me
-
-- 🔭 Pursuing a degree in Computer Science with a minor in Philosophy at Missouri University of Science and Technology.
-- 🌱 Passionate about data-driven solutions, focusing on databases, Django, and Python.
-- 👨‍💻 Seeking opportunities in internships and research to enhance my skills as a computer scientist.
-- 🧠 Key interests include AI integration with databases and full-stack development.
-- 🌍 Open to collaborations on innovative projects that push the boundaries of technology.
-
-## 💡 Technical Skills
-
-- **Languages**: Python, SQL, JavaScript, C++, C
-- **Frameworks**: Django, React
-- **Databases**: PostgreSQL
-- **Tools & Platforms**: Git, Docker, AWS, Azure, Linux, Unix, WSL, Jupyter Notebooks
-
-## 📈 Current Focus
-
-- **Full-Stack Development**: Building engaging applications.
-- **Django Development**: Developing web applications with a focus on backend development.
-- **Database Optimization**: Ensuring data is stored efficiently and securely.
-- **Cloud Integration**: Developing and deploying applications on AWS.
-- **Algorithm Validation**: Utilizing Jupyter Notebooks to prove algorithms and generate data structures supporting project results.
-
-## 🛠️ Projects
+## 🛠️ Completed Projects
 
 ### [Workout Database](https://github.com/carsontkempf/WorkoutDatabase)
 
