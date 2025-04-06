@@ -1,11 +1,11 @@
 /*
-Error: Invalid CSS after "... site.theme }}"": expected "{", was ";"
+Error: Invalid CSS after "...-theme-minimal"": expected "{", was ";"
         on line 4 of style.scss
 
 1: ---
 2: ---
 3: 
-4: @import "{{ site.theme }}";
+4: @import "jekyll-theme-minimal";
 
 Backtrace:
 style.scss:4
@@ -32,4 +32,4 @@ style.scss:4
 body:before {
   white-space: pre;
   font-family: monospace;
-  content: "Error: Invalid CSS after \"... site.theme }}\"\": expected \"{\", was \";\"\A         on line 4 of style.scss\A \A 1: ---\A 2: ---\A 3: \A 4: @import \"{{ site.theme }}\";"; }
+  content: "Error: Invalid CSS after \"...-theme-minimal\"\": expected \"{\", was \";\"\A         on line 4 of style.scss\A \A 1: ---\A 2: ---\A 3: \A 4: @import \"jekyll-theme-minimal\";"; }
