@@ -10,13 +10,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
     {% include head-custom.html %}
+    <style>
+      .content-wrapper { display: flex; }
+      .sidebar { width: 250px; flex-shrink: 0; }
+      .main-content { flex-grow: 1; padding-left: 20px; }
+    </style>
   </head>
   <body>
     <div class="wrapper">
       <header>
         <h1><a href="{{ "/" | absolute_url }}">{{ site.title | default: site.github.repository_name }}</a></h1>
         {% if site.logo %}
-          <img src="{{site.logo | relative_url}}" alt="Logo" />
+          <img src="{{ site.logo | relative_url }}" alt="Logo" />
         {% endif %}
         <p>{{ site.description | default: site.github.project_tagline }}</p>
         {% if site.github.is_project_page %}
@@ -34,12 +39,12 @@
         {% endif %}
       </header>
       <div class="content-wrapper">
-        <section class="main-content">
-          {{ content }}
-        </section>
         <aside class="sidebar">
           {% include sidebar.html %}
         </aside>
+        <section class="main-content">
+          {{ content }}
+        </section>
       </div>
       <footer>
         {% if site.github.is_project_page %}
