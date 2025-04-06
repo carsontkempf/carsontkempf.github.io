@@ -4,9 +4,8 @@
     {% for post in site.posts %}
       <li><a href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
     {% endfor %}
-    {% assign markdown_pages = site.pages | where_exp:"page", "page.extname == '.md' or page.extname == '.markdown'" %}
-    {% for page in markdown_pages %}
-      {% if page.url and page.url != "/" %}
+    {% for page in site.pages %}
+      {% if page.url and page.url != "/" and (page.extname == ".md" or page.extname == ".markdown") %}
         <li><a href="{{ page.url | relative_url }}">{{ page.title | default: page.name }}</a></li>
       {% endif %}
     {% endfor %}
