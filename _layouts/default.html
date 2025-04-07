@@ -15,14 +15,6 @@
         width: 100%;
         margin: 0 auto;
       }
-      /* Common wrapper styling for header, body, and footer */
-      .content-wrapper {
-        width: 100%;
-        padding: 15px;
-        background-color: #e0e0e0; /* slightly darker background */
-        margin-bottom: 20px;
-        text-align: center;
-      }
       /* Body-specific container for sidebar and main content */
       .body-content {
         display: flex;
@@ -57,6 +49,7 @@
           <aside class="sidebar">
             {% include sidebar.html %}
           </aside>
+          <section class="main-content">
             <header>
               <h1>
                 <a href="{{ site.baseurl }}/">{{ site.title | default: site.github.repository_name }}</a>
@@ -85,7 +78,6 @@
                 </ul>
               {% endif %}
             </header>
-          <section class="main-content">
             {{ content }}
           </section>
         </div>
