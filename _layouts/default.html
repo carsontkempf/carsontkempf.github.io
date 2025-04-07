@@ -75,24 +75,26 @@
             </ul>
           {% endif %}
         </header>
-        <div class="body-content">
-          <aside class="sidebar">
-            {% include sidebar.html %}
-          </aside>
-          <section class="main-content">
-            {{ content }}
-          </section>
-        </div>
       </div>
-      <footer>
-        {% if site.github.is_project_page %}
-          <p>
-            This project is maintained by
-            <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a>
-          </p>
-        {% endif %}
-      </footer>
-    </div>
+      <div class="content-wrapper">
+          <div class="body-content">
+            <aside class="sidebar">
+              {% include sidebar.html %}
+            </aside>
+            <section class="main-content">
+              {{ content }}
+            </section>
+          </div>
+        <footer>
+          {% if site.github.is_project_page %}
+            <p>
+              This project is maintained by
+              <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a>
+            </p>
+          {% endif %}
+        </footer>
+      </div>
+   </div>
     <script src="{{ site.baseurl }}/assets/js/scale.fix.js"></script>
   </body>
 </html>
