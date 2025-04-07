@@ -1,6 +1,6 @@
 /*
 Error: File to import not found or unreadable: rouge-github.
-        on line 2 of jekyll-theme-minimal.scss
+        on line 2 of jekyll-theme-_minimal.scss
 
 1: @import "fonts";
 2: @import "rouge-github";
@@ -11,7 +11,7 @@ Error: File to import not found or unreadable: rouge-github.
 7:   font: 14px/1.5 "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
 Backtrace:
-jekyll-theme-minimal.scss:2
+jekyll-theme-_minimal.scss:2
 /Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/import_node.rb:67:in 'Sass::Tree::ImportNode#import'
 /Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/import_node.rb:28:in 'Sass::Tree::ImportNode#imported_file'
 /Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/tree/import_node.rb:37:in 'Sass::Tree::ImportNode#css_import?'
