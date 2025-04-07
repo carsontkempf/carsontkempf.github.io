@@ -18,11 +18,9 @@
       }
       /* Header wrapper: absolute, at the top */
       .header-wrapper {
-        position: absolute;
+        width: 250px;
         top: 0;
         left: 0;
-        right: 0;
-        height: 150px; /* Adjust header height as needed */
       }
       header {
         width: 250px;
@@ -34,7 +32,7 @@
       }
       /* Body wrapper: absolute, positioned below header and above footer */
       .body-wrapper {
-        position: absolute;
+        position: relative;
         top: 0; /* equal to header height */
         left: 0;
         right: 0;
@@ -56,18 +54,16 @@
       }
       /* Main content: fills remaining space in body-content */
       .main-content {
-        position: absolute;
+        position: relative;
         top: 0;
         left: 250px; /* sidebar width */
         right: 0;
         bottom: 0;
-        overflow: auto;
-        padding: 20px;
         box-sizing: border-box;
       }
       /* Footer wrapper: absolute, at the bottom */
       .footer-wrapper {
-        position: absolute;
+        position: relative;
         bottom: 0;
         left: 0;
         right: 0;
