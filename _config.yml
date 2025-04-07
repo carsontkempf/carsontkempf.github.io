@@ -30,3 +30,5 @@ author: Carson Kempf
 show_downloads: true
 google_analytics:
 theme: jekyll-theme-minimal
+sass:
+  sass_dir: _sass

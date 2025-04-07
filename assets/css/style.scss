@@ -1,4 +1,8 @@
 ---
 ---
 
-@import "jekyll-theme-minimal"
+@import "jekyll-theme-minimal";
+
+.highlight .nn {
+  color: #555555;
+}
