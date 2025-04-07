@@ -1,35 +1,3 @@
-/*
-Error: Invalid CSS after "...-theme-minimal"": expected "{", was ";"
-        on line 4 of style.scss.liquid
 
-1: ---
-2: ---
-3: 
-4: @import "jekyll-theme-minimal";
 
-Backtrace:
-style.scss.liquid:4
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:1308:in 'Sass::SCSS::Parser.expected'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:1238:in 'Sass::SCSS::Parser#expected'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:1233:in 'Sass::SCSS::Parser#tok!'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:688:in 'Sass::SCSS::Parser#block'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:681:in 'Sass::SCSS::Parser#ruleset'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:707:in 'Sass::SCSS::Parser#block_child'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:697:in 'Sass::SCSS::Parser#block_contents'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:137:in 'Sass::SCSS::Parser#stylesheet'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/scss/parser.rb:41:in 'Sass::SCSS::Parser#parse'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/engine.rb:414:in 'Sass::Engine#_to_tree'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/engine.rb:389:in 'Sass::Engine#_render_with_sourcemap'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/engine.rb:307:in 'Sass::Engine#render_with_sourcemap'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/exec/sass_scss.rb:387:in 'Sass::Exec::SassScss#run'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/exec/sass_scss.rb:63:in 'Sass::Exec::SassScss#process_result'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/exec/base.rb:50:in 'Sass::Exec::Base#parse'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/lib/sass/exec/base.rb:18:in 'Sass::Exec::Base#parse!'
-/Users/ctk/.gem/ruby/3.4.1/gems/sass-3.7.4/bin/sass:13:in '<top (required)>'
-/Users/ctk/.gem/ruby/3.4.1/bin/sass:25:in 'Kernel#load'
-/Users/ctk/.gem/ruby/3.4.1/bin/sass:25:in '<main>'
-*/
-body:before {
-  white-space: pre;
-  font-family: monospace;
-  content: "Error: Invalid CSS after \"...-theme-minimal\"\": expected \"{\", was \";\"\A         on line 4 of style.scss\A \A 1: ---\A 2: ---\A 3: \A 4: @import \"jekyll-theme-minimal\";"; }
+/*# sourceMappingURL=style.css.map */
