@@ -51,7 +51,7 @@
   <body>
     <div class="wrapper">
       <!-- Header Section -->
-      <div class="content-wrapper">
+      <div class="wrapper">
         <header>
           <h1>
             <a href="{{ site.baseurl }}/">{{ site.title | default: site.github.repository_name }}</a>
@@ -83,7 +83,7 @@
       </div>
 
       <!-- Body Section -->
-      <div class="content-wrapper">
+      <div class="wrapper">
         <div class="body-content">
           <aside class="sidebar">
             {% include sidebar.html %}
@@ -95,7 +95,7 @@
       </div>
 
       <!-- Footer Section -->
-      <div class="content-wrapper">
+      <div class="wrapper">
         <footer>
           {% if site.github.is_project_page %}
             <p>This project is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
