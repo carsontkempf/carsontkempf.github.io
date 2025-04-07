@@ -15,23 +15,20 @@
         width: 100%;
         margin: 0 auto;
       }
-      /* Single content-wrapper for header, body, and footer */
+      /* Common wrapper styling for header, body, and footer */
       .content-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-      /* Header styling */
-      header {
         width: 100%;
-        background-color: #e0e0e0; /* slightly darker */
         padding: 15px;
+        background-color: #e0e0e0; /* slightly darker background */
+        margin-bottom: 20px;
         text-align: center;
       }
-      /* Container for sidebar and main content */
+      /* Body-specific container for sidebar and main content */
       .body-content {
         display: flex;
         gap: 20px;
+        justify-content: flex-start;
+        text-align: left;
       }
       .sidebar {
         width: 250px;
@@ -42,17 +39,18 @@
         flex-grow: 1;
         padding-left: 20px;
       }
-      /* Footer styling */
-      footer {
-        width: 100%;
+      /* Adjust header and footer styling if needed */
+      header, footer {
         background-color: #e0e0e0;
-        padding: 15px;
-        text-align: center;
+      }
+      header h1, footer p {
+        margin: 0;
       }
     </style>
   </head>
   <body>
     <div class="wrapper">
+      <!-- Header Section -->
       <div class="content-wrapper">
         <header>
           <h1>
@@ -82,6 +80,10 @@
             </ul>
           {% endif %}
         </header>
+      </div>
+
+      <!-- Body Section -->
+      <div class="content-wrapper">
         <div class="body-content">
           <aside class="sidebar">
             {% include sidebar.html %}
@@ -90,6 +92,10 @@
             {{ content }}
           </section>
         </div>
+      </div>
+
+      <!-- Footer Section -->
+      <div class="content-wrapper">
         <footer>
           {% if site.github.is_project_page %}
             <p>This project is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
