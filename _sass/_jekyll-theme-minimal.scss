@@ -31,7 +31,7 @@ h1, h2, h3 {
 }
 
 h1 {
-  font-size: clamp(26px, 1.75rem, 30px);
+  font-size: clamp(16px, 1.75rem, 30px);
 }
 
 h2 {
@@ -129,13 +129,6 @@ kbd {
 }
 
 header {
-  position: absolute;
-  top: 15px;
-  left: 0;
-  right: 87.5vw;
-  bottom: 87.5vw;
-  box-sizing: border-box;
-  background-color: #e0e0e0;
   -webkit-font-smoothing:subpixel-antialiased;
 }
 
