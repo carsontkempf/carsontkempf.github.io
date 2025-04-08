@@ -1,6 +1,10 @@
 @import "fonts";
 @import "rouge-github";
 
+html {
+  font-size: clamp(12px, 1.5vw, 30px);
+}
+
 body {
   font-size: inherit;
   background-color: #fff;
@@ -129,6 +133,11 @@ kbd {
 }
 
 header {
+  font-size: 0.5rem;
+  text-align: center;
+  top: 15px;
+  bottom: 300px;
+  margin-bottom: 20px;
   -webkit-font-smoothing:subpixel-antialiased;
 }
 
