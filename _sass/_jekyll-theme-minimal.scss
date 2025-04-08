@@ -6,11 +6,11 @@ html {
 }
 
 body {
+  font-size: inherit;
   background-color: #fff;
   padding: 3.125rem;        /* 50px converted to rem (50/16) */
   font: normal 0.875rem/1.5 "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;  /* 14px = 0.875rem */
   color: #727272;
-  font-size: inherit;
   font-weight: 400;
 }
 
