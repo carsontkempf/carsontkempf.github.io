@@ -15,6 +15,15 @@
         width: 100%;
         height: 100%;
       }
+      .header {
+        position: absolute;
+        top: 15px;
+        left: 0;
+        width: 12.5vw;
+        bottom: 300px;
+        background-color: #e0e0e0;
+        box-sizing: border-box;
+      }
       .sidebar {
         position: absolute;
         top: 300px;
@@ -35,21 +44,25 @@
   </head>
   <body>
     <div class="wrapper">
+
       <!-- Header Section -->
-      {% include head-custom.html %}
-      <!-- Body Section -->
+      <aside class="header">
+        {% include head-custom.html %}
+      </aside>
+
       <aside class="sidebar">
         {% include sidebar.html %}
       </aside>
+
+      <!-- Body Section -->
       <section class="main-content">
         {{ content }}
       </section>
+
       <!-- Footer Section -->
-      <footer>
-        {% if site.github.is_project_page %}
-          <p>This project is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
-        {% endif %}
-      </footer>
+      <section class="main-content">
+        {% include footer.html %}
+      </section>
       </div>
     <script src="{{ site.baseurl }}/assets/js/scale.fix.js"></script>
   </body>
