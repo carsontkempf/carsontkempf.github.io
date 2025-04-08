@@ -7,8 +7,6 @@ permalink: /mcp/
 tags: [MCP, AI, Agents, Research]
 ---
 
-# Research on MCP's and AI Agents
-
 This document is a comprehensive sample to test **all Markdown elements**. It discusses recent research on *MCP's* (Multi-Channel Processors) and AI agents.
 
 ## Introduction
