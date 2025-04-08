@@ -124,7 +124,13 @@ kbd {
 }
 
 header {
-  width:270px;
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 87.5vw;
+  bottom: 87.5vw;
+  box-sizing: border-box;
+  background-color: #e0e0e0;
   -webkit-font-smoothing:subpixel-antialiased;
 }
 
@@ -206,11 +212,19 @@ hr {
 }
 
 footer {
-  width:270px;
-  float:left;
-  position:fixed;
-  bottom:50px;
+  bottom: 0;
+  position: relative;
+  top: 87.5vw;
+  width: 100%;
+  background-color: #e0e0e0;
+  text-align: center;
+  box-sizing: border-box;
   -webkit-font-smoothing:subpixel-antialiased;
+}
+
+.skinny{
+  left: 0;
+  width: 12.5vw;
 }
 
 @media print, screen and (max-width: 960px) {
