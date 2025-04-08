@@ -139,7 +139,8 @@ header {
   top: 15px;
   bottom: 300px;
   white-space: nowrap;
-  word-break: keep-all;
+  word-break: normal;
+  overflow-wrap: break-word;
   margin-bottom: 1rem;
   -webkit-font-smoothing:subpixel-antialiased;
 }
