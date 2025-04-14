@@ -16,8 +16,8 @@ body {
 
 aside {
   background-color: rgba(149, 157, 165, 0.25);
-  font-size: clamp(10px, 1vw, 20px);
   text-align: center;
+  font-size: clamp(10px, 1vw, 20px);
   white-space: normal;
   hyphens: none;
   display: inline-block;
@@ -29,7 +29,7 @@ aside {
 
 h1, h2, h3, h4, h5, h6 {
   color: #222;
-  margin: 0 0 1.25rem;      /* 20px converted to rem (20/16) */
+  margin: 0.25rem 0;      /* 20px converted to rem (20/16) */
 }
 
 p, ul, ol, table, pre, dl {
@@ -139,13 +139,13 @@ kbd {
 }
 
 header {
+  margin: 0;
   font-size: 0.5rem;
-  padding: 1rem;
+  padding: 0.25rem 0.5rem;
   text-align: center;
   top: 15px;
   bottom: 300px;
   white-space: break-spaces;
-  margin-bottom: 1rem;
   -webkit-font-smoothing:subpixel-antialiased;
 }
 
