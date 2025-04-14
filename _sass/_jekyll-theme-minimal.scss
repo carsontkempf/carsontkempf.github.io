@@ -2,11 +2,7 @@
 @import "rouge-github";
 
 html {
-  font-size: clamp(12px, 1.5vw, 30px);
-}
-
-h1 {
-  font-size: clamp(8px, 1.75rem, 30px);
+  font-size: clamp(8px, 1vw, 30px);
 }
 
 body {
@@ -24,7 +20,9 @@ li {
 
 aside {
   white-space: normal;
+  hyphens: none;
   position: fixed;
+  padding: 0px 40px;
   top: 0;
   left: 0;
   bottom: 0;
@@ -34,9 +32,7 @@ aside {
   display: flex;
   overflow-x: hidden;
   flex-direction: column;
-  padding: 25px 20px;
   font-size: clamp(8px, 1vw, 30px);
-  hyphens: none;
 }
 
 h1, h2, h3, h4, h5, h6 {
