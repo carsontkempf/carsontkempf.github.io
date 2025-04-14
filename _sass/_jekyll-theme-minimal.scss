@@ -5,6 +5,10 @@ html {
   font-size: clamp(12px, 1.5vw, 30px);
 }
 
+h1 {
+  font-size: clamp(8px, 1.75rem, 30px);
+}
+
 body {
   font-size: inherit;
   background-color: #fff;
@@ -24,14 +28,11 @@ aside {
   left: 0;
   width: 12.5vw;
   background-color: rgba(149, 157, 165, 0.25);
-  justify-content: center;
-  align-items: center;
-  text-align: center;
   display: flex;
   overflow-x: hidden;
   flex-direction: column;
   padding: 25px 20px;
-  font-size: clamp(10px, 1vw, 20px);
+  font-size: clamp(8px, 1vw, 30px);
   white-space: normal;
   hyphens: none;
   box-sizing: border-box;
@@ -39,7 +40,7 @@ aside {
 
 h1, h2, h3, h4, h5, h6 {
   color: #222;
-  margin: 0.25rem 0;      /* 20px converted to rem (20/16) */
+  margin: 0.25rem 0;
 }
 
 ul, ol, table, pre, dl {
@@ -48,10 +49,6 @@ ul, ol, table, pre, dl {
 
 h1, h2, h3 {
   line-height: 1.1;
-}
-
-h1 {
-  font-size: clamp(16px, 1.75rem, 30px);
 }
 
 h2 {
@@ -149,14 +146,13 @@ kbd {
 }
 
 header {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  font-size: 0.5rem;
-  padding: 0.25rem 0.5rem;
   justify-content: center;
   align-items: center;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
   top: 15px;
   bottom: 300px;
   white-space: break-spaces;
