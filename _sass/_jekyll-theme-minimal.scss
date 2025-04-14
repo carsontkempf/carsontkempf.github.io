@@ -16,11 +16,13 @@ body {
 
 aside {
   background-color: rgba(149, 157, 165, 0.25);
+  justify-content: center;
+  align-items: center;
   text-align: center;
   font-size: clamp(10px, 1vw, 20px);
   white-space: normal;
   hyphens: none;
-  display: inline-block;
+  display: flex;
   position: absolute;
   left: 0;
   width: 12.5vw;
@@ -139,9 +141,13 @@ kbd {
 }
 
 header {
+  display: flex;
+  flex-direction: column;
   margin: 0;
   font-size: 0.5rem;
   padding: 0.25rem 0.5rem;
+  justify-content: center;
+  align-items: center;
   text-align: center;
   top: 15px;
   bottom: 300px;
