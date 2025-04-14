@@ -4,6 +4,8 @@ title: Resume
 ---
 ## 🛠️ Completed Projects
 
+--- 
+
 ### [Workout Database](https://github.com/carsontkempf/WorkoutDatabase)
 
 A web application developed to manage and track workout routines efficiently. This project demonstrates my proficiency in full-stack web development using the Flask framework and showcases my approach to building scalable and user-friendly applications.
@@ -19,6 +21,8 @@ A web application developed to manage and track workout routines efficiently. Th
   - **Modularity**: Organized code into modular components to promote reusability and simplify maintenance.
   - **User Experience**: Prioritized ease of use and a clean UI for enhanced user experience.
   - **Performance Optimization**: Employed efficient database queries and optimized server responses for scalability.
+
+--- 
 
 ### [Treehouse Booking Application](https://github.com/carsontkempf/RootsInnPlanning)
 

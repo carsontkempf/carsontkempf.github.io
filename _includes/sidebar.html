@@ -2,14 +2,6 @@
   <h2>Navigation</h2>
   <ul>
     <li><a href="{{ site.baseurl }}/">Home</a></li>
-    {% for post in site.posts %}
-      <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
-    {% endfor %}
-    {% for page in site.pages %}
-      {% if page.url and page.url != "/" and (page.extname == ".md" or page.extname == ".markdown") %}
-        <li><a href="{{ site.baseurl }}{{ page.url }}">{{ page.title | default: page.name }}</a></li>
-      {% endif %}
-    {% endfor %}
   </ul>
     {% for category in site.categories %}
     <h2>{{ category[0] }}</h2>
