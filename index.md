@@ -2,10 +2,6 @@
 layout: post
 title: Resume
 ---
-## 🛠️ Projects in Progress
-
-* just kidding
-
 ## 🛠️ Completed Projects
 
 ### [Workout Database](https://github.com/carsontkempf/WorkoutDatabase)
