@@ -5,6 +5,17 @@ html {
   font-size: clamp(8px, 1vw, 30px);
 }
 
+.sidebar {
+  text-align: left;
+  align-content: space-evenly;
+  white-space: normal;
+  hyphens: none;
+  font-size: 0.5rem;
+  top: 350px;
+  bottom: 0;
+  padding-top: 50px
+}
+
 body {
   font-size: inherit;
   background-color: #fff;
