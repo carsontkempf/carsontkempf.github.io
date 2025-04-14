@@ -13,7 +13,7 @@ html {
   white-space: normal;
   hyphens: none;
   font-size: 0.5rem;
-  top: 300px;
+  top: 320px;
   bottom: 0;
   padding-top: 50px
 }
@@ -29,6 +29,8 @@ body {
 
 li {
   align-text: left;
+  margin: 0;
+  padding: 0;
 }
 
 aside {
@@ -67,7 +69,12 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0.25rem 0;
 }
 
-ul, ol, table, pre, dl {
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+ol, table, pre, dl {
   margin: 0 0 1.25rem;
 }
 
