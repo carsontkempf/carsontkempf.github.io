@@ -8,6 +8,7 @@ html {
 .sidebar {
   text-align: left;
   align-content: space-evenly;
+  overflow-wrap: normal;
   white-space: normal;
   hyphens: none;
   font-size: 0.5rem;
@@ -19,7 +20,7 @@ html {
 body {
   font-size: inherit;
   background-color: #fff;
-  padding: 3.125rem;        /* 50px converted to rem (50/16) */
+  padding: 3.125rem;
   font: normal 0.875rem/1.5 "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;  /* 14px = 0.875rem */
   color: #727272;
   font-weight: 400;
@@ -44,6 +45,20 @@ aside {
   overflow-x: hidden;
   flex-direction: column;
   font-size: clamp(8px, 1vw, 30px);
+}
+
+.header {
+  padding-bottom: 20px;
+}
+
+.main-content {
+  font-size: 1rem;
+  width: auto;
+  position: absolute;
+  top: 0;
+  left: 20vw;
+  right: 0;
+  bottom: 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
