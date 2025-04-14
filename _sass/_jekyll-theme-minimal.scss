@@ -17,10 +17,9 @@ body {
 aside {
   background-color: rgba(149, 157, 165, 0.25);
   display: flex;
+  white-space: normal;
   justify-content: space-between;
-  flex-direction: column;
-  border: 1px outset grey;
-  padding: 1rem;
+  border: 1px groove grey;
   text-align: center;
   position: absolute;
   left: 0;
