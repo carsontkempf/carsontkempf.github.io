@@ -15,7 +15,13 @@ body {
 }
 
 aside {
-  display: flex;
+  background-color: rgba(149, 157, 165, 0.25);
+  display: inline-flex;
+  flex-direction: column;
+  border: 1px solid grey;
+  padding: 1rem;
+  margin: auto;
+  text-align: center;
   justify-content: space-between;
   position: absolute;
   left: 0;
