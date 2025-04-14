@@ -16,8 +16,8 @@ body {
 
 aside {
   background-color: rgba(149, 157, 165, 0.25);
-  font-size: clamp(10px, 2vw, 27px);
-  display: flex;
+  font-size: clamp(10px, 2vw, 20px);
+  display: inline-block;
   white-space: normal;
   hyphens: none;
   justify-content: space-between;
