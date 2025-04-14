@@ -23,19 +23,20 @@ li {
 }
 
 aside {
+  white-space: normal;
   position: fixed;
   top: 0;
   left: 0;
+  bottom: 0;
   width: 12.5vw;
+  box-sizing: border-box;
   background-color: rgba(149, 157, 165, 0.25);
   display: flex;
   overflow-x: hidden;
   flex-direction: column;
   padding: 25px 20px;
   font-size: clamp(8px, 1vw, 30px);
-  white-space: normal;
   hyphens: none;
-  box-sizing: border-box;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -96,7 +97,7 @@ blockquote {
 
 code, pre {
   font-family:Monaco, Bitstream Vera Sans Mono, Lucida Console, Terminal, Consolas, Liberation Mono, DejaVu Sans Mono, Courier New, monospace;
-  color:#333;
+  color: #959da5;
 }
 
 pre {
