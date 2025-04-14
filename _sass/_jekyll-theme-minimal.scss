@@ -16,12 +16,11 @@ body {
 
 aside {
   background-color: rgba(149, 157, 165, 0.25);
-  font-size: clamp(10px, 2vw, 20px);
-  display: inline-block;
+  font-size: clamp(10px, 1vw, 20px);
+  text-align: center;
   white-space: normal;
   hyphens: none;
-  justify-content: space-between;
-  text-align: center;
+  display: inline-block;
   position: absolute;
   left: 0;
   width: 12.5vw;
