@@ -14,7 +14,12 @@ body {
   font-weight: 400;
 }
 
+li {
+  align-text: left;
+}
+
 aside {
+  padding: 1em;
   background-color: rgba(149, 157, 165, 0.25);
   justify-content: center;
   align-items: center;
