@@ -2,7 +2,7 @@
 layout: post
 title: "LangChain-Tools"
 date: 2025-04-15 06:31:44 -0000
-categories: [AI]
+categories: [LangChain]
 permalink: /LangChain-Tools/
 ---
 

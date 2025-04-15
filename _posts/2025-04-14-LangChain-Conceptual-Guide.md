@@ -2,7 +2,7 @@
 layout: post
 title: "LangChain-Conceptual-Guide"
 date: 2025-04-14 20:34:39 -0000
-categories: [AI]
+categories: [LangChain]
 permalink: /LangChain-Conceptual-Guide/
 ---
 
