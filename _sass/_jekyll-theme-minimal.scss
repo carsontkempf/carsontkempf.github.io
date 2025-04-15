@@ -9,7 +9,8 @@
   overflow-wrap: normal;
   white-space: normal;
   hyphens: none;
-  font-size: 0.5rem;
+  display: flex;
+  flex-direction: column;
   top: 320px;
   bottom: 0;
   padding-top: 50px
