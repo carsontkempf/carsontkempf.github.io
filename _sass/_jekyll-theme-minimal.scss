@@ -13,16 +13,13 @@
   flex-direction: column;
   top: 320px;
   bottom: 0;
-  padding-top: 50px
+  padding-top: 50px;
+  position: relative;
 }
 
-body {
-  font-size: inherit;
-  background-color: #fff;
-  padding: 3.125rem;
-  font: normal 0.875rem/1.5 "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;  /* 14px = 0.875rem */
-  color: #727272;
-  font-weight: 400;
+.header {
+  font-size: clamp(10px, 0.75vw, 30px);
+  padding-bottom: 20px;
 }
 
 li {
@@ -47,9 +44,27 @@ aside {
   flex-direction: column;
 }
 
-.header {
-  font-size: clamp(14px, 1vw, 30px);
-  padding-bottom: 20px;
+header {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  top: 15px;
+  bottom: 300px;
+  white-space: break-spaces;
+  -webkit-font-smoothing:subpixel-antialiased;
+}
+
+body {
+  font-size: inherit;
+  background-color: #fff;
+  padding: 3.125rem;
+  font: normal 0.875rem/1.5 "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;  /* 14px = 0.875rem */
+  color: #727272;
+  font-weight: 400;
 }
 
 .main-content {
@@ -172,20 +187,6 @@ kbd {
   line-height: 10px;
   padding: 3px 5px;
   vertical-align: middle;
-}
-
-header {
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  top: 15px;
-  bottom: 300px;
-  white-space: break-spaces;
-  -webkit-font-smoothing:subpixel-antialiased;
 }
 
 ul.downloads {
