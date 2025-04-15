@@ -2,9 +2,9 @@
 layout: post
 title: "Research on MCP's and AI Agents"
 date: 2025-04-06 12:00:00 -0000
-categories: [Research, AI]
+categories: [Research]
 permalink: /mcp/
-tags: [MCP, AI, Agents, Research]
+tags: [Research]
 ---
 
 This document is a comprehensive sample to test **all Markdown elements**. It discusses recent research on *MCP's* (Multi-Channel Processors) and AI agents.
