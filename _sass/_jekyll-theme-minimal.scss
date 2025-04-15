@@ -4,6 +4,7 @@
 .sidebar {
   font-size: clamp(8px, 0.5vw, 20px);
   left: 0;
+  top: 320px;
   align-text: left;
   align-items: flex-start;
   overflow-wrap: normal;
@@ -11,7 +12,6 @@
   hyphens: none;
   display: flex;
   flex-direction: column;
-  top: 320px;
   bottom: 0;
   padding-top: 50px;
   position: relative;
