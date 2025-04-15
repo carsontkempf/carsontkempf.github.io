@@ -21,7 +21,7 @@ tags: [AI, API]
 ### Installation & Setup
 
 1. Install package
-* `pip install -qU "langchain[deepseek]"`
+* ```pip install -qU "langchain[deepseek]"```
 
 2. Get Environment Variables and Chat Model
 
@@ -38,7 +38,7 @@ tags: [AI, API]
   ```
 
 3. First API Call
-* `model.invoke("Hello, world!")`
+* ```model.invoke("Hello, world!")```
 
 ---
 
@@ -46,13 +46,13 @@ tags: [AI, API]
 
 #### Some Open Source Libraries
 
-* `langchain-core`
+* ```langchain-core```
   * Basic chat model features
-* `langchain-deepseek`
+* ```langchain-deepseek```
   * Integration package specifically for the deepseek chat models
-* `langchain`
+* ```langchain```
   * Chains, agents, and retrieval strategies that orchestrate an application's actual, logically implemented features
-* `langgraph`
+* ```langgraph```
   * Framework for orchestration
   * Represents an application's LLM steps as edges and nodes in a graph
 
@@ -62,18 +62,18 @@ tags: [AI, API]
 ### Simple LLM with Chat Model and Prompt Templates
 
 1. Installation
-  `pip install langchain`
+  ```pip install langchain```
 
 #### Note: Use LangSmith!
   * Used to construct more complex applications
   * Can inspect agents and chains more easily
   * LangSmith Environment Variables
 
-    `
+    ```
     export LANGSMITH_TRACING="true"
     export LANGSMITH_API_KEY="..."
     export LANGSMITH_PROJECT="default" # or any other project name
-    `
+    ```
 2. Simple Call to a Chat Model
 
   ```
@@ -90,8 +90,8 @@ tags: [AI, API]
   * LangChain Runnables
     * Expose an interface to interact with a chat model
   * Example Langchain Message
-` AIMessage(content='Ciao!', additional_kwargs={'refusal': None}, response_metadata={'token_usage': {'completion_tokens': 3, 'prompt_tokens': 20, 'total_tokens': 23, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 0, 'rejected_prediction_tokens': 0}, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0}}, 'model_name': 'gpt-4o-mini-2024-07-18', 'system_fingerprint': 'fp_0705bf87c0', 'finish_reason': 'stop', 'logprobs': None}, id='run-32654a56-627c-40e1-a141-ad9350bbfd3e-0', usage_metadata={'input_tokens': 20, 'output_tokens': 3, 'total_tokens': 23, 'input_token_details': {'audio': 0, 'cache_read': 0}, 'output_token_details': {'audio': 0, 'reasoning': 0}})
-`
+``` AIMessage(content='Ciao!', additional_kwargs={'refusal': None}, response_metadata={'token_usage': {'completion_tokens': 3, 'prompt_tokens': 20, 'total_tokens': 23, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 0, 'rejected_prediction_tokens': 0}, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0}}, 'model_name': 'gpt-4o-mini-2024-07-18', 'system_fingerprint': 'fp_0705bf87c0', 'finish_reason': 'stop', 'logprobs': None}, id='run-32654a56-627c-40e1-a141-ad9350bbfd3e-0', usage_metadata={'input_tokens': 20, 'output_tokens': 3, 'total_tokens': 23, 'input_token_details': {'audio': 0, 'cache_read': 0}, 'output_token_details': {'audio': 0, 'reasoning': 0}})
+```
 
 #### Message Objects
 
@@ -119,8 +119,8 @@ model.invoke([HumanMessage("Hello")])
 * Streaming tokens as they arrive instead of once they are all compiled and sent at once
 * Streaming Usage
 
-  `for token in model.stream(messages):
-      print(token.content, end="|")`
+  ```for token in model.stream(messages):
+      print(token.content, end="|")```
 
 #### Prompt Templates
 
@@ -139,9 +139,9 @@ model.invoke([HumanMessage("Hello")])
       [("system", system_template), ("user", "{text}")]
   )
   ```
-  * `language`
+  * ```language```
     * The language to translate text into
-  * `text`
+  * ```text```
     * The text to be translated
 
 * Note:
@@ -156,16 +156,17 @@ prompt = prompt_template.invoke({"language": "Italian", "text": "hi!"})
 prompt
 ```
 
-* What `prompt` Returns:
-`  * ChatPromptValue(messages=[SystemMessage(content='Translate the following from English into Italian', additional_kwargs={}, response_metadata={}), HumanMessage(content='hi!', additional_kwargs={}, response_metadata={})])
-`
-* What `prompt.to_messages()` Returns:
-`  * [SystemMessage(content='Translate the following from English into Italian', additional_kwargs={}, response_metadata={}),
+* What ```prompt``` Returns:
+```  * ChatPromptValue(messages=[SystemMessage(content='Translate the following from English into Italian', additional_kwargs={}, response_metadata={}), HumanMessage(content='hi!', additional_kwargs={}, response_metadata={})])
+```
+* What ```prompt.to_messages()``` Returns:
+```  * [SystemMessage(content='Translate the following from English into Italian', additional_kwargs={}, response_metadata={}),
  HumanMessage(content='hi!', additional_kwargs={}, response_metadata={})]
-`
+```
 * How to Actually Get a Response From our Invocation:
-`response = model.invoke(prompt)
-print(response.content)`
+```response = model.invoke(prompt)
+print(response.content)
+```
 
 
 # Topics To Explore Next
