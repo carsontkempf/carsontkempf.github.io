@@ -35,7 +35,7 @@ aside {
   white-space: normal;
   hyphens: none;
   position: fixed;
-  padding: 0px 40px;
+  padding: 0;
   top: 0;
   left: 0;
   bottom: 0;
@@ -45,7 +45,6 @@ aside {
   display: flex;
   overflow-x: hidden;
   flex-direction: column;
-  font-size: clamp(8px, 1vw, 30px);
 }
 
 .header {
