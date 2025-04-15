@@ -2,6 +2,8 @@
 layout: post
 title: Resume
 ---
+
+
 ## 🛠️ Completed Projects
 
 --- 
