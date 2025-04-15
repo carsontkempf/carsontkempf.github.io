@@ -1,11 +1,8 @@
 @import "fonts";
 @import "rouge-github";
 
-html {
-  font-size: clamp(14px, 1vw, 30px);
-}
-
 .sidebar {
+  font-size: clamp(8px, 1vw, 30px);
   left: 0;
   align-text: left;
   align-items: flex-start;
@@ -51,6 +48,7 @@ aside {
 }
 
 .header {
+  font-size: clamp(14px, 1vw, 30px);
   padding-bottom: 20px;
 }
 
