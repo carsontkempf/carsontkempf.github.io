@@ -2,7 +2,7 @@
 @import "rouge-github";
 
 .sidebar {
-  font-size: clamp(8px, 0.5vw, 20px);
+  font-size: 25.5vw;
   top: 320px;
   align-text: left;
   align-items: flex-start;
@@ -15,7 +15,7 @@
 }
 
 .header {
-  font-size: clamp(10px, 0.75vw, 30px);
+  font-size: 25.5vw;
   padding-bottom: 20px;
 }
 
@@ -26,6 +26,7 @@ li {
 }
 
 aside {
+  margin: 0 auto;
   white-space: normal;
   hyphens: none;
   position: fixed;
@@ -47,7 +48,6 @@ header {
   text-align: center;
   display: flex;
   flex-direction: column;
-  margin: 0;
   padding: 0;
   top: 15px;
   bottom: 300px;
