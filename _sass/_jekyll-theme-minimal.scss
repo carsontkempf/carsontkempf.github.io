@@ -2,7 +2,6 @@
 @import "rouge-github";
 
 .sidebar {
-  font-size: 25.5vw;
   top: 320px;
   align-text: left;
   align-items: flex-start;
@@ -15,7 +14,6 @@
 }
 
 .header {
-  font-size: 25.5vw;
   padding-bottom: 20px;
 }
 
@@ -26,6 +24,7 @@ li {
 }
 
 aside {
+  font-size: 0.75vw;
   margin: 0 auto;
   white-space: normal;
   hyphens: none;
