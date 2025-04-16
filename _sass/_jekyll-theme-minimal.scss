@@ -157,13 +157,13 @@ code, pre {
   color: #444d56;
 }
 
-ol {
+.sidebar ol {
   list-style: none;
   padding: 0;
   text-shadow: 0 1px 0 rgba(255,255,255,.5);
 }
 
-ol a {
+.sidebar ol a {
   position: relative;
   display: block;
   padding: .4em .4em .4em .8em;
@@ -174,16 +174,16 @@ ol a {
   transition: background .3s ease-out;
 }
 
-ol a:hover {
+.sidebar ol a:hover {
   background: #f9dd94;
 }
 
-ol li:nth-child(odd) a {
+.sidebar ol li:nth-child(odd) a {
   background: #B0B1B7;
 
 }
 
-ol li:nth-child(even) a {
+.sidebar ol li:nth-child(even) a {
   background: #D3D4DA;
 }
 
