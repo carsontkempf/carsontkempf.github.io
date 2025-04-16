@@ -1,13 +1,23 @@
 @import "fonts";
 @import "rouge-github";
 
+.footer {
+  bottom: 0;
+  left: 20vw;
+  right: 0;
+  background-color: #e0e0e0;
+  text-align: center;
+  font-size: 1rem;
+  padding: 1rem;
+  box-sizing: border-box;
+}
 
 h2 {
   padding-left: 5px;
 }
 
 h1 {
-  padding-top: 5px;
+  padding-top: 3px;
 }
 
 .sidebar {
@@ -86,16 +96,7 @@ body {
   bottom: 0;
 }
 
-.footer {
-  bottom: 0;
-  left: 20vw;
-  right: 0;
-  background-color: #e0e0e0;
-  text-align: center;
-  font-size: 1rem;
-  padding: 1rem;
-  box-sizing: border-box;
-}
+
 
 h1, h2, h3, h4, h5, h6 {
   color: #222;
