@@ -1,9 +1,10 @@
 @import "fonts";
 @import "rouge-github";
 
-.footer {
+footer {
   bottom: 0;
   left: 20vw;
+  top: 100vw;
   right: 0;
   background-color: #e0e0e0;
   text-align: center;
@@ -17,7 +18,7 @@ h2 {
 }
 
 h1 {
-  padding-top: 3px;
+  padding-top: 7px;
 }
 
 .sidebar {
