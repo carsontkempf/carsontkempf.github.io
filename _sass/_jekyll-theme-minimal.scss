@@ -154,6 +154,50 @@ code, pre {
   color: #444d56;
 }
 
+ol {
+  list-style: none;
+  padding: 0;
+  text-shadow: 0 1px 0 rgba(255,255,255,.5);
+}
+
+ol a {
+  position: relative;
+  display: block;
+  padding: .4em .4em .4em .8em;
+  margin: .5em 0 .5em 2.5em;
+  background: #D3D4DA;
+  color: #444;
+  text-decoration: none;
+  transition: all .3s ease-out;
+}
+
+ol a:hover {
+  background: #DCDDE1;
+}
+
+ol a:after {
+  position: absolute;
+  content: "";
+  border: .5em solid transparent;
+  left: -1em;
+  top: 50%;
+  margin-top: -.5em;
+  transition: all .3s ease-out;
+}
+
+ol a:hover:after {
+  left: -.5em;
+  border-left-color: #f9dd94;
+}
+
+ol li:nth-child(odd) a {
+  background: #D3D4DA;
+}
+
+ol li:nth-child(even) a {
+  background: #B0B1B7;
+}
+
 pre {
   padding:8px 15px;
   background: #f8f8f8;
