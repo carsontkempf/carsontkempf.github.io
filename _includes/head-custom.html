@@ -10,10 +10,22 @@
   <h1>
     <a href="{{ site.baseurl }}/">{{ site.title | default: site.github.repository_name }}</a>
   </h1>
+
   {% if site.logo %}
     <img src="{{ site.logo | relative_url }}" alt="Logo">
   {% endif %}
-  <p class="skinny">{{ site.description | default: site.github.project_tagline }}</p>
+
+  <p class="skinny">
+    {{ site.description | default: site.github.project_tagline }}
+  </p>
+
+  <p class="view">
+      <a href="{{ site.resume }}">
+        Check Out My Resume
+      </a>
+  </p>
+
+
   {% if site.github.is_project_page %}
     <p class="view">
       <a href="{{ site.github.repository_url }}">
