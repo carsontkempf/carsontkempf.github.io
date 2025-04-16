@@ -24,8 +24,11 @@ Enthusiastic computer science student with strong skills in database design, app
 
 ## Education
 B.S. in Computer Science
+
 Missouri University of Science and Technology
+
 **GPA:** 3.747
+
 **Expected Graduation:** December 2025
 
 --- 
@@ -42,6 +45,7 @@ Intro to AI, Evolutionary Computing, Database Systems (2300, 5300),  Operating S
 * Web Development: Django, Flask, JavaScript
 * Computer Networking: API Programming, HTTP Programming
 * Dev Ops: CI/CD, Unit Test Design, Containers, Virtual Machines
+
 
 --- 
 
