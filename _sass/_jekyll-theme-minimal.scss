@@ -82,9 +82,9 @@ body {
   bottom: 0;
 }
 
-footer {
+.footer {
+  position: fixed;
   bottom: 0;
-  height: 40px;
   font-size: 1rem;
   width: auto;
   left: 20vw;
