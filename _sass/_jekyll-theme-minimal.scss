@@ -1,6 +1,11 @@
 @import "fonts";
 @import "rouge-github";
 
+
+h2 {
+  padding-left: 5px;
+}
+
 .sidebar {
   top: 320px;
   align-text: left;
@@ -168,34 +173,20 @@ ol a {
   background: #D3D4DA;
   color: #444;
   text-decoration: none;
-  transition: all .3s ease-out;
+  transition: background .3s ease-out;
 }
 
 ol a:hover {
-  background: #DCDDE1;
-}
-
-ol a:after {
-  position: absolute;
-  content: "";
-  border: .5em solid transparent;
-  left: -1em;
-  top: 50%;
-  margin-top: -.5em;
-  transition: all .3s ease-out;
-}
-
-ol a:hover:after {
-  left: -.5em;
-  border-left-color: #f9dd94;
+  background: #f9dd94;
 }
 
 ol li:nth-child(odd) a {
-  background: #D3D4DA;
+  background: #B0B1B7;
+
 }
 
 ol li:nth-child(even) a {
-  background: #B0B1B7;
+  background: #D3D4DA;
 }
 
 pre {
