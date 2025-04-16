@@ -2,7 +2,7 @@
 layout: post
 title: "LangChain Overview"
 date: 2025-04-14 12:00:00 -0000
-categories: [AI]
+categories: [LangChain]
 permalink: /LangChain/
 tags: [LangChain]
 ---
