@@ -1,63 +1,101 @@
 ---
 layout: post
-title: Resume
+title: Hello! Happy you Made it!
 ---
 
+# Check Me Out
 
-## 🛠️ Completed Projects
+
+### [Spotify](https://open.spotify.com/user/5lfrt3edl389cewrkxf5upr88?si=30e627be14304032)
+
+### [Instagram](https://www.instagram.com/carsonthomaskempf/) 
+
+### [Linkedin](https://www.linkedin.com/in/carson-kempf)
+
 
 --- 
 
-### [Workout Database](https://github.com/carsontkempf/WorkoutDatabase)
+# Goal
 
-A web application developed to manage and track workout routines efficiently. This project demonstrates my proficiency in full-stack web development using the Flask framework and showcases my approach to building scalable and user-friendly applications.
+## This Site Contains:
 
-- **Key Features and Design Process**:
-  - **Backend Development**: Leveraged Flask to create a robust backend that dynamically generates content and handles user interactions. Utilized Flask-SQLAlchemy for seamless integration with a PostgreSQL database.
-  - **Frontend Design**: Designed a responsive and user-friendly interface using HTML, CSS, and JavaScript. Employed Jinja2 templating to dynamically render content based on user actions.
-  - **Data Security**: Implemented secure data handling practices, including the use of secure cookies and HTTPS protocols.
-  - **Error Handling and Logging**: Integrated comprehensive error handling mechanisms and logging tools.
-  - **Technology Stack**: Python, Flask, Flask-SQLAlchemy, PostgreSQL, HTML/CSS/JavaScript, Jinja2.
+### My Notes Over:
+* Assignments for School
+* Projects I'm Working On
+> Deepseek ChatBot -> Chatbot utilizing DeepSeek and Tavily APIs to replace my $20/month ChatGPT subscription. 
 
-- **Design Approach**:
-  - **Modularity**: Organized code into modular components to promote reusability and simplify maintenance.
-  - **User Experience**: Prioritized ease of use and a clean UI for enhanced user experience.
-  - **Performance Optimization**: Employed efficient database queries and optimized server responses for scalability.
+### Some Research On:
+* Artificial Intelligence
+* LLM Management
+* AI Agents
+* Model Context Protocol (MCP)
 
---- 
+### Tutorials Over:
+* Various Software Packages
+> LangChain      -> Interacting with LLM's APIs
 
-### [Treehouse Booking Application](https://github.com/carsontkempf/RootsInnPlanning)
+> LangGraph      -> Represent the AI action space as a graph with nodes and edges
 
-An in-development Django web application for booking and managing treehouse accommodations. This project focuses on creating a scalable and efficient booking system while optimizing cloud infrastructure costs.
+> LLM APIs       -> Utilize APIs to construct your own LLM applications
 
-- **Key Features and Design Process**:
-  - **Cloud Cost Optimization**: Achieved a 31.8% reduction in cloud costs by leveraging database normalization forms, implementing AWS server scheduling, and developing an image storage and compression algorithm.
-  - **Modular Django Applications**: Developed separate, modular applications for managing bookings, payments, and the treehouse library. This structure allows for easier maintenance and feature expansion.
-  - **AWS Integration**: Configured AWS RDS for database management and App Runner for efficient application deployment. This setup ensures high availability and performance.
-  - **Database Performance**: Implemented normalization techniques to optimize query performance and maintain data integrity. Ensured scalable data handling with PostgreSQL and AWS RDS.
-  - **Technology Stack**: Python, Django, PostgreSQL, AWS RDS, AWS App Runner, HTML/CSS/JavaScript.
+> Search APIs    -> Gain access to live content on the internet
 
-- **Design Approach**:
-  - **Scalability and Performance**: Focused on optimizing the backend and cloud infrastructure to support a growing user base and minimize operational costs.
-  - **Cloud Efficiency**: Utilized server scheduling and efficient storage solutions to reduce resource usage and costs.
-  - **User-Focused Development**: Designed with user experience in mind, ensuring an intuitive interface for booking and managing treehouse stays.
+* App Development Frameworks
 
-## 🎓 Education
+> Django         -> Build python applications
 
-- **Missouri University of Science and Technology**: Bachelor of Science in Computer Science, Minor in Philosophy (Expected December 2025)
-  - **GPA**: 3.737
-  - **Relevant Coursework**: Introduction to Artificial Intelligence, Evolutionary Computing (undergraduate & graduate), Databases (undergraduate & graduate)
+* Cloud Services
 
-## 💼 Experience
+> AWS            -> Deploy your applications for others to see
 
-- **Database Administration Intern**: Spectrum, Greenwood Village, Colorado
-  - **Responsibilities**: Assisting in database design, optimization, and maintenance to support various applications and services.
+* Deployment Tools
 
-## 🎯 Seeking Opportunities In
+> CI/CD          -> Organized and automatic deployment operations
 
-- **Internships**: Software Engineering, Web Development
-- **Research Positions**: AI Agents, Evolutionary Computing
+* Automation
 
----
+> Bash Scripts   -> Fun automation scripts to make your life easier
 
-Feel free to reach out for collaboration or opportunities!
+> Python Scripts -> Fun automation scripts that aren't awful to look at to make your life easier
+
+### Lectures On:
+* Computer Science Concepts
+
+> APIs
+
+> LLMs
+
+> AI
+
+* Philosophy
+
+* My Philosophies
+
+> Staying Organized
+
+> How to Learn Anything
+
+
+
+### Some of My Thoughts On:
+
+* Books
+
+> James Gleick: The Information: A History, A Theory, A Flood
+
+> Malcolm Gladwell: David and Goliath, Outlier, Blink
+
+> Cal Newport: Slow Productivity, Deep Work, Digital Minimalism
+
+> Albert Camus: The Stranger, The Myth of Sisyphus
+
+> Fedor Dotsoievsky: Crime and Punishment
+
+
+* Theories
+
+> Information Theory
+
+> "AI is Making Kids Stupid"
+
+

@@ -23,7 +23,7 @@ Enthusiastic computer science student with strong skills in database design, app
 --- 
 
 ## Education
-B.S. in Computer Science
+B.S. in Computer Science, Minor in Philosophy
 
 Missouri University of Science and Technology
 
