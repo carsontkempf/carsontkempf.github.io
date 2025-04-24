@@ -422,14 +422,19 @@ body > .theme-switch {
   top: 0;
   width: calc(100% / 3);
   height: var(--switch-height);
-  line-height: var(--switch-height);
-  text-align: center;
+  display: flex;                  /* center content */
+  align-items: center;
+  justify-content: center;
   z-index: 2;
   cursor: pointer;
-  pointer-events: auto;
+  background-color: transparent;  /* default transparent */
+  transition: background-color 0.2s ease;
 }
 .theme-switch .opt:hover {
   background-color: rgba(0, 0, 0, 0.1);
+}
+.theme-switch .opt:active {
+  background-color: rgba(0, 0, 0, 0.2);
 }
 .theme-switch label[for="ts-light"] { left: 0; }
 .theme-switch label[for="ts-dark"]  { left: calc(100% / 3); }
