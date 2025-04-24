@@ -315,6 +315,7 @@ hr {
 
 
 /* Pill toggle container */
+/* Pill toggle container */
 .theme-switch {
   position: fixed;
   top: 10px; left: 50%;
@@ -324,6 +325,8 @@ hr {
   border-radius: 1em;
   overflow: hidden;
   z-index: 1000;
+  --switch-height: 2em;
+  height: var(--switch-height);
 }
 /* Hidden radios each cover one third */
 .theme-switch input {
@@ -337,20 +340,21 @@ hr {
 .theme-switch #ts-dark  { left: 33.3333%; }
 .theme-switch #ts-lr    { left: 66.6667%; }
 /* Slider knob */
+/* Slider knob */
 .theme-switch .slider {
   position: absolute;
-  top: 2px; left: 2px;
-  width: calc(100% - 4px);
-  height: calc(100% - 4px);
+  top: 0;
+  left: 0;
+  width: var(--switch-height);
+  height: var(--switch-height);
   background: #fff;
   border-radius: 50%;
   transition: left 0.3s ease;
   z-index: 1;
 }
-/* Move knob on check */
-.theme-switch #ts-light:checked ~ .slider { left: 2px; }
-.theme-switch #ts-dark:checked  ~ .slider { left: calc(33.3333% + 2px); }
-.theme-switch #ts-lr:checked    ~ .slider { left: calc(66.6667% + 2px); }
+#ts-light:checked ~ .slider { left: 0; }
+#ts-dark:checked  ~ .slider { left: calc(100%/3); }
+#ts-lr:checked    ~ .slider { left: calc((100%/3)*2); }
 /* Label areas */
 .theme-switch .opt {
   position: absolute;
@@ -374,10 +378,10 @@ hr {
         color: #ECDFCC;          /* high-contrast text */ 
       }
       .sidebar {
-        background-color: #9A7E6F; /* very dark sidebar */ 
+        background-color: #697565; /* very dark sidebar */ 
       }
       .header, .footer {
-        background-color: #9A7E6F;
+        background-color: #697565;
         color: #ECDFCC;
       }
       h1, h2, h3, h4, h5, h6 {
@@ -395,7 +399,7 @@ hr {
         background-color: #3C3D37;  /* blend with background */ 
       }
       pre {
-        background-color: #697565;
+        background-color: #9A7E6F;
         color: #ECDFCC;
         border-radius: 10px;
         background-clip: padding-box;
@@ -425,7 +429,7 @@ hr {
         margin: 0;
         padding: .4em .8em;
         box-sizing: border-box;
-        background: none;
+        background-color: #697565;
       }
     }
 
@@ -484,4 +488,11 @@ hr {
     box-sizing: border-box;
     background: none;
   }
+}
+/* Ensure markdown images are half-width and centered */
+.main-content img {
+  display: block;
+  margin: 1rem auto;
+  width: 50%;
+  height: auto;
 }
