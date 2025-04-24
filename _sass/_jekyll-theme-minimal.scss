@@ -119,14 +119,16 @@ h2 {
   color: #393939;
 }
 
+// Standard link style: blue, always underlined
 a {
-  color:#267CB9;
-  text-decoration:none;
+  color: #0000EE;            /* standard blue link color */
+  text-decoration: underline; /* always underlined */
 }
 
-a:hover, a:focus {
-  color:#069;
-  font-weight: bold;
+a:hover,
+a:focus {
+  color: #0000EE;            /* maintain blue on hover/focus */
+  text-decoration: underline; /* maintain underline on hover/focus */
 }
 
 a small {
@@ -336,15 +338,14 @@ hr {
 
 /* Pill toggle container */
 .theme-switch {
-  position: fixed;
-  top: 10px;
   left: 50%;
-  transform: translateX(-50%);
   width: 12em;
   --switch-height: 2em;
   height: var(--switch-height);
   border: 2px solid #999;
   box-shadow: 0 0 0 1px #999;
+  border-radius: calc(var(--switch-height) / 2);
+  margin: 0 auto 1rem;
   border-radius: calc(var(--switch-height) / 2);
 }
 /* Hidden radios each cover one third */
@@ -425,16 +426,10 @@ hr {
         background-color: #3C3D37;  /* blend with background */ 
       }
       code, pre {
-        font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal,
-                     Consolas, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-        background-color: #9A7E6F;  /* unified background */
+        background-color: #9A7E6F;
         color: #ECDFCC;
         border-radius: 5px;
         background-clip: padding-box;
-        overflow-x: auto;
-        display: block;
-        width: 100%;
-        padding: .5em;
       }
       table {
         border-collapse: collapse;
