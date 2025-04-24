@@ -380,17 +380,14 @@ hr {
 
 /* Pill toggle container */
 .theme-switch {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  position: static; /* return to normal document flow */
+  margin: 1rem auto 0; /* center above header with spacing */
   width: 12em;
   --switch-height: 2em;
   height: var(--switch-height);
   border: 2px solid #999;
   box-shadow: 0 0 0 1px #999;
   border-radius: calc(var(--switch-height) / 2);
-  z-index: 10000;
 }
 /* Hidden radios each cover one third */
 .theme-switch input {
