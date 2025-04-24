@@ -237,7 +237,7 @@ header {
   /* Geometry */
   --switch-height: 2em;                              /* outer height incl. border */
   --border-width: 2px;                               /* stroke thickness */
-  --knob-gap: 1px;                           /* cushion so knob clears curved border */
+  --knob-gap: 2px;                           /* cushion so knob clears curved border */
   --knob-size: calc(var(--switch-height) - (var(--border-width) + var(--knob-gap)) * 2);
 
   position: relative;
