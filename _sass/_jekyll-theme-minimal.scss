@@ -219,6 +219,7 @@ header {
 // ***********************************************
 .theme-switch {
   position: absolute;
+  flex-shrink: 0;
   top: 5px;
   left: 50%;
   transform: translateX(-50%);
@@ -233,9 +234,9 @@ header {
   height: calc(var(--knob-size) + (var(--switch-border) * 2));
   border: 2px solid #999;
   border-radius: 50%/50%;
-  box-shadow: 0 0 0 1px #999;
   display: flex;
   align-items: center;
+  overflow: hidden;
 }
 .theme-switch input {
   position: relative;
@@ -243,7 +244,9 @@ header {
   left: var(--switch-border);
   right: var(--switch-border);
   margin: 0; padding: 0;
-  opacity: 0; cursor: pointer; z-index: 2;
+  opacity: 0; 
+  cursor: pointer; 
+  z-index: 2;
 }
 .theme-switch .slider {
   position: relative;
