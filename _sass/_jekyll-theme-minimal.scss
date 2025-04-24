@@ -232,7 +232,7 @@ header {
   width: calc((var(--knob-size) * 3) + (var(--switch-border) * 2));
   height: calc(var(--knob-size) + (var(--switch-border) * 2));
   border: 2px solid #999;
-  border-radius: calc(var(--switch-height) / 2);
+  border-radius: 50%/50%;
   box-shadow: 0 0 0 1px #999;
   display: flex;
   align-items: center;
@@ -248,10 +248,9 @@ header {
 .theme-switch .slider {
   position: relative;
   flex: 0 0 auto;
-  top: calc(var(--switch-border) / 2);
+  height: var(--knob-size);
   left: var(--switch-border);
   right: var(--switch-border);
-  height: var(--knob-size);
   background: #fff;
   border-radius: 50%;
   transition: left 0.3s ease;
@@ -262,7 +261,6 @@ header {
 .theme-switch #ts-lr:checked    ~ .slider { left: calc((var(--knob-size) * 2) + var(--switch-border)); }
 .theme-switch .opt {
   position: relative; 
-  top: calc(var(--switch-border) / 2);
   flex: 0 0 auto;
   height: var(--knob-size);
   left: var(--switch-border);
@@ -273,9 +271,12 @@ header {
   border-radius: 50%; 
   pointer-events: auto;
   transition: background-color 0.2s ease; 
-  z-index: 2;
+  z-index: 3;
 }
-.theme-switch .opt:hover { background-color: rgba(0, 0, 0, 0.2); }
+.theme-switch .opt:hover {
+   background-color: rgba(0, 0, 0, 0.5); 
+   z-index: 4;
+  }
 .theme-switch input#ts-light,
 .theme-switch label[for="ts-light"],
 .theme-switch .slider { left: var(--switch-border); }
@@ -564,6 +565,7 @@ header {
   margin: 1rem 0;
   width: 75%;
   height: auto;
+  padding: 15px 0px;
 }
 .header h1 a {
   background: none !important;
