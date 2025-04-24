@@ -351,12 +351,13 @@ hr {
 
 
 .theme-switch {
-  position: fixed;
+  position: sticky;              /* normal flow */
   top: 0;
   left: 50%;
-  transform: translateX(-50%);
+  margin: 1rem auto;             /* top spacing + center */
   --switch-height: 2em;
   --switch-width: calc(var(--switch-height) * 3);
+  box-sizing: border-box;
   width: var(--switch-width);
   height: var(--switch-height);
   border: 2px solid #999;
@@ -374,23 +375,23 @@ body > .theme-switch {
 }
 /* Hidden radios each cover one third */
 .theme-switch input {
-  position: absolute;
+  position: relative;
   top: 0;
-  width: calc(var(--switch-width) / 3);
   height: var(--switch-height);
+  width: calc(var(--switch-width) / 3);
   margin: 0;
   padding: 0;
   opacity: 0;
   cursor: pointer;
-  z-index: 2;
+  z-index: 2; /* below labels but above slider */
 }
 .theme-switch #ts-light { left: 0; }
-.theme-switch #ts-dark  { left: calc(var(--switch-width) / 3); }
-.theme-switch #ts-lr    { left: calc((var(--switch-width) / 3) * 2); }
+.theme-switch #ts-dark  { left: calc(100% / 3); }
+.theme-switch #ts-lr    { left: calc((100% / 3) * 2); }
 /* Slider knob */
 /* Slider knob */
 .theme-switch .slider {
-  position: absolute;
+  position: relative;
   top: 0;
   left: 0;
   width: var(--switch-height);
@@ -401,29 +402,35 @@ body > .theme-switch {
   z-index: 1;  /* below inputs and labels */
 }
 /* precise knob positioning: left, center, right */
+.theme-switch #ts-light:checked ~ .slider {
+  left: 0;
+}
+.theme-switch #ts-dark:checked ~ .slider {
+  left: calc((100% - var(--switch-height)) / 2);
+}
+.theme-switch #ts-lr:checked ~ .slider {
+  left: calc(100% - var(--switch-height));
+}
 /* Label areas */
 .theme-switch .opt {
-  position: absolute;
+  position: relative;
   top: 0;
   width: var(--switch-height);
   height: var(--switch-height);
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: auto;
-  transition: background-color 0.2s ease;
   z-index: 3;            /* above inputs and slider */
+  pointer-events: auto;  /* allow hover & click on label */
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
 }
 .theme-switch .opt:hover {
   background-color: rgba(0, 0, 0, 0.2);
 }
-.theme-switch .opt:active {
-  background-color: rgba(0, 0, 0, 0.3);
-}
 .theme-switch label[for="ts-light"] { left: 0; }
-.theme-switch label[for="ts-dark"]  { left: calc(var(--switch-width) / 3 - var(--switch-height) / 2); }
-.theme-switch label[for="ts-lr"]    { left: calc((var(--switch-width) / 3) * 2 - var(--switch-height) / 2); }
+.theme-switch label[for="ts-dark"]  { left: calc((var(--switch-width) / 3) - (var(--switch-height) / 2)); }
+.theme-switch label[for="ts-lr"]    { left: calc((var(--switch-width) * 2 / 3) - (var(--switch-height) / 2)); }
 
 /* Dark mode overrides */
 [data-theme="dark"] {
