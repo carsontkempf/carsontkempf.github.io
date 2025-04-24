@@ -328,6 +328,7 @@ header {
     overflow-x: auto;
     display: block;
     width: 100%;
+    z-index: 2;
   }
 
   /* Light mode Rouge inline code */
@@ -353,6 +354,7 @@ header {
   code {
     background-color: #D7C0AE;
     color: #967E76;
+    z-index: 2;
   }
 }
 [data-theme="dark"] {
@@ -430,6 +432,7 @@ header {
     overflow-x: auto;
     display: block;
     width: 100%;
+    z-index: 2;
   }
 
   /* Dark mode Rouge inline code */
@@ -455,6 +458,7 @@ header {
   code {
     background-color: #9A7E6F;
     color: #ECDFCC;
+    z-index: 2;
   }
 }
 [data-theme="lr"] {
@@ -530,6 +534,7 @@ header {
     overflow-x: auto;
     display: block;
     width: 100%;
+    z-index: 2;
   }
 
   /* LR mode Rouge inline code */
@@ -555,6 +560,7 @@ header {
   code {
     background-color: #EC7FA9;
     color: #BE5985;
+    z-index: 2;
   }
 }
 
