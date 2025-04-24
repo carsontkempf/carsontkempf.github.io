@@ -219,7 +219,7 @@ pre {
                "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
   background-color: #D7C0AE;    /* unified background */
   padding: 15px;
-  border-radius: 5px;
+  border-radius: 10px;
   background-clip: padding-box;
   overflow-x: auto;
   display: block;
@@ -315,8 +315,8 @@ hr {
         background-color: #9A7E6F; /* very dark sidebar */ 
       }
       .header, .footer {
-        background-color: #181C14; /* match sidebar for cohesion */ 
-        color: #ECDFCC;             /* ensure headers are light */ 
+        background-color: #9A7E6F;
+        color: #ECDFCC;
       }
       h1, h2, h3, h4, h5, h6 {
         color: #ECDFCC;             /* force all headings to contrast color */ 
@@ -332,11 +332,14 @@ hr {
         color: #ECDFCC;             /* light quote text */ 
         background-color: #3C3D37;  /* blend with background */ 
       }
-      code, pre {
+      pre {
         background-color: #697565;
         color: #ECDFCC;
-        border-radius: 5px;
+        border-radius: 10px;
         background-clip: padding-box;
+        overflow-x: auto;
+        display: block;
+        width: 100%;
       }
       table {
         border-collapse: collapse;
