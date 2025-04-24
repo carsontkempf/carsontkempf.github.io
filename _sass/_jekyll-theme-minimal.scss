@@ -112,8 +112,12 @@ ol {
 
 /* Light mode header links */
 html:not([data-theme]) .header a {
-  color: #0000EE;            /* standard blue */
-  text-decoration: underline; /* always underlined */
+  display: inline-block;
+  background-color: #E0D1BA;
+  padding: 0.5em 1em;
+  border-radius: 9999px;
+  text-align: center;
+  white-space: normal;
 }
 html:not([data-theme]) .header a {
   background-color: #E0D1BA;
@@ -128,9 +132,12 @@ html:not([data-theme]) .header a:focus {
 
 /* Main-content links (all modes) */
 .main-content a {
-  color: #5A5A5A;        /* muted gray */
-  font-weight: bold;     /* stand out */
-  text-decoration: none; /* no underline */
+  display: inline-block;
+  background-color: #E0D1BA;
+  padding: 0.5em 1em;
+  border-radius: 9999px;
+  text-align: center;
+  white-space: normal;
 }
 .main-content a {
   background-color: #E0D1BA;
@@ -456,15 +463,21 @@ hr {
       }
       /* Dark mode header links */
       .header a {
+        display: inline-block;
         background-color: #2D2E29;
-        padding: 0.25em 0.5em;
-        border-radius: 50%;
+        padding: 0.5em 1em;
+        border-radius: 9999px;
+        text-align: center;
+        white-space: normal;
       }
       /* Dark mode main-content links */
       .main-content a {
+        display: inline-block;
         background-color: #2D2E29;
-        padding: 0.25em 0.5em;
-        border-radius: 50%;
+        padding: 0.5em 1em;
+        border-radius: 9999px;
+        text-align: center;
+        white-space: normal;
       }
       a:hover, a:focus {
         color: #697565;             /* accent hover state */ 
@@ -534,15 +547,21 @@ hr {
   }
   /* LR mode header links */
   .header a {
+    display: inline-block;
     background-color: #FFE1F1;
-    padding: 0.25em 0.5em;
-    border-radius: 50%;
+    padding: 0.5em 1em;
+    border-radius: 9999px;
+    text-align: center;
+    white-space: normal;
   }
   /* LR mode main-content links */
   .main-content a {
+    display: inline-block;
     background-color: #FFE1F1;
-    padding: 0.25em 0.5em;
-    border-radius: 50%;
+    padding: 0.5em 1em;
+    border-radius: 9999px;
+    text-align: center;
+    white-space: normal;
   }
   a:hover, a:focus {
     color: #E8C2CA;            /* link hover */
