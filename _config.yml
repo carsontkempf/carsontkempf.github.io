@@ -32,4 +32,3 @@ google_analytics:
 theme: jekyll-theme-minimal
 sass:
   sass_dir: _sass
-include: "_img"
