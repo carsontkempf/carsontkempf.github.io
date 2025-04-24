@@ -237,13 +237,14 @@ header {
   /* Geometry */
   --switch-height: 2em;                              /* outer height incl. border */
   --border-width: 2px;                               /* stroke thickness */
-  --knob-size: calc(var(--switch-height) - var(--border-width) * 2);
+  --knob-gap: 1px;                           /* cushion so knob clears curved border */
+  --knob-size: calc(var(--switch-height) - (var(--border-width) + var(--knob-gap)) * 2);
 
   position: relative;
   left: 7vw;
   display: block;
   margin: 0 auto;
-  width: calc(var(--knob-size) * 3 + var(--border-width) * 2);
+  width: calc(var(--knob-size) * 3 + (var(--border-width) + var(--knob-gap)) * 2);
   height: var(--switch-height);
   border-radius: calc(var(--switch-height) / 2);
   border: var(--border-width) solid #000;
@@ -262,7 +263,7 @@ header {
 /* Invisible radio inputs—one per segment */
 .theme-switch input {
   position: absolute;
-  top: var(--border-width);
+  top: calc(var(--border-width) + var(--knob-gap));
   width: var(--knob-size);
   height: var(--knob-size);
   opacity: 0;
@@ -270,14 +271,14 @@ header {
   padding: 0;
   cursor: pointer;
 }
-#ts-light { left: var(--border-width); }
-#ts-dark  { left: calc(var(--border-width) + var(--knob-size)); }
-#ts-lr    { left: calc(var(--border-width) + var(--knob-size) * 2); }
+#ts-light { left: calc(var(--border-width) + var(--knob-gap)); }
+#ts-dark  { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-size)); }
+#ts-lr    { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-size) * 2); }
 
 /* Hover indicator circles */
 .theme-switch .opt {
   position: absolute;
-  top: var(--border-width);
+  top: calc(var(--border-width) + var(--knob-gap));
   width: var(--knob-size);
   height: var(--knob-size);
   border-radius: 50%;
@@ -286,9 +287,9 @@ header {
   transition: background-color 0.2s ease;
   z-index: 2;                              /* above slider */
 }
-label[for="ts-light"] { left: var(--border-width); }
-label[for="ts-dark"]  { left: calc(var(--border-width) + var(--knob-size)); }
-label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-size) * 2); }
+label[for="ts-light"] { left: calc(var(--border-width) + var(--knob-gap)); }
+label[for="ts-dark"]  { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-size)); }
+label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-size) * 2); }
 
 .theme-switch .opt:hover {
   background-color: rgba(0, 0, 0, 0.15);
@@ -297,8 +298,8 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-size) * 2); 
 /* Sliding knob */
 .theme-switch .slider {
   position: absolute;
-  top: var(--border-width);
-  left: var(--border-width);
+  top: calc(var(--border-width) + var(--knob-gap));
+  left: calc(var(--border-width) + var(--knob-gap));
   width: var(--knob-size);
   height: var(--knob-size);
   border-radius: 50%;
@@ -308,9 +309,9 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-size) * 2); 
 }
 
 /* Checked‑driven knob positions */
-#ts-light:checked ~ .slider { left: var(--border-width); }
-#ts-dark:checked  ~ .slider { left: calc(var(--border-width) + var(--knob-size)); }
-#ts-lr:checked    ~ .slider { left: calc(var(--border-width) + var(--knob-size) * 2); }
+#ts-light:checked ~ .slider { left: calc(var(--border-width) + var(--knob-gap)); }
+#ts-dark:checked  ~ .slider { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-size)); }
+#ts-lr:checked    ~ .slider { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-size) * 2); }
 
 // ***********************************************
 // Theme Overrides: Light, Dark, LR
