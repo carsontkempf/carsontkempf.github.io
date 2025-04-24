@@ -2,6 +2,7 @@
 @import "rouge-github";
 
 
+
 h2 {
   padding-left: 5px;
 }
@@ -84,6 +85,7 @@ body {
   margin-left: 20vw;
   padding-bottom: 2rem;
   width: auto;
+  text-align: center;
 }
 
 .footer {
@@ -110,38 +112,13 @@ ol {
   margin: 0 0 1.25rem;
 }
 
-/* Light mode header links */
-html:not([data-theme]) .header a {
-  display: inline-block;
-  background-color: darken(#E0D1BA, 10%);
-  padding: 0.5em 1em;
-  border-radius: 9999px;
-  text-align: center;
-  white-space: normal;
-}
-html:not([data-theme]) .header a {
-  background-color: darken(#E0D1BA, 10%);
-  padding: 0.25em 0.5em;
-  border-radius: 50%;
-}
-
-/* Main-content links (all modes) */
-.main-content a {
-  display: inline-block;
-  background-color: darken(#E0D1BA, 10%);
-  padding: 0.5em 1em;
-  border-radius: 9999px;
-  text-align: center;
-  white-space: normal;
-}
-.main-content a {
-  background-color: darken(#E0D1BA, 10%);
-  padding: 0.25em 0.5em;
-  border-radius: 50%;
-}
-.main-content a:hover,
-.main-content a:focus {
-  color: #333333;        /* darker on hover */
+/* Light mode link circles */
+html:not([data-theme]) .header a,
+html:not([data-theme]) .main-content a {
+  background-color: #E6D7B6;     /* slightly darker than #EEE3CB */
+  color: inherit;                /* use standard text color */
+  padding: 0.3em 0.6em;
+  border-radius: 9999px;          /* pill/circle shape */
   text-decoration: none;
 }
 
@@ -149,6 +126,17 @@ h1, h2, h3 {
   line-height: 2;
 }
 
+// Standard link style: blue, always underlined
+a {
+  color: #0000EE;            /* standard blue link color */
+  text-decoration: underline; /* always underlined */
+}
+
+a:hover,
+a:focus {
+  color: #0000EE;            /* maintain blue on hover/focus */
+  text-decoration: underline; /* maintain underline on hover/focus */
+}
 
 a small {
   font-size:11px;
@@ -364,17 +352,19 @@ hr {
 
 /* Pill toggle container */
 .theme-switch {
-  position: static; /* return to normal document flow */
-  top: 0;
+  position: fixed;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
+  left: 50%;
   width: 12em;
   --switch-height: 2em;
   height: var(--switch-height);
   border: 2px solid #999;
   box-shadow: 0 0 0 1px #999;
   border-radius: calc(var(--switch-height) / 2);
-  z-index: 10000;
+  margin: 0 auto 1rem;
+  border-radius: calc(var(--switch-height) / 2);
 }
 /* Hidden radios each cover one third */
 .theme-switch input {
@@ -445,24 +435,6 @@ hr {
       a {
         color: #ECDFCC;             /* links contrast on dark background */ 
       }
-      /* Dark mode header links */
-      .header a {
-        display: inline-block;
-        background-color: darken(#2D2E29, 10%);
-        padding: 0.5em 1em;
-        border-radius: 9999px;
-        text-align: center;
-        white-space: normal;
-      }
-      /* Dark mode main-content links */
-      .main-content a {
-        display: inline-block;
-        background-color: darken(#2D2E29, 10%);
-        padding: 0.5em 1em;
-        border-radius: 9999px;
-        text-align: center;
-        white-space: normal;
-      }
       a:hover, a:focus {
         color: #697565;             /* accent hover state */ 
       }
@@ -511,6 +483,15 @@ hr {
         border-radius: 5px;
         padding: 2px 4px;
       }
+      /* Dark mode link circles */
+      .header a,
+      .main-content a {
+        background-color: #353532;     /* slightly darker than #3C3D37 */
+        color: inherit;
+        padding: 0.3em 0.6em;
+        border-radius: 9999px;
+        text-decoration: none;
+      }
     }
 
 /* LR mode overrides */
@@ -528,24 +509,6 @@ hr {
   }
   a {
     color: #BE5985;            /* links */
-  }
-  /* LR mode header links */
-  .header a {
-    display: inline-block;
-    background-color: darken(#FFE1F1, 10%);
-    padding: 0.5em 1em;
-    border-radius: 9999px;
-    text-align: center;
-    white-space: normal;
-  }
-  /* LR mode main-content links */
-  .main-content a {
-    display: inline-block;
-    background-color: darken(#FFE1F1, 10%);
-    padding: 0.5em 1em;
-    border-radius: 9999px;
-    text-align: center;
-    white-space: normal;
   }
   a:hover, a:focus {
     color: #E8C2CA;            /* link hover */
@@ -595,6 +558,15 @@ hr {
     color: #BE5985;             /* LR text color */
     border-radius: 5px;
     padding: 2px 4px;
+  }
+  /* LR mode link circles */
+  .header a,
+  .main-content a {
+    background-color: #F7D1E9;     /* slightly darker than #FFEDFA */
+    color: inherit;
+    padding: 0.3em 0.6em;
+    border-radius: 9999px;
+    text-decoration: none;
   }
 }
 .main-content img {

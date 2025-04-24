@@ -25,6 +25,9 @@ permalink: /LangChain-Conceptual-Guide/
 | Components:  |    Integrations    |    Integrations    |
 | Architecture |     LangChain      |     LangGraph      |
 
+---
+
+
 |     LangSmith     |
 |:-----------------:|
 |    Playground     |
