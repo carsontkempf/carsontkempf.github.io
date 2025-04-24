@@ -9,19 +9,26 @@
     <!--[if lt IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
+    <script>
+      const _t = localStorage.theme;
+      if (_t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    </script>
   </head>
   <body>
-    <div id="theme-toggle" style="position:fixed; top:10px; left:50%; transform:translateX(-50%); z-index:1000;">
+    <div id="theme-toggle" …>
       <button id="light-mode">Light</button>
       <button id="dark-mode">Dark</button>
     </div>
     <script>
-      document.getElementById('light-mode').addEventListener('click', () => {
-        document.documentElement.removeAttribute('data-theme');
-      });
-      document.getElementById('dark-mode').addEventListener('click', () => {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      });
+      const setTheme = theme => {
+        if (theme==='dark') document.documentElement.setAttribute('data-theme','dark');
+        else document.documentElement.removeAttribute('data-theme');
+        localStorage.theme = theme;
+      };
+      document.getElementById('light-mode')
+        .addEventListener('click', () => setTheme('light'));
+      document.getElementById('dark-mode')
+        .addEventListener('click', () => setTheme('dark'));
     </script>
     <div class="wrapper">
 
