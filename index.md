@@ -33,46 +33,41 @@ title: Hello! Happy you Made it!
 ### Tutorials Over:
 * Various Software Packages
 > LangChain      -> Interacting with LLM's APIs
-
+> 
 > LangGraph      -> Represent the AI action space as a graph with nodes and edges
-
+> 
 > LLM APIs       -> Utilize APIs to construct your own LLM applications
-
+> 
 > Search APIs    -> Gain access to live content on the internet
 
 * App Development Frameworks
 
 > Django         -> Build python applications
-
-* Cloud Services
-
+> * Cloud Services
+> 
 > AWS            -> Deploy your applications for others to see
-
-* Deployment Tools
-
+> * Deployment Tools
+> 
 > CI/CD          -> Organized and automatic deployment operations
-
-* Automation
-
+> * Automation
+> 
 > Bash Scripts   -> Fun automation scripts to make your life easier
-
+> 
 > Python Scripts -> Fun automation scripts that aren't awful to look at to make your life easier
 
 ### Lectures On:
 * Computer Science Concepts
 
 > APIs
-
+> 
 > LLMs
-
+> 
 > AI
-
-* Philosophy
-
-* My Philosophies
-
+> * Philosophy
+> * My Philosophies
+> 
 > Staying Organized
-
+> 
 > How to Learn Anything
 
 
@@ -82,20 +77,7 @@ title: Hello! Happy you Made it!
 * Books
 
 > James Gleick: The Information: A History, A Theory, A Flood
-
+> 
 > Malcolm Gladwell: David and Goliath, Outlier, Blink
-
+> 
 > Cal Newport: Slow Productivity, Deep Work, Digital Minimalism
-
-> Albert Camus: The Stranger, The Myth of Sisyphus
-
-> Fedor Dotsoievsky: Crime and Punishment
-
-
-* Theories
-
-> Information Theory
-
-> "AI is Making Kids Stupid"
-
-
