@@ -340,7 +340,7 @@ hr {
 .theme-switch .slider {
   position: absolute;
   top: 2px; left: 2px;
-  width: calc(33.3333% - 4px);
+  width: calc(100% - 4px);
   height: calc(100% - 4px);
   background: #fff;
   border-radius: 50%;
@@ -432,30 +432,30 @@ hr {
 /* LR mode overrides */
 [data-theme="lr"] {
   body {
-    background-color: #F7D1CD; /* main background */
-    color: #735D78;            /* text color */
+    background-color: #FFEDFA; /* main background */
+    color: #BE5985;            /* text color */
   }
   .sidebar, .header, .footer {
-    background-color: #B392AC; /* sidebar/header/footer background */
-    color: #735D78;
+    background-color: #FFB8E0; /* sidebar/header/footer background */
+    color: #BE5985;
   }
   h1, h2, h3, h4, h5, h6 {
-    color: #735D78;            /* headings */
+    color: #BE5985;            /* headings */
   }
   a {
-    color: #735D78;            /* links */
+    color: #BE5985;            /* links */
   }
   a:hover, a:focus {
     color: #E8C2CA;            /* link hover */
   }
   blockquote {
     border-left-color: #E8C2CA; /* blockquote border */
-    color: #735D78;
+    color: #BE5985;
     background-color: #F7D1CD;  /* blockquote background */
   }
   code, pre {
-    background-color: #D1B3C4;  /* code block background */
-    color: #735D78;
+    background-color: #EC7FA9;  /* code block background */
+    color: #BE5985;
     border-radius: 5px;
     background-clip: padding-box;
   }
@@ -468,7 +468,7 @@ hr {
     border: 1px solid #E8C2CA;  /* table cell border */
     padding: 5px 10px;
     text-align: left;
-    color: #735D78;
+    color: #BE5985;
   }
   hr {
     margin: 1.5rem 0;
