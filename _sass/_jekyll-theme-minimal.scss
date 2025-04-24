@@ -266,6 +266,17 @@ code.language-plaintext.highlighter-rouge {
   padding: 2px 4px;
 }
 
+/* Light mode Rouge block highlight background */
+.language-plaintext.highlighter-rouge .highlight,
+.language-plaintext.highlighter-rouge pre.highlight {
+  background-color: #D7C0AE;    /* match light mode pre/code background */
+  color: #967E76;               /* match light mode text color */
+  border-radius: 5px;
+  padding: 0.5em;
+  overflow-x: auto;
+  background-clip: padding-box;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
