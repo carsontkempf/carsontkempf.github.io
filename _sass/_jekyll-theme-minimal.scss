@@ -226,89 +226,79 @@ header {
 // Theme Switcher Component
 // ***********************************************
 .theme-switch {
-  position: relative;
-  left: 50% !important;
-  padding: 0;
-  display: flex;
-  flex-shrink: 0;
-  top: 5px;
+  /* Custom properties */
+  --switch-height: 2em;                    /* overall pill height */
+  --knob-size: calc(var(--switch-height)); /* knob diameter */
+
+  position: relative;                      /* anchor absolute children */
+  display: inline-block;                   /* normal document flow */
   width: calc(var(--knob-size) * 3);
-  height: var(--knob-size);
-  transform: translateX(-50%);
-  z-index: 10000;
-  margin: 1rem auto;
-  --switch-height: 2em;
-  --switch-width: calc(var(--switch-height) * 3);
-  --switch-border: 2px;
-  --knob-size: calc(var(--switch-height) - (var(--switch-border) * 2));
+  height: var(--switch-height);
+  border-radius: 50%;                      /* perfect pill */
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-}
-.theme-switch input {
-  position: relative;
-  flex: 0 0 auto;
-  top: var(--switch-border);
-  left: 0;
-  width: var(--knob-size);
-  height: var(--knob-size);
-  margin: 0; 
-  padding: 0;
-  opacity: 0; 
-  cursor: pointer; 
-  z-index: 2;
-}
-.theme-switch .slider {
-  position: relative;
-  padding: 0;
-  flex: 0 0 auto;
-  top: var(--switch-border);
-  left: 0;
-  width: var(--knob-size);
-  height: var(--knob-size);
-  background: #fff;
-  border-radius: 50%;
-  transition: left 0.3s ease;
-  z-index: 2;
-}
-.theme-switch .opt {
-  position: relative;
-  padding: 0;
-  flex: 0 0 auto;
-  height: var(--knob-size);
-  left: 0;
-  right: var(--switch-border);
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
-  border-radius: 50%; 
-  pointer-events: auto;
-  transition: background-color 0.2s ease; 
-  z-index: 3;
-}
-.theme-switch .opt:hover {
-   background-color: rgba(0, 0, 0, 0.5); 
-   z-index: 4;
-   overflow: visible;
-  }
-.theme-switch input#ts-light,
-.theme-switch label[for="ts-light"] {
-  left: 0;
-}
-.theme-switch input#ts-dark,
-.theme-switch label[for="ts-dark"] {
-  left: var(--switch-border);
-}
-.theme-switch input#ts-lr,
-.theme-switch label[for="ts-lr"] {
-  right: 0;
 }
 
-.theme-switch #ts-light:checked ~ .slider { left: var(--switch-border); }
-.theme-switch #ts-dark:checked  ~ .slider { left: calc(var(--knob-size) + var(--switch-border)); }
-.theme-switch #ts-lr:checked    ~ .slider { left: calc((var(--knob-size) * 2) + var(--switch-border)); }
+/* Adopt the same box model for all descendants */
+.theme-switch *,
+.theme-switch *::before,
+.theme-switch *::after {
+  box-sizing: inherit;
+}
+
+/* Invisible radio inputs—one per segment */
+.theme-switch input {
+  position: absolute;
+  top: 0;
+  width: var(--knob-size);
+  height: var(--knob-size);
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+#ts-light { left: 0; }
+#ts-dark  { left: var(--knob-size); }
+#ts-lr    { left: calc(var(--knob-size) * 2); }
+
+/* Hover indicator circles */
+.theme-switch .opt {
+  position: absolute;
+  top: 0;
+  width: var(--knob-size);
+  height: var(--knob-size);
+  border-radius: 50%;
+  background: transparent;
+  pointer-events: auto;
+  transition: background-color 0.2s ease;
+  z-index: 2;                              /* above slider */
+}
+label[for="ts-light"] { left: 0; }
+label[for="ts-dark"]  { left: var(--knob-size); }
+label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
+
+.theme-switch .opt:hover {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+/* Sliding knob */
+.theme-switch .slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--knob-size);
+  height: var(--knob-size);
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.3s ease;
+  z-index: 1;                              /* below hover circles */
+}
+
+/* Checked‑driven knob positions */
+#ts-light:checked ~ .slider { left: 0; }
+#ts-dark:checked  ~ .slider { left: var(--knob-size); }
+#ts-lr:checked    ~ .slider { left: calc(var(--knob-size) * 2); }
 
 // ***********************************************
 // Theme Overrides: Light, Dark, LR
