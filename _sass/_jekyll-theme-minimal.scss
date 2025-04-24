@@ -259,12 +259,16 @@ code.language-plaintext.highlighter-rouge {
 table {
   width: 100%;
   border-collapse: collapse;
+  border: none;             /* keep outer table border none */
+  /* ensure cell borders are black in all modes */
+  th, td {
+    border: 1px solid #000;
+  }
 }
 
-th, td {
-  border: 1px solid #e5e5e5;
-  padding: 5px 10px;
-  text-align: left;
+/* Thicker border for header row */
+thead th {
+  border: 2px solid #000;
 }
 
 hr {
@@ -338,6 +342,10 @@ hr {
 
 /* Pill toggle container */
 .theme-switch {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   left: 50%;
   width: 12em;
   --switch-height: 2em;
@@ -436,7 +444,7 @@ hr {
         background-color: #3C3D37;  /* table background */ 
       }
       th, td {
-        border: 1px solid #697565;  /* accent borders */ 
+        /* border is set globally to 1px solid #000; */
         padding: 5px 10px;
         text-align: left;
         color: #ECDFCC;             /* cell text in contrast */ 
@@ -503,7 +511,7 @@ hr {
     background-color: #F7D1CD;
   }
   th, td {
-    border: 1px solid #E8C2CA;  /* table cell border */
+    /* border is set globally to 1px solid #000; */
     padding: 5px 10px;
     text-align: left;
     color: #BE5985;
