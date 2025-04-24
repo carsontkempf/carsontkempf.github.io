@@ -172,18 +172,19 @@ a:hover small {
   padding: 0;
   margin: 0;
 }
-.sidebar ul li a,
-.sidebar ol li a {
+.sidebar li a {
   display: block;
-  width: 100% !important;
+  position: relative;
+  left: 0;
+  right: 0;
+  width: 100%;
   margin: 0;
   padding: .5em 1em;
   box-sizing: border-box;
   background: none;
 }
 
-.sidebar ul li a:hover,
-.sidebar ol li a:hover {
+.sidebar li a:hover {
   background-color: rgba(0,0,0,0.1);
 }
 
@@ -311,44 +312,48 @@ hr {
     color:#444;
   }
 }
+
+/* 3-position pill toggle styles */
 .theme-switch {
   position: fixed;
   top: 10px; left: 50%;
   transform: translateX(-50%);
   width: 12em; height: 2em;
   background: #ccc;
-  border-radius: 1em;           /* half of height for pill shape */  /*  [oai_citation:10‡Treehouse Blog](https://blog.teamtreehouse.com/css-toggle-switch?utm_source=chatgpt.com) †  [oai_citation:11‡W3Schools.com](https://www.w3schools.com/howto/howto_css_switch.asp?utm_source=chatgpt.com) */
+  border-radius: 1em;
   display: flex;
   align-items: center;
   overflow: hidden;
+  z-index: 1000;
 }
 .theme-switch input {
-  position: absolute;           /* keep radios out of sight */
-  opacity: 0; width: 0; height: 0;
+  position: absolute;
+  opacity: 0;
+  width: 100%; height: 100%;
+  margin: 0;
+  cursor: pointer;
+  z-index: 2;
 }
 .theme-switch .slider {
   position: absolute;
-  top: 0.1em; left: 0.1em;
-  width: 1.8em; height: 1.8em; /* knob diameter */
+  top: 2px; left: 2px;
+  width: calc(33.3333% - 4px);
+  height: calc(100% - 4px);
   background: #fff;
-  border-radius: 50%;           /* circle */                   /*  [oai_citation:12‡Treehouse Blog](https://blog.teamtreehouse.com/css-toggle-switch?utm_source=chatgpt.com) */
+  border-radius: 50%;
   transition: transform 0.3s ease;
   z-index: 1;
 }
-/* move knob based on checked state */
-.theme-switch #ts-light:checked ~ .slider { transform: translateX(0); }
-.theme-switch #ts-dark:checked  ~ .slider { transform: translateX(4em); }
-.theme-switch #ts-lr:checked    ~ .slider { transform: translateX(8em); }
-
-/* labels fill each third, clickable area */
 .theme-switch .opt {
   flex: 1;
   text-align: center;
-  z-index: 2;
-  cursor: pointer;                /* indicate clickability */ /*  [oai_citation:15‡DEV Community](https://dev.to/navdeepm20/3-state-switches-are-not-tough-ultimate-guide-to-css-switches-using-css-only-1gja?utm_source=chatgpt.com) */
-  user-select: none;
-  font-size: 0;                   /* hide text if undesired */
+  line-height: 2em;
+  pointer-events: none;
+  z-index: 3;
 }
+.theme-switch #ts-light:checked  ~ .slider { transform: translateX(0); }
+.theme-switch #ts-dark:checked   ~ .slider { transform: translateX(33.3333%); }
+.theme-switch #ts-lr:checked     ~ .slider { transform: translateX(66.6667%); }
 
 /* Dark mode overrides */
 [data-theme="dark"] {

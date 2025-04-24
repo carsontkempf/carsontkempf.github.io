@@ -1,44 +1,54 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="en-US" data-theme="{{ localStorage.theme | default: '' }}">
   <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% seo %}
     <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
-    <link href="https://cdn.jsdelivr.net/css-toggle-switch/latest/toggle-switch.css" rel="stylesheet" />
     <!--[if lt IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
     <script>
-      const _t = localStorage.theme;
-      if (_t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+      // Re-apply stored theme before rendering to avoid flash
+      (function() {
+        var theme = localStorage.getItem('theme');
+        if (theme && theme !== 'light') {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      })();
     </script>
   </head>
   <body>
-    <!-- 3-position theme switch -->
+    <!-- 3-position pill theme switch -->
     <div class="theme-switch">
-      <input type="radio" id="ts-light" name="theme" checked>
-      <input type="radio" id="ts-dark"  name="theme">
-      <input type="radio" id="ts-lr"    name="theme">
+      <input type="radio" id="ts-light" name="theme" value="light" checked>
+      <input type="radio" id="ts-dark"  name="theme" value="dark">
+      <input type="radio" id="ts-lr"    name="theme" value="lr">
       <div class="slider"></div>
-      <label for="ts-light" class="opt"></label>
-      <label for="ts-dark"  class="opt"></label>
-      <label for="ts-lr"    class="opt"></label>
+      <label for="ts-light" class="opt">Light</label>
+      <label for="ts-dark"  class="opt">Dark</label>
+      <label for="ts-lr"    class="opt">LR</label>
     </div>
     <script>
-      // apply stored theme on load
-      const savedTheme = localStorage.theme;
-      if (savedTheme) document.getElementById('ts-' + savedTheme)?.click();
-
-      document.querySelectorAll('.theme-switch input').forEach(input =>
-        input.addEventListener('change', () => {
-          const mode = input.id.replace('ts-', '');
-          if (mode === 'light') document.documentElement.removeAttribute('data-theme');
-          else document.documentElement.setAttribute('data-theme', mode);
-          localStorage.theme = mode;
-        })
-      );
+      // On load: set the correct radio and theme
+      document.addEventListener('DOMContentLoaded', function() {
+        var saved = localStorage.getItem('theme') || 'light';
+        var radio = document.getElementById('ts-' + saved);
+        if (radio) radio.checked = true;
+      });
+      // Listen for changes
+      document.querySelectorAll('.theme-switch input').forEach(function(input) {
+        input.addEventListener('change', function() {
+          var mode = this.value;
+          if (mode === 'light') {
+            document.documentElement.removeAttribute('data-theme');
+          } else {
+            document.documentElement.setAttribute('data-theme', mode);
+          }
+          localStorage.setItem('theme', mode);
+        });
+      });
     </script>
     <div class="wrapper">
 
@@ -61,7 +71,7 @@
         {% include footer.html %}
       </section>
 
-      </div>
+    </div>
     <script src="{{ site.baseurl }}/assets/js/scale.fix.js"></script>
   </body>
 </html>
