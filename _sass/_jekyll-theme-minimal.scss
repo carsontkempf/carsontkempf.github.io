@@ -227,11 +227,11 @@ header {
 // ***********************************************
 .theme-switch {
   position: relative;
+  left: 50% !important;
   padding: 0;
   display: flex;
   flex-shrink: 0;
   top: 5px;
-  left: 50%;
   width: calc(var(--knob-size) * 3);
   height: var(--knob-size);
   transform: translateX(-50%);
@@ -251,7 +251,7 @@ header {
   position: relative;
   flex: 0 0 auto;
   top: var(--switch-border);
-  left: var(--switch-border);
+  left: 0;
   width: var(--knob-size);
   height: var(--knob-size);
   margin: 0; 
@@ -265,7 +265,7 @@ header {
   padding: 0;
   flex: 0 0 auto;
   top: var(--switch-border);
-  left: var(--switch-border);
+  left: 0;
   width: var(--knob-size);
   height: var(--knob-size);
   background: #fff;
@@ -278,7 +278,7 @@ header {
   padding: 0;
   flex: 0 0 auto;
   height: var(--knob-size);
-  left: var(--switch-border);
+  left: 0;
   right: var(--switch-border);
   display: flex; 
   align-items: center; 
@@ -295,15 +295,15 @@ header {
   }
 .theme-switch input#ts-light,
 .theme-switch label[for="ts-light"] {
-  left: var(--switch-border);
+  left: 0;
 }
 .theme-switch input#ts-dark,
 .theme-switch label[for="ts-dark"] {
-  left: calc(var(--knob-size) + var(--switch-border));
+  left: var(--switch-border);
 }
 .theme-switch input#ts-lr,
 .theme-switch label[for="ts-lr"] {
-  left: calc((var(--knob-size) * 2) + var(--switch-border));
+  right: 0;
 }
 
 .theme-switch #ts-light:checked ~ .slider { left: var(--switch-border); }
