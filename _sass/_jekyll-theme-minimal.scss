@@ -184,7 +184,7 @@ blockquote {
 
 code {
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-  background-color: #f8f8f8a2;
+  background-color: #f8f8f815;
   padding: 2px 4px;
   border-radius: 3px;
 }
@@ -278,38 +278,48 @@ hr {
 
 /* Dark mode overrides */
 [data-theme="dark"] {
-  body {
-    background-color: #121212;
-    color: #e0e0e0;
-  }
-  .header, .footer {
-    background-color: #1e1e1e;
-    color: #c0c0c0;
-  }
-  .sidebar {
-    background-color: rgba(255,255,255,0.08);
-  }
-  a {
-    color: #8ab4f8;
-  }
-  a:hover, a:focus {
-    color: #a0c4ff;
-  }
-  blockquote {
-    border-left-color: #333;
-    color: #bbb;
-  }
-  code, pre {
-    background-color: #1e1e1e;
-    color: #f8f8f2;
-  }
-  table {
-    border-color: #333;
-  }
-  th, td {
-    border: 1px solid #333;
-  }
-  hr {
-    border-top-color: #333;
-  }
-}
+      body {
+        background-color: #3C3D37; /* dark neutral background */ 
+        color: #ECDFCC;          /* high-contrast text */ 
+      }
+      .sidebar {
+        background-color: #181C14; /* very dark sidebar */ 
+      }
+      .header, .footer {
+        background-color: #181C14; /* match sidebar for cohesion */ 
+        color: #ECDFCC;             /* ensure headers are light */ 
+      }
+      h1, h2, h3, h4, h5, h6 {
+        color: #ECDFCC;             /* force all headings to contrast color */ 
+      }
+      a {
+        color: #ECDFCC;             /* links contrast on dark background */ 
+      }
+      a:hover, a:focus {
+        color: #697565;             /* accent hover state */ 
+      }
+      blockquote {
+        border-left-color: #697565; /* accent border */ 
+        color: #ECDFCC;             /* light quote text */ 
+        background-color: #3C3D37;  /* blend with background */ 
+      }
+      code, pre {
+        background-color: #697565;  /* muted accent for code blocks */ 
+        color: #ECDFCC;             /* readable code text */ 
+      }
+      table {
+        border-collapse: collapse;
+        background-color: #3C3D37;  /* table background */ 
+      }
+      th, td {
+        border: 1px solid #697565;  /* accent borders */ 
+        padding: 5px 10px;
+        text-align: left;
+        color: #ECDFCC;             /* cell text in contrast */ 
+      }
+      hr {
+        margin: 1.5rem 0;
+        border: 0;
+        border-top: 1px solid #697565; /* accent separator */ 
+      }
+    }
