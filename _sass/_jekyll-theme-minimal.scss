@@ -231,6 +231,8 @@ header {
   flex-shrink: 0;
   top: 5px;
   left: 50%;
+  width: calc((var(--knob-size) * 3) + (var(--switch-border) * 2));
+  height: calc(var(--knob-size) + (var(--switch-border) * 2));
   transform: translateX(-50%);
   z-index: 10000;
   margin: 1rem auto;
