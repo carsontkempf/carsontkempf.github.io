@@ -21,7 +21,15 @@ h1 {
   display: flex;
   flex-direction: column;
   bottom: 0;
-  background-color: #D7C0AE;
+  background-color: #9BABB8;
+}
+
+/* Match headers to list-item backgrounds */
+.sidebar h2:nth-of-type(odd) {
+  background-color: #B0B1B7;
+}
+.sidebar h2:nth-of-type(even) {
+  background-color: #D3D4DA;
 }
 
 .header {
@@ -198,20 +206,24 @@ blockquote {
 }
 
 code {
-  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-  background-color: #9BABB8;
+  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
+               "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+  background-color: #D7C0AE;    /* unified background */
   padding: 2px 4px;
   border-radius: 3px;
   background-clip: padding-box;
 }
 
 pre {
-  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-  background-color: #9BABB8;
+  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
+               "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+  background-color: #D7C0AE;    /* unified background */
   padding: 15px;
   border-radius: 5px;
   background-clip: padding-box;
   overflow-x: auto;
+  display: block;
+  width: 100%;
 }
 
 table {
