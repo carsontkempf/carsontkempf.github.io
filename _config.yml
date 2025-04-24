@@ -27,10 +27,10 @@ url: "https://carsontkempf.github.io" # the base hostname & protocol for your si
 github_username:  carsontkempf
 author: Carson Kempf
 
+safe: false
 show_downloads: false
 google_analytics:
 theme: jekyll-theme-minimal
-theme: jekyll-theme-dark
 sass:
   sass_dir: _sass
 #include:

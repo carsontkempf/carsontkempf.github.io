@@ -5,8 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% seo %}
-    <link id="theme-link-light" rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
-    <link id="theme-link-dark" rel="stylesheet" href="{{ "/assets/css/dark.css?v=" | append: site.github.build_revision | relative_url }}">
+    <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
     <!--[if lt IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
@@ -17,17 +16,11 @@
       <button id="dark-mode">Dark</button>
     </div>
     <script>
-      const lightBtn = document.getElementById('light-mode');
-      const darkBtn = document.getElementById('dark-mode');
-      const lightLink = document.getElementById('theme-link-light');
-      const darkLink = document.getElementById('theme-link-dark');
-      lightBtn.addEventListener('click', () => {
-        lightLink.disabled = false;
-        darkLink.disabled = true;
+      document.getElementById('light-mode').addEventListener('click', () => {
+        document.documentElement.removeAttribute('data-theme');
       });
-      darkBtn.addEventListener('click', () => {
-        darkLink.disabled = false;
-        lightLink.disabled = true;
+      document.getElementById('dark-mode').addEventListener('click', () => {
+        document.documentElement.setAttribute('data-theme', 'dark');
       });
     </script>
     <div class="wrapper">
