@@ -566,17 +566,19 @@ hr {
   color: inherit !important;
 }
 
-pre {
-  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
-               "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-  background-color: #D7C0AE;
-  color: #967E76;
-  padding: 15px;
-  border-radius: 10px;
-  background-clip: padding-box;
-  overflow-x: auto;
-  display: block;
-  width: 100%;
+html:not([data-theme]) {
+  pre {
+    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
+                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+    background-color: #D7C0AE;
+    color: #967E76;
+    padding: 15px;
+    border-radius: 10px;
+    background-clip: padding-box;
+    overflow-x: auto;
+    display: block;
+    width: 100%;
+  }
 }
 
 /* Light mode Rouge inline code */
@@ -618,9 +620,11 @@ code {
   margin: 1rem auto;             /* top spacing + center */
   --switch-height: 2em;
   --switch-width: calc(var(--switch-height) * 3);
-  box-sizing: border-box;
-  width: var(--switch-width);
-  height: var(--switch-height);
+  --switch-border: 2px;
+  --knob-size: calc(var(--switch-height) - (var(--switch-border) * 2));
+  padding: var(--switch-border);
+  width: calc((var(--knob-size) * 3) + (var(--switch-border) * 2));
+  height: calc(var(--knob-size) + (var(--switch-border) * 2));
   border: 2px solid #999;
   border-radius: calc(var(--switch-height) / 2);
   box-shadow: 0 0 0 1px #999;
@@ -635,11 +639,12 @@ body > .theme-switch {
 }
 
 /* Inputs cover exactly one segment */
+/* Inputs cover exactly one segment */
 .theme-switch input {
   position: relative;
   top: 0;
-  width: var(--switch-height);
-  height: var(--switch-height);
+  width: var(--knob-size);
+  height: var(--knob-size);
   margin: 0;
   padding: 0;
   opacity: 0;
@@ -650,33 +655,27 @@ body > .theme-switch {
 /* Slider knob */
 .theme-switch .slider {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: var(--switch-height);
-  height: var(--switch-height);
+  top: var(--switch-border);
+  left: var(--switch-border);
+  width: var(--knob-size);
+  height: var(--knob-size);
   background: #fff;
   border-radius: 50%;
   transition: left 0.3s ease;
   z-index: 1;
 }
 
-/* precise knob positioning: left, center, right */
-.theme-switch #ts-light:checked ~ .slider {
-  left: 0;
-}
-.theme-switch #ts-dark:checked  ~ .slider {
-  left: var(--switch-height);
-}
-.theme-switch #ts-lr:checked    ~ .slider {
-  left: calc(var(--switch-height) * 2);
-}
+/* knob position on checked */
+.theme-switch #ts-light:checked ~ .slider { left: var(--switch-border); }
+.theme-switch #ts-dark:checked  ~ .slider { left: calc(var(--knob-size) + var(--switch-border)); }
+.theme-switch #ts-lr:checked    ~ .slider { left: calc((var(--knob-size) * 2) + var(--switch-border)); }
 
 /* Label areas */
 .theme-switch .opt {
   position: absolute;
-  top: 0;
-  width: var(--switch-height);
-  height: var(--switch-height);
+  top: var(--switch-border);
+  width: var(--knob-size);
+  height: var(--knob-size);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -689,21 +688,17 @@ body > .theme-switch {
   background-color: rgba(0, 0, 0, 0.2);
 }
 
-/* precise positioning for inputs, labels, and slider */
+/* explicit positioning for inputs, labels, and slider */
 .theme-switch input#ts-light,
 .theme-switch label[for="ts-light"],
 .theme-switch .slider {
-  left: 0;
+  left: var(--switch-border);
 }
 .theme-switch input#ts-dark,
 .theme-switch label[for="ts-dark"] {
-  left: var(--switch-height);
+  left: calc(var(--knob-size) + var(--switch-border));
 }
 .theme-switch input#ts-lr,
 .theme-switch label[for="ts-lr"] {
-  left: calc(var(--switch-height) * 2);
+  left: calc((var(--knob-size) * 2) + var(--switch-border));
 }
-/* knob position on checked */
-.theme-switch #ts-light:checked ~ .slider { left: 0; }
-.theme-switch #ts-dark:checked  ~ .slider { left: var(--switch-height); }
-.theme-switch #ts-lr:checked    ~ .slider { left: calc(var(--switch-height) * 2); }
