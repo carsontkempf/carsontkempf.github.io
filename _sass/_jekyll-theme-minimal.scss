@@ -170,6 +170,7 @@ header {
   margin: 0;
   padding: 0;
   list-style: none;
+  width: 250%;
 }
 .sidebar ol a,
 .sidebar li a {
@@ -220,7 +221,7 @@ header {
 // Theme Switcher Component
 // ***********************************************
 .theme-switch {
-  position: sticky;
+  position: fixed;
   top: 5px;
   left: 50%;
   transform: translateX(-50%);
@@ -366,12 +367,6 @@ header {
     color: #ECDFCC;             /* light quote text */ 
     background-color: #3C3D37;  /* blend with background */ 
   }
-  code, pre {
-    background-color: #9A7E6F;
-    color: #ECDFCC;
-    border-radius: 5px;
-    background-clip: padding-box;
-  }
   table {
     border-collapse: collapse;
     background-color: #3C3D37;  /* table background */ 
@@ -399,13 +394,6 @@ header {
     background: none;
     color: #000;
   }
-  /* Dark mode Rouge inline code */
-  code.language-plaintext.highlighter-rouge {
-    background-color: #9A7E6F;
-    color: #ECDFCC;
-    border-radius: 5px;
-    padding: 2px 4px;
-  }
   /* Dark mode link circles */
   .header a,
   .main-content a {
@@ -414,6 +402,50 @@ header {
     padding: 0.3em 0.6em;
     border-radius: 9999px;
     text-decoration: none;
+  }
+
+  /* Ensure rounded corners on both sides for pre in dark mode */
+  pre {
+    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
+                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+    background-color: #9A7E6F;
+    color: #ECDFCC;
+    padding: 15px;
+    border-radius: 10px;
+    background-clip: padding-box;
+    overflow-x: auto;
+    display: block;
+    width: 100%;
+  }
+
+  /* Dark mode Rouge inline code */
+  code.language-plaintext.highlighter-rouge {
+    background-color: #9A7E6F;
+    color: #ECDFCC;
+    border-radius: 5px;
+    padding: 2px 4px;
+  }
+
+  /* Dark mode Rouge block highlight background */
+  .language-plaintext.highlighter-rouge .highlight,
+  .language-plaintext.highlighter-rouge pre.highlight {
+    background-color: #9A7E6F;
+    color: #ECDFCC;
+    border-radius: 5px;
+    padding: 0.5em;
+    overflow-x: auto;
+    background-clip: padding-box;
+  }
+
+  /* Dark mode inline code default */
+  code {
+    background-color: #9A7E6F;
+    color: #ECDFCC;
+    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
+                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background-clip: padding-box;
   }
 }
 [data-theme="lr"] {
@@ -438,12 +470,6 @@ header {
     border-left-color: #E8C2CA; /* blockquote border */
     color: #BE5985;
     background-color: #F7D1CD;  /* blockquote background */
-  }
-  code, pre {
-    background-color: #EC7FA9;  /* code block background */
-    color: #BE5985;
-    border-radius: 5px;
-    background-clip: padding-box;
   }
   table {
     width: 100%;
@@ -473,13 +499,6 @@ header {
     background: none;
     color: #000;
   }
-  /* LR mode Rouge inline code */
-  code.language-plaintext.highlighter-rouge {
-    background-color: #EC7FA9;  /* same as LR pre background */
-    color: #BE5985;             /* LR text color */
-    border-radius: 5px;
-    padding: 2px 4px;
-  }
   /* LR mode link circles */
   .header a,
   .main-content a {
@@ -488,6 +507,50 @@ header {
     padding: 0.3em 0.6em;
     border-radius: 9999px;
     text-decoration: none;
+  }
+
+  /* Ensure rounded corners on both sides for pre in LR mode */
+  pre {
+    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
+                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+    background-color: #EC7FA9;
+    color: #BE5985;
+    padding: 15px;
+    border-radius: 10px;
+    background-clip: padding-box;
+    overflow-x: auto;
+    display: block;
+    width: 100%;
+  }
+
+  /* LR mode Rouge inline code */
+  code.language-plaintext.highlighter-rouge {
+    background-color: #EC7FA9;
+    color: #BE5985;
+    border-radius: 5px;
+    padding: 2px 4px;
+  }
+
+  /* LR mode Rouge block highlight background */
+  .language-plaintext.highlighter-rouge .highlight,
+  .language-plaintext.highlighter-rouge pre.highlight {
+    background-color: #EC7FA9;
+    color: #BE5985;
+    border-radius: 5px;
+    padding: 0.5em;
+    overflow-x: auto;
+    background-clip: padding-box;
+  }
+
+  /* LR mode inline code default */
+  code {
+    background-color: #EC7FA9;
+    color: #BE5985;
+    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
+                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background-clip: padding-box;
   }
 }
 
