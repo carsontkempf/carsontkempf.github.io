@@ -385,14 +385,18 @@ body > .theme-switch {
 /* Hidden radios each cover one third */
 .theme-switch input {
   position: absolute;
-  top: 0; height: 100%;
-  width: 33.3333%;
+  top: 0;
+  height: 100%;
+  width: calc(100% / 3);
+  margin: 0;
+  padding: 0;
   opacity: 0;
   cursor: pointer;
+  z-index: 2; /* below labels but above slider */
 }
 .theme-switch #ts-light { left: 0; }
-.theme-switch #ts-dark  { left: 33.3333%; }
-.theme-switch #ts-lr    { left: 66.6667%; }
+.theme-switch #ts-dark  { left: calc(100% / 3); }
+.theme-switch #ts-lr    { left: calc((100% / 3) * 2); }
 /* Slider knob */
 /* Slider knob */
 .theme-switch .slider {
@@ -404,7 +408,7 @@ body > .theme-switch {
   background: #fff;
   border-radius: 50%;
   transition: left 0.3s ease;
-  z-index: 1;
+  z-index: 1;  /* below inputs and labels */
 }
 /* precise knob positioning: left, center, right */
 .theme-switch #ts-light:checked ~ .slider {
@@ -422,12 +426,11 @@ body > .theme-switch {
   top: 0;
   width: calc(100% / 3);
   height: var(--switch-height);
-  display: flex;                  /* center content */
+  display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2;
-  cursor: pointer;
-  background-color: transparent;  /* default transparent */
+  z-index: 3;            /* above inputs and slider */
+  pointer-events: auto;  /* allow hover & click on label */
   transition: background-color 0.2s ease;
 }
 .theme-switch .opt:hover {
