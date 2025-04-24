@@ -262,6 +262,7 @@ header {
 }
 .theme-switch .slider {
   position: relative;
+  padding: 0;
   flex: 0 0 auto;
   top: var(--switch-border);
   left: var(--switch-border);
@@ -273,7 +274,8 @@ header {
   z-index: 2;
 }
 .theme-switch .opt {
-  position: relative; 
+  position: relative;
+  padding: 0;
   flex: 0 0 auto;
   height: var(--knob-size);
   left: var(--switch-border);
