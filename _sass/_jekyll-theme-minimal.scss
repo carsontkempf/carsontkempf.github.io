@@ -227,6 +227,7 @@ header {
 // ***********************************************
 .theme-switch {
   position: absolute;
+  padding: 0;
   display: flex;
   flex-shrink: 0;
   top: 5px;
@@ -253,7 +254,8 @@ header {
   left: var(--switch-border);
   width: var(--knob-size);
   height: var(--knob-size);
-  margin: 0; padding: 0;
+  margin: 0; 
+  padding: 0;
   opacity: 0; 
   cursor: pointer; 
   z-index: 2;
@@ -287,6 +289,7 @@ header {
 .theme-switch .opt:hover {
    background-color: rgba(0, 0, 0, 0.5); 
    z-index: 4;
+   overflow: visible;
   }
 .theme-switch input#ts-light,
 .theme-switch label[for="ts-light"] {
