@@ -470,8 +470,8 @@ body > .theme-switch {
         background-color: #3C3D37;  /* blend with background */ 
       }
       code, pre {
-        background-color: #9A7E6F;
-        color: #ECDFCC;
+        background-color: #9A7E6F !important;
+        color: #ECDFCC !important;
         border-radius: 5px;
         background-clip: padding-box;
       }
@@ -545,8 +545,8 @@ body > .theme-switch {
     background-color: #F7D1CD;  /* blockquote background */
   }
   code, pre {
-    background-color: #EC7FA9;  /* code block background */
-    color: #BE5985;
+    background-color: #EC7FA9 !important;  /* code block background */
+    color: #BE5985 !important;
     border-radius: 5px;
     background-clip: padding-box;
   }
