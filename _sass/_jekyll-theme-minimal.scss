@@ -220,7 +220,7 @@ header {
 // Theme Switcher Component
 // ***********************************************
 .theme-switch {
-  position: fixed;
+  position: sticky;
   top: 5px;
   left: 50%;
   transform: translateX(-50%);
@@ -247,7 +247,7 @@ header {
   opacity: 0; cursor: pointer; z-index: 2;
 }
 .theme-switch .slider {
-  position: absolute;
+  position: relative;
   top: calc(var(--switch-border) / 2);
   left: var(--switch-border);
   width: var(--knob-size);
@@ -261,11 +261,17 @@ header {
 .theme-switch #ts-dark:checked  ~ .slider { left: calc(var(--knob-size) + var(--switch-border)); }
 .theme-switch #ts-lr:checked    ~ .slider { left: calc((var(--knob-size) * 2) + var(--switch-border)); }
 .theme-switch .opt {
-  position: absolute; top: calc(var(--switch-border) / 2);
-  width: var(--knob-size); height: var(--knob-size);
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 50%; pointer-events: auto;
-  transition: background-color 0.2s ease; z-index: 2;
+  position: relative; 
+  top: calc(var(--switch-border) / 2);
+  width: var(--knob-size); 
+  height: var(--knob-size);
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  border-radius: 50%; 
+  pointer-events: auto;
+  transition: background-color 0.2s ease; 
+  z-index: 2;
 }
 .theme-switch .opt:hover { background-color: rgba(0, 0, 0, 0.2); }
 .theme-switch input#ts-light,
