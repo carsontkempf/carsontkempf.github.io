@@ -240,7 +240,7 @@ code {
 pre {
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
                "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-  background-color: #D7C0AE;    /* unified background */
+  background-color: #D7C0AE;
   padding: 15px;
   border-radius: 10px;
   background-clip: padding-box;
@@ -348,22 +348,24 @@ hr {
   }
 }
 
-body > .theme-switch {
-  position: fixed !important;
-  display: flex !important;
-}
 
-/* Pill toggle container */
 .theme-switch {
-  left: 50%;
-  display: flex;
+  position: static;              /* normal flow */
+  margin: 1rem auto;             /* top spacing + center */
   width: 12em;
   --switch-height: 2em;
   height: var(--switch-height);
-  margin: 1rem auto;
   border: 2px solid #999;
-  box-shadow: 0 0 0 1px #999;
   border-radius: calc(var(--switch-height) / 2);
+  box-shadow: 0 0 0 1px #999;
+  display: flex;
+  align-items: center;
+}
+
+/* Hide any leftover fixed rules */
+body > .theme-switch {
+  position: static !important;
+  z-index: auto !important;
 }
 /* Hidden radios each cover one third */
 .theme-switch input {
