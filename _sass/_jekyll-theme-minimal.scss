@@ -238,7 +238,7 @@ header {
   position: relative;
   left: 7vw;               /* centers within main document area */
   display: block;                          /* allows horizontal centering */
-  margin: 5px auto 0;                     /* 5 px from top & centered */
+  margin: 1px auto 0;                     /* 5 px from top & centered */
   width: calc(var(--knob-size) * 3);
   height: var(--switch-height);
   border-radius: calc(var(--knob-size) / 2);
@@ -585,12 +585,11 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
 // Final Image & Link Adjustments
 // ***********************************************
 .main-content img {
-  display: inline-block;
-  text-align: center;
-  margin: 1rem 0;
-  width: 75%;
+  display: block;              // occupy full line, prevents inline text wrap
+  margin: 1rem auto;           // top/bottom spacing, centered horizontally
+  width: 67%;
   height: auto;
-  padding: 15px 0px;
+  clear: both;                 // force next content to start below image
 }
 .header h1 a {
   background: none !important;
