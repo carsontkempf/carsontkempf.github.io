@@ -184,7 +184,7 @@ blockquote {
 
 code {
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-  background-color: #f8f8f8;
+  background-color: #f8f8f8a2;
   padding: 2px 4px;
   border-radius: 3px;
 }
@@ -206,6 +206,12 @@ th, td {
   border: 1px solid #e5e5e5;
   padding: 5px 10px;
   text-align: left;
+}
+
+hr {
+  margin: 1.5rem 0;
+  border: 0;
+  border-top: 1px solid #e5e5e5;
 }
 
 @media print, screen and (max-width: 960px) {
