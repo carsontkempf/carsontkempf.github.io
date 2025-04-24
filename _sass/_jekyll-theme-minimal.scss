@@ -336,15 +336,13 @@ hr {
 
 /* Pill toggle container */
 .theme-switch {
-  position: fixed;
-  top: 10px; left: 50%;
-  transform: translateX(-50%);
   width: 12em;
   --switch-height: 2em;
   height: var(--switch-height);
-  /* width remains 100% of container */
   border: 2px solid #999;         /* add visible outline */
   box-shadow: 0 0 0 1px #999;     /* subtle inner outline */
+  margin: 0 auto 1rem;
+  border-radius: calc(var(--switch-height) / 2);
 }
 /* Hidden radios each cover one third */
 .theme-switch input {
@@ -528,6 +526,13 @@ hr {
     box-sizing: border-box;
     background: none;
     color: #000;
+  }
+  /* LR mode Rouge inline code */
+  code.language-plaintext.highlighter-rouge {
+    background-color: #EC7FA9;  /* same as LR pre background */
+    color: #BE5985;             /* LR text color */
+    border-radius: 5px;
+    padding: 2px 4px;
   }
 }
 /* Ensure markdown images are half-width and centered */
