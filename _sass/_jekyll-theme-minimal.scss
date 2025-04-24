@@ -408,18 +408,21 @@ body > .theme-switch {
 /* Label areas */
 .theme-switch .opt {
   position: absolute;
-  top: 0; height: 100%;
-  width: 33.3333%;
+  top: 0;
+  width: calc(100% / 3);
+  height: var(--switch-height);
+  line-height: var(--switch-height);
   text-align: center;
-  line-height: 2em;
   z-index: 2;
+  cursor: pointer;
+  pointer-events: auto;
 }
 .theme-switch .opt:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
 .theme-switch label[for="ts-light"] { left: 0; }
-.theme-switch label[for="ts-dark"]  { left: 33.3333%; }
-.theme-switch label[for="ts-lr"]    { left: 66.6667%; }
+.theme-switch label[for="ts-dark"]  { left: calc(100% / 3); }
+.theme-switch label[for="ts-lr"]    { left: calc((100% / 3) * 2); }
 
 /* Dark mode overrides */
 [data-theme="dark"] {
