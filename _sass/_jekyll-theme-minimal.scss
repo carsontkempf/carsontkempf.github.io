@@ -72,7 +72,6 @@ blockquote {
   margin: 1.25rem 0;
   padding: 0.5rem 1rem;
   font-style: italic;
-  color: #555;
 }
 ul, ol {
   margin: 0;
@@ -231,20 +230,26 @@ header {
 // ***********************************************
 // Theme Switcher Component
 // ***********************************************
+// ***********************************************
+// Theme Switcher Component
+// ***********************************************
 .theme-switch {
-  /* Custom properties */
-  --switch-height: 2em;                    /* overall pill height */
-  --knob-size: calc(var(--switch-height)); /* knob diameter */
+  /* Geometry */
+  --switch-height: 2em;                              /* outer height incl. border */
+  --border-width: 2px;                               /* stroke thickness */
+  --knob-size: calc(var(--switch-height) - var(--border-width) * 2);
+
   position: relative;
-  left: 7vw;               /* centers within main document area */
-  display: block;                          /* allows horizontal centering */
-  margin: 0 auto 0;                     /* 5 px from top & centered */
-  width: calc(var(--knob-size) * 3);
+  left: 7vw;
+  display: block;
+  margin: 0 auto;
+  width: calc(var(--knob-size) * 3 + var(--border-width) * 2);
   height: var(--switch-height);
-  border-radius: calc(var(--knob-size) / 2);
+  border-radius: calc(var(--switch-height) / 2);
+  border: var(--border-width) solid #000;
+  background-color: inherit;
   padding: 0;
   box-sizing: border-box;
-  border: 2px solid #000;
 }
 
 /* Adopt the same box model for all descendants */
@@ -257,7 +262,7 @@ header {
 /* Invisible radio inputs—one per segment */
 .theme-switch input {
   position: absolute;
-  top: 0;
+  top: var(--border-width);
   width: var(--knob-size);
   height: var(--knob-size);
   opacity: 0;
@@ -265,14 +270,14 @@ header {
   padding: 0;
   cursor: pointer;
 }
-#ts-light { left: 0; }
-#ts-dark  { left: var(--knob-size); }
-#ts-lr    { left: calc(var(--knob-size) * 2); }
+#ts-light { left: var(--border-width); }
+#ts-dark  { left: calc(var(--border-width) + var(--knob-size)); }
+#ts-lr    { left: calc(var(--border-width) + var(--knob-size) * 2); }
 
 /* Hover indicator circles */
 .theme-switch .opt {
   position: absolute;
-  top: 0;
+  top: var(--border-width);
   width: var(--knob-size);
   height: var(--knob-size);
   border-radius: 50%;
@@ -281,9 +286,9 @@ header {
   transition: background-color 0.2s ease;
   z-index: 2;                              /* above slider */
 }
-label[for="ts-light"] { left: 0; }
-label[for="ts-dark"]  { left: var(--knob-size); }
-label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
+label[for="ts-light"] { left: var(--border-width); }
+label[for="ts-dark"]  { left: calc(var(--border-width) + var(--knob-size)); }
+label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-size) * 2); }
 
 .theme-switch .opt:hover {
   background-color: rgba(0, 0, 0, 0.15);
@@ -292,8 +297,8 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
 /* Sliding knob */
 .theme-switch .slider {
   position: absolute;
-  bottom: 0px;
-  left: 0;
+  top: var(--border-width);
+  left: var(--border-width);
   width: var(--knob-size);
   height: var(--knob-size);
   border-radius: 50%;
@@ -303,14 +308,20 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
 }
 
 /* Checked‑driven knob positions */
-#ts-light:checked ~ .slider { left: 0; }
-#ts-dark:checked  ~ .slider { left: var(--knob-size); }
-#ts-lr:checked    ~ .slider { left: calc(var(--knob-size) * 2); }
+#ts-light:checked ~ .slider { left: var(--border-width); }
+#ts-dark:checked  ~ .slider { left: calc(var(--border-width) + var(--knob-size)); }
+#ts-lr:checked    ~ .slider { left: calc(var(--border-width) + var(--knob-size) * 2); }
 
 // ***********************************************
 // Theme Overrides: Light, Dark, LR
 // ***********************************************
  [data-theme="light"] {
+  /* Light‑mode blockquote gets lighter‑than‑pre background */
+  blockquote {
+    background-color: #EBE0D6;   /* 50 % lighter than #D7C0AE */
+    color: #967E76;              /* same text colour used in <pre> */
+    border-left-color: #D7C0AE;  /* keep accent consistent */
+  }
   /* Light mode link circles */
   .header a,
   .main-content a {
@@ -392,7 +403,7 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
   blockquote {
     border-left-color: #697565; /* accent border */ 
     color: #ECDFCC;             /* light quote text */ 
-    background-color: #3C3D37;  /* blend with background */ 
+    background-color: #CDBEB7;  /* 50 % lighter than #9A7E6F */
   }
   table {
     border-collapse: collapse;
@@ -498,7 +509,7 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
   blockquote {
     border-left-color: #E8C2CA; /* blockquote border */
     color: #BE5985;
-    background-color: #F7D1CD;  /* blockquote background */
+    background-color: #F6BFD4;  /* 50 % lighter than #EC7FA9 */
   }
   table {
     width: 100%;
