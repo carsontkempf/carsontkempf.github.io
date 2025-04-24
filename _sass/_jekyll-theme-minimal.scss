@@ -24,12 +24,8 @@ h1 {
   background-color: #9BABB8;
 }
 
-/* Match headers to list-item backgrounds */
-.sidebar h2:nth-of-type(odd) {
-  background-color: #B0B1B7;
-}
-.sidebar h2:nth-of-type(even) {
-  background-color: #D3D4DA;
+.sidebar h2 {
+  background: none;
 }
 
 .header {
@@ -171,13 +167,17 @@ a:hover small {
 .sidebar ul li,
 .sidebar ol li {
   list-style: none;
+  padding: 0;
+  margin: 0;
 }
 .sidebar ul li a,
 .sidebar ol li a {
   display: block;
   width: 100%;
-  box-sizing: border-box;
+  margin: 0;
   padding: .4em .8em;
+  box-sizing: border-box;
+  background: none;
 }
 
 .sidebar ol a:hover {
@@ -355,5 +355,14 @@ hr {
         margin: 1.5rem 0;
         border: 0;
         border-top: 1px solid #697565; /* accent separator */ 
+      }
+      .sidebar ul li a,
+      .sidebar ol li a {
+        display: block;
+        width: 100%;
+        margin: 0;
+        padding: .4em .8em;
+        box-sizing: border-box;
+        background: none;
       }
     }
