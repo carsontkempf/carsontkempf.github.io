@@ -262,6 +262,7 @@ header {
 .theme-switch .opt {
   position: relative; 
   top: calc(var(--switch-border) / 2);
+  flex: 0 0 auto;
   width: var(--knob-size); 
   height: var(--knob-size);
   display: flex; 
