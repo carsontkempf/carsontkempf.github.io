@@ -53,6 +53,14 @@ pre {
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
 }
+code {
+  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
+  "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background-clip: padding-box;
+  padding: 15px 0;
+}
 blockquote {
   border-left: 4px solid #e5e5e5;
   margin: 1.25rem 0;
@@ -219,6 +227,7 @@ header {
 // ***********************************************
 .theme-switch {
   position: absolute;
+  display: flex;
   flex-shrink: 0;
   top: 5px;
   left: 50%;
@@ -339,11 +348,6 @@ header {
   code {
     background-color: #D7C0AE;
     color: #967E76;
-    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
-                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-    padding: 2px 4px;
-    border-radius: 3px;
-    background-clip: padding-box;
   }
 }
 [data-theme="dark"] {
@@ -446,11 +450,6 @@ header {
   code {
     background-color: #9A7E6F;
     color: #ECDFCC;
-    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
-                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-    padding: 2px 4px;
-    border-radius: 3px;
-    background-clip: padding-box;
   }
 }
 [data-theme="lr"] {
@@ -551,11 +550,6 @@ header {
   code {
     background-color: #EC7FA9;
     color: #BE5985;
-    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
-                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-    padding: 2px 4px;
-    border-radius: 3px;
-    background-clip: padding-box;
   }
 }
 
