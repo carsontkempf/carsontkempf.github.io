@@ -321,6 +321,8 @@ header {
 
   /* Ensure rounded corners on both sides for pre in light mode */
   pre {
+    position: relative;
+    z-index: 1;
     font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
                  "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
     background-color: #D7C0AE;
@@ -336,6 +338,8 @@ header {
 
   /* Light mode Rouge inline code */
   code.language-plaintext.highlighter-rouge {
+    position: relative;
+    z-index: 1;
     background-color: #D7C0AE;
     color: #967E76;
     border-radius: 5px;
@@ -345,6 +349,8 @@ header {
   /* Light mode Rouge block highlight background */
   .language-plaintext.highlighter-rouge .highlight,
   .language-plaintext.highlighter-rouge pre.highlight {
+    position: relative;
+    z-index: 1;
     background-color: #D7C0AE;
     color: #967E76;
     border-radius: 5px;
@@ -355,6 +361,8 @@ header {
 
   /* Light mode inline code default */
   code {
+    position: relative;
+    z-index: 1;
     background-color: #D7C0AE;
     color: #967E76;
     z-index: 2;
@@ -425,6 +433,8 @@ header {
 
   /* Ensure rounded corners on both sides for pre in dark mode */
   pre {
+    position: relative;
+    z-index: 1;
     font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
                  "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
     background-color: #9A7E6F;
@@ -440,6 +450,8 @@ header {
 
   /* Dark mode Rouge inline code */
   code.language-plaintext.highlighter-rouge {
+    position: relative;
+    z-index: 1;
     background-color: #9A7E6F;
     color: #ECDFCC;
     border-radius: 5px;
@@ -449,6 +461,8 @@ header {
   /* Dark mode Rouge block highlight background */
   .language-plaintext.highlighter-rouge .highlight,
   .language-plaintext.highlighter-rouge pre.highlight {
+    position: relative;
+    z-index: 1;
     background-color: #9A7E6F;
     color: #ECDFCC;
     border-radius: 5px;
@@ -459,6 +473,8 @@ header {
 
   /* Dark mode inline code default */
   code {
+    position: relative;
+    z-index: 1;
     background-color: #9A7E6F;
     color: #ECDFCC;
     z-index: 2;
@@ -527,6 +543,8 @@ header {
 
   /* Ensure rounded corners on both sides for pre in LR mode */
   pre {
+    position: relative;
+    z-index: 1;
     font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
                  "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
     background-color: #EC7FA9;
@@ -542,6 +560,8 @@ header {
 
   /* LR mode Rouge inline code */
   code.language-plaintext.highlighter-rouge {
+    position: relative;
+    z-index: 1;
     background-color: #EC7FA9;
     color: #BE5985;
     border-radius: 5px;
@@ -551,6 +571,8 @@ header {
   /* LR mode Rouge block highlight background */
   .language-plaintext.highlighter-rouge .highlight,
   .language-plaintext.highlighter-rouge pre.highlight {
+    position: relative;
+    z-index: 1;
     background-color: #EC7FA9;
     color: #BE5985;
     border-radius: 5px;
@@ -561,6 +583,8 @@ header {
 
   /* LR mode inline code default */
   code {
+    position: relative;
+    z-index: 1;
     background-color: #EC7FA9;
     color: #BE5985;
     z-index: 2;
