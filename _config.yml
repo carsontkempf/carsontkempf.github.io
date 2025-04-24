@@ -33,5 +33,5 @@ google_analytics:
 sass:
   sass_dir: _sass
 include:
-  - /assets/css/style.scss.liquid
-  - /assets/css/dark.scss.liquid
+  - assets/css/style.scss.liquid
+  - assets/css/dark.scss.liquid
