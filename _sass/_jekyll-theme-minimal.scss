@@ -230,12 +230,12 @@ header {
   --switch-height: 2em;                    /* overall pill height */
   --knob-size: calc(var(--switch-height)); /* knob diameter */
   position: relative;
+  left: 10vw;               /* centers within main document area */
   display: block;                          /* allows horizontal centering */
   margin: 5px auto 0;                     /* 5 px from top & centered */
   width: calc(var(--knob-size) * 3);
   height: var(--switch-height);
   border-radius: 50%;                      /* perfect pill */
-  margin: 0;
   padding: 0;
   box-sizing: border-box;
   outline: 1px solid #000;
