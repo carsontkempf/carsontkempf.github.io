@@ -273,9 +273,6 @@ header {
   transition: left 0.3s ease;
   z-index: 2;
 }
-.theme-switch #ts-light:checked ~ .slider { left: var(--switch-border); }
-.theme-switch #ts-dark:checked  ~ .slider { left: calc(var(--knob-size) + var(--switch-border)); }
-.theme-switch #ts-lr:checked    ~ .slider { left: calc((var(--knob-size) * 2) + var(--switch-border)); }
 .theme-switch .opt {
   position: relative; 
   flex: 0 0 auto;
@@ -295,12 +292,21 @@ header {
    z-index: 4;
   }
 .theme-switch input#ts-light,
-.theme-switch label[for="ts-light"],
-.theme-switch .slider { left: var(--switch-border); }
+.theme-switch label[for="ts-light"] {
+  left: var(--switch-border);
+}
 .theme-switch input#ts-dark,
-.theme-switch label[for="ts-dark"] { left: calc(var(--knob-size) + var(--switch-border)); }
+.theme-switch label[for="ts-dark"] {
+  left: calc(var(--knob-size) + var(--switch-border));
+}
 .theme-switch input#ts-lr,
-.theme-switch label[for="ts-lr"] { left: calc((var(--knob-size) * 2) + var(--switch-border)); }
+.theme-switch label[for="ts-lr"] {
+  left: calc((var(--knob-size) * 2) + var(--switch-border));
+}
+
+.theme-switch #ts-light:checked ~ .slider { left: var(--switch-border); }
+.theme-switch #ts-dark:checked  ~ .slider { left: calc(var(--knob-size) + var(--switch-border)); }
+.theme-switch #ts-lr:checked    ~ .slider { left: calc((var(--knob-size) * 2) + var(--switch-border)); }
 
 // ***********************************************
 // Theme Overrides: Light, Dark, LR
