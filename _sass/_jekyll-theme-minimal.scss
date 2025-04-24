@@ -2,7 +2,6 @@
 @import "rouge-github";
 
 
-
 h2 {
   padding-left: 5px;
 }
@@ -85,7 +84,6 @@ body {
   margin-left: 20vw;
   padding-bottom: 2rem;
   width: auto;
-  text-align: center;
 }
 
 .footer {
@@ -117,6 +115,11 @@ html:not([data-theme]) .header a {
   color: #0000EE;            /* standard blue */
   text-decoration: underline; /* always underlined */
 }
+html:not([data-theme]) .header a {
+  background-color: #E0D1BA;
+  padding: 0.25em 0.5em;
+  border-radius: 50%;
+}
 html:not([data-theme]) .header a:hover,
 html:not([data-theme]) .header a:focus {
   color: #0000EE;
@@ -128,6 +131,11 @@ html:not([data-theme]) .header a:focus {
   color: #5A5A5A;        /* muted gray */
   font-weight: bold;     /* stand out */
   text-decoration: none; /* no underline */
+}
+.main-content a {
+  background-color: #E0D1BA;
+  padding: 0.25em 0.5em;
+  border-radius: 50%;
 }
 .main-content a:hover,
 .main-content a:focus {
@@ -446,6 +454,18 @@ hr {
       a {
         color: #ECDFCC;             /* links contrast on dark background */ 
       }
+      /* Dark mode header links */
+      .header a {
+        background-color: #2D2E29;
+        padding: 0.25em 0.5em;
+        border-radius: 50%;
+      }
+      /* Dark mode main-content links */
+      .main-content a {
+        background-color: #2D2E29;
+        padding: 0.25em 0.5em;
+        border-radius: 50%;
+      }
       a:hover, a:focus {
         color: #697565;             /* accent hover state */ 
       }
@@ -512,6 +532,18 @@ hr {
   a {
     color: #BE5985;            /* links */
   }
+  /* LR mode header links */
+  .header a {
+    background-color: #FFE1F1;
+    padding: 0.25em 0.5em;
+    border-radius: 50%;
+  }
+  /* LR mode main-content links */
+  .main-content a {
+    background-color: #FFE1F1;
+    padding: 0.25em 0.5em;
+    border-radius: 50%;
+  }
   a:hover, a:focus {
     color: #E8C2CA;            /* link hover */
   }
@@ -563,7 +595,7 @@ hr {
   }
 }
 .main-content img {
-  display: block;
+  display: inline-block;
   text-align: center;
   margin: 1rem 0;
   width: 75%;
