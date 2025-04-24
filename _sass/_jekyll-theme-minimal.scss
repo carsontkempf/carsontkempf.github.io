@@ -111,16 +111,6 @@ ol {
   margin: 0 0 1.25rem;
 }
 
-/* Light mode link circles */
-html:not([data-theme]) .header a,
-html:not([data-theme]) .main-content a {
-  background-color: #E6D7B6;     /* slightly darker than #EEE3CB */
-  color: inherit;                /* use standard text color */
-  padding: 0.3em 0.6em;
-  border-radius: 9999px;          /* pill/circle shape */
-  text-decoration: none;
-}
-
 h1, h2, h3 {
   line-height: 2;
 }
@@ -566,28 +556,6 @@ hr {
   color: inherit !important;
 }
 
-html:not([data-theme]) {
-  pre {
-    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
-                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-    background-color: #D7C0AE;
-    color: #967E76;
-    padding: 15px;
-    border-radius: 10px;
-    background-clip: padding-box;
-    overflow-x: auto;
-    display: block;
-    width: 100%;
-  }
-}
-
-/* Light mode Rouge inline code */
-code.language-plaintext.highlighter-rouge {
-  background-color: #D7C0AE;
-  color: #967E76;
-  border-radius: 5px;
-  padding: 2px 4px;
-}
 
 /* Light mode Rouge block highlight background */
 .language-plaintext.highlighter-rouge .highlight,
@@ -600,20 +568,68 @@ code.language-plaintext.highlighter-rouge {
   background-clip: padding-box;
 }
 
-code {
-  background-color: #D7C0AE;
-  color: #967E76;
-  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
-               "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-  padding: 2px 4px;
-  border-radius: 3px;
-  background-clip: padding-box;
+
+/* Light mode overrides */
+[data-theme="light"] {
+  /* Light mode link circles */
+  .header a,
+  .main-content a {
+    background-color: #E6D7B6;
+    color: inherit;
+    padding: 0.3em 0.6em;
+    border-radius: 9999px;
+    text-decoration: none;
+  }
+
+  /* Ensure rounded corners on both sides for pre in light mode */
+  pre {
+    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
+                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+    background-color: #D7C0AE;
+    color: #967E76;
+    padding: 15px;
+    border-radius: 10px;
+    background-clip: padding-box;
+    overflow-x: auto;
+    display: block;
+    width: 100%;
+  }
+
+  /* Light mode Rouge inline code */
+  code.language-plaintext.highlighter-rouge {
+    background-color: #D7C0AE;
+    color: #967E76;
+    border-radius: 5px;
+    padding: 2px 4px;
+  }
+
+  /* Light mode Rouge block highlight background */
+  .language-plaintext.highlighter-rouge .highlight,
+  .language-plaintext.highlighter-rouge pre.highlight {
+    background-color: #D7C0AE;
+    color: #967E76;
+    border-radius: 5px;
+    padding: 0.5em;
+    overflow-x: auto;
+    background-clip: padding-box;
+  }
+
+  /* Light mode inline code default */
+  code {
+    background-color: #D7C0AE;
+    color: #967E76;
+    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
+                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background-clip: padding-box;
+  }
 }
 
 /* theme-switch refinements */
 .theme-switch {
   position: fixed;
-  top: 0;
+  top: 5px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10000;
@@ -655,7 +671,7 @@ body > .theme-switch {
 /* Slider knob */
 .theme-switch .slider {
   position: absolute;
-  top: var(--switch-border);
+  top: calc(var(--switch-border) / 2);
   left: var(--switch-border);
   width: var(--knob-size);
   height: var(--knob-size);
@@ -673,7 +689,7 @@ body > .theme-switch {
 /* Label areas */
 .theme-switch .opt {
   position: absolute;
-  top: var(--switch-border);
+  top: calc(var(--switch-border) / 2);
   width: var(--knob-size);
   height: var(--knob-size);
   display: flex;

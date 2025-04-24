@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-US" data-theme="{{ localStorage.theme | default: '' }}">
+<html lang="en-US" data-theme="{{ localStorage.theme | default: 'light' }}">
   <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -31,46 +31,36 @@
       <label for="ts-lr"    class="opt"></label>
     </div>
     <script>
-      // On load: set the correct radio and theme
       document.addEventListener('DOMContentLoaded', function() {
         var saved = localStorage.getItem('theme') || 'light';
         var radio = document.getElementById('ts-' + saved);
         if (radio) radio.checked = true;
+        document.documentElement.setAttribute('data-theme', saved);
       });
-      // Listen for changes
       document.querySelectorAll('.theme-switch input').forEach(function(input) {
         input.addEventListener('change', function() {
           var mode = this.value;
-          if (mode === 'light') {
-            document.documentElement.removeAttribute('data-theme');
-          } else {
-            document.documentElement.setAttribute('data-theme', mode);
-          }
+          document.documentElement.setAttribute('data-theme', mode);
           localStorage.setItem('theme', mode);
         });
       });
     </script>
     <div class="wrapper">
-
       <!-- Header Section -->
       <aside class="header">
         {% include head-custom.html %}
       </aside>
-
       <aside class="sidebar">
         {% include sidebar.html %}
       </aside>
-
       <!-- Body Section -->
       <section class="main-content">
         {{ content }}
       </section>
-
       <!-- Footer Section -->
       <section class="footer">
         {% include footer.html %}
       </section>
-
     </div>
     <script src="{{ site.baseurl }}/assets/js/scale.fix.js"></script>
   </body>
