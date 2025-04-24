@@ -85,6 +85,7 @@ body {
   margin-left: 20vw;
   padding-bottom: 2rem;
   width: auto;
+  text-align: center;
 }
 
 .footer {
@@ -205,11 +206,14 @@ a:hover small {
   box-sizing: border-box;
   background: none;
   color: #000;
+  text-decoration: none;
 }
 
 .sidebar li a:hover {
   background-color: rgba(0,0,0,0.1);
+  text-decoration: none;
 }
+
 
 .sidebar ol a:hover {
   background: #f9dd94;
@@ -560,10 +564,10 @@ hr {
     padding: 2px 4px;
   }
 }
-/* Ensure markdown images are half-width and centered */
 .main-content img {
-  display: block;
-  margin: 1rem auto;
+  display: inline-block;
+  text-align: center;
+  margin: 1rem 0;
   width: 75%;
   height: auto;
 }
