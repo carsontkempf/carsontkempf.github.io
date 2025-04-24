@@ -215,6 +215,7 @@ blockquote {
 }
 
 code {
+  background: none;
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
                "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
   padding: 2px 4px;
@@ -378,10 +379,10 @@ hr {
         color: #ECDFCC;          /* high-contrast text */ 
       }
       .sidebar {
-        background-color: #697565; /* very dark sidebar */ 
+        background-color: #9A7E6F; /* swapped to code bg */
       }
       .header, .footer {
-        background-color: #697565;
+        background-color: #9A7E6F; /* swapped to code bg */
         color: #ECDFCC;
       }
       h1, h2, h3, h4, h5, h6 {
@@ -399,13 +400,15 @@ hr {
         background-color: #3C3D37;  /* blend with background */ 
       }
       pre {
-        background-color: #9A7E6F;
+        background-color: #697565;  /* sidebar bg */
         color: #ECDFCC;
         border-radius: 10px;
-        background-clip: padding-box;
         overflow-x: auto;
         display: block;
         width: 100%;
+      }
+      code {
+        background: none;
       }
       table {
         border-collapse: collapse;
