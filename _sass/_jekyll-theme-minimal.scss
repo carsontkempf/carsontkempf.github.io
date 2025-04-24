@@ -85,7 +85,6 @@ body {
   margin-left: 20vw;
   padding-bottom: 2rem;
   width: auto;
-  text-align: center;
 }
 
 .footer {
@@ -349,6 +348,10 @@ hr {
   }
 }
 
+body > .theme-switch {
+  position: fixed !important;
+  display: flex !important;
+}
 
 /* Pill toggle container */
 .theme-switch {
