@@ -101,7 +101,8 @@ thead th {
   border: 2px solid #000;
 }
 hr {
-  margin: 1.5rem 0;
+  /* 15 px space above & below every markdown ‘---’ separator */
+  margin: 15px 0;
   border: 0;
   border-top: 1px solid #e5e5e5;
 }
@@ -325,6 +326,10 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
 // Theme Overrides: Light, Dark, LR
 // ***********************************************
  [data-theme="light"] {
+  /* Darker line separator in light mode */
+  hr {
+    border-top: 1px solid #888;   /* darker than global #e5e5e5 */
+  }
   /* Light‑mode blockquote gets lighter‑than‑pre background */
   blockquote {
     background-color: #EBE0D6;   /* 50 % lighter than #D7C0AE */
