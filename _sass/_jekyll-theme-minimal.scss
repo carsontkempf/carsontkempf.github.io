@@ -293,7 +293,7 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
 /* Sliding knob */
 .theme-switch .slider {
   position: absolute;
-  bottom: 1px;
+  bottom: 0px;
   left: 0;
   width: var(--knob-size);
   height: var(--knob-size);
