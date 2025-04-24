@@ -355,6 +355,7 @@ body > .theme-switch {
 
 /* Pill toggle container */
 .theme-switch {
+  left: 50%;
   display: flex;
   width: 12em;
   --switch-height: 2em;
