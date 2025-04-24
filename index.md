@@ -43,13 +43,13 @@ title: Hello! Happy you Made it!
 * App Development Frameworks
 
 > Django         -> Build python applications
-> * Cloud Services
+>   Cloud Services
 > 
 > AWS            -> Deploy your applications for others to see
-> * Deployment Tools
+>   Deployment Tools
 > 
 > CI/CD          -> Organized and automatic deployment operations
-> * Automation
+>   Automation
 > 
 > Bash Scripts   -> Fun automation scripts to make your life easier
 > 
@@ -63,8 +63,8 @@ title: Hello! Happy you Made it!
 > LLMs
 > 
 > AI
-> * Philosophy
-> * My Philosophies
+>   Philosophy
+>   My Philosophies
 > 
 > Staying Organized
 > 
