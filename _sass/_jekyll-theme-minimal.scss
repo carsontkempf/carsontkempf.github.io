@@ -317,8 +317,6 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
 
   /* Ensure rounded corners on both sides for pre in light mode */
   pre {
-    position: relative;
-    z-index: 1;
     font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
                  "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
     background-color: #D7C0AE;
@@ -345,8 +343,6 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
   /* Light mode Rouge block highlight background */
   .language-plaintext.highlighter-rouge .highlight,
   .language-plaintext.highlighter-rouge pre.highlight {
-    position: relative;
-    z-index: 1;
     background-color: #D7C0AE;
     color: #967E76;
     border-radius: 5px;
@@ -429,8 +425,6 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
 
   /* Ensure rounded corners on both sides for pre in dark mode */
   pre {
-    position: relative;
-    z-index: 1;
     font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
                  "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
     background-color: #9A7E6F;
@@ -457,8 +451,6 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
   /* Dark mode Rouge block highlight background */
   .language-plaintext.highlighter-rouge .highlight,
   .language-plaintext.highlighter-rouge pre.highlight {
-    position: relative;
-    z-index: 1;
     background-color: #9A7E6F;
     color: #ECDFCC;
     border-radius: 5px;
@@ -539,8 +531,6 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
 
   /* Ensure rounded corners on both sides for pre in LR mode */
   pre {
-    position: relative;
-    z-index: 1;
     font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
                  "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
     background-color: #EC7FA9;
@@ -567,8 +557,6 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
   /* LR mode Rouge block highlight background */
   .language-plaintext.highlighter-rouge .highlight,
   .language-plaintext.highlighter-rouge pre.highlight {
-    position: relative;
-    z-index: 1;
     background-color: #EC7FA9;
     color: #BE5985;
     border-radius: 5px;
