@@ -365,7 +365,9 @@ hr {
 /* Pill toggle container */
 .theme-switch {
   position: static; /* return to normal document flow */
-  margin: 1rem auto 0; /* center above header with spacing */
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 12em;
   --switch-height: 2em;
   height: var(--switch-height);
