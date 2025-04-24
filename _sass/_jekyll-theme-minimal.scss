@@ -237,7 +237,7 @@ header {
   --switch-height: 2em;                              /* outer height incl. border */
   --border-width: 3px;                               /* stroke thickness */
   --knob-gap: 0px;                           /* cushion so knob clears curved border */
-  --knob-offset: 1px;                       /* lifts knob & hovers upward */
+  --knob-offset: 2px;                       /* lifts knob & hovers upward */
   --knob-size: calc(var(--switch-height) - (var(--border-width) + var(--knob-gap)) * 2);
 
   position: relative;
