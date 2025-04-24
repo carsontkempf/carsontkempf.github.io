@@ -236,16 +236,15 @@ header {
   --switch-height: 2em;                    /* overall pill height */
   --knob-size: calc(var(--switch-height)); /* knob diameter */
   position: relative;
-  top: 3px;
   left: 7vw;               /* centers within main document area */
   display: block;                          /* allows horizontal centering */
-  margin: 1px auto 0;                     /* 5 px from top & centered */
+  margin: 0 auto 0;                     /* 5 px from top & centered */
   width: calc(var(--knob-size) * 3);
   height: var(--switch-height);
   border-radius: calc(var(--knob-size) / 2);
   padding: 0;
   box-sizing: border-box;
-  border: 1px solid #000;
+  border: 2px solid #000;
 }
 
 /* Adopt the same box model for all descendants */
