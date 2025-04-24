@@ -355,18 +355,13 @@ body > .theme-switch {
 
 /* Pill toggle container */
 .theme-switch {
-  position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  left: 50%;
+  display: flex;
   width: 12em;
   --switch-height: 2em;
   height: var(--switch-height);
+  margin: 1rem auto;
   border: 2px solid #999;
   box-shadow: 0 0 0 1px #999;
-  border-radius: calc(var(--switch-height) / 2);
-  margin: 0 auto 1rem;
   border-radius: calc(var(--switch-height) / 2);
 }
 /* Hidden radios each cover one third */
@@ -578,4 +573,13 @@ body > .theme-switch {
   margin: 1rem 0;
   width: 75%;
   height: auto;
+}
+
+/* Remove link circles for header h1 links */
+.header h1 a {
+  background: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  text-decoration: none !important;
+  color: inherit !important;
 }
