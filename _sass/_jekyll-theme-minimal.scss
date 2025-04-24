@@ -221,7 +221,7 @@ header {
 // Theme Switcher Component
 // ***********************************************
 .theme-switch {
-  position: fixed;
+  position: relative;
   top: 5px;
   left: 50%;
   transform: translateX(-50%);
@@ -249,6 +249,7 @@ header {
 }
 .theme-switch .slider {
   position: relative;
+  flex: 0 0 auto;
   top: calc(var(--switch-border) / 2);
   left: var(--switch-border);
   width: var(--knob-size);
