@@ -236,7 +236,8 @@ header {
   /* Geometry */
   --switch-height: 2em;                              /* outer height incl. border */
   --border-width: 3px;                               /* stroke thickness */
-  --knob-gap: 2px;                           /* cushion so knob clears curved border */
+  --knob-gap: 0px;                           /* cushion so knob clears curved border */
+  --knob-offset: 1px;                       /* lifts knob & hovers upward */
   --knob-size: calc(var(--switch-height) - (var(--border-width) + var(--knob-gap)) * 2);
 
   position: relative;
@@ -262,7 +263,7 @@ header {
 /* Invisible radio inputs—one per segment */
 .theme-switch input {
   position: absolute;
-  top: calc(var(--border-width) + var(--knob-gap));
+  top: calc(var(--border-width) + var(--knob-gap) - var(--knob-offset));
   width: var(--knob-size);
   height: var(--knob-size);
   opacity: 0;
@@ -277,7 +278,7 @@ header {
 /* Hover indicator circles */
 .theme-switch .opt {
   position: absolute;
-  top: calc(var(--border-width) + var(--knob-gap));
+  top: calc(var(--border-width) + var(--knob-gap) - var(--knob-offset));
   width: var(--knob-size);
   height: var(--knob-size);
   border-radius: 50%;
@@ -297,7 +298,7 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
 /* Sliding knob */
 .theme-switch .slider {
   position: absolute;
-  top: calc(var(--border-width) + var(--knob-gap));
+  top: calc(var(--border-width) + var(--knob-gap) - var(--knob-offset));
   left: calc(var(--border-width) + var(--knob-gap));
   width: var(--knob-size);
   height: var(--knob-size);
