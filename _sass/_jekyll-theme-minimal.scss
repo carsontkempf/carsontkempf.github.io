@@ -239,8 +239,9 @@ header {
 }
 .theme-switch input {
   position: relative;
-  width: var(--knob-size);
   height: var(--knob-size);
+  left: var(--switch-border);
+  right: var(--switch-border);
   margin: 0; padding: 0;
   opacity: 0; cursor: pointer; z-index: 2;
 }
@@ -263,8 +264,9 @@ header {
   position: relative; 
   top: calc(var(--switch-border) / 2);
   flex: 0 0 auto;
-  width: var(--knob-size); 
   height: var(--knob-size);
+  left: var(--switch-border);
+  right: var(--switch-border);
   display: flex; 
   align-items: center; 
   justify-content: center;
