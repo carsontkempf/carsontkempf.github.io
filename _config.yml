@@ -30,6 +30,7 @@ author: Carson Kempf
 show_downloads: false
 google_analytics:
 theme: jekyll-theme-minimal
+theme: jekyll-theme-dark
 sass:
   sass_dir: _sass
 #include:
