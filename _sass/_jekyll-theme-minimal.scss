@@ -366,3 +366,55 @@ hr {
         background: none;
       }
     }
+
+    .theme-switch {
+      position: fixed;
+      top: 10px; left: 50%;
+      transform: translateX(-50%);
+      width: 12em; height: 2em;
+      background: #ccc;
+      border-radius: 1em;           /* half of height for pill shape */  /*  [oai_citation:10‡Treehouse Blog](https://blog.teamtreehouse.com/css-toggle-switch?utm_source=chatgpt.com) †  [oai_citation:11‡W3Schools.com](https://www.w3schools.com/howto/howto_css_switch.asp?utm_source=chatgpt.com) */
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    .theme-switch input {
+      position: absolute;           /* keep radios out of sight */
+      opacity: 0; width: 0; height: 0;
+    }
+    .theme-switch .slider {
+      position: absolute;
+      top: 0.1em; left: 0.1em;
+      width: 1.8em; height: 1.8em; /* knob diameter */
+      background: #fff;
+      border-radius: 50%;           /* circle */                   /*  [oai_citation:12‡Treehouse Blog](https://blog.teamtreehouse.com/css-toggle-switch?utm_source=chatgpt.com) */
+      transition: transform 0.3s ease;
+      z-index: 1;
+    }
+    /* move knob based on checked state */
+    #ts-dark:checked  ~ .slider { transform: translateX(4em); }  /* 1/3 of 12em */ /*  [oai_citation:13‡DEV Community](https://dev.to/jimajs/how-to-create-a-three-state-toggle-switch-using-html-css-and-javascript-2e68?utm_source=chatgpt.com) */
+    #ts-lr:checked    ~ .slider { transform: translateX(8em); }  /* 2/3 of 12em */ /*  [oai_citation:14‡DEV Community](https://dev.to/jimajs/how-to-create-a-three-state-toggle-switch-using-html-css-and-javascript-2e68?utm_source=chatgpt.com) */
+    
+    /* labels fill each third, clickable area */
+    .theme-switch .opt {
+      flex: 1;
+      text-align: center;
+      z-index: 2;
+      cursor: pointer;                /* indicate clickability */ /*  [oai_citation:15‡DEV Community](https://dev.to/navdeepm20/3-state-switches-are-not-tough-ultimate-guide-to-css-switches-using-css-only-1gja?utm_source=chatgpt.com) */
+      user-select: none;
+      font-size: 0;                   /* hide text if undesired */
+    }
+
+/* LR (light-right) mode overrides */
+[data-theme="light-right"] {
+  /* move sidebar to the right */
+  .sidebar {
+    left: auto;
+    right: 0;
+  }
+  /* adjust main content and footer/header margins */
+  .main-content, .footer, .header {
+    margin-left: 0;
+    margin-right: 20vw;
+  }
+}
