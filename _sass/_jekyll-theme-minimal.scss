@@ -366,8 +366,9 @@ hr {
   top: 0;
   left: 50%;
   margin: 1rem auto;             /* top spacing + center */
-  width: 12em;
+  --switch-width: 12em;
   --switch-height: 2em;
+  width: var(--switch-width);
   height: var(--switch-height);
   border: 2px solid #999;
   border-radius: calc(var(--switch-height) / 2);
@@ -386,8 +387,8 @@ body > .theme-switch {
 .theme-switch input {
   position: relative;
   top: 0;
-  height: 100%;
-  width: calc(100% / 3);
+  height: var(--switch-height);
+  width: calc(var(--switch-width) / 3);
   margin: 0;
   padding: 0;
   opacity: 0;
@@ -422,16 +423,14 @@ body > .theme-switch {
 }
 /* Label areas */
 .theme-switch .opt {
-  position: relative;
+  position: absolute;
   top: 0;
-  width: calc(100% / 3);
+  width: var(--switch-height);
   height: var(--switch-height);
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 3;            /* above inputs and slider */
-  pointer-events: auto;  /* allow hover & click on label */
-  transition: background-color 0.2s ease;
+  pointer-events: auto;
 }
 .theme-switch .opt:hover {
   background-color: rgba(0, 0, 0, 0.1);
@@ -440,8 +439,8 @@ body > .theme-switch {
   background-color: rgba(0, 0, 0, 0.2);
 }
 .theme-switch label[for="ts-light"] { left: 0; }
-.theme-switch label[for="ts-dark"]  { left: calc(100% / 3); }
-.theme-switch label[for="ts-lr"]    { left: calc((100% / 3) * 2); }
+.theme-switch label[for="ts-dark"]  { left: calc((var(--switch-width) / 3) - (var(--switch-height) / 2)); }
+.theme-switch label[for="ts-lr"]    { left: calc((var(--switch-width) * 2 / 3) - (var(--switch-height) / 2)); }
 
 /* Dark mode overrides */
 [data-theme="dark"] {
@@ -472,7 +471,7 @@ body > .theme-switch {
       }
       code, pre {
         background-color: #9A7E6F;
-        color: #9A7E6F;
+        color: #ECDFCC;
         border-radius: 5px;
         background-clip: padding-box;
       }
@@ -506,7 +505,7 @@ body > .theme-switch {
       /* Dark mode Rouge inline code */
       code.language-plaintext.highlighter-rouge {
         background-color: #9A7E6F;
-        color: #9A7E6F;
+        color: #ECDFCC;
         border-radius: 5px;
         padding: 2px 4px;
       }
