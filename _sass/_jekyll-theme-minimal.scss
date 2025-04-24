@@ -22,6 +22,7 @@ h1 {
   flex-direction: column;
   bottom: 0;
   background-color: #9BABB8;
+  padding: 0;
 }
 
 .sidebar h2 {
@@ -163,6 +164,7 @@ a:hover small {
 .sidebar ol {
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 .sidebar ul li,
 .sidebar ol li {
@@ -173,11 +175,16 @@ a:hover small {
 .sidebar ul li a,
 .sidebar ol li a {
   display: block;
-  width: 100%;
+  width: 100% !important;
   margin: 0;
-  padding: .4em .8em;
+  padding: .5em 1em;
   box-sizing: border-box;
   background: none;
+}
+
+.sidebar ul li a:hover,
+.sidebar ol li a:hover {
+  background-color: rgba(0,0,0,0.1);
 }
 
 .sidebar ol a:hover {
