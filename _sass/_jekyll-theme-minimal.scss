@@ -183,6 +183,7 @@ a:hover small {
   padding: .5em 1em;
   box-sizing: border-box;
   background: none;
+  color: #000;
 }
 
 .sidebar li a:hover {
@@ -325,7 +326,6 @@ hr {
 
 
 /* Pill toggle container */
-/* Pill toggle container */
 .theme-switch {
   position: fixed;
   top: 10px; left: 50%;
@@ -334,6 +334,8 @@ hr {
   --switch-height: 2em;
   height: var(--switch-height);
   /* width remains 100% of container */
+  border: 2px solid #999;         /* add visible outline */
+  box-shadow: 0 0 0 1px #999;     /* subtle inner outline */
 }
 /* Hidden radios each cover one third */
 .theme-switch input {
@@ -395,7 +397,7 @@ hr {
         background-color: #697565; /* swapped to code bg */
       }
       .header, .footer {
-        background-color: #9A7E6F; /* swapped to code bg */
+        background-color: #697565; /* swapped to code bg */
         color: #ECDFCC;
       }
       h1, h2, h3, h4, h5, h6 {
@@ -449,6 +451,7 @@ hr {
         padding: .5em 1em;
         box-sizing: border-box;
         background: none;
+        color: #000;
       }
     }
 
@@ -508,6 +511,7 @@ hr {
     padding: .5em 1em;
     box-sizing: border-box;
     background: none;
+    color: #000;
   }
 }
 /* Ensure markdown images are half-width and centered */
