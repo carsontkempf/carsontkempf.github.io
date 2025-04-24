@@ -374,6 +374,7 @@ hr {
   border: 2px solid #999;
   box-shadow: 0 0 0 1px #999;
   border-radius: calc(var(--switch-height) / 2);
+  z-index: 10000;
 }
 /* Hidden radios each cover one third */
 .theme-switch input {
