@@ -217,7 +217,8 @@ blockquote {
 }
 
 code {
-  background: none;
+  background-color: #D7C0AE;
+  color: #967E76;
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
                "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
   padding: 2px 4px;
@@ -243,6 +244,14 @@ pre {
   border-bottom-left-radius: 10px;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
+}
+
+/* Light mode Rouge inline code */
+code.language-plaintext.highlighter-rouge {
+  background-color: #D7C0AE;
+  color: #967E76;
+  border-radius: 5px;
+  padding: 2px 4px;
 }
 
 table {
@@ -452,6 +461,13 @@ hr {
         box-sizing: border-box;
         background: none;
         color: #000;
+      }
+      /* Dark mode Rouge inline code */
+      code.language-plaintext.highlighter-rouge {
+        background-color: #9A7E6F;
+        color: #ECDFCC;
+        border-radius: 5px;
+        padding: 2px 4px;
       }
     }
 
