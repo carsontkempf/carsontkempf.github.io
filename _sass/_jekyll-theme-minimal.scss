@@ -313,7 +313,8 @@ hr {
   }
 }
 
-/* 3-position pill toggle styles */
+
+/* Pill toggle container */
 .theme-switch {
   position: fixed;
   top: 10px; left: 50%;
@@ -321,19 +322,21 @@ hr {
   width: 12em; height: 2em;
   background: #ccc;
   border-radius: 1em;
-  display: flex;
-  align-items: center;
   overflow: hidden;
   z-index: 1000;
 }
+/* Hidden radios each cover one third */
 .theme-switch input {
   position: absolute;
+  top: 0; height: 100%;
+  width: 33.3333%;
   opacity: 0;
-  width: 100%; height: 100%;
-  margin: 0;
   cursor: pointer;
-  z-index: 2;
 }
+.theme-switch #ts-light { left: 0; }
+.theme-switch #ts-dark  { left: 33.3333%; }
+.theme-switch #ts-lr    { left: 66.6667%; }
+/* Slider knob */
 .theme-switch .slider {
   position: absolute;
   top: 2px; left: 2px;
@@ -344,16 +347,23 @@ hr {
   transition: transform 0.3s ease;
   z-index: 1;
 }
+/* Move knob on check */
+.theme-switch #ts-light:checked ~ .slider { transform: translateX(0); }
+.theme-switch #ts-dark:checked  ~ .slider { transform: translateX(33.3333%); }
+.theme-switch #ts-lr:checked    ~ .slider { transform: translateX(66.6667%); }
+/* Label areas */
 .theme-switch .opt {
-  flex: 1;
+  position: absolute;
+  top: 0; height: 100%;
+  width: 33.3333%;
   text-align: center;
   line-height: 2em;
+  z-index: 2;
   pointer-events: none;
-  z-index: 3;
 }
-.theme-switch #ts-light:checked  ~ .slider { transform: translateX(0); }
-.theme-switch #ts-dark:checked   ~ .slider { transform: translateX(33.3333%); }
-.theme-switch #ts-lr:checked     ~ .slider { transform: translateX(66.6667%); }
+.theme-switch label[for="ts-light"] { left: 0; }
+.theme-switch label[for="ts-dark"]  { left: 33.3333%; }
+.theme-switch label[for="ts-lr"]    { left: 66.6667%; }
 
 /* Dark mode overrides */
 [data-theme="dark"] {
@@ -471,14 +481,5 @@ hr {
     padding: .4em .8em;
     box-sizing: border-box;
     background: none;
-  }
-  /* move sidebar to the right */
-  .sidebar {
-    left: auto;
-    right: 0;
-  }
-  .main-content, .footer, .header {
-    margin-left: 0;
-    margin-right: 20vw;
   }
 }
