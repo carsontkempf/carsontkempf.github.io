@@ -366,18 +366,16 @@ hr {
 /* Pill toggle container */
 .theme-switch {
   position: fixed;
-  top: 10px;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-  left: 50%;
   width: 12em;
   --switch-height: 2em;
   height: var(--switch-height);
   border: 2px solid #999;
   box-shadow: 0 0 0 1px #999;
   border-radius: calc(var(--switch-height) / 2);
-  margin: 0 auto 1rem;
-  border-radius: calc(var(--switch-height) / 2);
+  z-index: 10000;
 }
 /* Hidden radios each cover one third */
 .theme-switch input {
@@ -565,7 +563,7 @@ hr {
   }
 }
 .main-content img {
-  display: inline-block;
+  display: block;
   text-align: center;
   margin: 1rem 0;
   width: 75%;
