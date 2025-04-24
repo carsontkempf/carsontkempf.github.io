@@ -237,18 +237,7 @@ code {
   background-clip: padding-box;
 }
 
-pre {
-  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
-               "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-  background-color: #D7C0AE;
-  color: #967E76;
-  padding: 15px;
-  border-radius: 10px;
-  background-clip: padding-box;
-  overflow-x: auto;
-  display: block;
-  width: 100%;
-}
+
 
 /* Ensure rounded corners on both sides for pre in light mode */
 pre {
@@ -366,8 +355,8 @@ hr {
   top: 0;
   left: 50%;
   margin: 1rem auto;             /* top spacing + center */
-  --switch-width: 12em;
   --switch-height: 2em;
+  --switch-width: calc(var(--switch-height) * 3);
   width: var(--switch-width);
   height: var(--switch-height);
   border: 2px solid #999;
@@ -423,24 +412,24 @@ body > .theme-switch {
 }
 /* Label areas */
 .theme-switch .opt {
-  position: absolute;
+  position: relative;
   top: 0;
   width: var(--switch-height);
   height: var(--switch-height);
-  border-radius: 50%;
   display: flex;
   align-items: center;
-  pointer-events: auto;
+  justify-content: center;
+  z-index: 3;            /* above inputs and slider */
+  pointer-events: auto;  /* allow hover & click on label */
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
 }
 .theme-switch .opt:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-.theme-switch .opt:active {
   background-color: rgba(0, 0, 0, 0.2);
 }
 .theme-switch label[for="ts-light"] { left: 0; }
-.theme-switch label[for="ts-dark"]  { left: calc((var(--switch-width) / 3) - (var(--switch-height) / 2)); }
-.theme-switch label[for="ts-lr"]    { left: calc((var(--switch-width) * 2 / 3) - (var(--switch-height) / 2)); }
+.theme-switch label[for="ts-dark"]  { left: calc(var(--switch-width) / 3 - var(--switch-height) / 2); }
+.theme-switch label[for="ts-lr"]    { left: calc(var(--switch-width) * 2 / 3 - var(--switch-height) / 2); }
 
 /* Dark mode overrides */
 [data-theme="dark"] {
@@ -470,8 +459,8 @@ body > .theme-switch {
         background-color: #3C3D37;  /* blend with background */ 
       }
       code, pre {
-        background-color: #9A7E6F !important;
-        color: #ECDFCC !important;
+        background-color: #9A7E6F;
+        color: #9A7E6F;
         border-radius: 5px;
         background-clip: padding-box;
       }
@@ -545,8 +534,8 @@ body > .theme-switch {
     background-color: #F7D1CD;  /* blockquote background */
   }
   code, pre {
-    background-color: #EC7FA9 !important;  /* code block background */
-    color: #BE5985 !important;
+    background-color: #EC7FA9;  /* code block background */
+    color: #BE5985;
     border-radius: 5px;
     background-clip: padding-box;
   }
@@ -610,4 +599,17 @@ body > .theme-switch {
   border-radius: 0 !important;
   text-decoration: none !important;
   color: inherit !important;
+}
+
+pre {
+  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
+               "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+  background-color: #D7C0AE;
+  color: #967E76;
+  padding: 15px;
+  border-radius: 10px;
+  background-clip: padding-box;
+  overflow-x: auto;
+  display: block;
+  width: 100%;
 }
