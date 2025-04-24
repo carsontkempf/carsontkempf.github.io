@@ -227,18 +227,6 @@ blockquote {
   color: #555;
 }
 
-code {
-  background-color: #D7C0AE;
-  color: #967E76;
-  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
-               "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-  padding: 2px 4px;
-  border-radius: 3px;
-  background-clip: padding-box;
-}
-
-
-
 /* Ensure rounded corners on both sides for pre in light mode */
 pre {
   border-top-left-radius: 10px;
@@ -247,24 +235,6 @@ pre {
   border-bottom-right-radius: 10px;
 }
 
-/* Light mode Rouge inline code */
-code.language-plaintext.highlighter-rouge {
-  background-color: #D7C0AE;
-  color: #967E76;
-  border-radius: 5px;
-  padding: 2px 4px;
-}
-
-/* Light mode Rouge block highlight background */
-.language-plaintext.highlighter-rouge .highlight,
-.language-plaintext.highlighter-rouge pre.highlight {
-  background-color: #D7C0AE;    /* match light mode pre/code background */
-  color: #967E76;               /* match light mode text color */
-  border-radius: 5px;
-  padding: 0.5em;
-  overflow-x: auto;
-  background-clip: padding-box;
-}
 
 table {
   width: 100%;
@@ -607,6 +577,35 @@ pre {
   overflow-x: auto;
   display: block;
   width: 100%;
+}
+
+/* Light mode Rouge inline code */
+code.language-plaintext.highlighter-rouge {
+  background-color: #D7C0AE;
+  color: #967E76;
+  border-radius: 5px;
+  padding: 2px 4px;
+}
+
+/* Light mode Rouge block highlight background */
+.language-plaintext.highlighter-rouge .highlight,
+.language-plaintext.highlighter-rouge pre.highlight {
+  background-color: #D7C0AE;    /* match light mode pre/code background */
+  color: #967E76;               /* match light mode text color */
+  border-radius: 5px;
+  padding: 0.5em;
+  overflow-x: auto;
+  background-clip: padding-box;
+}
+
+code {
+  background-color: #D7C0AE;
+  color: #967E76;
+  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
+               "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background-clip: padding-box;
 }
 
 /* theme-switch refinements */
