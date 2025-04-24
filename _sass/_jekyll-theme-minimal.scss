@@ -236,6 +236,7 @@ header {
   --switch-height: 2em;                    /* overall pill height */
   --knob-size: calc(var(--switch-height)); /* knob diameter */
   position: relative;
+  top: 3px;
   left: 7vw;               /* centers within main document area */
   display: block;                          /* allows horizontal centering */
   margin: 1px auto 0;                     /* 5 px from top & centered */
@@ -292,7 +293,7 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
 /* Sliding knob */
 .theme-switch .slider {
   position: absolute;
-  top: 0;
+  bottom: 1px;
   left: 0;
   width: var(--knob-size);
   height: var(--knob-size);
