@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% seo %}
     <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
+    <link href="https://cdn.jsdelivr.net/css-toggle-switch/latest/toggle-switch.css" rel="stylesheet" />
     <!--[if lt IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
@@ -15,20 +16,34 @@
     </script>
   </head>
   <body>
-    <div id="theme-toggle" style="position:fixed; top:10px; left:50%; transform:translateX(-50%); z-index:1000;">
-      <button id="light-mode">Light</button>
-      <button id="dark-mode">Dark</button>
+    <div class="switch-toggle switch-3 switch-candy" style="position:fixed; top:10px; left:50%; transform:translateX(-50%); z-index:1000;">
+      <input id="light" name="theme-toggle" type="radio" checked />
+      <label for="light">Light</label>
+
+      <input id="dark" name="theme-toggle" type="radio" />
+      <label for="dark">Dark</label>
+
+      <input id="lr" name="theme-toggle" type="radio" />
+      <label for="lr">LR</label>
+
+      <a></a>
     </div>
     <script>
       const setTheme = theme => {
-        if (theme==='dark') document.documentElement.setAttribute('data-theme','dark');
+        if (theme === 'dark') document.documentElement.setAttribute('data-theme','dark');
+        else if (theme === 'lr') document.documentElement.setAttribute('data-theme','light-right');
         else document.documentElement.removeAttribute('data-theme');
         localStorage.theme = theme;
       };
-      document.getElementById('light-mode')
-        .addEventListener('click', () => setTheme('light'));
-      document.getElementById('dark-mode')
-        .addEventListener('click', () => setTheme('dark'));
+      document.getElementById('light').addEventListener('change', () => setTheme('light'));
+      document.getElementById('dark').addEventListener('change', () => setTheme('dark'));
+      document.getElementById('lr').addEventListener('change', () => setTheme('lr'));
+      // On load
+      const saved = localStorage.theme;
+      if (saved) {
+        document.getElementById(saved)?.checked = true;
+        setTheme(saved);
+      }
     </script>
     <div class="wrapper">
 
