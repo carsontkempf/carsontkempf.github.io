@@ -344,13 +344,13 @@ hr {
   height: calc(100% - 4px);
   background: #fff;
   border-radius: 50%;
-  transition: transform 0.3s ease;
+  transition: left 0.3s ease;
   z-index: 1;
 }
 /* Move knob on check */
-.theme-switch #ts-light:checked ~ .slider { transform: translateX(0); }
-.theme-switch #ts-dark:checked  ~ .slider { transform: translateX(33.3333%); }
-.theme-switch #ts-lr:checked    ~ .slider { transform: translateX(66.6667%); }
+.theme-switch #ts-light:checked ~ .slider { left: 2px; }
+.theme-switch #ts-dark:checked  ~ .slider { left: calc(33.3333% + 2px); }
+.theme-switch #ts-lr:checked    ~ .slider { left: calc(66.6667% + 2px); }
 /* Label areas */
 .theme-switch .opt {
   position: absolute;
@@ -359,7 +359,9 @@ hr {
   text-align: center;
   line-height: 2em;
   z-index: 2;
-  pointer-events: none;
+}
+.theme-switch .opt:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 .theme-switch label[for="ts-light"] { left: 0; }
 .theme-switch label[for="ts-dark"]  { left: 33.3333%; }
