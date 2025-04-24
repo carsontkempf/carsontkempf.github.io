@@ -56,10 +56,16 @@ pre {
 code {
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
   "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-  padding: 2px 4px;
+  padding: 2px 4px;          /* small chip for inline code */
   border-radius: 3px;
   background-clip: padding-box;
-  padding: 15px 0;
+}
+
+/* Remove extra padding/background for code blocks inside <pre> */
+pre code {
+  padding: 0;
+  background: none;
+  border-radius: 0;
 }
 blockquote {
   border-left: 4px solid #e5e5e5;
@@ -230,7 +236,7 @@ header {
   --switch-height: 2em;                    /* overall pill height */
   --knob-size: calc(var(--switch-height)); /* knob diameter */
   position: relative;
-  left: 10vw;               /* centers within main document area */
+  left: 8vw;               /* centers within main document area */
   display: block;                          /* allows horizontal centering */
   margin: 5px auto 0;                     /* 5 px from top & centered */
   width: calc(var(--knob-size) * 3);
