@@ -111,12 +111,31 @@ ol {
   margin: 0 0 1.25rem;
 }
 
-h1, h2, h3 {
-  line-height: 2;
+/* Light mode header links */
+html:not([data-theme]) .header a {
+  color: #0000EE;            /* standard blue */
+  text-decoration: underline; /* always underlined */
+}
+html:not([data-theme]) .header a:hover,
+html:not([data-theme]) .header a:focus {
+  color: #0000EE;
+  text-decoration: underline;
 }
 
-h2 {
-  color: #393939;
+/* Main-content links (all modes) */
+.main-content a {
+  color: #5A5A5A;        /* muted gray */
+  font-weight: bold;     /* stand out */
+  text-decoration: none; /* no underline */
+}
+.main-content a:hover,
+.main-content a:focus {
+  color: #333333;        /* darker on hover */
+  text-decoration: none;
+}
+
+h1, h2, h3 {
+  line-height: 2;
 }
 
 // Standard link style: blue, always underlined
