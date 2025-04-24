@@ -86,11 +86,15 @@ li {
   align-text: left;
 }
 table {
-  width: 100%;
+  width: auto;                /* shrink‑wrap table to content width          */
+  table-layout: auto;         /* let browser size columns by widest cell     */
   border-collapse: collapse;
   border: none;
-  th, td {
+
+  th,
+  td {
     border: 1px solid #000;
+    padding: 2px 5px;         /* 2 px top/bottom, 5 px left/right            */
   }
 }
 thead th {
@@ -226,9 +230,7 @@ header {
   body { padding: 0.4in; font-size:12pt; color:#444; }
 }
 
-// ***********************************************
-// Theme Switcher Component
-// ***********************************************
+
 // ***********************************************
 // Theme Switcher Component
 // ***********************************************
@@ -391,7 +393,7 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
     background-color: #3C3D37; /* dark neutral background */ 
     color: #ECDFCC;            /* high-contrast text */ 
   }
-  .sidebar {
+  .sidebar, .footer {
     background-color: #697565; /* swapped to code bg */
   }
   .header, .footer {
@@ -417,10 +419,10 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
     background-color: #3C3D37;  /* table background */ 
   }
   th, td {
-    /* border is set globally to 1px solid #000; */
-    padding: 5px 10px;
+    border: 1px solid #000;
+    padding: 2px 5px;
     text-align: left;
-    color: #ECDFCC;             /* cell text in contrast */ 
+    color: #ECDFCC;
   }
   hr {
     margin: 1.5rem 0;
@@ -524,8 +526,8 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
     background-color: #F7D1CD;
   }
   th, td {
-    /* border is set globally to 1px solid #000; */
-    padding: 5px 10px;
+    border: 1px solid #000;
+    padding: 2px 5px;
     text-align: left;
     color: #BE5985;
   }
