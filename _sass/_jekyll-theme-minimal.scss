@@ -168,6 +168,7 @@ a:hover small {
 }
 .sidebar ul li,
 .sidebar ol li {
+  width: 150%;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -233,6 +234,14 @@ pre {
   overflow-x: auto;
   display: block;
   width: 100%;
+}
+
+/* Ensure rounded corners on both sides for pre in light mode */
+pre {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 table {
@@ -321,13 +330,10 @@ hr {
   position: fixed;
   top: 10px; left: 50%;
   transform: translateX(-50%);
-  width: 12em; height: 2em;
-  background: #ccc;
-  border-radius: 1em;
-  overflow: hidden;
-  z-index: 1000;
+  width: 12em;
   --switch-height: 2em;
   height: var(--switch-height);
+  /* width remains 100% of container */
 }
 /* Hidden radios each cover one third */
 .theme-switch input {
@@ -353,9 +359,16 @@ hr {
   transition: left 0.3s ease;
   z-index: 1;
 }
-#ts-light:checked ~ .slider { left: 0; }
-#ts-dark:checked  ~ .slider { left: calc(100%/3); }
-#ts-lr:checked    ~ .slider { left: calc((100%/3)*2); }
+/* precise knob positioning: left, center, right */
+.theme-switch #ts-light:checked ~ .slider {
+  left: 0;
+}
+.theme-switch #ts-dark:checked ~ .slider {
+  left: calc((100% - var(--switch-height)) / 2);
+}
+.theme-switch #ts-lr:checked ~ .slider {
+  left: calc(100% - var(--switch-height));
+}
 /* Label areas */
 .theme-switch .opt {
   position: absolute;
@@ -379,7 +392,7 @@ hr {
         color: #ECDFCC;          /* high-contrast text */ 
       }
       .sidebar {
-        background-color: #9A7E6F; /* swapped to code bg */
+        background-color: #697565; /* swapped to code bg */
       }
       .header, .footer {
         background-color: #9A7E6F; /* swapped to code bg */
@@ -399,16 +412,17 @@ hr {
         color: #ECDFCC;             /* light quote text */ 
         background-color: #3C3D37;  /* blend with background */ 
       }
-      pre {
-        background-color: #697565;  /* sidebar bg */
+      code, pre {
+        font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal,
+                     Consolas, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+        background-color: #9A7E6F;  /* unified background */
         color: #ECDFCC;
-        border-radius: 10px;
+        border-radius: 5px;
+        background-clip: padding-box;
         overflow-x: auto;
         display: block;
         width: 100%;
-      }
-      code {
-        background: none;
+        padding: .5em;
       }
       table {
         border-collapse: collapse;
@@ -425,14 +439,16 @@ hr {
         border: 0;
         border-top: 1px solid #697565; /* accent separator */ 
       }
-      .sidebar ul li a,
-      .sidebar ol li a {
+      .sidebar li a {
         display: block;
+        position: relative;
+        left: 0;
+        right: 0;
         width: 100%;
         margin: 0;
-        padding: .4em .8em;
+        padding: .5em 1em;
         box-sizing: border-box;
-        background-color: #697565;
+        background: none;
       }
     }
 
@@ -482,12 +498,14 @@ hr {
     border: 0;
     border-top: 1px solid #E8C2CA; /* separator */
   }
-  .sidebar ul li a,
-  .sidebar ol li a {
+  .sidebar li a {
     display: block;
+    position: relative;
+    left: 0;
+    right: 0;
     width: 100%;
     margin: 0;
-    padding: .4em .8em;
+    padding: .5em 1em;
     box-sizing: border-box;
     background: none;
   }
@@ -496,6 +514,6 @@ hr {
 .main-content img {
   display: block;
   margin: 1rem auto;
-  width: 50%;
+  width: 75%;
   height: auto;
 }
