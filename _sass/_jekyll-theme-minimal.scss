@@ -113,34 +113,29 @@ ol {
 /* Light mode header links */
 html:not([data-theme]) .header a {
   display: inline-block;
-  background-color: #E0D1BA;
+  background-color: darken(#E0D1BA, 10%);
   padding: 0.5em 1em;
   border-radius: 9999px;
   text-align: center;
   white-space: normal;
 }
 html:not([data-theme]) .header a {
-  background-color: #E0D1BA;
+  background-color: darken(#E0D1BA, 10%);
   padding: 0.25em 0.5em;
   border-radius: 50%;
-}
-html:not([data-theme]) .header a:hover,
-html:not([data-theme]) .header a:focus {
-  color: #0000EE;
-  text-decoration: underline;
 }
 
 /* Main-content links (all modes) */
 .main-content a {
   display: inline-block;
-  background-color: #E0D1BA;
+  background-color: darken(#E0D1BA, 10%);
   padding: 0.5em 1em;
   border-radius: 9999px;
   text-align: center;
   white-space: normal;
 }
 .main-content a {
-  background-color: #E0D1BA;
+  background-color: darken(#E0D1BA, 10%);
   padding: 0.25em 0.5em;
   border-radius: 50%;
 }
@@ -154,17 +149,6 @@ h1, h2, h3 {
   line-height: 2;
 }
 
-// Standard link style: blue, always underlined
-a {
-  color: #0000EE;            /* standard blue link color */
-  text-decoration: underline; /* always underlined */
-}
-
-a:hover,
-a:focus {
-  color: #0000EE;            /* maintain blue on hover/focus */
-  text-decoration: underline; /* maintain underline on hover/focus */
-}
 
 a small {
   font-size:11px;
@@ -461,7 +445,7 @@ hr {
       /* Dark mode header links */
       .header a {
         display: inline-block;
-        background-color: #2D2E29;
+        background-color: darken(#2D2E29, 10%);
         padding: 0.5em 1em;
         border-radius: 9999px;
         text-align: center;
@@ -470,7 +454,7 @@ hr {
       /* Dark mode main-content links */
       .main-content a {
         display: inline-block;
-        background-color: #2D2E29;
+        background-color: darken(#2D2E29, 10%);
         padding: 0.5em 1em;
         border-radius: 9999px;
         text-align: center;
@@ -545,7 +529,7 @@ hr {
   /* LR mode header links */
   .header a {
     display: inline-block;
-    background-color: #FFE1F1;
+    background-color: darken(#FFE1F1, 10%);
     padding: 0.5em 1em;
     border-radius: 9999px;
     text-align: center;
@@ -554,7 +538,7 @@ hr {
   /* LR mode main-content links */
   .main-content a {
     display: inline-block;
-    background-color: #FFE1F1;
+    background-color: darken(#FFE1F1, 10%);
     padding: 0.5em 1em;
     border-radius: 9999px;
     text-align: center;
