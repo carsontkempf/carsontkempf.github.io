@@ -310,7 +310,7 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
 // ***********************************************
 // Theme Overrides: Light, Dark, LR
 // ***********************************************
-[data-theme="light"] {
+ [data-theme="light"] {
   /* Light mode link circles */
   .header a,
   .main-content a {
@@ -358,6 +358,7 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
   }
 
   /* Light mode inline code default */
+  .theme-switch { background-color: #9BABB8; }
   code {
     position: relative;
     z-index: 1;
@@ -366,7 +367,8 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
     z-index: 2;
   }
 }
-[data-theme="dark"] {
+ [data-theme="dark"] {
+  .theme-switch { background-color: #697565; }
   body {
     background-color: #3C3D37; /* dark neutral background */ 
     color: #ECDFCC;            /* high-contrast text */ 
@@ -474,7 +476,8 @@ label[for="ts-lr"]    { left: calc(var(--knob-size) * 2); }
     z-index: 2;
   }
 }
-[data-theme="lr"] {
+ [data-theme="lr"] {
+  .theme-switch { background-color: #FFB8E0; }
   body {
     background-color: #FFEDFA; /* main background */
     color: #BE5985;            /* text color */
