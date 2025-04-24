@@ -689,7 +689,21 @@ body > .theme-switch {
   background-color: rgba(0, 0, 0, 0.2);
 }
 
-/* precise label positioning */
-.theme-switch #ts-light { left: 0; }
-.theme-switch #ts-dark  { left: var(--switch-height); }
-.theme-switch #ts-lr    { left: calc(var(--switch-height) * 2); }
+/* precise positioning for inputs, labels, and slider */
+.theme-switch input#ts-light,
+.theme-switch label[for="ts-light"],
+.theme-switch .slider {
+  left: 0;
+}
+.theme-switch input#ts-dark,
+.theme-switch label[for="ts-dark"] {
+  left: var(--switch-height);
+}
+.theme-switch input#ts-lr,
+.theme-switch label[for="ts-lr"] {
+  left: calc(var(--switch-height) * 2);
+}
+/* knob position on checked */
+.theme-switch #ts-light:checked ~ .slider { left: 0; }
+.theme-switch #ts-dark:checked  ~ .slider { left: var(--switch-height); }
+.theme-switch #ts-lr:checked    ~ .slider { left: calc(var(--switch-height) * 2); }
