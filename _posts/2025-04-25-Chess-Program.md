@@ -1,138 +1,47 @@
 ---
 layout: post
 title: "Chess-Program"
-date: 2025-04-25 13:03:04 -0000
+date: 2025-04-25 13:46:00 -0000
 categories: [AI]
 permalink: /Chess-Program/
 ---
 
-# Game Assignment Set: Chess
-
-![](../assets/_img/2025-04-25-13-10-49.png)
-
+# Chess Program
 
 ---
 
-## Rules
+## Scope
 
-* Normal chess rules
-
-### Exception
-
-Instead of the official three board state repetition draw rule:
-
-```
-
-For the last 8 moves:
-    If (no capture OR no promotions OR no pawn movement) AND (moves {0,1,2,3} == {4,5,6,7}):
-        A draw occurs
-
-# {0,1,2,3} == {4,5,6,7}    if the starting position (rank and file) and ending position (rank and file) of the moves are identical
-```
+* Create a program that makes random **valid** chess moves
+* Implement chess using the chess AI Framework
 
 ---
 
-## AI Framework
+## Objectives
 
-### `make_move()`
+* Create a model of the game state and action generation
 
-* Fill in the `make_move()` function of the AI class
+(to be used for future AI algorithms to solve)
 
-### Each call to `make_move()`:
+### Overview
 
-* AI player returns a legal move
-* Use the search algorithm specified in the assignment to select which legal move
+* Generate all pseudo-valid moves for all of your player's pieces in the current game state
 
-### Note
+* `Pseudo-valid == valid moves disregarding checks`
 
-1. **NEVER** modify the member variables of the AI framework classes
-2. **IMPLEMENT** the state of the board & all data-structures
+[Joueur](https://siggame.github.io/Joueur.py/)
 
----
-
-## Input
-
-### Initial States and FEN Notation
-
-* Program must support board states in [FEN notation](https://en.wikipedia.org/wiki/Forsyth–Edwards_Notation)
-
-1. FEN starting position
-
-> `rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1`
-
-2. And after the move 1.e4:
-
-> `rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1`
-
-3. And then after 1...c5:
-
-> `rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2`
-
-4. And then after 2.Nf3:
-
-> `rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2`
-
-A FEN record contains six fields, each separated by a space. The fields are as follows:
-
-1. Piece placement data: 
-
-* Each rank is described, starting with rank 8 and ending with rank 1, with a "/" between each one; within each rank, the contents of the squares are described in order from the a-file to the h-file. 
-
-* Each piece is identified by a single letter taken from the standard English names in algebraic notation (pawn = "P", knight = "N", bishop = "B", rook = "R", queen = "Q" and king = "K").
-
-*  White pieces are designated using uppercase letters ("PNBRQK"), while black pieces use lowercase letters ("pnbrqk"). 
-  
-*  A set of one or more consecutive empty squares within a rank is denoted by a digit from "1" to "8", corresponding to the number of squares.
-
-2. Active color: "w" means that White is to move; "b" means that Black is to move.
-
-3. Castling availability: 
-
-* If neither side has the ability to castle, this field uses the character "-". 
-
-* Otherwise, this field contains one or more letters: "K" if White can castle kingside, "Q" if White can castle queenside, "k" if Black can castle kingside, and "q" if Black can castle queenside. 
-
-* A situation that temporarily prevents castling does not prevent the use of this notation.
-
-4. En passant target square: 
-
-* This is a square over which a pawn has just passed while moving two squares.
-
-*  It is given in algebraic notation. 
-
-*  If there is no en passant target square, this field uses the character "-". 
-
-* This is recorded regardless of whether there is a pawn in position to capture en passant. 
-
-* An updated version of the spec has since made it so the target square is recorded only if a legal en passant capture is possible, but the old version of the standard is the one most commonly used.
-
-5. Halfmove clock:
-
-* The number of halfmoves since the last capture or pawn advance, used for the fifty-move rule.
-
-6. Fullmove number: 
-
-* The number of the full moves. It starts at 1 and is incremented after Black's move.
-
-![](../assets/_img/2025-04-25-13-31-47.png)
+[Joueur Class](https://siggame.github.io/Joueur.py/chess/index.html)
 
 ---
 
 ## Output
 
-* Returns a move chosen by our algorithm
+### On Each Turn
 
-### Universal Chess Interface Notation
+1. Print out in its own line: the number of moves available to your program
+2. Print out in a single line: all moves available to your player program in alphabetical order
+3. In the next line: print the randomly chosen move that the program returns to the chess server
 
-Examples: 
-
-> e2e4
-> 
-> e7e5
-> 
-> e1g1 (white short castling)
-> 
-> e7e8q (for promotion)
-
-
-* A "nullmove" from an engine to a GUI should be sent as 0000.
+* After, the program can print other stuff
+* 
