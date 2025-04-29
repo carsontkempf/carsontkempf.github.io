@@ -1,4 +1,6 @@
-<div class="sidebar-toggle-btn" id="sidebar-toggle-btn">☰</div>
+<div class="sidebar-toggle-btn" id="sidebar-toggle-btn" style="--icon-offset-y: 3px;">
+  <span class="toggle-icon">☰</span>
+</div>
 <script>
   document.getElementById('sidebar-toggle-btn').addEventListener('click', function() {
     var root = document.documentElement;
@@ -8,4 +10,15 @@
       root.setAttribute('data-sidebar', 'expanded');
     }
   });
+  // call with a number (positive or negative) to move the icon vertically
+  function setIconOffset(y) {
+    document.getElementById('sidebar-toggle-btn')
+      .style.setProperty('--icon-offset-y', y + 'px');
+  }
 </script>
+<style>
+  .sidebar-toggle-btn .toggle-icon {
+    display: inline-block;
+    transform: translateY(var(--icon-offset-y));
+  }
+</style>
