@@ -1,9 +1,9 @@
 @import "fonts";
 @import "rouge-github";
 
-// ***********************************************
+// **********************************************************************************************
 // Base Typography and Headings
-// ***********************************************
+// **********************************************************************************************
 h1 {
   padding-top: 7px;
 }
@@ -18,9 +18,9 @@ h1, h2, h3 {
   line-height: 2;
 }
 
-// ***********************************************
+// **********************************************************************************************
 // Global Elements
-// ***********************************************
+// **********************************************************************************************
 body {
   font-size: inherit;
   background-color: #EEE3CB;
@@ -108,9 +108,9 @@ hr {
   border-top: 1px solid #e5e5e5;
 }
 
-// ***********************************************
+// **********************************************************************************************
 // Layout Containers
-// ***********************************************
+// **********************************************************************************************
 .wrapper {
   position: relative;
   width: 100%;
@@ -315,7 +315,7 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
   border-radius: 50%;
   background: #fff;
   transition: left 0.3s ease;
-  z-index: 1;                              /* below hover circles */
+  z-index: 1;
 }
 
 /* Checked‑driven knob positions */
@@ -324,9 +324,9 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
 #ts-lr:checked    ~ .slider { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset) + var(--knob-size) * 2); }
 
 
-// ***********************************************
+// **********************************************************************************************
 // Expanded Sidebar
-// ***********************************************
+// **********************************************************************************************
 
 .sidebar-toggle-btn {
   position: fixed;
@@ -345,21 +345,20 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
   cursor: pointer;
 }
 
+// Expanded Sidebar
 [data-sidebar="expanded"] {
-
-.sidebar {
-  width: 85% !important;
-  font-size: 1.25rem;
+  .sidebar {
+    width: 85% !important;
+    font-size: 1.25rem;
+    top: 0 !important;
+    height: 100vh !important;
+    z-index: 10000;
+  }
 }
 
- .main-content {
-  margin-left: 85% !important;
-}
-}
-
-// ***********************************************
-// Theme Overrides: Light, Dark, LR
-// ***********************************************
+// **********************************************************************************************
+// Light Theme
+// **********************************************************************************************
  [data-theme="light"] {
   /* Darker line separator in light mode */
   hr {
@@ -428,6 +427,9 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
     z-index: 2;
   }
 }
+// **********************************************************************************************
+// Dark Theme
+// **********************************************************************************************
  [data-theme="dark"] {
   .theme-switch { background-color: #697565; }
   body {
@@ -537,6 +539,9 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
     z-index: 2;
   }
 }
+// **********************************************************************************************
+// Leah Theme
+// **********************************************************************************************
  [data-theme="lr"] {
   .theme-switch { background-color: #FFB8E0; }
   body {
@@ -646,9 +651,9 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
   }
 }
 
-// ***********************************************
+// **********************************************************************************************
 // Final Image & Link Adjustments
-// ***********************************************
+// **********************************************************************************************
 .main-content img {
   display: block;              // occupy full line, prevents inline text wrap
   margin: 1rem auto;           // top/bottom spacing, centered horizontally
