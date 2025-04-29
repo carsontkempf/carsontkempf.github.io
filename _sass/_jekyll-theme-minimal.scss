@@ -235,7 +235,7 @@ header {
 
 
 // ***********************************************
-// Theme Switcher Component
+// Theme Switcher
 // ***********************************************
 .theme-switch {
   /* Geometry */
@@ -248,7 +248,7 @@ header {
   --knob-size: calc(var(--switch-height) - (var(--border-width) + var(--knob-gap)) * 2);
 
   position: relative;
-  left: 7vw;
+  right: 7vw;
   display: block;
   margin: 0 auto;
   width: calc(
