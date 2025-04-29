@@ -247,10 +247,14 @@ header {
   --knob-leftoffset: -3px;                 /* horizontal cushion on left side */
   --knob-size: calc(var(--switch-height) - (var(--border-width) + var(--knob-gap)) * 2);
 
-  position: relative;
-  left: 7vw;
-  display: block;
-  margin: 0 auto;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  // position: relative;
+  // left: 7vw;
+  // display: block;
+  // margin: 0 auto;
   width: calc(
     var(--knob-size) * 3
     + (var(--border-width) + var(--knob-gap) + var(--knob-leftoffset))   /* left side */
@@ -260,7 +264,7 @@ header {
   border-radius: calc(var(--switch-height) / 2);
   border: var(--border-width) solid #000;
   background-color: inherit;
-  padding: 0;
+  padding: 10px, 0px;
   box-sizing: border-box;
 }
 
