@@ -1,0 +1,11 @@
+<div class="sidebar-toggle-btn" id="sidebar-toggle-btn">☰</div>
+<script>
+  document.getElementById('sidebar-toggle-btn').addEventListener('click', function() {
+    var root = document.documentElement;
+    if (root.getAttribute('data-sidebar') === 'expanded') {
+      root.removeAttribute('data-sidebar');
+    } else {
+      root.setAttribute('data-sidebar', 'expanded');
+    }
+  });
+</script>

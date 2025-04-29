@@ -323,6 +323,40 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
 #ts-dark:checked  ~ .slider { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset) + var(--knob-size)); }
 #ts-lr:checked    ~ .slider { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset) + var(--knob-size) * 2); }
 
+
+// ***********************************************
+// Expanded Sidebar
+// ***********************************************
+
+.sidebar-toggle-btn {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: #967E76;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.5rem;
+  z-index: 10001;
+  cursor: pointer;
+}
+
+[data-sidebar="expanded"] {
+
+.sidebar {
+  width: 85% !important;
+  font-size: 1.25rem;
+}
+
+ .main-content {
+  margin-left: 85% !important;
+}
+}
+
 // ***********************************************
 // Theme Overrides: Light, Dark, LR
 // ***********************************************
