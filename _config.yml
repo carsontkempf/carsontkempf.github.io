@@ -29,10 +29,7 @@ author: Carson Kempf
 
 safe: false
 show_downloads: false
-google_analytics:
+google_analytics: "G-DSMK52452T"
 theme: jekyll-theme-minimal
 sass:
   sass_dir: _sass
-#include:
-#  - assets/css/style.scss.liquid
-#  - assets/css/dark.scss.liquid
