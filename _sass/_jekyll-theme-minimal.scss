@@ -124,6 +124,7 @@ hr {
   white-space: normal;
   hyphens: none;
   display: flex;
+  transition: width 0.3s ease, height 0.3s ease;
   flex-direction: column;
   bottom: 0;
   background-color: #9BABB8;
@@ -335,7 +336,6 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
-  background-color: #967E76;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -360,6 +360,9 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
 // Light Theme
 // **********************************************************************************************
  [data-theme="light"] {
+  .sidebar-toggle-btn {
+    background-color: #967E76;
+  }
   /* Darker line separator in light mode */
   hr {
     padding: 15px 0;
@@ -431,6 +434,9 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
 // Dark Theme
 // **********************************************************************************************
  [data-theme="dark"] {
+  .sidebar-toggle-btn {
+    background-color: #353532;
+  }
   .theme-switch { background-color: #697565; }
   body {
     background-color: #3C3D37; /* dark neutral background */ 
@@ -543,6 +549,9 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
 // Leah Theme
 // **********************************************************************************************
  [data-theme="lr"] {
+  .sidebar-toggle-btn {
+    background-color: #BE5985;
+  }
   .theme-switch { background-color: #FFB8E0; }
   body {
     background-color: #FFEDFA; /* main background */
