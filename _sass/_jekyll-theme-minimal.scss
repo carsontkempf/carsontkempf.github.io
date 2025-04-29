@@ -248,7 +248,7 @@ header {
   --knob-size: calc(var(--switch-height) - (var(--border-width) + var(--knob-gap)) * 2);
 
   position: relative;
-  right: 7vw;
+  left: 7vw;
   display: block;
   margin: 0 auto;
   width: calc(
@@ -332,7 +332,7 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
 .sidebar-toggle-btn {
   position: fixed;
   bottom: 1rem;
-  left: 1rem;
+  right: 1rem;
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
