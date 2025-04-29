@@ -349,7 +349,7 @@ label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(-
 // Expanded Sidebar
 [data-sidebar="expanded"] {
   .sidebar {
-    width: 85% !important;
+    width: 80% !important;
     font-size: 1.25rem;
     top: 0 !important;
     height: 100vh !important;
