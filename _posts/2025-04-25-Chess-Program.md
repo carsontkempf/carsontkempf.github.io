@@ -116,13 +116,13 @@ If other files are used:
 
 ## AI
 
-### class games.chess.ai.AI(game)
+### `class games.chess.ai.AI(game)`
 
 * Add AI to play chess
 
 > Functions
-
-##### end(won: bool, reason: str)
+> 
+> `end(won: bool, reason: str)`
 
 * Called when the game ends
 
