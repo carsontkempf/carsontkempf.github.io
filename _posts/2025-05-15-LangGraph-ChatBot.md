@@ -28,8 +28,8 @@ In this project, `visuals.py` uses Streamlit to:
 *   Include a "Submit" button to send the query.
 *   Offer a selection widget for choosing the underlying Large Language Model (LLM), such as DeepSeek or Claude.
  
- ![](assets/img/2025-05-16-10-30-24.png)
- 
+![](../assets/img/2025-05-16-10-39-04.png)
+
 ## Chapter 2: Core Logic - LangGraph Orchestration
  
 When a user submits a query, it's processed by the Chatbot's core logic, which is managed by **LangGraph** (defined in `lang_graph.py`). This system uses a Large Language Model (LLM) as its central reasoning component.
@@ -94,17 +94,17 @@ Here's a simplified flow of how a user query like "What's the weather like in Lo
  
 The system offers features for understanding its internal operations:
 
-![](assets/img/2025-05-16-10-32-12.png)
+![](../assets/img/2025-05-16-10-32-12.png)
  
 *   **Tool Invocation Graph (`mermaid_graph.py`):**
     For queries involving tool usage, `visuals.py` can render a visual graph (using Mermaid syntax via `st_mermaid`) illustrating the sequence of tool calls and data flow. This graph helps visualize which tools were used and in what order. Text is sanitized to ensure proper rendering.
 
-![](assets/img/2025-05-16-10-33-29.png)
+![](../assets/img/2025-05-16-10-33-29.png)
  
 *   **Detailed Interaction Log (`visuals.py` - `display_full_log`):**
     The interface can display a comprehensive log of each interaction. This log includes the user's query, details of each tool called (name, input, output), and the final parsed response from the LLM. This provides a step-by-step record of the chatbot's process.
 
-![](assets/img/2025-05-16-10-34-00.png)
+![](../assets/img/2025-05-16-10-34-00.png)
  
 ## Chapter 6: Quality Assurance - Automated Testing (`prompt_test.py`)
  
