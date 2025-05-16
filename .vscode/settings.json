@@ -1,5 +1,7 @@
 {
     "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
         "_sass/_fonts.css": true,
         "_sass/_fonts.css.map": true,
         "_sass/_fonts.scss": true,
