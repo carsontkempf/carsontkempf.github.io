@@ -8,8 +8,6 @@ window.siteAuth = {
 	checkAccess: null
 };
 
-function handleAuth0SdkLoad() {
-	console.log('Auth0 SDK script has loaded (onload event fired).');
 	document.addEventListener('DOMContentLoaded', async () => {
 		// let auth0Client = null; // Now using window.siteAuth.auth0Client
 		const auth0Domain = 'dev-l57dcpkhob0u7ykb.us.auth0.com';
@@ -241,4 +239,3 @@ function handleAuth0SdkLoad() {
 		}
 		await updateUI();
 	});
-}
