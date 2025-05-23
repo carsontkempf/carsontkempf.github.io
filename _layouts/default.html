@@ -17,6 +17,10 @@
         }
       })();
     </script>
+
+    <!-- Auth0 Integration Scripts -->
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js" defer></script>
+    <script src="{{ '/assets/js/auth.js' | relative_url }}" defer></script>
   </head>
   <body>
     {% include theme-switch.html %}
@@ -46,7 +50,5 @@
         <p id="user-info" style="display: none; margin: 0;"></p>
         <button id="btn-logout" style="display: none;">Log Out</button>
     </div>
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <script src="{{ '/assets/js/auth.js' | relative_url }}"></script>
   </body>
 </html>
