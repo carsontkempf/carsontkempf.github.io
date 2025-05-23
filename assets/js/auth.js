@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	// let auth0Client = null; // Now using window.siteAuth.auth0Client
 	const auth0Domain = 'dev-l57dcpkhob0u7ykb.us.auth0.com';
 	const auth0ClientId = 'moH0QbZSCdnwIryD7FoElVSs3kEvUHbH';
-	const auth0Audience = 'https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/';
+	const auth0Audience = 'https://carsontkempf.github.io/account/'; // FIXME: Replace with your actual API Identifier from Auth0 (e.g., https://api.yourdomain.com)
 
 	const loginButton = document.getElementById('btn-login');
 	const logoutButton = document.getElementById('btn-logout');
@@ -20,6 +20,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 	async function configureClient() {
 		try {
+			console.log('Attempting to configure Auth0 client...'); // DEBUG
+			if (typeof auth0spa === 'undefined') {
+				console.error('CRITICAL: auth0spa is undefined at the time of calling createAuth0Client. Auth0 SDK might not be loaded or initialized correctly.');
+				throw new Error('Auth0 SDK (auth0spa) is not available.');
+			}
 			window.siteAuth.auth0Client = await auth0spa.createAuth0Client({
 				domain: auth0Domain,
 				client_id: auth0ClientId,
@@ -30,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 			});
 			// auth0Client = window.siteAuth.auth0Client; // Keep local reference if preferred, or use window.siteAuth.auth0Client directly
 		} catch (err) {
+			// Error is already logged by the previous console.error or the one in the if block above
 			console.error("Error configuring Auth0 client: ", err);
 			if (loginButton) loginButton.disabled = true; // Disable login if config fails
 			if (userInfoP) userInfoP.textContent = "Error: Auth0 not configured. See console.";
@@ -100,21 +106,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 	if (loginButton) {
 		loginButton.addEventListener('click', async () => {
-			console.log('Login button clicked.'); // DEBUG
+			console.log('Login button clicked. siteAuth.auth0Client:', window.siteAuth.auth0Client); // DEBUG
 			if (!window.siteAuth.auth0Client) {
-				console.error('Auth0 client not available when login button clicked.'); // DEBUG
+				console.error('Auth0 client (window.siteAuth.auth0Client) is not available when login button clicked.'); // DEBUG
 				alert('Authentication system not ready. Please try again in a moment or refresh the page.');
 				return;
 			}
 			try {
-				console.log('Attempting loginWithRedirect with audience:', auth0Audience); // DEBUG
+				console.log('Attempting loginWithRedirect. Configured audience for redirect:', auth0Audience); // DEBUG
 				await window.siteAuth.auth0Client.loginWithRedirect({
 					authorizationParams: {
 						// redirect_uri: window.location.origin, // Default is fine
 						audience: auth0Audience
 					}
 				});
-				console.log('loginWithRedirect call completed (browser should be redirecting).'); // DEBUG
+				// If successful, the browser will redirect, so this log might not be seen.
 			} catch (err) {
 				console.error('Error during loginWithRedirect:', err); // DEBUG
 				alert('Error during login attempt. Check console.');
