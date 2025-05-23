@@ -19,7 +19,7 @@
     </script>
 
     <!-- Auth0 Integration Scripts -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js" defer></script>
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js" defer onload="handleAuth0SdkLoad()"></script>
     <script src="{{ '/assets/js/auth.js' | relative_url }}" defer></script>
   </head>
   <body>
