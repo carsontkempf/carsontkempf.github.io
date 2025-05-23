@@ -23,6 +23,8 @@
         "Gemfile.lock": false,
         ".github": false,
         ".vscode": false,
-        ".gitignore": false
+        ".gitignore": false,
+        "node_modules": false,
+        "package-lock.json": false
     }
 }
