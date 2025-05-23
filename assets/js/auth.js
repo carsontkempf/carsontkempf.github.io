@@ -13,13 +13,31 @@ const auth0Domain = 'dev-l57dcpkhob0u7ykb.us.auth0.com';
 const auth0ClientId = 'moH0QbZSCdnwIryD7FoElVSs3kEvUHbH';
 const auth0Audience = 'https://carsontkempf.github.io/account/'; // this is correct
 
-function onAuth0SdkReady() {
-	console.log('Auth0 SDK onload event fired. Initializing Auth0 logic.');
-	// The DOMContentLoaded listener ensures that DOM elements are available.
-	document.addEventListener('DOMContentLoaded', async () => {
-		const loginButton = document.getElementById('btn-login');
-		const logoutButton = document.getElementById('btn-logout');
-		const userInfoP = document.getElementById('user-info');
+document.addEventListener('DOMContentLoaded', async () => {
+	const loginButton = document.getElementById('btn-login');
+	const logoutButton = document.getElementById('btn-logout');
+	const userInfoP = document.getElementById('user-info');
+
+	async function waitForAuth0Spa() {
+		return new Promise((resolve, reject) => {
+			const maxRetries = 70; // Try for 7 seconds (70 * 100ms)
+			let retries = 0;
+			const intervalId = setInterval(() => {
+				if (typeof window.auth0spa !== 'undefined' && typeof window.auth0spa.createAuth0Client === 'function') {
+					clearInterval(intervalId);
+					console.log("Auth0 SPA SDK (auth0spa) is now available.");
+					resolve();
+				} else {
+					retries++;
+					if (retries >= maxRetries) {
+						clearInterval(intervalId);
+						console.error("CRITICAL: Auth0 SPA SDK (auth0spa) did not become available after waiting.");
+						reject(new Error('Auth0 SDK (auth0spa) timed out or is not valid.'));
+					}
+				}
+			}, 100);
+		});
+	}
 
 		async function configureClient() {
 			try {
@@ -221,6 +239,7 @@ function onAuth0SdkReady() {
 
 		// Initialize and handle redirect
 		try {
+			await waitForAuth0Spa(); // Wait for the SDK to be ready
 			await configureClient();
 
 			if (window.siteAuth.auth0Client && window.location.search.includes('code=') && window.location.search.includes('state=')) {
@@ -250,4 +269,3 @@ function onAuth0SdkReady() {
 			}
 		}
 	});
-}
