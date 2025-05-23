@@ -6,21 +6,20 @@ permalink: /account/
 
 <h2>My Account</h2>
 <div id="account-details"><p>Loading account information...</p></div>
-<!--
-<button id="btn-get-api-key" style="display: none;">Get My API Key</button>
+
+<button id="btn-get-api-key" style="display: none;">Get My API Key</button> <!-- Uncomment if you want to test this -->
 <p id="api-key-display" style="display: none;"></p>
--->
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const accountDetailsDiv = document.getElementById('account-details');
-  // const getApiKeyButton = document.getElementById('btn-get-api-key');
-  // const apiKeyDisplayP = document.getElementById('api-key-display');
+  const getApiKeyButton = document.getElementById('btn-get-api-key'); // Uncomment if button is active
+  const apiKeyDisplayP = document.getElementById('api-key-display'); // Uncomment if display P is active
 
   function renderAccountPage() {
     if (window.siteAuth && window.siteAuth.isAuthenticated && window.siteAuth.user) {
       accountDetailsDiv.innerHTML = `<p>Welcome, ${window.siteAuth.user.name}!</p><p>Email: ${window.siteAuth.user.email}</p>`;
-      // getApiKeyButton.style.display = 'block';
+      if (getApiKeyButton) getApiKeyButton.style.display = 'block'; // Uncomment if button is active
     } else {
       accountDetailsDiv.innerHTML = '<p>Please <a href="#" id="login-link">log in</a> to view your account details.</p>';
       const loginLink = document.getElementById('login-link');
@@ -28,20 +27,26 @@ document.addEventListener('DOMContentLoaded', () => {
         loginLink.addEventListener('click', (e) => {
           e.preventDefault();
           if (window.siteAuth && window.siteAuth.auth0Client) {
+            const configuredAudience = window.siteAuth.auth0Client.options.authorizationParams.audience;
+            if (!configuredAudience) {
+              console.error("Audience is not configured in auth0Client options. Cannot log in.");
+              alert("Authentication configuration error. Audience missing.");
+              return;
+            }
             window.siteAuth.auth0Client.loginWithRedirect({
               authorizationParams: {
-                redirect_uri: window.location.origin + '/account/', // Redirect back to account page
+                redirect_uri: window.location.origin, // Standardize redirect_uri
+                audience: configuredAudience
               },
-              appState: { targetUrl: window.location.pathname }
+              appState: { targetUrl: '/account/' } // Specify targetUrl to return to /account/
             });
           } else {
-            // Fallback if auth0Client isn't ready, though the interval should prevent this
             alert('Authentication system not ready. Please try again in a moment.');
           }
         });
       }
-      // getApiKeyButton.style.display = 'none'; // Button is now commented out in HTML
-      // apiKeyDisplayP.style.display = 'none'; // Display P is now commented out in HTML
+      if (getApiKeyButton) getApiKeyButton.style.display = 'none';
+      if (apiKeyDisplayP) apiKeyDisplayP.style.display = 'none';
     }
   }
 
@@ -51,23 +56,29 @@ document.addEventListener('DOMContentLoaded', () => {
       clearInterval(checkAuthReadyInterval);
       renderAccountPage();
 
-      // if (getApiKeyButton) { // getApiKeyButton is now commented out
-      //   getApiKeyButton.addEventListener('click', async () => {
-      //     if (window.siteAuth && window.siteAuth.getApiKey) {
-      //       apiKeyDisplayP.textContent = 'Fetching API key...';
-      //       apiKeyDisplayP.style.display = 'block';
-      //       const apiKey = await window.siteAuth.getApiKey();
-      //       if (apiKey) {
-      //         apiKeyDisplayP.textContent = `Your API Key: ${apiKey}`;
-      //       } else {
-      //         apiKeyDisplayP.textContent = 'Could not retrieve API key.';
-      //       }
-      //     } else {
-      //       apiKeyDisplayP.textContent = 'API key function not available.';
-      //       apiKeyDisplayP.style.display = 'block';
-      //     }
-      //   });
-      // }
+      if (getApiKeyButton) { // Uncomment if button is active
+        getApiKeyButton.addEventListener('click', async () => {
+          if (window.siteAuth && window.siteAuth.getApiKey) {
+            if (apiKeyDisplayP) {
+              apiKeyDisplayP.textContent = 'Fetching API key...';
+              apiKeyDisplayP.style.display = 'block';
+            }
+            const apiKey = await window.siteAuth.getApiKey();
+            if (apiKeyDisplayP) {
+              if (apiKey) {
+                apiKeyDisplayP.textContent = `Your API Key: ${apiKey}`;
+              } else {
+                apiKeyDisplayP.textContent = 'Could not retrieve API key.';
+              }
+            }
+          } else {
+            if (apiKeyDisplayP) {
+              apiKeyDisplayP.textContent = 'API key function not available.';
+              apiKeyDisplayP.style.display = 'block';
+            }
+          }
+        });
+      }
     }
   }, 100); // Poll every 100ms
 });

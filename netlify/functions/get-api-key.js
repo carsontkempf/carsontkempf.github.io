@@ -1,42 +1,78 @@
 // Netlify serverless function to retrieve an API key.
 // This function expects an Authorization header with an Auth0 access token.
-// It verifies the token (TODO), checks user permissions (TODO),
+// It verifies the token, checks user permissions (basic check here),
 // and then returns an API key stored in an environment variable.
 
+const { auth } = require('express-oauth2-jwt-bearer');
+
+// This would be set via Netlify environment variables
+const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN;
+const AUTH0_AUDIENCE_SERVER = process.env.AUTH0_AUDIENCE_SERVER; // This should be the same API Identifier used in client-side auth.js
+
+if (!AUTH0_DOMAIN || !AUTH0_AUDIENCE_SERVER) {
+  console.error('CRITICAL: AUTH0_DOMAIN or AUTH0_AUDIENCE_SERVER environment variables are not set for the get-api-key function.');
+}
+
+const jwtCheck = AUTH0_DOMAIN && AUTH0_AUDIENCE_SERVER ? auth({
+  audience: AUTH0_AUDIENCE_SERVER,
+  issuerBaseURL: `https://${AUTH0_DOMAIN}/`,
+  tokenSigningAlg: 'RS256'
+}) : null;
+
+// Helper to adapt Netlify event/context to Express-like req/res for the middleware
+const promisifyMiddleware = (middleware) => (event, context) =>
+  new Promise((resolve, reject) => {
+    const req = {
+      headers: event.headers,
+      method: event.httpMethod,
+      url: event.path,
+      connection: { remoteAddress: event.headers['x-nf-client-connection-ip'] || 'unknown' }, // for rate limiting if enabled in jwksRsa
+      // body: event.body // if needed by middleware
+    };
+    const res = { // Mock res object
+      getHeader: () => {},
+      setHeader: (key, value) => { /* store if needed, e.g. for WWW-Authenticate */ },
+      send: (body) => resolve({ statusCode: res.statusCode || 200, body }),
+      status: (code) => { res.statusCode = code; return res; },
+      end: () => resolve({ statusCode: res.statusCode || 204, body: '' })
+    };
+    const next = (err) => {
+      if (err) {
+        console.error('JWT validation error:', err.message, err.status, err.code);
+        // Map express-oauth2-jwt-bearer errors to appropriate HTTP responses
+        let statusCode = err.status || 500;
+        if (err.code === 'invalid_token') statusCode = 401;
+        if (err.code === 'insufficient_scope') statusCode = 403;
+
+        resolve({
+          statusCode: statusCode,
+          body: JSON.stringify({ error: err.message || 'Authorization error' })
+        });
+      } else {
+        // If next() is called without error, it means auth succeeded.
+        // We don't actually proceed to another "middleware" here,
+        // so we resolve indicating success to proceed with function logic.
+        resolve({ authenticated: true, user: req.auth }); // req.auth is populated by express-oauth2-jwt-bearer
+      }
+    };
+    middleware(req, res, next);
+  });
+
 exports.handler = async (event, context) => {
+  if (!jwtCheck) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Authentication service not configured correctly on the server (missing env vars).' })
+    };
+  }
+
   try {
-    // Check for Authorization header and extract token
-    const authHeader = event.headers.authorization;
-    if (!authHeader) {
-      return {
-        statusCode: 401,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: 'Unauthorized - No token provided' }),
-      };
+    const authResult = await promisifyMiddleware(jwtCheck)(event, context);
+    if (!authResult.authenticated) {
+      // If not authenticated, authResult itself is the error response
+      return authResult;
     }
-
-    const tokenParts = authHeader.split(' ');
-    if (tokenParts.length !== 2 || tokenParts[0].toLowerCase() !== 'bearer') {
-      return {
-        statusCode: 401,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: 'Unauthorized - Invalid token format' }),
-      };
-    }
-    const accessToken = tokenParts[1];
-
-    // TODO: Add Auth0 token verification logic here
-    // This would involve using a library like 'jsonwebtoken' and your Auth0 public key
-    // to verify the signature and claims of the accessToken.
-
-    // TODO: Add user role/permission check logic here
-    // After verifying the token, you would typically check if the user
-    // associated with the token has the necessary roles or permissions
-    // to access this function and retrieve an API key.
+    // console.log('Authenticated user (from token sub):', authResult.user.payload.sub);
 
     // Attempt to read the API key from environment variables
     const apiKey = process.env.USER_API_KEY;
@@ -44,28 +80,19 @@ exports.handler = async (event, context) => {
     if (apiKey) {
       return {
         statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
         body: JSON.stringify({ apiKey: apiKey }),
       };
     } else {
-      console.error('USER_API_KEY not found in environment variables.');
+      console.error('CRITICAL: USER_API_KEY environment variable not found for the get-api-key function.');
       return {
         statusCode: 500,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
         body: JSON.stringify({ error: 'API key not configured on server' }),
       };
     }
   } catch (error) {
-    console.error('Error in get-api-key function:', error);
+    console.error('Unexpected error in get-api-key function:', error);
     return {
       statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
       body: JSON.stringify({ error: 'Internal Server Error' }),
     };
   }
