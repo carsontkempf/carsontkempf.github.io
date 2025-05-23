@@ -10,9 +10,9 @@ window.siteAuth = {
 
 document.addEventListener('DOMContentLoaded', async () => {
   // let auth0Client = null; // Now using window.siteAuth.auth0Client
-  const auth0Domain = 'YOUR_AUTH0_DOMAIN'; // Replace with your Auth0 domain
-  const auth0ClientId = 'YOUR_AUTH0_CLIENT_ID'; // Replace with your Auth0 client ID
-  const auth0Audience = 'YOUR_AUTH0_AUDIENCE'; // TODO: Replace with your Auth0 API Identifier/Audience
+  const auth0Domain = 'dev-l57dcpkhob0u7ykb.us.auth0.com'; // Replace with your Auth0 domain
+  const auth0ClientId = 'moH0QbZSCdnwIryD7FoElVSs3kEvUHbH'; // Replace with your Auth0 client ID
+  const auth0Audience = 'https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/'; // TODO: Replace with your Auth0 API Identifier/Audience
 
     const loginButton = document.getElementById('btn-login');
     const logoutButton = document.getElementById('btn-logout');
