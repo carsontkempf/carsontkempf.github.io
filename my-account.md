@@ -6,19 +6,21 @@ permalink: /account/
 
 <h2>My Account</h2>
 <div id="account-details"><p>Loading account information...</p></div>
+<!--
 <button id="btn-get-api-key" style="display: none;">Get My API Key</button>
 <p id="api-key-display" style="display: none;"></p>
+-->
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const accountDetailsDiv = document.getElementById('account-details');
-  const getApiKeyButton = document.getElementById('btn-get-api-key');
-  const apiKeyDisplayP = document.getElementById('api-key-display');
+  // const getApiKeyButton = document.getElementById('btn-get-api-key');
+  // const apiKeyDisplayP = document.getElementById('api-key-display');
 
   function renderAccountPage() {
     if (window.siteAuth && window.siteAuth.isAuthenticated && window.siteAuth.user) {
       accountDetailsDiv.innerHTML = `<p>Welcome, ${window.siteAuth.user.name}!</p><p>Email: ${window.siteAuth.user.email}</p>`;
-      getApiKeyButton.style.display = 'block';
+      // getApiKeyButton.style.display = 'block';
     } else {
       accountDetailsDiv.innerHTML = '<p>Please <a href="#" id="login-link">log in</a> to view your account details.</p>';
       const loginLink = document.getElementById('login-link');
@@ -38,8 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
       }
-      getApiKeyButton.style.display = 'none';
-      apiKeyDisplayP.style.display = 'none';
+      // getApiKeyButton.style.display = 'none'; // Button is now commented out in HTML
+      // apiKeyDisplayP.style.display = 'none'; // Display P is now commented out in HTML
     }
   }
 
@@ -49,23 +51,23 @@ document.addEventListener('DOMContentLoaded', () => {
       clearInterval(checkAuthReadyInterval);
       renderAccountPage();
 
-      if (getApiKeyButton) {
-        getApiKeyButton.addEventListener('click', async () => {
-          if (window.siteAuth && window.siteAuth.getApiKey) {
-            apiKeyDisplayP.textContent = 'Fetching API key...';
-            apiKeyDisplayP.style.display = 'block';
-            const apiKey = await window.siteAuth.getApiKey();
-            if (apiKey) {
-              apiKeyDisplayP.textContent = `Your API Key: ${apiKey}`;
-            } else {
-              apiKeyDisplayP.textContent = 'Could not retrieve API key.';
-            }
-          } else {
-            apiKeyDisplayP.textContent = 'API key function not available.';
-            apiKeyDisplayP.style.display = 'block';
-          }
-        });
-      }
+      // if (getApiKeyButton) { // getApiKeyButton is now commented out
+      //   getApiKeyButton.addEventListener('click', async () => {
+      //     if (window.siteAuth && window.siteAuth.getApiKey) {
+      //       apiKeyDisplayP.textContent = 'Fetching API key...';
+      //       apiKeyDisplayP.style.display = 'block';
+      //       const apiKey = await window.siteAuth.getApiKey();
+      //       if (apiKey) {
+      //         apiKeyDisplayP.textContent = `Your API Key: ${apiKey}`;
+      //       } else {
+      //         apiKeyDisplayP.textContent = 'Could not retrieve API key.';
+      //       }
+      //     } else {
+      //       apiKeyDisplayP.textContent = 'API key function not available.';
+      //       apiKeyDisplayP.style.display = 'block';
+      //     }
+      //   });
+      // }
     }
   }, 100); // Poll every 100ms
 });
