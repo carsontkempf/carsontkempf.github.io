@@ -49,7 +49,7 @@
     </div>
 
     <!-- Auth0 Integration Scripts - Placed at the end of body for sequential loading -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <script src="{{ '/assets/js/auth.js' | relative_url }}"></script>
+    <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <script defer src="{{ '/assets/js/auth.js' | relative_url }}"></script>
   </body>
 </html>

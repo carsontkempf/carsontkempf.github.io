@@ -10,7 +10,7 @@ window.siteAuth = {
 
 // These constants will be used by functions within onAuth0SdkReady
 const auth0Domain = 'dev-l57dcpkhob0u7ykb.us.auth0.com';
-const auth0ClientId = 'moH0QbZSCdnwIryD7FoElVSs3kEvUHbH';
+const auth0ClientId = 'Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC'; // <-- UPDATE THIS to your "Prompt Library" Client ID
 const auth0Audience = 'https://carsontkempf.github.io/account/'; // this is correct
 
 document.addEventListener('DOMContentLoaded', async () => {
