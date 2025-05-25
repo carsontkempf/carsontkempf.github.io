@@ -1,33 +1,52 @@
 {
     "files.exclude": {
-        "**/__pycache__": true,
-        "**/*.pyc": true,
-        "_sass/_fonts.css": true,
-        "_sass/_fonts.css.map": true,
-        "_sass/_fonts.scss": true,
-        "_sass/_jekyll-theme-minimal.css": true,
-        "_sass/_jekyll-theme-minimal.css.map": true,
-        "_sass/_minimal.css": true,
-        "_sass/_minimal.css.map": true,
-        "_sass/_minimal.scss": true,
-        "_sass/_rouge-github.css": true,
-        "_sass/_rouge-github.css.map": true,
-        "_sass/_rouge-github.scss": true,
-        "_site": true,
-        ".github/workflows": true,
-        ".idea": true,
-        "_config.yml": true,
-        "404.html": true,
-        "Gemfile": true,
-        "Gemfile.lock": true,
-        ".github": true,
-        ".vscode": true,
-        ".gitignore": true,
-        "node_modules": true,
-        "package-lock.json": true,
-        "assets/css": true,
-        "assets/fonts": true,
-        "assets/img": true,
-        "assets/js/scale.fix.js": true
-    }
+        "**/__pycache__": false,
+        "**/*.pyc": false,
+        "_sass/_fonts.css": false,
+        "_sass/_fonts.css.map": false,
+        "_sass/_fonts.scss": false,
+        "_sass/_jekyll-theme-minimal.css": false,
+        "_sass/_jekyll-theme-minimal.css.map": false,
+        "_sass/_minimal.css": false,
+        "_sass/_minimal.css.map": false,
+        "_sass/_minimal.scss": false,
+        "_sass/_rouge-github.css": false,
+        "_sass/_rouge-github.css.map": false,
+        "_sass/_rouge-github.scss": false,
+        "_site": false,
+        ".github/workflows": false,
+        ".idea": false,
+        "_config.yml": false,
+        "404.html": false,
+        "Gemfile": false,
+        "Gemfile.lock": false,
+        ".github": false,
+        ".vscode": false,
+        ".gitignore": false,
+        "node_modules": false,
+        "package-lock.json": false,
+        "assets/css": false,
+        "assets/fonts": false,
+        "assets/img": false,
+        "assets/js/scale.fix.js": false
+    },
+
+
+/* Gemini Code Assist doesn't have a maximum text input  */
+
+
+    "geminicodeassist.rules": "OAuth Frontend Documentation: Frontend Setup Start the setup by configuring your frontend application to use SuperTokens for authentication.  This guide uses the SuperTokens pre-built UI components. If you want to create your own interface please check the Custom UI tutorial.  What type of UI are you using? Pre-Built UI Authentication UI provided by SuperTokens  Custom UI Authentication UI created by you 1. Install the SDK Run the following command in your terminal to install the package.    npm i -s supertokens-auth-react  2. Initialize the SDK App Info Adjust these values based on the application that you are trying to configure. To learn more about what each field means check the references page. Application Name This is the URL of your app's API server. API Domain This is the URL of your app's API server. API Base Path SuperTokens will expose it's APIs scoped by this base API path. /auth Website Domain This is the URL of your website. Website Base Path The path where the login UI will be rendered /auth In your main application file call the SuperTokens.init function to initialize the SDK. The init call includes the main configuration details, as well as the recipes that you will be using in your setup. After that you will have to wrap the application with the SuperTokensWrapper component. This will provide authentication context for the rest of the UI tree.  import React from \"react\";  import SuperTokens, { SuperTokensWrapper } from \"supertokens-auth-react\"; import EmailPassword from \"supertokens-auth-react/recipe/emailpassword\"; import Session from \"supertokens-auth-react/recipe/session\";  SuperTokens.init({   appInfo: {     // learn more about this on https://supertokens.com/docs/references/frontend-sdks/reference#sdk-configuration     appName: \"<YOUR_APP_NAME>\",     apiDomain: \"<YOUR_API_DOMAIN>\",     websiteDomain: \"<YOUR_WEBSITE_DOMAIN>\",     apiBasePath: \"/auth\",     websiteBasePath: \"/auth\",   },   recipeList: [EmailPassword.init(), Session.init()], });  /* Your App */ class App extends React.Component {   render() {     return (       <SuperTokensWrapper>         {/*Your app components*/}       </SuperTokensWrapper>     );   } }   3. Configure Routing In order for the pre-built UI to be rendered inside your application, you will have to specify which routes will show the authentication components. The React SDK uses React Router under the hood to achieve this. Based on whether you already use this package or not in your project, there are two different ways of configuring the routes.  Do you use react-router-dom?  Yes  No Call the getSuperTokensRoutesForReactRouterDom method from within any react-router-dom Routes component.  import React from 'react'; import {   BrowserRouter,   Routes,   Route,   Link } from \"react-router-dom\";  import SuperTokens, { SuperTokensWrapper } from \"supertokens-auth-react\"; import { getSuperTokensRoutesForReactRouterDom } from \"supertokens-auth-react/ui\"; import { EmailPasswordPreBuiltUI } from 'supertokens-auth-react/recipe/emailpassword/prebuiltui'; import * as reactRouterDom from \"react-router-dom\";  class App extends React.Component {     render() {         return (             <SuperTokensWrapper>                 <BrowserRouter>                     <Routes>                         {/*This renders the login UI on the /auth route*/}                         {getSuperTokensRoutesForReactRouterDom(reactRouterDom, [EmailPasswordPreBuiltUI])}                         {/*Your app routes*/}                     </Routes>                 </BrowserRouter>             </SuperTokensWrapper>         );     } }   important If you are using useRoutes, createBrowserRouter or have routes defined in a different file, you need to adjust the code sample. Please see this issue for further details.  import React from 'react';  import { BrowserRouter, useRoutes } from \"react-router-dom\"; import SuperTokens, { SuperTokensWrapper } from \"supertokens-auth-react\"; import { getSuperTokensRoutesForReactRouterDom } from \"supertokens-auth-react/ui\"; import * as reactRouterDom from \"react-router-dom\";  function AppRoutes() {   const authRoutes = getSuperTokensRoutesForReactRouterDom(     reactRouterDom,     [/* Add your UI recipes here e.g. EmailPasswordPrebuiltUI, PasswordlessPrebuiltUI, ThirdPartyPrebuiltUI */]   );    const routes = useRoutes([     ...authRoutes.map(route => route.props),     // Include the rest of your app routes    ]);    return routes; }  function App() {   return (     <SuperTokensWrapper>       <BrowserRouter>           <AppRoutes />       </BrowserRouter>     </SuperTokensWrapper>   ); }   4. Handle Session Tokens This part is handled automatically by the Frontend SDK. You don not need to do anything. The step serves more as a way for us to tell you how is this handled under the hood.  After you call the init function, the SDK will add interceptors to both fetch and XHR, XMLHTTPRequest. The latter is used by the axios library. The interceptors save the session tokens that are generated from the authentication flow. Those tokens are then added to requests initialized by your frontend app which target the backend API. By default, the tokens are stored through session cookies but you can also switch to header based authentication.  5. Secure Application Routes In order to prevent unauthorized access to certain parts of your frontend application you can use our utilities. Follow the code samples below to understand how to do this.  You can wrap your components with the <SessionAuth> react component. This will ensure that your component renders only if the user is logged in. If they are not logged in, the user will be redirected to the login page.  import React from \"react\"; import { BrowserRouter, Routes, Route } from \"react-router-dom\"; import { SessionAuth } from \"supertokens-auth-react/recipe/session\"; import MyDashboardComponent from \"./dashboard\";  class App extends React.Component {   render() {     return (       <BrowserRouter>         <Routes>           <Route             path=\"/dashboard\"             element={               <SessionAuth>                 {/*Components that require to be protected by authentication*/}                 <MyDashboardComponent />               </SessionAuth>             }           />         </Routes>       </BrowserRouter>     );   } }  6. View the login UI You can check the login UI by visiting the /auth route, in your frontend application. To review all the components of our pre-built UI please follow this link.\n\n\n\nOAuth Backend Documentation: Backend Setup Let's got through the changes required so that your backend can expose the SuperTokens authentication features.  1. Install the SDK Run the following command in your terminal to install the package.  npm i -s supertokens-node  info At the moment we only have SDKs for Node.js, Python and Go. If you wish to use SuperTokens with other languages you will have to create a separate authentication service. Please check our guide that shows you how to resolve this.  2. Initialize the SDK App Info Adjust these values based on the application that you are trying to configure. To learn more about what each field means check the references page. Application Name This is the URL of your app's API server. API Domain This is the URL of your app's API server. API Base Path SuperTokens will expose it's APIs scoped by this base API path. /auth Website Domain This is the URL of your website. Website Base Path The path where the login UI will be rendered /auth You will have to initialize the Backend SDK alongside the code that starts your server. The init call will include configuration details for your app, how the backend will connect to the SuperTokens Core, as well as the Recipes that will be used in your setup.  import supertokens from \"supertokens-node\"; import Session from \"supertokens-node/recipe/session\"; import EmailPassword from \"supertokens-node/recipe/emailpassword\";  supertokens.init({     framework: \"express\",     supertokens: {         // We use try.supertokens for demo purposes.         // At the end of the tutorial we will show you how to create         // your own SuperTokens core instance and then update your config.         connectionURI: \"https://try.supertokens.io\",         // apiKey: <YOUR_API_KEY>     },     appInfo: {         // learn more about this on https://supertokens.com/docs/session/appinfo         appName: \"<YOUR_APP_NAME>\",         apiDomain: \"<YOUR_API_DOMAIN>\",         websiteDomain: \"<YOUR_WEBSITE_DOMAIN>\",         apiBasePath: \"/auth\",         websiteBasePath: \"/auth\",     },     recipeList: [         EmailPassword.init(), // initializes signin / sign up features         Session.init() // initializes session features     ] });   3. Add the SuperTokens APIs and Configure CORS Now that the SDK is initialized you need to expose the endpoints that will be used by the frontend SDKs. Besides this, your server's CORS, Cross-Origin Resource Sharing, settings should be updated to allow the use of the authentication headers required by SuperTokens.  important Add the middleware BEFORE all your routes. Add the cors middleware BEFORE the SuperTokens middleware as shown below. import express from \"express\"; import cors from \"cors\"; import supertokens from \"supertokens-node\"; import { middleware } from \"supertokens-node/framework/express\";  let app = express();  app.use( \tcors({ \t\torigin: \"<YOUR_WEBSITE_DOMAIN>\", \t\tallowedHeaders: [\"content-type\", ...supertokens.getAllCORSHeaders()], \t\tcredentials: true, \t}), );  // IMPORTANT: CORS should be before the below line. app.use(middleware());  // ...your API routes  You can review all the endpoints that are added through the use of SuperTokens by visiting the API Specs.  4. Add the SuperTokens Error Handler Depending on the language and framework that you are using, you might need to add a custom error handler to your server. The handler will catch all the authentication related errors and return proper HTTP responses that can be parsed by the frontend SDKs.  import express, { Request, Response, NextFunction } from \"express\"; import { errorHandler } from \"supertokens-node/framework/express\";  let app = express();  // ...your API routes  // Add this AFTER all your routes app.use(errorHandler());  // your own error handler app.use((err: unknown, req: Request, res: Response, next: NextFunction) => { \t/* ... */ });  5. Secure Application Routes Now that your server can authenticate users, the final step that you need to take care of is to prevent unauthorized access to certain parts of the application.  For your APIs that require a user to be logged in, use the verifySession middleware.  import express from \"express\"; import { verifySession } from \"supertokens-node/recipe/session/framework/express\"; import { SessionRequest } from \"supertokens-node/framework/express\";  let app = express();  app.post(\"/like-comment\", verifySession(), (req: SessionRequest, res) => { \tlet userId = req.session!.getUserId(); \t//.... });  The middleware function returns a 401 to the frontend if a session doesn't exist, or if the access token has expired, in which case, our frontend SDK automatically refreshes the session.  In case of successful session verification, you get access to a session object using which you can get the user's ID, or manipulate the session information.  6. Test the Login Flow Now that you have configured both the frontend and the backend, you can return to the frontend login page. From here follow these steps to confirm that your setup is working properly.  Click on the Sign up button to create a new account. After you have created the account go to Login page and fill in your credentials. If you are greeted with the login screen you have completed the quickstart setup.",
+    "ctk.ruleSet": [
+        {
+            "id": 1,
+            "key": "OAuth Frontend Documentation"
+        },
+        {
+            "id": 2,
+            "key": "OAuth Backend Documentation"
+        }
+    ]
 }
+
+
+
