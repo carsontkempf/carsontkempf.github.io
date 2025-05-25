@@ -1,85 +1,71 @@
 ---
-layout: page
+layout: default
 title: My Account
 permalink: /account/
 ---
-
 <h2>My Account</h2>
-<div id="account-details"><p>Loading account information...</p></div>
-
-<button id="btn-get-api-key" style="display: none;">Get My API Key</button> <!-- Uncomment if you want to test this -->
-<p id="api-key-display" style="display: none;"></p>
+<div id="account-details" style="display: none;">
+    <p>Welcome to your account page. Only logged-in users can see this.</p>
+    <p>User Profile: <pre id="user-profile-data"></pre></p>
+    <button id="btn-get-api-key">Get My API Key</button>
+    <p>Your API Key: <pre id="api-key-display" style="display:none;"></pre></p>
+</div>
+<p id="login-prompt" style="display: block;">Please <a href="#" onclick="window.siteAuth.auth0Client.loginWithRedirect({ appState: { targetUrl: window.location.pathname }}); return false;">log in</a> to view your account details.</p>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const accountDetailsDiv = document.getElementById('account-details');
-  const getApiKeyButton = document.getElementById('btn-get-api-key'); // Uncomment if button is active
-  const apiKeyDisplayP = document.getElementById('api-key-display'); // Uncomment if display P is active
-
-  function renderAccountPage() {
-    if (window.siteAuth && window.siteAuth.isAuthenticated && window.siteAuth.user) {
-      accountDetailsDiv.innerHTML = `<p>Welcome, ${window.siteAuth.user.name}!</p><p>Email: ${window.siteAuth.user.email}</p>`;
-      if (getApiKeyButton) getApiKeyButton.style.display = 'block'; // Uncomment if button is active
-    } else {
-      accountDetailsDiv.innerHTML = '<p>Please <a href="#" id="login-link">log in</a> to view your account details.</p>';
-      const loginLink = document.getElementById('login-link');
-      if (loginLink) {
-        loginLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          if (window.siteAuth && window.siteAuth.auth0Client) {
-            const configuredAudience = window.siteAuth.auth0Client.options.authorizationParams.audience;
-            if (!configuredAudience) {
-              console.error("Audience is not configured in auth0Client options. Cannot log in.");
-              alert("Authentication configuration error. Audience missing.");
-              return;
-            }
-            window.siteAuth.auth0Client.loginWithRedirect({
-              authorizationParams: {
-                redirect_uri: window.location.origin, // Standardize redirect_uri
-                audience: configuredAudience
-              },
-              appState: { targetUrl: '/account/' } // Specify targetUrl to return to /account/
-            });
-          } else {
-            alert('Authentication system not ready. Please try again in a moment.');
-          }
+document.addEventListener('DOMContentLoaded', async () => {
+    // Wait for siteAuth to be initialized by auth.js
+    function waitForSiteAuth() {
+        return new Promise(resolve => {
+            const interval = setInterval(() => {
+                if (window.siteAuth && window.siteAuth.auth0Client) {
+                    clearInterval(interval);
+                    resolve(window.siteAuth);
+                }
+            }, 100);
         });
-      }
-      if (getApiKeyButton) getApiKeyButton.style.display = 'none';
-      if (apiKeyDisplayP) apiKeyDisplayP.style.display = 'none';
     }
-  }
 
-  const checkAuthReadyInterval = setInterval(() => {
-    // Check for auth0Client for login link, and isAuthenticated for initial render logic
-    if (window.siteAuth && typeof window.siteAuth.isAuthenticated !== 'undefined' && window.siteAuth.auth0Client) {
-      clearInterval(checkAuthReadyInterval);
-      renderAccountPage();
+    const siteAuth = await waitForSiteAuth();
+    const accountDetailsDiv = document.getElementById('account-details');
+    const loginPromptP = document.getElementById('login-prompt');
+    const userProfilePre = document.getElementById('user-profile-data');
+    const btnGetApiKey = document.getElementById('btn-get-api-key');
+    const apiKeyDisplayPre = document.getElementById('api-key-display');
 
-      if (getApiKeyButton) { // Uncomment if button is active
-        getApiKeyButton.addEventListener('click', async () => {
-          if (window.siteAuth && window.siteAuth.getApiKey) {
-            if (apiKeyDisplayP) {
-              apiKeyDisplayP.textContent = 'Fetching API key...';
-              apiKeyDisplayP.style.display = 'block';
+    async function updateAccountPageUI() {
+        if (siteAuth.isAuthenticated) {
+            accountDetailsDiv.style.display = 'block';
+            loginPromptP.style.display = 'none';
+            if (siteAuth.user && userProfilePre) {
+                userProfilePre.textContent = JSON.stringify(siteAuth.user, null, 2);
             }
-            const apiKey = await window.siteAuth.getApiKey();
-            if (apiKeyDisplayP) {
-              if (apiKey) {
-                apiKeyDisplayP.textContent = `Your API Key: ${apiKey}`;
-              } else {
-                apiKeyDisplayP.textContent = 'Could not retrieve API key.';
-              }
+        } else {
+            accountDetailsDiv.style.display = 'none';
+            loginPromptP.style.display = 'block';
+        }
+    }
+
+    await updateAccountPageUI(); // Initial UI update
+
+    // Listen for auth state changes (optional, if auth.js emits custom events)
+    // document.addEventListener('authStateChanged', updateAccountPageUI);
+
+    if (btnGetApiKey) {
+        btnGetApiKey.addEventListener('click', async () => {
+            if (!siteAuth.isAuthenticated) {
+                alert('Please log in to get an API key.');
+                return;
             }
-          } else {
-            if (apiKeyDisplayP) {
-              apiKeyDisplayP.textContent = 'API key function not available.';
-              apiKeyDisplayP.style.display = 'block';
+            const apiKey = await siteAuth.getApiKey();
+            if (apiKey && apiKeyDisplayPre) {
+                apiKeyDisplayPre.textContent = apiKey;
+                apiKeyDisplayPre.style.display = 'block';
+            } else if (apiKeyDisplayPre) {
+                apiKeyDisplayPre.textContent = 'Could not retrieve API key.';
+                apiKeyDisplayPre.style.display = 'block';
             }
-          }
         });
-      }
     }
-  }, 100); // Poll every 100ms
 });
 </script>

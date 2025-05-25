@@ -9,6 +9,8 @@
     <!--[if lt IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
+    <!-- Load Auth0 SPA SDK early and synchronously -->
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <script>
       (function() {
         var theme = localStorage.getItem('theme');
@@ -43,13 +45,12 @@
 
     <!-- Auth0 Integration -->
     <div id="auth-status" style="position: fixed; top: 10px; right: 10px; z-index: 1000; background: white; padding: 5px; border: 1px solid #ccc;">
-        <button id="btn-login">Log In</button>
+        <button id="btn-login" onclick="window.location.href='{{ '/login/' | relative_url }}';">Log In</button>
         <p id="user-info" style="display: none; margin: 0;"></p>
         <button id="btn-logout" style="display: none;">Log Out</button>
     </div>
 
-    <!-- Auth0 Integration Scripts - Placed at the end of body for sequential loading -->
-    <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <!-- Your custom auth script, can remain deferred -->
     <script defer src="{{ '/assets/js/auth.js' | relative_url }}"></script>
   </body>
 </html>

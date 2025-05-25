@@ -188,8 +188,58 @@ header {
   list-style: none;
   width: 250%;
 }
+.sidebar li:has(> ul) > span,
+.sidebar li:has(> ul) > a:first-child { // Assumes the link is the folder name and is the first child
+  display: block;
+  padding: 0.5em 0.8em; // Consistent padding
+  margin: 0;
+  text-decoration: none; // For <a> tags
+  // Font properties and color will be set by more specific rules or themes.
+}
+
+// Style for TOP-LEVEL "Parent Directory" labels
+// These are direct children of the first <ul> (or <ol>) in .sidebar
+.sidebar > ul > li:has(> ul) > span,
+.sidebar > ol > li:has(> ul) > span,
+.sidebar > ul > li:has(> ul) > a:first-child,
+.sidebar > ol > li:has(> ul) > a:first-child {
+  font-weight: bold;
+  font-size: 1.15em; // Larger text for parent directories
+}
+
+// Style for SUB-DIRECTORY labels (second level folders)
+// These are nested one level deeper
+.sidebar > ul > li > ul > li:has(> ul) > span,
+.sidebar > ol > li > ol > li:has(> ul) > span,
+.sidebar > ul > li > ul > li:has(> ul) > a:first-child,
+.sidebar > ol > li > ol > li:has(> ul) > a:first-child {
+  font-weight: bold; // Can be normal (e.g., font-weight: 500;) if preferred for less emphasis
+  font-size: 1.05em; // Slightly smaller than top-level, or same as posts
+}
+// Example for a third-level directory, if needed (uncomment and adjust):
+// .sidebar > ul > li > ul > li > ul > li:has(> ul) > span,
+// .sidebar > ol > li > ol > li > ol > li:has(> ul) > span,
+// .sidebar > ul > li > ul > li > ul > li:has(> ul) > a:first-child,
+// .sidebar > ol > li > ol > li > ol > li:has(> ul) > a:first-child {
+//   font-weight: normal;
+//   font-size: 1em;
+// }
+
+// Indentation for ALL nested lists to create the tree structure
+.sidebar ul ul,
+.sidebar ol ol {
+  padding-left: 1.2em; // Adjust indentation as needed
+  width: 100%; // Contain nested lists within their parent li's width,
+               // especially if the top-level ul/ol has an unusual width like 250%.
+}
+
+// --- Existing/Modified Link Styling for Posts ---
+
+// General style for all clickable links (posts and potentially directory links if not styled above)
+// Ensures post links are at base size and normal weight.
+// Directory <a> tags styled by :has() above will retain their specific font styles.
 .sidebar ol a,
-.sidebar li a {
+.sidebar ul li a {
   display: block;
   width: 100%;
   box-sizing: border-box;
@@ -202,7 +252,15 @@ header {
 .sidebar li a:hover {
   background-color: rgba(0,0,0,0.1);
   text-decoration: none;
+  font-size: 1em; // Base size for post links
+  font-weight: normal; // Normal weight for post links
 }
+.sidebar ol a:hover,
+.sidebar ul li a:hover {
+  background-color: rgba(0,0,0,0.1); // Default hover color
+  text-decoration: none;
+}
+
 .sidebar ol li:nth-child(odd) a {
   background: #B0B1B7;
 }

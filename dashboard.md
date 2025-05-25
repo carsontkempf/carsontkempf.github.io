@@ -1,50 +1,60 @@
 ---
-layout: page 
+layout: default
 title: Dashboard
 permalink: /dashboard/
 ---
+<h2>Dashboard</h2>
 
-<h2>Welcome to Your Dashboard!</h2>
-
-<div id="dashboard-content">
-  <p>You have successfully logged in.</p>
-
-  <p>From here, you can typically:</p>
-  <ul>
-    <li><a href="{{ '/account/' | relative_url }}">View Your Account Details</a></li>
-    <!-- Add more links relevant to authenticated users -->
-    <!-- Example: <li><a href="/settings/">Manage Your Settings</a></li> -->
-    <!-- Example: <li><a href="/exclusive-content/">Access Exclusive Content</a></li> -->
-  </ul>
-
-  <p>If you need to log out, you can usually find the logout button in the site's header or navigation area.</p>
+<!-- Content for all authenticated users -->
+<div id="dashboard-general-content" style="display: none;">
+    <p>Welcome to your dashboard. This content is visible to all logged-in users.</p>
 </div>
+
+<!-- Content specifically for subscribers -->
+<div id="dashboard-subscriber-content" style="display: none;">
+    <p style="color: green; font-weight: bold;">Welcome, valued Subscriber! Here's your exclusive content.</p>
+    <!-- Add more subscriber-specific content here -->
+</div>
+
+<p id="dashboard-login-prompt" style="display: block;">Please <a href="#" onclick="window.siteAuth.auth0Client.loginWithRedirect({ appState: { targetUrl: window.location.pathname }}); return false;">log in</a> to view the dashboard.</p>
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
-  const dashboardContentEl = document.getElementById('dashboard-content');
-
-  // This is a basic check. Your main auth.js should handle the heavy lifting
-  // of ensuring authentication state is up-to-date.
-  // This script could be enhanced to fetch dashboard-specific data.
-
-  const checkAuthInterval = setInterval(() => {
-    if (window.siteAuth && typeof window.siteAuth.isAuthenticated !== 'undefined') {
-      clearInterval(checkAuthInterval); // Stop polling once siteAuth is available
-
-      if (!window.siteAuth.isAuthenticated) {
-        // If, for some reason, the user lands here without being authenticated,
-        // provide a way to log in or redirect.
-        // Your main auth.js and page-specific scripts like my-account.md
-        // should ideally prevent unauthenticated access to protected routes.
-        if (dashboardContentEl) {
-          dashboardContentEl.innerHTML = '<p>Please <a href="#" onclick="window.siteAuth.auth0Client.loginWithRedirect({ appState: { targetUrl: \'/dashboard/\' } }); return false;">log in</a> to view your dashboard.</p>';
-        }
-      } else {
-        // User is authenticated, dashboard can load normally or fetch additional data.
-        console.log('User authenticated, welcome to the dashboard!', window.siteAuth.user);
-      }
+    function waitForSiteAuth() {
+        return new Promise(resolve => {
+            const interval = setInterval(() => {
+                if (window.siteAuth && window.siteAuth.auth0Client) {
+                    clearInterval(interval);
+                    resolve(window.siteAuth);
+                }
+            }, 100);
+        });
     }
-  }, 200); // Poll for siteAuth
+
+    const siteAuth = await waitForSiteAuth();
+    const dashboardGeneralContentDiv = document.getElementById('dashboard-general-content');
+    const dashboardSubscriberContentDiv = document.getElementById('dashboard-subscriber-content');
+    const loginPromptP = document.getElementById('dashboard-login-prompt');
+
+    async function updateDashboardPageUI() {
+        const isAuthenticated = siteAuth.isAuthenticated; // Or await siteAuth.checkAccess();
+        const isSubscriber = await siteAuth.checkAccess('subscriber');
+
+        if (isAuthenticated) {
+            dashboardGeneralContentDiv.style.display = 'block';
+            loginPromptP.style.display = 'none';
+
+            if (isSubscriber) {
+                dashboardSubscriberContentDiv.style.display = 'block';
+            } else {
+                dashboardSubscriberContentDiv.style.display = 'none';
+            }
+        } else {
+            dashboardGeneralContentDiv.style.display = 'none';
+            dashboardSubscriberContentDiv.style.display = 'none';
+            loginPromptP.style.display = 'block';
+        }
+    }
+    await updateDashboardPageUI();
 });
 </script>
