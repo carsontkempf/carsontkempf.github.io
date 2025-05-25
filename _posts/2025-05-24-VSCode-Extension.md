@@ -2,7 +2,7 @@
 layout: post
 title: "VSCode-Extension"
 date: 2025-05-24 20:31:15 -0000
-categories: [VSCodeExtension]
+categories: [Extensions]
 permalink: /VSCode-Extension/
 ---
 
