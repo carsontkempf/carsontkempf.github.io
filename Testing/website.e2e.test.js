@@ -9,7 +9,6 @@ const BASE_APP_DIRECTORY = path.resolve(__dirname, '..'); // Assumes test file i
 const JEKYLL_PORT = 4000;
 const JEKYLL_SERVER_URL = `http://localhost:${JEKYLL_PORT}`;
 const LOGIN_PAGE_URL = `${JEKYLL_SERVER_URL}/login/`; // Used for Jekyll readiness
-// const ERROR_LOGGER_URL = 'http://localhost:3001'; // If your error logger server has a health check endpoint
 
 let jekyllProcess;
 let browser;
@@ -39,7 +38,7 @@ function streamAndCollectOutput(processName, stream, collection, readyString = n
 }
 
 // Helper to kill a process and its children
-async function killProcessTree(proc, processName, killTimeout = 5000) { // Reduced killTimeout to 5s
+async function killProcessTree(proc, processName, killTimeout = 1500) { // Reduced killTimeout to 5s
     return new Promise((outerResolve, outerReject) => {
         if (!proc || proc.killed) {
             console.log(`Process ${processName} (PID: ${proc ? proc.pid : 'N/A'}) already killed or not started.`);
@@ -99,19 +98,16 @@ async function killProcessTree(proc, processName, killTimeout = 5000) { // Reduc
 }
 
 // Increase Jest's default timeout for async operations in beforeAll/afterAll
-jest.setTimeout(60000); // Reduced overall Jest timeout to 1 minute
+jest.setTimeout(5000); // Reduced overall Jest timeout to 1 minute
 
 beforeAll(async () => {
     // 3. Launch Puppeteer (Moved to be the first operation)
     console.log('--- [Setup] Launching Puppeteer browser... ---');
     browser = await puppeteer.launch({
         headless: false, // Set to false to see the browser window
-        slowMo: 50,      // Reduced slowMo
+        slowMo: 5,      // Reduced slowMo
         args: ['--no-sandbox', '--disable-setuid-sandbox'] // Common for CI environments
     });
-    // page = await browser.newPage(); // Old: This creates a new, additional page.
-
-    // New: Get existing pages and use the first one.
     const allPages = await browser.pages();
     if (allPages.length > 0) {
         page = allPages[0]; // Use the first existing page (browser's initial tab)
@@ -176,13 +172,7 @@ beforeAll(async () => {
 
     console.log('--- [Setup] Puppeteer browser launched and page object created. ---');
 
-    // Placeholder: Start your Node.js Error Logger Server here if it's managed by the test
-    // For example:
-    // console.log('--- [Setup] Starting Node.js Error Logger Server ---');
-    // nodeLoggerProcess = spawn('node', ['path/to/your/error-logger-server.js'], { cwd: BASE_APP_DIRECTORY });
-
     console.log('--- [Setup] Starting Jekyll Server ---');
-    // let jekyllReadyPromiseResolved = false; // Removed - Unused
 
     // Wrap Jekyll startup and readiness check in a single promise for beforeAll
     await new Promise((resolve, reject) => {
@@ -211,8 +201,8 @@ beforeAll(async () => {
 
         // HTTP readiness check logic
         let retries = 0;
-        const retryInterval = 1000; // Reduced retry interval
-        const maxRetries = Math.floor(30000 / retryInterval); // Target ~30 seconds for Jekyll readiness
+        const retryInterval = 100; // Make retry interval even shorter
+        const maxRetries = Math.floor(1500 / retryInterval); // Target ~30 seconds for Jekyll readiness, check much more frequently
         let readinessTimeoutId;
 
         const checkJekyllReady = () => {
@@ -263,7 +253,7 @@ beforeAll(async () => {
 
         // Start checks after a brief moment to allow the process to spawn and potentially output errors.
         console.log('--- [Setup] Jekyll process spawned. Waiting briefly before first HTTP check... ---');
-        setTimeout(checkJekyllReady, 500); // Adjust delay as needed
+        setTimeout(checkJekyllReady, 100); // Further reduced initial delay before first check
     });
     console.log('--- [Setup] Jekyll Server presumed ready. ---');
 });
@@ -278,7 +268,7 @@ afterAll(async () => {
             // Add a timeout for browser.close() as it can sometimes hang
             await Promise.race([
                 browser.close(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('browser.close() timed out after 3s')), 3000)) 
+                new Promise((_, reject) => setTimeout(() => reject(new Error('browser.close() timed out after 3s')), 1000)) 
             ]);
             console.log('--- [Teardown] Puppeteer browser closed. ---');
         } catch (e) {
@@ -291,13 +281,13 @@ afterAll(async () => {
     // Terminate Node.js Error Logger Server if it was started
     if (nodeLoggerProcess) {
         console.log('--- [Teardown] Stopping Node.js Error Logger Server... ---');
-        killPromises.push(killProcessTree(nodeLoggerProcess, 'NodeLogger', 2000) 
+        killPromises.push(killProcessTree(nodeLoggerProcess, 'NodeLogger', 1000) 
             .catch(e => console.error("--- [Teardown] Error killing NodeLogger:", e)));
     }
 
     if (jekyllProcess) {
         console.log('--- [Teardown] Stopping Jekyll Server... ---');
-        killPromises.push(killProcessTree(jekyllProcess, 'Jekyll', 3000) 
+        killPromises.push(killProcessTree(jekyllProcess, 'Jekyll', 1000) 
             .catch(e => console.error("--- [Teardown] Error killing Jekyll:", e)));
     }
 
@@ -332,8 +322,8 @@ describe('Website E2E Tests', () => {
             browserPageErrorMessages.push(err.message); 
         });
 
-        const waitForAuthLogs = async (timeout = 5000) => { // Reduced default timeout to 5s
-            console.log(`--- [Test] Waiting up to ${timeout / 1000} seconds for auth.js initialization signals... ---`);
+        const waitForAuthLogs = async (timeout = 500) => { // Further reduced default timeout
+            console.log(`--- [Test] Waiting up to ${timeout / 100} seconds for auth.js initialization signals... ---`);
             const startTime = Date.now();
             while (Date.now() - startTime < timeout) {
                 const initLog = browserConsoleLogs.some(log => log.text.includes("Auth0 initialization script finished."));
@@ -341,9 +331,8 @@ describe('Website E2E Tests', () => {
                     console.log('--- [Test] Auth.js "initialization script finished" signal found. Proceeding despite likely SDK failure. ---');
                     return; 
                 }
-                await new Promise(r => setTimeout(r, 250)); // Reduced poll interval
+                await new Promise(r => setTimeout(r, 100)); // Further reduced poll interval
             }
-
             const missingLogs = [];
             if (!browserConsoleLogs.some(log => log.text.includes("Auth0 initialization script finished."))) {
                 missingLogs.push("'Auth0 initialization script finished.'");
@@ -359,11 +348,8 @@ describe('Website E2E Tests', () => {
 
         try {
             console.log(`--- [Test] Navigating to ${JEKYLL_SERVER_URL}... ---`);
-            await page.goto(JEKYLL_SERVER_URL, { waitUntil: 'networkidle0', timeout: 2000 }); // Reduced goto timeout to 10s
+            await page.goto(JEKYLL_SERVER_URL, { waitUntil: 'networkidle0', timeout: 1200 }); // Increased goto timeout
             console.log('--- [Test] Page navigation complete. ---');
-
-            console.log('--- [Test Debug] Waiting 1 second after networkidle0 for scripts to execute... ---');
-            await new Promise(r => setTimeout(r, 1000)); // Reduced delay
 
             console.log('--- [Test Debug] Checking for window.auth0spa on the Jekyll page (expecting local SDK)... ---');
             const auth0SpaExists = await page.evaluate(() => typeof window.auth0spa !== 'undefined');
@@ -393,10 +379,7 @@ describe('Website E2E Tests', () => {
                 );
                 console.log(`--- [Test Debug] Early auth.js logs found: ${authJsEarlyLogs.length > 0} ---`, authJsEarlyLogs.map(l => l.text));
             }
-        
-            // if (!auth0SpaExists) {
-            //     throw new Error('CRITICAL SDK FAILURE: window.auth0spa was not defined by the Auth0 SPA SDK after page load and delay. Cannot proceed with Auth0 dependent tests.');
-            // }
+    
 
             const pageContent = await page.content();
             if (!pageContent.includes('/assets/js/auth0-spa-sdk-v2.0.js')) {
@@ -410,7 +393,7 @@ describe('Website E2E Tests', () => {
             }
 
             try {
-                await waitForAuthLogs(5000); // Reduced timeout
+                await waitForAuthLogs(10); // Further reduced timeout for waiting for auth logs
             } catch (e) {
                 console.warn(`--- [Test] waitForAuthLogs may have failed or timed out due to SDK issue: ${e.message} ---`);
             }
@@ -418,42 +401,19 @@ describe('Website E2E Tests', () => {
             const title = await page.title();
             expect(title).toContain("Carson’s Meditations");
 
-            console.log('--- [Test] Waiting 0.5 seconds before interacting with login button... ---');
-            await new Promise(resolve => setTimeout(resolve, 500)); // Reduced delay
-
-            console.log('--- [Test Debug] Attempting to focus and click on the page body BEFORE #btn-login CLICK... ---');
             await page.focus('body'); 
             await page.click('body');   
-            const focusedElementBeforeClick = await page.evaluate(() => document.activeElement.tagName);
-            console.log(`--- [Test Debug] Focus/click on page body. Active element before #btn-login click: ${focusedElementBeforeClick} ---`);
 
             const loginButtonSelector = '#btn-login';
-            console.log(`--- [Test] Attempting to click login button: ${loginButtonSelector} ---`);
             await page.click(loginButtonSelector);
-
-            console.log('--- [Test] Now on the /login/ page. Auth.js will attempt to initialize Auth0 SDK again here. ---');
-            console.log('--- [Test] Expecting Auth0 SDK to fail initialization on this page as well, and no actual Auth0 login will occur. ---');
-            
-
-            console.log('--- [Test] Waiting 1 second before clicking #btn-actual-login... ---');
-            await new Promise(resolve => setTimeout(resolve, 500));
 
             await page.focus('body');
             await page.click('body');
 
-            const focusedElementBeforeActualLoginClick = await page.evaluate(() => document.activeElement.tagName);
-
             const actualLoginButtonSelector = '#btn-actual-login';
             await page.click(actualLoginButtonSelector);
 
-            console.log(`--- [Test] Attempting to click actual login button: ${actualLoginButtonSelector} ---`);
-            console.log('--- [Test Debug] Attempting to focus and click on the page body BEFORE #btn-actual-login CLICK... ---');
-
-            console.log(`--- [Test Debug] Focus/click on page body. Active element before #btn-actual-login click: ${focusedElementBeforeActualLoginClick} ---`);
-            
-            console.log('--- [Test] Actual login button clicked. ---');
-            console.log('--- [Test] Observing page for 5 seconds after clicking #btn-actual-login... ---');
-            await new Promise(resolve => setTimeout(resolve, 5000)); 
+            await new Promise(resolve => setTimeout(resolve, 2000)); 
 
             expect(browserPageErrorMessages).toEqual([]);
 
@@ -476,5 +436,5 @@ describe('Website E2E Tests', () => {
         }
         process.stdout.write("--- [Test] Test completed successfully.\n");
 
-    }, 35000); // Reduced overall test case timeout
+    }, 10000); // Reduced overall test case timeout
 });
