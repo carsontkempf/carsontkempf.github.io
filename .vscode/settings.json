@@ -39,7 +39,8 @@
         ".venv": true,
         ".pytest_cache": true,
         "favicon.ico": true,
-        "jest.config.js": true
+        "jest.config.js": true,
+        "assets/js/auth0-spa-sdk-v2.0.js": true
     },
     "jest.shell": {
         "path": "/bin/bash",

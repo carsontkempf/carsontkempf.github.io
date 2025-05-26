@@ -9,8 +9,8 @@
     <!--[if lt IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
-    <!-- Load Auth0 SPA SDK locally -->
-    <script defer src="{{ '/assets/js/auth0-spa-sdk-v2.0.js' | relative_url }}"></script>
+    <!-- Load Auth0 SPA SDK deferred to avoid issues with document.write and improve performance -->
+    <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <script>
       (function() {
         var theme = localStorage.getItem('theme');
