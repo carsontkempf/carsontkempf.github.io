@@ -10,8 +10,8 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
 
-    <!-- Crucial: Load Auth0 SPA SDK early and synchronously -->
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <!-- Crucial: Load Auth0 SPA SDK locally -->
+    <script defer src="{{ '/assets/js/auth0-spa-sdk-v2.0.js' | relative_url }}"></script>
 
     <script>
       // Theme switcher logic (can be kept if used on login page)

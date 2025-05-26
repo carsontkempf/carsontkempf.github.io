@@ -1,3 +1,4 @@
+@charset "UTF-8";
 @import "fonts";
 @import "rouge-github";
 
@@ -90,13 +91,12 @@ table {
   table-layout: auto;         /* let browser size columns by widest cell     */
   border-collapse: collapse;
   border: none;
-
-  th,
-  td {
+}
+th, td, table {
     border: 1px solid #000;
     padding: 2px 5px;         /* 2 px top/bottom, 5 px left/right            */
   }
-}
+
 thead th {
   border: 2px solid #000;
 }

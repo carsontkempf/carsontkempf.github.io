@@ -37,11 +37,40 @@ function serializeErrorForReporting(error) {
 
 async function reportErrorToServer(errorToReport) {
     const errorDetails = serializeErrorForReporting(errorToReport);
+    let requestBody;
+
+    try {
+        requestBody = JSON.stringify({
+            timestamp: new Date().toISOString(),
+            url: window.location.href,
+            error: errorDetails,
+            userAgent: navigator.userAgent
+        });
+    } catch (stringifyError) {
+        console.error('[Auth.js] CRITICAL: Failed to stringify error report body:', stringifyError, '(Original error was:', errorToReport, ')');
+        // Fallback: try sending a very basic error message if main serialization fails
+        try {
+            await fetch('http://localhost:3001/log-client-error', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', },
+                body: JSON.stringify({
+                    timestamp: new Date().toISOString(),
+                    url: window.location.href,
+                    error: { message: "Error during client-side error serialization. Original: " + String(errorToReport) + (errorToReport && errorToReport.stack ? ". Stack: " + errorToReport.stack : "") },
+                    userAgent: navigator.userAgent
+                }),
+            });
+        } catch (fallbackReportingError) {
+            console.warn('[Auth.js] Failed to report even fallback error to server:', fallbackReportingError);
+        }
+        return; // Don't proceed with the original fetch if stringify failed
+    }
+
     try {
         await fetch('http://localhost:3001/log-client-error', { // Dedicated error logging server
             method: 'POST',
             headers: { 'Content-Type': 'application/json', },
-            body: JSON.stringify({ timestamp: new Date().toISOString(), url: window.location.href, error: errorDetails, userAgent: navigator.userAgent }),
+            body: requestBody,
         });
     } catch (reportingError) {
         console.warn('[Auth.js] Failed to report error to server:', reportingError, '(Original error was:', errorToReport, ')');
@@ -64,10 +93,65 @@ function siteAuthError(...args) {
     }
 }
 
+// --- Global Error Handlers to report unhandled issues to the server ---
+// Attach these as early as possible.
+
+window.addEventListener('unhandledrejection', function(event) {
+	siteAuthLog('[Global Handler] Unhandled promise rejection detected.');
+	let errorToReport;
+	if (event.reason instanceof Error) {
+		errorToReport = event.reason;
+	} else {
+		let message = `Unhandled promise rejection. Reason type: ${typeof event.reason}.`;
+		try {
+			message += ` Reason: ${JSON.stringify(event.reason)}`;
+		} catch {
+			message += ` Reason: ${String(event.reason)}`;
+		}
+		errorToReport = new Error(message);
+		// Attempt to capture some detail if reason is not an error
+		if (typeof event.reason !== 'undefined' && event.reason !== null) {
+			try {
+				// If event.reason is an object, copy its properties to the error object
+				if (typeof event.reason === 'object') {
+					Object.assign(errorToReport, event.reason);
+				}
+				errorToReport.originalReason = JSON.stringify(event.reason); // Keep a serialized version
+			} catch (e) {
+				errorToReport.details = String(event.reason);
+			}
+		}
+	}
+	console.warn('[Auth.js Global] Unhandled Rejection:', event.reason, errorToReport);
+	reportErrorToServer(errorToReport);
+});
+
+window.onerror = function(message, source, lineno, colno, error) {
+	siteAuthLog('[Global Handler] Unhandled error detected by window.onerror.');
+	let errorToReport = error;
+	if (error instanceof Error) {
+		// Ensure all properties are captured if it's already an Error
+		errorToReport.message = error.message || message; // Prefer error object's message
+		errorToReport.source = error.source || source;
+		errorToReport.lineno = error.lineno || lineno;
+		errorToReport.colno = error.colno || colno;
+	} else {
+		// Construct an error if one isn't provided
+		errorToReport = new Error(message || 'Unknown global error');
+		errorToReport.source = source;
+		errorToReport.lineno = lineno;
+		errorToReport.colno = colno;
+	}
+	console.warn('[Auth.js Global] window.onerror captured:', errorToReport);
+	reportErrorToServer(errorToReport);
+	return false; // Let default browser error handling also run
+};
+
 // These constants will be used by functions within onAuth0SdkReady
 const auth0Domain = 'dev-l57dcpkhob0u7ykb.us.auth0.com';
 const auth0ClientId = 'Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC'; // Ensure this is the Client ID for your "Carson's Meditations" APPLICATION
 const auth0Audience = 'https://carsontkempf.github.io/api/carsons-meditations'; // <-- UPDATE THIS to your new API Identifier
+
 
 document.addEventListener('DOMContentLoaded', async () => {
 	siteAuthLog('DOMContentLoaded event fired. Starting Auth0 initialization process.');
@@ -84,16 +168,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 			const maxRetries = 70; // Try for 7 seconds (70 * 100ms)
 			let retries = 0;
 			const intervalId = setInterval(() => {
-				siteAuthLog(`waitForAuth0Spa: Retry #${retries + 1}. Checking for window.auth0spa...`);
+				const spaLib = window.auth0spa;
+				const createClientFn = spaLib ? spaLib.createAuth0Client : undefined;
+
+				siteAuthLog(`waitForAuth0Spa: Retry #${retries + 1}. ` +
+					`window.auth0spa type: ${typeof spaLib}, ` +
+					`createAuth0Client type: ${typeof createClientFn}`);
+
 				if (typeof window.auth0spa !== 'undefined' && typeof window.auth0spa.createAuth0Client === 'function') {
 					clearInterval(intervalId);
-					siteAuthLog("Auth0 SPA SDK (window.auth0spa) is now available.");
+					siteAuthLog("waitForAuth0Spa: Auth0 SPA SDK (window.auth0spa) is now available and createAuth0Client is a function.");
 					resolve();
 				} else {
 					retries++;
 					if (retries >= maxRetries) {
 						clearInterval(intervalId);
-						siteAuthError("CRITICAL: Auth0 SPA SDK (window.auth0spa) did not become available after waiting.");
+						siteAuthError(`CRITICAL: Auth0 SPA SDK (window.auth0spa) did not become available after ${maxRetries} retries. ` +
+							`Last state: window.auth0spa type: ${typeof spaLib}, createAuth0Client type: ${typeof createClientFn}`);
 						reject(new Error('Auth0 SDK (window.auth0spa) timed out or is not valid.'));
 					}
 				}
