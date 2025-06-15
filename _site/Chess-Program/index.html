@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en-US" data-theme="light">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Chess-Program | Carson’s Meditations</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Chess-Program" />
+<meta name="author" content="Carson Kempf" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Chess Program" />
+<meta property="og:description" content="Chess Program" />
+<link rel="canonical" href="https://carsontkempf.github.io/Chess-Program/" />
+<meta property="og:url" content="https://carsontkempf.github.io/Chess-Program/" />
+<meta property="og:site_name" content="Carson’s Meditations" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-04-25T07:46:00-06:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Chess-Program" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Carson Kempf"},"dateModified":"2025-04-25T07:46:00-06:00","datePublished":"2025-04-25T07:46:00-06:00","description":"Chess Program","headline":"Chess-Program","mainEntityOfPage":{"@type":"WebPage","@id":"https://carsontkempf.github.io/Chess-Program/"},"url":"https://carsontkempf.github.io/Chess-Program/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=b4a6cf313c17d87e16de50d0a09fa0c58770e3e7">
+    <!--[if lt IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <![endif]-->
+    <!-- Load Auth0 SPA SDK deferred to avoid issues with document.write and improve performance -->
+    <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        if (theme && theme !== 'light') {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      })();
+    </script>
+
+  </head>
+  <body>
+    <div class="theme-switch">
+    <input type="radio" id="ts-light" name="theme" value="light" checked>
+    <input type="radio" id="ts-dark" name="theme" value="dark">
+    <input type="radio" id="ts-lr" name="theme" value="lr">
+    <div class="slider"></div>
+    <label for="ts-light" class="opt"></label>
+    <label for="ts-dark" class="opt"></label>
+    <label for="ts-lr" class="opt"></label>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var saved = localStorage.getItem('theme') || 'light';
+      var radio = document.getElementById('ts-' + saved);
+      if (radio) radio.checked = true;
+      document.documentElement.setAttribute('data-theme', saved);
+    });
+    document.querySelectorAll('.theme-switch input').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var mode = this.value;
+        document.documentElement.setAttribute('data-theme', mode);
+        localStorage.setItem('theme', mode);
+      });
+    });
+  </script>
+    <div class="wrapper">
+      <!-- Header Section -->
+      <aside class="header">
+        <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DSMK52452T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-DSMK52452T');
+  </script>
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" -->
+
+<header>
+  <h1>
+    <a href="/">Carson's Meditations</a>
+  </h1>
+
+  
+
+  <p class="skinny">
+    My site for my reflections on all types of projects
+  </p>
+
+  <p class="view">
+    <a href="/resume">Check Out My Resume</a>
+  </p>
+
+  
+  
+    <p>
+      <a href="https://github.com/carsontkempf">View My GitHub Profile</a>
+    </p>
+  
+</header>
+
+<!-- end custom head snippets -->
+      </aside>
+      <aside class="sidebar">
+        <div class="sidebar skinny">
+
+    
+
+    <h2>LangChain</h2>
+
+  <ol>
+    <ul>
+      
+        <li><a href="/LangChain-With-Search/">LangChain-With-Search</a></li>
+      
+        <li><a href="/LangChain-Tools/">LangChain-Tools</a></li>
+      
+        <li><a href="/LangChain-Conceptual-Guide/">LangChain-Conceptual-Guide</a></li>
+      
+        <li><a href="/LangChain/">LangChain Overview</a></li>
+      
+    </ul>
+  </ol>
+
+
+    
+
+    <h2>AI</h2>
+
+  <ol>
+    <ul>
+      
+        <li><a href="/Computer-Chess-Program/">Computer-Chess-Program</a></li>
+      
+        <li><a href="/Chess-Program/">Chess-Program</a></li>
+      
+        <li><a href="/Chess-Program-Requirements/">Chess-Program-Requirements</a></li>
+      
+        <li><a href="/River-Toad-Game/">River-Toad-Game</a></li>
+      
+        <li><a href="/A-Star-Search-Assignment/">A-Star-Search-Assignment</a></li>
+      
+    </ul>
+  </ol>
+
+
+    
+
+    <h2>Apps</h2>
+
+  <ol>
+    <ul>
+      
+        <li><a href="/LangGraph-ChatBot/">LangGraph-ChatBot</a></li>
+      
+        <li><a href="/To-Do-App/">To-Do-App</a></li>
+      
+    </ul>
+  </ol>
+
+
+    
+
+    <h2>Extensions</h2>
+
+  <ol>
+    <ul>
+      
+        <li><a href="/Chrome-Extension/">Chrome-Extension</a></li>
+      
+        <li><a href="/VSCode-Extension/">VSCode-Extension</a></li>
+      
+    </ul>
+  </ol>
+
+
+    
+</div>
+      </aside>
+      <!-- Body Section -->
+      <section class="main-content">
+        <small>25 April 2025</small>
+<h1>Chess-Program</h1>
+
+<p class="view">by Carson Kempf</p>
+
+<h1 id="chess-program">Chess Program</h1>
+
+<hr />
+
+<h2 id="scope">Scope</h2>
+
+<ul>
+  <li>Create a program that makes random <strong>valid</strong> chess moves</li>
+  <li>Implement chess using the chess AI Framework</li>
+</ul>
+
+<hr />
+
+<h2 id="objectives">Objectives</h2>
+
+<ul>
+  <li>Create a model of the game state and action generation</li>
+</ul>
+
+<p>(to be used for future AI algorithms to solve)</p>
+
+<h3 id="overview">Overview</h3>
+
+<ul>
+  <li>
+    <p>Generate all pseudo-valid moves for all of your player’s pieces in the current game state</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">Pseudo-valid == valid moves disregarding checks</code></p>
+  </li>
+</ul>
+
+<p><a href="https://siggame.github.io/Joueur.py/">Joueur</a></p>
+
+<p><a href="https://siggame.github.io/Joueur.py/chess/index.html">Joueur Class</a></p>
+
+<hr />
+
+<h2 id="output">Output</h2>
+
+<h3 id="on-each-turn">On Each Turn</h3>
+
+<ol>
+  <li>Print out in its own line: the number of moves available to your program</li>
+  <li>Print out in a single line: all moves available to your player program in alphabetical order</li>
+  <li>In the next line: print the randomly chosen move that the program returns to the chess server</li>
+</ol>
+
+<ul>
+  <li>After, the program can print other stuff</li>
+</ul>
+
+<h3 id="moves-printed">Moves Printed</h3>
+
+<ul>
+  <li>In universal chess notation</li>
+</ul>
+
+<p>Examples:</p>
+
+<blockquote>
+  <p>e2e4</p>
+
+  <p>e7e5</p>
+
+  <p>e1g1 (white short castling)</p>
+
+  <p>e7e8q (for promotion)</p>
+</blockquote>
+
+<h3 id="sample-output">Sample Output</h3>
+
+<p>Input FEN string:</p>
+
+<p><code class="language-plaintext highlighter-rouge">3k4/8/5N2/3P3p/4K3/2p5/1B6/8 w - - 0 23</code></p>
+
+<p>(Corresponds to the following board…)</p>
+
+<p><img src="../assets/img/2025-04-29-14-01-46.png" alt="" /></p>
+
+<p>Output Format:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>18 
+b2a1 b2a3 b2c1 b2c3 d5d6 e4d3 e4d4 e4e3 e4e5 e4f3 e4f4 e4f5 
+f6d7 f6e8 f6g4 f6g8 f6h5 f6h7 
+My move = b2c1
+</code></pre></div></div>
+
+<p>**Note: Remember the special move rules for pawns and kings
+**</p>
+
+<hr />
+
+<h2 id="implementation-requirements">Implementation Requirements</h2>
+
+<ul>
+  <li>Only one language framework</li>
+  <li>Delete the frameworks that aren’t used</li>
+  <li>Place code in <code class="language-plaintext highlighter-rouge">ai.py</code> file</li>
+</ul>
+
+<p>If other files are used:</p>
+<ul>
+  <li>Place them in the same folder as <code class="language-plaintext highlighter-rouge">ai.py</code></li>
+  <li>Name the other files in the format <code class="language-plaintext highlighter-rouge">Game1*.py</code></li>
+  <li>Import the new file: <code class="language-plaintext highlighter-rouge">import games.chess.foo</code></li>
+</ul>
+
+<hr />
+
+<h1 id="documentation"><a href="https://siggame.github.io/Joueur.py/chess/index.html">Documentation</a></h1>
+
+<h2 id="classes">Classes</h2>
+
+<ul>
+  <li><a href="https://siggame.github.io/Joueur.py/chess/ai.html">AI</a></li>
+  <li><a href="https://siggame.github.io/Joueur.py/chess/game.html">Game</a></li>
+  <li><a href="https://siggame.github.io/Joueur.py/chess/game_object.html">GameObject</a></li>
+  <li><a href="https://siggame.github.io/Joueur.py/chess/player.html">Player</a></li>
+</ul>
+
+<h2 id="scope-1">Scope</h2>
+
+<ul>
+  <li>
+    <p>Should only edit <strong>file</strong> <code class="language-plaintext highlighter-rouge">Joueur.py/games/chess/ai.py</code></p>
+  </li>
+  <li>
+    <p>Should only edit <strong>functions</strong> <code class="language-plaintext highlighter-rouge">make_move()</code> and <code class="language-plaintext highlighter-rouge">get_name()</code></p>
+  </li>
+</ul>
+
+<hr />
+
+<h2 id="ai">AI</h2>
+
+<h3 id="class-gameschessaiaigame"><code class="language-plaintext highlighter-rouge">class games.chess.ai.AI(game)</code></h3>
+
+<ul>
+  <li>Add AI to play chess</li>
+</ul>
+
+<blockquote>
+  <p>Functions</p>
+
+  <p><code class="language-plaintext highlighter-rouge">end(won: bool, reason: str)</code></p>
+</blockquote>
+
+<ul>
+  <li>Called when the game ends</li>
+</ul>
+
+<h6 id="returns">returns:</h6>
+
+<ul>
+  <li>None</li>
+</ul>
+
+<h6 id="parameters">Parameters:</h6>
+
+<p>won(bool)</p>
+
+<ul>
+  <li>
+    <p>True (won)</p>
+  </li>
+  <li>
+    <p>False (lost)</p>
+  </li>
+</ul>
+
+<p>reason(str)</p>
+
+<ul>
+  <li>
+    <p>Human readable string</p>
+  </li>
+  <li>
+    <p>Explains why the AI won or lost</p>
+  </li>
+</ul>
+
+<h5 id="game_updated">game_updated()</h5>
+
+<ul>
+  <li>
+    <p>Called every time the game’s state updates</p>
+  </li>
+  <li>
+    <p>For tracking (game states, trends?, ???)</p>
+  </li>
+</ul>
+
+<h6 id="returns-1">returns:</h6>
+
+<ul>
+  <li>None</li>
+</ul>
+
+<h5 id="get_name">get_name()</h5>
+
+<ul>
+  <li>
+    <p>The name sent to the server</p>
+  </li>
+  <li>
+    <p>The AI can control the player that is named this string</p>
+  </li>
+</ul>
+
+<h6 id="returns-2">returns:</h6>
+
+<ul>
+  <li>string (The name of the player)</li>
+</ul>
+
+<h5 id="get_settingskey-str">get_settings(key: str)</h5>
+
+<ul>
+  <li>
+    <p>Gets an AI setting passed to the program</p>
+  </li>
+  <li>
+    <p>Through the “-aiSettings” flag</p>
+  </li>
+</ul>
+
+<h6 id="returns-3">returns:</h6>
+
+<ul>
+  <li>string (Represents the value set via the command line (or none))</li>
+</ul>
+
+<h6 id="flag">Flag:</h6>
+
+<p>Set</p>
+
+<ul>
+  <li>Returned as a string value</li>
+</ul>
+
+<p>Not Set</p>
+
+<ul>
+  <li>None returned</li>
+</ul>
+
+<h6 id="parameters-1">Parameters:</h6>
+
+<p>key(str)</p>
+
+<ul>
+  <li>
+    <p>The key of the setting</p>
+  </li>
+  <li>
+    <p>We want to get the value of that specific key</p>
+  </li>
+</ul>
+
+<h5 id="make_move">make_move()</h5>
+
+<ul>
+  <li>Called every time the AI.player’s turn to make a single move</li>
+</ul>
+
+<h6 id="returns-4">returns:</h6>
+
+<p>string</p>
+
+<ul>
+  <li>
+    <p>In Universal Chess Interface</p>
+  </li>
+  <li>
+    <p>Represents the move we want to make</p>
+  </li>
+  <li>
+    <p>If the move is invalid or not properly formatted, we lose the game</p>
+  </li>
+</ul>
+
+<h5 id="start">start()</h5>
+
+<ul>
+  <li>
+    <p>Called once the game starts</p>
+  </li>
+  <li>
+    <p>Our AI knows its player and game</p>
+  </li>
+  <li>
+    <p>Initialize the AI</p>
+  </li>
+</ul>
+
+<h6 id="returns-5">returns:</h6>
+
+<p>None</p>
+
+<blockquote>
+  <p>Properties</p>
+</blockquote>
+
+<h5 id="property-game">property game</h5>
+
+<ul>
+  <li>References the Game instance this AI is playing</li>
+</ul>
+
+<h6 id="type">Type:</h6>
+
+<p>games.chess.game.Game</p>
+
+<h5 id="property-player">property player</h5>
+
+<ul>
+  <li>References the Player this AI controls in the Game</li>
+</ul>
+
+<h6 id="type-1">Type:</h6>
+
+<p>games.chess.player.Player</p>
+
+<hr />
+
+<h2 id="game">Game</h2>
+
+<h3 id="class-gameschessgamegame">class games.chess.game.Game</h3>
+
+<ul>
+  <li>
+    <p>Represents the Game in the Chess game</p>
+  </li>
+  <li>
+    <p>Traditional 8x8 chess board</p>
+  </li>
+</ul>
+
+<blockquote>
+  <p>Functions</p>
+</blockquote>
+
+<h5 id="get_game_objectid-str">get_game_object(id: str)</h5>
+
+<ul>
+  <li>Gets the game object with the given id (or returns none)</li>
+</ul>
+
+<h6 id="returns-6">Returns:</h6>
+
+<p>Optional[joueur.base_game_object.BaseGameObject]</p>
+
+<blockquote>
+  <p>Properties</p>
+</blockquote>
+
+<h5 id="property-fen">property fen</h5>
+
+<ul>
+  <li>Describes the entire state of the game board</li>
+</ul>
+
+<h6 id="type-2">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-game_objects">property game_objects</h5>
+
+<ul>
+  <li>
+    <p>Maps every game object’s ID to the actual game object</p>
+  </li>
+  <li>
+    <p>Used by the server and client</p>
+  </li>
+  <li>
+    <p>Refers to the game objects via the ID</p>
+  </li>
+</ul>
+
+<h6 id="type-3">Type:</h6>
+
+<p>dict[str, games.chess.game_object.GameObject]</p>
+
+<h5 id="property-history">property history</h5>
+
+<ul>
+  <li>
+    <p>The list of known moves that have occurred in the game</p>
+  </li>
+  <li>
+    <p>In Universal Chess Interface format</p>
+  </li>
+  <li>
+    <p>The first element is the first move</p>
+  </li>
+  <li>
+    <p>The last element is the most recent move</p>
+  </li>
+</ul>
+
+<h6 id="type-4">Type:</h6>
+
+<p>list[str]</p>
+
+<h5 id="property-players">property players</h5>
+
+<ul>
+  <li>List of all the players in the game</li>
+</ul>
+
+<h6 id="type-5">Type:</h6>
+
+<p>list[games.chess.player.Player]</p>
+
+<h5 id="property-session">property session</h5>
+
+<ul>
+  <li>A unique identifier for the game instance that’s being played</li>
+</ul>
+
+<h6 id="type-6">Type:</h6>
+
+<p>string</p>
+
+<hr />
+
+<h2 id="gameobject">GameObject</h2>
+
+<h3 id="class-gameschessgame_objectgameobject">class games.chess.game_object.GameObject</h3>
+
+<ul>
+  <li>
+    <p>Represents an object in chess</p>
+  </li>
+  <li>
+    <p>The most basic class</p>
+  </li>
+  <li>
+    <p>All classes inherit from automatically</p>
+  </li>
+</ul>
+
+<blockquote>
+  <p>Functions</p>
+</blockquote>
+
+<h5 id="logmessagestr">log(message:str)</h5>
+
+<ul>
+  <li>
+    <p>Adds a message to the GameObject’s logs</p>
+  </li>
+  <li>
+    <p>For debugging purposes</p>
+  </li>
+</ul>
+
+<h6 id="returns-7">Returns:</h6>
+
+<p>None</p>
+
+<h6 id="parameters-2">Parameters:</h6>
+
+<p>message(str)</p>
+
+<ul>
+  <li>String to add to the GameObject’s log (for debugging)</li>
+</ul>
+
+<blockquote>
+  <p>Properties</p>
+</blockquote>
+
+<h5 id="property-game_object_name">property game_object_name</h5>
+
+<ul>
+  <li>
+    <p>String representation of the top level Class that the GameObject is an instance of</p>
+  </li>
+  <li>
+    <p>Used for reflection</p>
+  </li>
+  <li>
+    <p>Creates new instances on clients</p>
+  </li>
+  <li>
+    <p>Exposed for convenience (should AIs want this data)</p>
+  </li>
+</ul>
+
+<h6 id="type-7">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-id">property id</h5>
+
+<ul>
+  <li>
+    <p>A unique id for each instance of a GameObject or a sub class</p>
+  </li>
+  <li>
+    <p>Used for client and server communication</p>
+  </li>
+  <li>
+    <p>Never changes value after being set</p>
+  </li>
+</ul>
+
+<h6 id="type-8">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-logs">property logs</h5>
+
+<ul>
+  <li>
+    <p>Any strings logged are stored here</p>
+  </li>
+  <li>
+    <p>For debugging</p>
+  </li>
+</ul>
+
+<h6 id="type-9">Type:</h6>
+
+<p>list[str]</p>
+
+<hr />
+
+<h2 id="player">Player</h2>
+
+<h3 id="class-gameschessplayerplayer">class games.chess.player.Player</h3>
+
+<ul>
+  <li>
+    <p>Represents the player in the chess game</p>
+  </li>
+  <li>
+    <p>Every AI controls one player</p>
+  </li>
+</ul>
+
+<blockquote>
+  <p>Functions</p>
+</blockquote>
+
+<h5 id="logmessage-str">log(message: str)</h5>
+
+<ul>
+  <li>
+    <p>Adds a message to this GameObject’s logs</p>
+  </li>
+  <li>
+    <p>Intended for debugging</p>
+  </li>
+</ul>
+
+<h6 id="returns-8">Returns:</h6>
+
+<p>None</p>
+
+<h6 id="parameters-3">Parameters:</h6>
+
+<p>message(str)</p>
+
+<blockquote>
+  <p>Properties</p>
+</blockquote>
+
+<h5 id="property-client_type">property client_type</h5>
+
+<ul>
+  <li>
+    <p>What type of client the player is (Python in our case)</p>
+  </li>
+  <li>
+    <p>For data mining purposes</p>
+  </li>
+</ul>
+
+<h6 id="type-10">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-color">property color</h5>
+
+<ul>
+  <li>
+    <p>The color of this player</p>
+  </li>
+  <li>
+    <p>Either “white” or “black”</p>
+  </li>
+  <li>
+    <p>Player “white” has the first move</p>
+  </li>
+</ul>
+
+<h6 id="type-11">Type:</h6>
+
+<p>“white”</p>
+
+<p>“black”</p>
+
+<h5 id="property-game_object_name-1">property game_object_name</h5>
+
+<ul>
+  <li>
+    <p>String representing the top level Class that this GameObject is an instance of</p>
+  </li>
+  <li>
+    <p>Used for reflection</p>
+  </li>
+  <li>
+    <p>Helps create new instances on clients</p>
+  </li>
+  <li>
+    <p>Exposed for convenience if AIs want this data</p>
+  </li>
+</ul>
+
+<h6 id="type-12">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-id-1">property id</h5>
+
+<ul>
+  <li>
+    <p>Unique id for each instance of a GameObject or sub class</p>
+  </li>
+  <li>
+    <p>Used for client and server communication</p>
+  </li>
+  <li>
+    <p>Never change value after being set</p>
+  </li>
+</ul>
+
+<h6 id="type-13">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-logs-1">property logs</h5>
+
+<ul>
+  <li>Any strings logged are stored here</li>
+</ul>
+
+<h6 id="type-14">Type:</h6>
+
+<p>list[str]</p>
+
+<h5 id="property-lost">property lost</h5>
+
+<ul>
+  <li>If the player lost the game or not</li>
+</ul>
+
+<h6 id="type-15">Type:</h6>
+
+<p>boolean</p>
+
+<h5 id="property-name">property name</h5>
+
+<ul>
+  <li>The name of the player</li>
+</ul>
+
+<h6 id="type-16">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-opponent">property opponent</h5>
+
+<ul>
+  <li>This player’s opponent in chess</li>
+</ul>
+
+<h6 id="type-17">Type:</h6>
+
+<p>games.chess.player.Player</p>
+
+<h5 id="property-reason_lost">property reason_lost</h5>
+
+<ul>
+  <li>The reason why the player lost the game</li>
+</ul>
+
+<h6 id="type-18">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-reason_won">property reason_won</h5>
+
+<ul>
+  <li>The reason why the player won the game</li>
+</ul>
+
+<h6 id="type-19">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-time_remaining">property time_remaining</h5>
+
+<ul>
+  <li>The amount of time (in ns) remaining for this AI to send commands</li>
+</ul>
+
+<h6 id="type-20">Type:</h6>
+
+<p>float</p>
+
+<h5 id="property-won">property won</h5>
+
+<ul>
+  <li>If the player won the game or not</li>
+</ul>
+
+<h6 id="type-21">Type:</h6>
+
+<p>boolean</p>
+
+<hr />
+
+<h3 id="game-logic">Game Logic</h3>
+
+<ul>
+  <li>Game logic is not implemented for you</li>
+  <li>Cadre facilitates IO between a game server and the AI</li>
+</ul>
+
+<hr />
+
+<h2 id="submission">Submission</h2>
+
+<h3 id="readytosubmittxt"><code class="language-plaintext highlighter-rouge">ReadyToSubmit.txt</code></h3>
+
+<ol>
+  <li>Change to <code class="language-plaintext highlighter-rouge">yes</code></li>
+  <li>Change to <code class="language-plaintext highlighter-rouge">py</code></li>
+</ol>
+
+<hr />
+
+<h2 id="grading">Grading</h2>
+
+<ul>
+  <li>Tested with the <code class="language-plaintext highlighter-rouge">play.sh</code> script</li>
+  <li>Plays the AI against itself</li>
+</ul>
+
+<blockquote>
+  <p>Do <strong>NOT</strong> edit <code class="language-plaintext highlighter-rouge">play.sh</code></p>
+</blockquote>
+
+<h3 id="execution">Execution</h3>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">./play.sh LANGUAGE_DIR SESSION_ID</code></p>
+
+  <p><code class="language-plaintext highlighter-rouge">./testRun MyOwnGameSession</code></p>
+</blockquote>
+
+<h3 id="language_dir"><code class="language-plaintext highlighter-rouge">LANGUAGE_DIR</code></h3>
+
+<ul>
+  <li>The directory where we are coding in: <code class="language-plaintext highlighter-rouge">Joueur.py</code></li>
+</ul>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">./play.sh Joueur.py testing_id</code></p>
+</blockquote>
+
+<h3 id="the-testrun-script">The <code class="language-plaintext highlighter-rouge">testRun</code> Script</h3>
+
+<ul>
+  <li>
+    <p>Set up to connect to the remote host <code class="language-plaintext highlighter-rouge">mst-ai.xyz</code>.</p>
+  </li>
+  <li>
+    <p>If running locally change this to <code class="language-plaintext highlighter-rouge">localhost (127.0.0.1)</code></p>
+  </li>
+</ul>
+
+<h3 id="server-software"><a href="https://github.com/siggame/Cerveau">Server Software</a></h3>
+
+<ul>
+  <li>
+    <p>Ignore the log files here</p>
+  </li>
+  <li>
+    <p>Find logs under <code class="language-plaintext highlighter-rouge">logs/gamelogs</code> in the server directory (if running locally)</p>
+  </li>
+</ul>
+
+
+      </section>
+      <!-- Footer Section -->
+      <section class="footer">
+        <footer>
+
+
+</footer>
+      </section>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+    <div class="sidebar-toggle-btn" id="sidebar-toggle-btn" style="--icon-offset-y: -3px;">
+  <span class="toggle-icon">☰</span>
+</div>
+<script>
+  document.getElementById('sidebar-toggle-btn').addEventListener('click', function() {
+    var root = document.documentElement;
+    if (root.getAttribute('data-sidebar') === 'expanded') {
+      root.removeAttribute('data-sidebar');
+    } else {
+      root.setAttribute('data-sidebar', 'expanded');
+    }
+  });
+  // call with a number (positive or negative) to move the icon vertically
+  function setIconOffset(y) {
+    document.getElementById('sidebar-toggle-btn')
+      .style.setProperty('--icon-offset-y', y + 'px');
+  }
+</script>
+<style>
+  .sidebar-toggle-btn .toggle-icon {
+    display: inline-block;
+    transform: translateY(var(--icon-offset-y));
+  }
+</style>
+
+    <!-- Auth0 UI Integration -->
+    <!-- /Users/ctk/Programming/VSCodeProjects/carsontkempf.github.io/_includes/auth_ui.html -->
+<div id="auth-status-buttons" style="position: fixed; top: 10px; right: 10px; z-index: 1000; background: white; padding: 5px; border: 1px solid #ccc;">
+    <button id="btn-login" onclick="siteAuth.login()" style="display: none;">Log In</button>
+    <p id="user-info" style="display: none; margin: 0;"></p>
+    <a href="/dashboard/" id="btn-dashboard" style="display: none;">Dashboard</a>
+    <button id="btn-logout" onclick="siteAuth.logout()" style="display: none;">Log Out</button>
+</div>
+
+    <!-- Your custom auth script, can remain deferred -->
+    <script defer src="/assets/js/auth.js"></script>
+  </body>
+</html>

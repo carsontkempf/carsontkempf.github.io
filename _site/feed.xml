@@ -1,0 +1,2757 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="https://carsontkempf.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://carsontkempf.github.io/" rel="alternate" type="text/html" /><updated>2025-06-15T17:14:42-06:00</updated><id>https://carsontkempf.github.io/feed.xml</id><title type="html">Carson’s Meditations</title><subtitle>My site for my reflections on all types of projects</subtitle><author><name>Carson Kempf</name></author><entry><title type="html">Chrome-Extension</title><link href="https://carsontkempf.github.io/Chrome-Extension/" rel="alternate" type="text/html" title="Chrome-Extension" /><published>2025-05-24T14:57:40-06:00</published><updated>2025-05-24T14:57:40-06:00</updated><id>https://carsontkempf.github.io/Chrome-Extension</id><content type="html" xml:base="https://carsontkempf.github.io/Chrome-Extension/"><![CDATA[<h3 id="check-out-our-extension"><a href="https://chromewebstore.google.com/detail/chrome-to-do-list/cjbofglecjgeekcimjbcdkkfiiapnmmj?utm_source=item-share-cb">Check out our extension!</a></h3>
+
+<h1 id="todo-list-extension">Todo List Extension</h1>
+
+<h2 id="project-structure">Project Structure</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root/
+├ manifest.json
+├ images/ *.png
+├ sounds/slot_machine_payout.wav
+├ templates/ todo.html, dashboard.html
+├ styles/ todo.css, dashboard.css
+├ scripts/
+├ load-templates.js
+├ todo.js
+└ dashboard.js
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="data-structures">Data Structures</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Var</th>
+      <th>File</th>
+      <th>Type</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">tasks</code></td>
+      <td>todo.js</td>
+      <td><code class="language-plaintext highlighter-rouge">Array&lt;{title,url}&gt;</code></td>
+      <td>persisted</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">timers</code></td>
+      <td>dashboard.js</td>
+      <td><code class="language-plaintext highlighter-rouge">Array&lt;Timer&gt;</code></td>
+      <td>runtime</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="core-functions">Core Functions</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>File</th>
+      <th>Function</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>load-templates.js</td>
+      <td>inject templates</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>todo.js</td>
+      <td>waitForDocumentLoad · loadTasks · saveTasks · renderTasks · handleAddButton</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>dashboard.js</td>
+      <td>formatTime · tickTimer · renderTimers · waitForElement</td>
+      <td> </td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="features">Features</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Priority</th>
+      <th>Feature</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>★★★</td>
+      <td>Site blocker</td>
+    </tr>
+    <tr>
+      <td>★★★</td>
+      <td>Tag filter UI</td>
+    </tr>
+    <tr>
+      <td>★★</td>
+      <td>Stopwatch mode</td>
+    </tr>
+    <tr>
+      <td>★★</td>
+      <td>Productivity charts</td>
+    </tr>
+    <tr>
+      <td>★</td>
+      <td>Cloud sync</td>
+    </tr>
+    <tr>
+      <td>★</td>
+      <td>Collaboration</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h1 id="develop-with-us">Develop with us!</h1>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">chrome://extensions</code> → <strong>Developer Mode</strong> ON</li>
+  <li><strong>Load unpacked</strong> → select project root</li>
+  <li>Confirm <em>Chrome To‑Do List</em> v2.3 appears</li>
+</ol>
+
+<h3 id="github-repo">GitHub Repo:</h3>
+
+<p><a href="https://github.com/carsontkempf/S.E.-Capstone-I">Main Branch</a></p>
+
+<p><a href="https://github.com/carsontkempf/S.E.-Capstone-I/tree/develop">Develop Branch</a></p>]]></content><author><name>Carson Kempf</name></author><category term="Extensions" /><summary type="html"><![CDATA[Check out our extension!]]></summary></entry><entry><title type="html">VSCode-Extension</title><link href="https://carsontkempf.github.io/VSCode-Extension/" rel="alternate" type="text/html" title="VSCode-Extension" /><published>2025-05-24T14:31:15-06:00</published><updated>2025-05-24T14:31:15-06:00</updated><id>https://carsontkempf.github.io/VSCode-Extension</id><content type="html" xml:base="https://carsontkempf.github.io/VSCode-Extension/"><![CDATA[<h1 id="gemini-prompt-library">Gemini Prompt Library</h1>
+
+<blockquote>
+  <p><a href="https://marketplace.visualstudio.com/items?itemName=ctk.ctk-gee">Download my extension!</a></p>
+</blockquote>
+
+<h2 id="1">1</h2>
+
+<h3 id="i-was-tired-of-my-resources-for-gemini-looking-like-this">I was tired of my resources for Gemini looking like this:</h3>
+
+<p><img src="../assets/img/2025-05-24-20-41-25.png" alt="" /></p>
+
+<h2 id="2">2</h2>
+
+<h3 id="so-i-made-an-extension-that-allows-key-value-pairs-to-be-used-for-geminis-resources">So I made an extension that allows key-value pairs to be used for Gemini’s resources.</h3>
+
+<p><img src="../assets/img/2025-05-24-20-43-19.png" alt="" /></p>
+
+<h2 id="3">3</h2>
+
+<h3 id="it-does-this-by-mapping-keys-to-ids">It does this by mapping keys to id’s</h3>
+
+<p><img src="../assets/img/2025-05-24-20-44-59.png" alt="" /></p>
+
+<h2 id="4">4</h2>
+
+<h3 id="so-that-our-resources-section-can-still-look-like-this">So that our resources section can still look like this:</h3>
+
+<p><img src="../assets/img/2025-05-24-20-41-25.png" alt="" /></p>
+
+<h2 id="5">5</h2>
+
+<h3 id="but-we-only-have-to-look-at-this">But we only have to look at this:</h3>
+
+<p><img src="../assets/img/2025-05-24-20-43-19.png" alt="" /></p>
+
+<hr />
+
+<h1 id="commands">Commands</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">CTK GEE: Add Global/Workspace Rule</code>: Prompts for a new rule key and value and adds it.</li>
+  <li><code class="language-plaintext highlighter-rouge">CTK GEE: Edit Global/Workspace Rule</code>: Allows selecting and editing an existing rule’s key and value.</li>
+  <li><code class="language-plaintext highlighter-rouge">CTK GEE: Delete Global/Workspace Rule</code>: Allows selecting and deleting a rule.</li>
+  <li><code class="language-plaintext highlighter-rouge">CTK GEE: View Global/Workspace Rules</code>: Displays the current rules.</li>
+  <li><code class="language-plaintext highlighter-rouge">CTK GEE: Force Sync Global/Workspace Rules</code>: Manually re-synchronizes <code class="language-plaintext highlighter-rouge">ctk.ruleSet</code> with <code class="language-plaintext highlighter-rouge">geminicodeassist.rules</code>.</li>
+</ul>]]></content><author><name>Carson Kempf</name></author><category term="Extensions" /><summary type="html"><![CDATA[Gemini Prompt Library]]></summary></entry><entry><title type="html">LangGraph-ChatBot</title><link href="https://carsontkempf.github.io/LangGraph-ChatBot/" rel="alternate" type="text/html" title="LangGraph-ChatBot" /><published>2025-05-15T11:46:10-06:00</published><updated>2025-05-15T11:46:10-06:00</updated><id>https://carsontkempf.github.io/LangGraph-ChatBot</id><content type="html" xml:base="https://carsontkempf.github.io/LangGraph-ChatBot/"><![CDATA[<h1 id="tool-augmented-chatbot-system-overview">Tool-Augmented Chatbot: System Overview</h1>
+
+<h2 id="chapter-1-user-interaction---the-chat-interface">Chapter 1: User Interaction - The Chat Interface</h2>
+
+<p>A user interacts with the Chatbot through a web-based interface. The user types their query into a text input field and submits it.</p>
+
+<p>This interface is built using <strong>Streamlit</strong> (as seen in <code class="language-plaintext highlighter-rouge">visuals.py</code>).</p>
+
+<h3 id="what-is-streamlit">What is Streamlit?</h3>
+
+<p>Streamlit is a Python library that simplifies the creation of web applications. For developers, it’s a way to build interactive user interfaces using Python code, without needing extensive web development knowledge (HTML, CSS, JavaScript). Streamlit handles the complexities of rendering web elements, allowing developers to focus on the application’s logic and functionality.</p>
+
+<p>In this project, <code class="language-plaintext highlighter-rouge">visuals.py</code> uses Streamlit to:</p>
+<ul>
+  <li>Display the application title (e.g., “LLM Chat with Tool Routing”) via <code class="language-plaintext highlighter-rouge">display_title()</code>.</li>
+  <li>Provide a text area for user input via <code class="language-plaintext highlighter-rouge">get_user_input()</code>.</li>
+  <li>Include a “Submit” button to send the query.</li>
+  <li>Offer a selection widget for choosing the underlying Large Language Model (LLM), such as DeepSeek or Claude.</li>
+</ul>
+
+<p><img src="../assets/img/2025-05-16-10-39-04.png" alt="" /></p>
+
+<h2 id="chapter-2-core-logic---langgraph-orchestration">Chapter 2: Core Logic - LangGraph Orchestration</h2>
+
+<p>When a user submits a query, it’s processed by the Chatbot’s core logic, which is managed by <strong>LangGraph</strong> (defined in <code class="language-plaintext highlighter-rouge">lang_graph.py</code>). This system uses a Large Language Model (LLM) as its central reasoning component.</p>
+
+<h3 id="what-is-langgraph">What is LangGraph?</h3>
+
+<p>LangGraph is a library for building stateful, multi-actor applications with LLMs. It allows developers to define complex workflows as graphs, where the LLM can decide to call upon external “tools” to gather information or perform actions.</p>
+
+<p>Essentially, LangGraph enables the LLM to:</p>
+<ol>
+  <li>Analyze the user’s query and determine if it can answer directly.</li>
+  <li>If not, identify if a specialized “tool” (a helper function) is needed to fulfill the request.</li>
+</ol>
+
+<p><code class="language-plaintext highlighter-rouge">lang_graph.py</code> sets up this decision-making process:</p>
+<ul>
+  <li>It defines an <code class="language-plaintext highlighter-rouge">AgentState</code> to maintain the history and current state of the conversation.</li>
+  <li>The <code class="language-plaintext highlighter-rouge">call_model</code> function is the entry point where the LLM first processes the user’s message.</li>
+  <li>The LLM is made aware of available tools (via <code class="language-plaintext highlighter-rouge">core_llm.bind_tools(available_tools)</code>). For instance, if a user asks, “What’s the weather in Paris?”, the LLM can recognize the need for the <code class="language-plaintext highlighter-rouge">weather_tool</code>.</li>
+  <li>LangGraph uses a <code class="language-plaintext highlighter-rouge">ToolNode</code> to execute the chosen tool.</li>
+  <li>The <code class="language-plaintext highlighter-rouge">tools_condition</code> acts as a conditional router: if a tool is selected by the LLM, the workflow executes that tool; otherwise, the LLM might proceed to generate a direct answer.</li>
+  <li>The system includes a mechanism to prevent redundant tool calls. If a tool (e.g., <code class="language-plaintext highlighter-rouge">weather_tool</code>) has just been executed with specific arguments, and the LLM proposes to call the exact same tool with the exact same arguments again, this redundant call is suppressed to enhance efficiency.</li>
+</ul>
+
+<p>The compiled workflow (<code class="language-plaintext highlighter-rouge">workflow.compile()</code>) results in an intelligent agent capable of dynamic decision-making and tool utilization.</p>
+
+<h2 id="chapter-3-specialized-capabilities---the-tools">Chapter 3: Specialized Capabilities - The Tools</h2>
+
+<p>The LLM, orchestrated by LangGraph, can leverage a suite of specialized tools to perform specific tasks or retrieve external information. These tools are individual Python functions designed for particular purposes:</p>
+
+<ul>
+  <li>
+    <p><strong>Professor Defini (<code class="language-plaintext highlighter-rouge">define_tool.py</code>):</strong>
+    *   <strong>Functionality:</strong> Provides definitions for terms or concepts.
+    *   <strong>Mechanism:</strong> When asked to define something (e.g., “Define ‘artificial intelligence’”), this tool uses an LLM to generate a concise definition.</p>
+  </li>
+  <li>
+    <p><strong>Weather Wiz (<code class="language-plaintext highlighter-rouge">weather.py</code>):</strong>
+    *   <strong>Functionality:</strong> Retrieves current weather information for a specified location.
+    *   <strong>Mechanism:</strong> For a query like “What’s the weather like in Rolla, MO tonight?”, this tool first uses the Nominatim service to geocode the location (find its latitude and longitude). It then queries the National Weather Service (NWS) API to fetch the weather forecast. It includes error handling for network issues or unresolvable locations.</p>
+  </li>
+  <li>
+    <p><strong>News Hound (<code class="language-plaintext highlighter-rouge">web_search.py</code>):</strong>
+    *   <strong>Functionality:</strong> Performs web searches to find current information or news.
+    *   <strong>Mechanism:</strong> For queries like “What’s the latest news about self-driving cars?”, this tool uses the Tavily search API to find relevant web pages and returns a summary of the search results.</p>
+  </li>
+  <li>
+    <p><strong>Speedy Summarizer (<code class="language-plaintext highlighter-rouge">summarizer.py</code>):</strong>
+    *   <strong>Functionality:</strong> Condenses long pieces of text into shorter summaries.
+    *   <strong>Mechanism:</strong> If provided with a lengthy text, this tool will summarize it to a specified maximum word count (e.g., 150 words), extracting the key information.</p>
+  </li>
+</ul>
+
+<p>These tools act as specialized assistants, providing the LLM with capabilities beyond its inherent knowledge. The system is extensible, allowing for the addition of new tools as needed.</p>
+
+<h2 id="chapter-4-processing-a-query---from-input-to-output">Chapter 4: Processing a Query - From Input to Output</h2>
+
+<p>Here’s a simplified flow of how a user query like “What’s the weather like in London?” is processed:</p>
+
+<ol>
+  <li><strong>User Input:</strong> The user types the query into the Streamlit interface (<code class="language-plaintext highlighter-rouge">visuals.py</code>).</li>
+  <li><strong>LangGraph Receives:</strong> The <code class="language-plaintext highlighter-rouge">agent_graph</code> in <code class="language-plaintext highlighter-rouge">lang_graph.py</code> takes the message.</li>
+  <li><strong>LLM Decision:</strong> The LLM, as part of the <code class="language-plaintext highlighter-rouge">call_model</code> function, analyzes the query and determines that the <code class="language-plaintext highlighter-rouge">weather_tool</code> is required.</li>
+  <li><strong>Tool Execution:</strong> LangGraph routes the request to the <code class="language-plaintext highlighter-rouge">ToolNode</code>, which executes the <code class="language-plaintext highlighter-rouge">weather_tool</code>.</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">weather_tool</code> Action (<code class="language-plaintext highlighter-rouge">weather.py</code>):</strong>
+    <ul>
+      <li>Finds London’s geographical coordinates.</li>
+      <li>Fetches weather data from the NWS API.</li>
+      <li>Returns the weather information (e.g., “London: Mostly cloudy, 15°C (as of 2023-10-27 14:00:00 UTC)”).</li>
+    </ul>
+  </li>
+  <li><strong>Response Generation:</strong> The weather information is passed back to the LLM via LangGraph.</li>
+  <li><strong>LLM Formulates Reply:</strong> The LLM uses this information to craft a user-friendly response, such as “The weather in London is currently mostly cloudy at 15°C.”</li>
+  <li><strong>Display to User:</strong> Streamlit displays the final answer in the chat interface.</li>
+</ol>
+
+<h2 id="chapter-5-transparency-and-debugging---visualizations-and-logs">Chapter 5: Transparency and Debugging - Visualizations and Logs</h2>
+
+<p>The system offers features for understanding its internal operations:</p>
+
+<p><img src="../assets/img/2025-05-16-10-32-12.png" alt="" /></p>
+
+<ul>
+  <li><strong>Tool Invocation Graph (<code class="language-plaintext highlighter-rouge">mermaid_graph.py</code>):</strong>
+For queries involving tool usage, <code class="language-plaintext highlighter-rouge">visuals.py</code> can render a visual graph (using Mermaid syntax via <code class="language-plaintext highlighter-rouge">st_mermaid</code>) illustrating the sequence of tool calls and data flow. This graph helps visualize which tools were used and in what order. Text is sanitized to ensure proper rendering.</li>
+</ul>
+
+<p><img src="../assets/img/2025-05-16-10-33-29.png" alt="" /></p>
+
+<ul>
+  <li><strong>Detailed Interaction Log (<code class="language-plaintext highlighter-rouge">visuals.py</code> - <code class="language-plaintext highlighter-rouge">display_full_log</code>):</strong>
+The interface can display a comprehensive log of each interaction. This log includes the user’s query, details of each tool called (name, input, output), and the final parsed response from the LLM. This provides a step-by-step record of the chatbot’s process.</li>
+</ul>
+
+<p><img src="../assets/img/2025-05-16-10-34-00.png" alt="" /></p>
+
+<h2 id="chapter-6-quality-assurance---automated-testing-prompt_testpy">Chapter 6: Quality Assurance - Automated Testing (<code class="language-plaintext highlighter-rouge">prompt_test.py</code>)</h2>
+
+<p>To ensure reliability and correct functionality, the Chatbot undergoes automated testing using <code class="language-plaintext highlighter-rouge">prompt_test.py</code>. This script uses Pytest and Selenium for end-to-end testing.</p>
+
+<p>The test script performs the following key actions:</p>
+<ol>
+  <li><strong>Starts the Application:</strong> It programmatically starts the Streamlit application server (<code class="language-plaintext highlighter-rouge">streamlit_server</code> fixture). It includes a utility (<code class="language-plaintext highlighter-rouge">kill_process_on_port</code>) to ensure that the required port is free before starting the server.
+    *   It checks for any visible error messages on the page using <code class="language-plaintext highlighter-rouge">get_error_text_if_present</code>. If errors are detected, the test fails.
+    *   It verifies expected outcomes, such as ensuring that tools are invoked when appropriate (e.g., by checking that the “No tool invocation steps to graph.” message <em>does not</em> appear if a tool was expected to run).</li>
+  <li><strong>Debug Support:</strong> The script can optionally keep the browser window open after a test (<code class="language-plaintext highlighter-rouge">time.sleep(60)</code>) to allow for manual inspection in case of unexpected behavior. It also streams the Streamlit server’s output (<code class="language-plaintext highlighter-rouge">stream_output</code>) for debugging purposes.</li>
+</ol>
+
+<h2 id="summary">Summary</h2>
+
+<p>The Tool-Augmented Chatbot combines a user-friendly Streamlit interface with the powerful reasoning capabilities of an LLM orchestrated by LangGraph. By leveraging a suite of specialized tools, the Chatbot can answer a wide range of queries, retrieve external information, and perform specific tasks. Visualizations and detailed logs provide transparency into its operations, while automated testing ensures its reliability.</p>
+
+<p>This system is designed to be an informative and helpful assistant, capable of complex interactions and adaptable to new functionalities through the addition of more tools.</p>
+
+<hr />
+
+<p><strong>Key Project Files:</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">tests/prompt_test.py</code>: Automated end-to-end testing script.</li>
+  <li><code class="language-plaintext highlighter-rouge">tests/test_queries.py</code>: Predefined queries for automated testing.</li>
+  <li><code class="language-plaintext highlighter-rouge">tools/define_tool.py</code>: Tool for defining terms.</li>
+  <li><code class="language-plaintext highlighter-rouge">tools/summarizer.py</code>: Tool for summarizing text.</li>
+  <li><code class="language-plaintext highlighter-rouge">tools/weather.py</code>: Tool for fetching weather information.</li>
+  <li><code class="language-plaintext highlighter-rouge">tools/web_search.py</code>: Tool for performing web searches.</li>
+  <li><code class="language-plaintext highlighter-rouge">lang_graph.py</code>: Core LLM and tool orchestration logic using LangGraph.</li>
+  <li><code class="language-plaintext highlighter-rouge">mermaid_graph.py</code>: Utility for generating Mermaid graph definitions (used by <code class="language-plaintext highlighter-rouge">visuals.py</code>).</li>
+  <li><code class="language-plaintext highlighter-rouge">visuals.py</code>: Streamlit-based user interface, including display of logs and graphs.</li>
+</ul>]]></content><author><name>Carson Kempf</name></author><category term="Apps" /><summary type="html"><![CDATA[Tool-Augmented Chatbot: System Overview]]></summary></entry><entry><title type="html">Computer-Chess-Program</title><link href="https://carsontkempf.github.io/Computer-Chess-Program/" rel="alternate" type="text/html" title="Computer-Chess-Program" /><published>2025-05-05T09:15:23-06:00</published><updated>2025-05-05T09:15:23-06:00</updated><id>https://carsontkempf.github.io/Computer-Chess-Program</id><content type="html" xml:base="https://carsontkempf.github.io/Computer-Chess-Program/"><![CDATA[<h1 id="game-assignment-2---depth-limited-minimax-implementation">Game Assignment 2 - Depth-Limited MiniMax Implementation</h1>
+
+<ul>
+  <li>
+    <p>Implement a depth limit to search solutions while having our program still have time to complete</p>
+  </li>
+  <li>
+    <p>The depth limit doesn’t need to be static throughout the program</p>
+  </li>
+</ul>
+
+<hr />
+
+<h2 id="objectives">Objectives</h2>
+
+<ol>
+  <li>Use the chess game from our last program</li>
+  <li>Implement depth limited MiniMax</li>
+  <li>Use a state evaluation heuristic function</li>
+</ol>
+
+<ul>
+  <li>Material advantage, positional advantage, …</li>
+</ul>
+
+<hr />
+
+<h2 id="specifications">Specifications</h2>
+
+<ul>
+  <li>Implement in our <code class="language-plaintext highlighter-rouge">make_move()</code> function</li>
+</ul>
+
+<hr />
+
+<h2 id="output">Output</h2>
+
+<ul>
+  <li>On each turn, select one of the valid moves from last assignment</li>
+  <li>Use depth limited minimax to select one of the valid moves</li>
+</ul>
+
+<hr />
+
+<h2 id="grading">Grading</h2>
+
+<p>Use the script:</p>
+
+<p><code class="language-plaintext highlighter-rouge">./play.sh Joueur.py SESSION_ID</code></p>]]></content><author><name>Carson Kempf</name></author><category term="AI" /><summary type="html"><![CDATA[Game Assignment 2 - Depth-Limited MiniMax Implementation]]></summary></entry><entry><title type="html">Chess-Program</title><link href="https://carsontkempf.github.io/Chess-Program/" rel="alternate" type="text/html" title="Chess-Program" /><published>2025-04-25T07:46:00-06:00</published><updated>2025-04-25T07:46:00-06:00</updated><id>https://carsontkempf.github.io/Chess-Program</id><content type="html" xml:base="https://carsontkempf.github.io/Chess-Program/"><![CDATA[<h1 id="chess-program">Chess Program</h1>
+
+<hr />
+
+<h2 id="scope">Scope</h2>
+
+<ul>
+  <li>Create a program that makes random <strong>valid</strong> chess moves</li>
+  <li>Implement chess using the chess AI Framework</li>
+</ul>
+
+<hr />
+
+<h2 id="objectives">Objectives</h2>
+
+<ul>
+  <li>Create a model of the game state and action generation</li>
+</ul>
+
+<p>(to be used for future AI algorithms to solve)</p>
+
+<h3 id="overview">Overview</h3>
+
+<ul>
+  <li>
+    <p>Generate all pseudo-valid moves for all of your player’s pieces in the current game state</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">Pseudo-valid == valid moves disregarding checks</code></p>
+  </li>
+</ul>
+
+<p><a href="https://siggame.github.io/Joueur.py/">Joueur</a></p>
+
+<p><a href="https://siggame.github.io/Joueur.py/chess/index.html">Joueur Class</a></p>
+
+<hr />
+
+<h2 id="output">Output</h2>
+
+<h3 id="on-each-turn">On Each Turn</h3>
+
+<ol>
+  <li>Print out in its own line: the number of moves available to your program</li>
+  <li>Print out in a single line: all moves available to your player program in alphabetical order</li>
+  <li>In the next line: print the randomly chosen move that the program returns to the chess server</li>
+</ol>
+
+<ul>
+  <li>After, the program can print other stuff</li>
+</ul>
+
+<h3 id="moves-printed">Moves Printed</h3>
+
+<ul>
+  <li>In universal chess notation</li>
+</ul>
+
+<p>Examples:</p>
+
+<blockquote>
+  <p>e2e4</p>
+
+  <p>e7e5</p>
+
+  <p>e1g1 (white short castling)</p>
+
+  <p>e7e8q (for promotion)</p>
+</blockquote>
+
+<h3 id="sample-output">Sample Output</h3>
+
+<p>Input FEN string:</p>
+
+<p><code class="language-plaintext highlighter-rouge">3k4/8/5N2/3P3p/4K3/2p5/1B6/8 w - - 0 23</code></p>
+
+<p>(Corresponds to the following board…)</p>
+
+<p><img src="../assets/img/2025-04-29-14-01-46.png" alt="" /></p>
+
+<p>Output Format:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>18 
+b2a1 b2a3 b2c1 b2c3 d5d6 e4d3 e4d4 e4e3 e4e5 e4f3 e4f4 e4f5 
+f6d7 f6e8 f6g4 f6g8 f6h5 f6h7 
+My move = b2c1
+</code></pre></div></div>
+
+<p>**Note: Remember the special move rules for pawns and kings
+**</p>
+
+<hr />
+
+<h2 id="implementation-requirements">Implementation Requirements</h2>
+
+<ul>
+  <li>Only one language framework</li>
+  <li>Delete the frameworks that aren’t used</li>
+  <li>Place code in <code class="language-plaintext highlighter-rouge">ai.py</code> file</li>
+</ul>
+
+<p>If other files are used:</p>
+<ul>
+  <li>Place them in the same folder as <code class="language-plaintext highlighter-rouge">ai.py</code></li>
+  <li>Name the other files in the format <code class="language-plaintext highlighter-rouge">Game1*.py</code></li>
+  <li>Import the new file: <code class="language-plaintext highlighter-rouge">import games.chess.foo</code></li>
+</ul>
+
+<hr />
+
+<h1 id="documentation"><a href="https://siggame.github.io/Joueur.py/chess/index.html">Documentation</a></h1>
+
+<h2 id="classes">Classes</h2>
+
+<ul>
+  <li><a href="https://siggame.github.io/Joueur.py/chess/ai.html">AI</a></li>
+  <li><a href="https://siggame.github.io/Joueur.py/chess/game.html">Game</a></li>
+  <li><a href="https://siggame.github.io/Joueur.py/chess/game_object.html">GameObject</a></li>
+  <li><a href="https://siggame.github.io/Joueur.py/chess/player.html">Player</a></li>
+</ul>
+
+<h2 id="scope-1">Scope</h2>
+
+<ul>
+  <li>
+    <p>Should only edit <strong>file</strong> <code class="language-plaintext highlighter-rouge">Joueur.py/games/chess/ai.py</code></p>
+  </li>
+  <li>
+    <p>Should only edit <strong>functions</strong> <code class="language-plaintext highlighter-rouge">make_move()</code> and <code class="language-plaintext highlighter-rouge">get_name()</code></p>
+  </li>
+</ul>
+
+<hr />
+
+<h2 id="ai">AI</h2>
+
+<h3 id="class-gameschessaiaigame"><code class="language-plaintext highlighter-rouge">class games.chess.ai.AI(game)</code></h3>
+
+<ul>
+  <li>Add AI to play chess</li>
+</ul>
+
+<blockquote>
+  <p>Functions</p>
+
+  <p><code class="language-plaintext highlighter-rouge">end(won: bool, reason: str)</code></p>
+</blockquote>
+
+<ul>
+  <li>Called when the game ends</li>
+</ul>
+
+<h6 id="returns">returns:</h6>
+
+<ul>
+  <li>None</li>
+</ul>
+
+<h6 id="parameters">Parameters:</h6>
+
+<p>won(bool)</p>
+
+<ul>
+  <li>
+    <p>True (won)</p>
+  </li>
+  <li>
+    <p>False (lost)</p>
+  </li>
+</ul>
+
+<p>reason(str)</p>
+
+<ul>
+  <li>
+    <p>Human readable string</p>
+  </li>
+  <li>
+    <p>Explains why the AI won or lost</p>
+  </li>
+</ul>
+
+<h5 id="game_updated">game_updated()</h5>
+
+<ul>
+  <li>
+    <p>Called every time the game’s state updates</p>
+  </li>
+  <li>
+    <p>For tracking (game states, trends?, ???)</p>
+  </li>
+</ul>
+
+<h6 id="returns-1">returns:</h6>
+
+<ul>
+  <li>None</li>
+</ul>
+
+<h5 id="get_name">get_name()</h5>
+
+<ul>
+  <li>
+    <p>The name sent to the server</p>
+  </li>
+  <li>
+    <p>The AI can control the player that is named this string</p>
+  </li>
+</ul>
+
+<h6 id="returns-2">returns:</h6>
+
+<ul>
+  <li>string (The name of the player)</li>
+</ul>
+
+<h5 id="get_settingskey-str">get_settings(key: str)</h5>
+
+<ul>
+  <li>
+    <p>Gets an AI setting passed to the program</p>
+  </li>
+  <li>
+    <p>Through the “-aiSettings” flag</p>
+  </li>
+</ul>
+
+<h6 id="returns-3">returns:</h6>
+
+<ul>
+  <li>string (Represents the value set via the command line (or none))</li>
+</ul>
+
+<h6 id="flag">Flag:</h6>
+
+<p>Set</p>
+
+<ul>
+  <li>Returned as a string value</li>
+</ul>
+
+<p>Not Set</p>
+
+<ul>
+  <li>None returned</li>
+</ul>
+
+<h6 id="parameters-1">Parameters:</h6>
+
+<p>key(str)</p>
+
+<ul>
+  <li>
+    <p>The key of the setting</p>
+  </li>
+  <li>
+    <p>We want to get the value of that specific key</p>
+  </li>
+</ul>
+
+<h5 id="make_move">make_move()</h5>
+
+<ul>
+  <li>Called every time the AI.player’s turn to make a single move</li>
+</ul>
+
+<h6 id="returns-4">returns:</h6>
+
+<p>string</p>
+
+<ul>
+  <li>
+    <p>In Universal Chess Interface</p>
+  </li>
+  <li>
+    <p>Represents the move we want to make</p>
+  </li>
+  <li>
+    <p>If the move is invalid or not properly formatted, we lose the game</p>
+  </li>
+</ul>
+
+<h5 id="start">start()</h5>
+
+<ul>
+  <li>
+    <p>Called once the game starts</p>
+  </li>
+  <li>
+    <p>Our AI knows its player and game</p>
+  </li>
+  <li>
+    <p>Initialize the AI</p>
+  </li>
+</ul>
+
+<h6 id="returns-5">returns:</h6>
+
+<p>None</p>
+
+<blockquote>
+  <p>Properties</p>
+</blockquote>
+
+<h5 id="property-game">property game</h5>
+
+<ul>
+  <li>References the Game instance this AI is playing</li>
+</ul>
+
+<h6 id="type">Type:</h6>
+
+<p>games.chess.game.Game</p>
+
+<h5 id="property-player">property player</h5>
+
+<ul>
+  <li>References the Player this AI controls in the Game</li>
+</ul>
+
+<h6 id="type-1">Type:</h6>
+
+<p>games.chess.player.Player</p>
+
+<hr />
+
+<h2 id="game">Game</h2>
+
+<h3 id="class-gameschessgamegame">class games.chess.game.Game</h3>
+
+<ul>
+  <li>
+    <p>Represents the Game in the Chess game</p>
+  </li>
+  <li>
+    <p>Traditional 8x8 chess board</p>
+  </li>
+</ul>
+
+<blockquote>
+  <p>Functions</p>
+</blockquote>
+
+<h5 id="get_game_objectid-str">get_game_object(id: str)</h5>
+
+<ul>
+  <li>Gets the game object with the given id (or returns none)</li>
+</ul>
+
+<h6 id="returns-6">Returns:</h6>
+
+<p>Optional[joueur.base_game_object.BaseGameObject]</p>
+
+<blockquote>
+  <p>Properties</p>
+</blockquote>
+
+<h5 id="property-fen">property fen</h5>
+
+<ul>
+  <li>Describes the entire state of the game board</li>
+</ul>
+
+<h6 id="type-2">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-game_objects">property game_objects</h5>
+
+<ul>
+  <li>
+    <p>Maps every game object’s ID to the actual game object</p>
+  </li>
+  <li>
+    <p>Used by the server and client</p>
+  </li>
+  <li>
+    <p>Refers to the game objects via the ID</p>
+  </li>
+</ul>
+
+<h6 id="type-3">Type:</h6>
+
+<p>dict[str, games.chess.game_object.GameObject]</p>
+
+<h5 id="property-history">property history</h5>
+
+<ul>
+  <li>
+    <p>The list of known moves that have occurred in the game</p>
+  </li>
+  <li>
+    <p>In Universal Chess Interface format</p>
+  </li>
+  <li>
+    <p>The first element is the first move</p>
+  </li>
+  <li>
+    <p>The last element is the most recent move</p>
+  </li>
+</ul>
+
+<h6 id="type-4">Type:</h6>
+
+<p>list[str]</p>
+
+<h5 id="property-players">property players</h5>
+
+<ul>
+  <li>List of all the players in the game</li>
+</ul>
+
+<h6 id="type-5">Type:</h6>
+
+<p>list[games.chess.player.Player]</p>
+
+<h5 id="property-session">property session</h5>
+
+<ul>
+  <li>A unique identifier for the game instance that’s being played</li>
+</ul>
+
+<h6 id="type-6">Type:</h6>
+
+<p>string</p>
+
+<hr />
+
+<h2 id="gameobject">GameObject</h2>
+
+<h3 id="class-gameschessgame_objectgameobject">class games.chess.game_object.GameObject</h3>
+
+<ul>
+  <li>
+    <p>Represents an object in chess</p>
+  </li>
+  <li>
+    <p>The most basic class</p>
+  </li>
+  <li>
+    <p>All classes inherit from automatically</p>
+  </li>
+</ul>
+
+<blockquote>
+  <p>Functions</p>
+</blockquote>
+
+<h5 id="logmessagestr">log(message:str)</h5>
+
+<ul>
+  <li>
+    <p>Adds a message to the GameObject’s logs</p>
+  </li>
+  <li>
+    <p>For debugging purposes</p>
+  </li>
+</ul>
+
+<h6 id="returns-7">Returns:</h6>
+
+<p>None</p>
+
+<h6 id="parameters-2">Parameters:</h6>
+
+<p>message(str)</p>
+
+<ul>
+  <li>String to add to the GameObject’s log (for debugging)</li>
+</ul>
+
+<blockquote>
+  <p>Properties</p>
+</blockquote>
+
+<h5 id="property-game_object_name">property game_object_name</h5>
+
+<ul>
+  <li>
+    <p>String representation of the top level Class that the GameObject is an instance of</p>
+  </li>
+  <li>
+    <p>Used for reflection</p>
+  </li>
+  <li>
+    <p>Creates new instances on clients</p>
+  </li>
+  <li>
+    <p>Exposed for convenience (should AIs want this data)</p>
+  </li>
+</ul>
+
+<h6 id="type-7">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-id">property id</h5>
+
+<ul>
+  <li>
+    <p>A unique id for each instance of a GameObject or a sub class</p>
+  </li>
+  <li>
+    <p>Used for client and server communication</p>
+  </li>
+  <li>
+    <p>Never changes value after being set</p>
+  </li>
+</ul>
+
+<h6 id="type-8">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-logs">property logs</h5>
+
+<ul>
+  <li>
+    <p>Any strings logged are stored here</p>
+  </li>
+  <li>
+    <p>For debugging</p>
+  </li>
+</ul>
+
+<h6 id="type-9">Type:</h6>
+
+<p>list[str]</p>
+
+<hr />
+
+<h2 id="player">Player</h2>
+
+<h3 id="class-gameschessplayerplayer">class games.chess.player.Player</h3>
+
+<ul>
+  <li>
+    <p>Represents the player in the chess game</p>
+  </li>
+  <li>
+    <p>Every AI controls one player</p>
+  </li>
+</ul>
+
+<blockquote>
+  <p>Functions</p>
+</blockquote>
+
+<h5 id="logmessage-str">log(message: str)</h5>
+
+<ul>
+  <li>
+    <p>Adds a message to this GameObject’s logs</p>
+  </li>
+  <li>
+    <p>Intended for debugging</p>
+  </li>
+</ul>
+
+<h6 id="returns-8">Returns:</h6>
+
+<p>None</p>
+
+<h6 id="parameters-3">Parameters:</h6>
+
+<p>message(str)</p>
+
+<blockquote>
+  <p>Properties</p>
+</blockquote>
+
+<h5 id="property-client_type">property client_type</h5>
+
+<ul>
+  <li>
+    <p>What type of client the player is (Python in our case)</p>
+  </li>
+  <li>
+    <p>For data mining purposes</p>
+  </li>
+</ul>
+
+<h6 id="type-10">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-color">property color</h5>
+
+<ul>
+  <li>
+    <p>The color of this player</p>
+  </li>
+  <li>
+    <p>Either “white” or “black”</p>
+  </li>
+  <li>
+    <p>Player “white” has the first move</p>
+  </li>
+</ul>
+
+<h6 id="type-11">Type:</h6>
+
+<p>“white”</p>
+
+<p>“black”</p>
+
+<h5 id="property-game_object_name-1">property game_object_name</h5>
+
+<ul>
+  <li>
+    <p>String representing the top level Class that this GameObject is an instance of</p>
+  </li>
+  <li>
+    <p>Used for reflection</p>
+  </li>
+  <li>
+    <p>Helps create new instances on clients</p>
+  </li>
+  <li>
+    <p>Exposed for convenience if AIs want this data</p>
+  </li>
+</ul>
+
+<h6 id="type-12">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-id-1">property id</h5>
+
+<ul>
+  <li>
+    <p>Unique id for each instance of a GameObject or sub class</p>
+  </li>
+  <li>
+    <p>Used for client and server communication</p>
+  </li>
+  <li>
+    <p>Never change value after being set</p>
+  </li>
+</ul>
+
+<h6 id="type-13">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-logs-1">property logs</h5>
+
+<ul>
+  <li>Any strings logged are stored here</li>
+</ul>
+
+<h6 id="type-14">Type:</h6>
+
+<p>list[str]</p>
+
+<h5 id="property-lost">property lost</h5>
+
+<ul>
+  <li>If the player lost the game or not</li>
+</ul>
+
+<h6 id="type-15">Type:</h6>
+
+<p>boolean</p>
+
+<h5 id="property-name">property name</h5>
+
+<ul>
+  <li>The name of the player</li>
+</ul>
+
+<h6 id="type-16">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-opponent">property opponent</h5>
+
+<ul>
+  <li>This player’s opponent in chess</li>
+</ul>
+
+<h6 id="type-17">Type:</h6>
+
+<p>games.chess.player.Player</p>
+
+<h5 id="property-reason_lost">property reason_lost</h5>
+
+<ul>
+  <li>The reason why the player lost the game</li>
+</ul>
+
+<h6 id="type-18">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-reason_won">property reason_won</h5>
+
+<ul>
+  <li>The reason why the player won the game</li>
+</ul>
+
+<h6 id="type-19">Type:</h6>
+
+<p>string</p>
+
+<h5 id="property-time_remaining">property time_remaining</h5>
+
+<ul>
+  <li>The amount of time (in ns) remaining for this AI to send commands</li>
+</ul>
+
+<h6 id="type-20">Type:</h6>
+
+<p>float</p>
+
+<h5 id="property-won">property won</h5>
+
+<ul>
+  <li>If the player won the game or not</li>
+</ul>
+
+<h6 id="type-21">Type:</h6>
+
+<p>boolean</p>
+
+<hr />
+
+<h3 id="game-logic">Game Logic</h3>
+
+<ul>
+  <li>Game logic is not implemented for you</li>
+  <li>Cadre facilitates IO between a game server and the AI</li>
+</ul>
+
+<hr />
+
+<h2 id="submission">Submission</h2>
+
+<h3 id="readytosubmittxt"><code class="language-plaintext highlighter-rouge">ReadyToSubmit.txt</code></h3>
+
+<ol>
+  <li>Change to <code class="language-plaintext highlighter-rouge">yes</code></li>
+  <li>Change to <code class="language-plaintext highlighter-rouge">py</code></li>
+</ol>
+
+<hr />
+
+<h2 id="grading">Grading</h2>
+
+<ul>
+  <li>Tested with the <code class="language-plaintext highlighter-rouge">play.sh</code> script</li>
+  <li>Plays the AI against itself</li>
+</ul>
+
+<blockquote>
+  <p>Do <strong>NOT</strong> edit <code class="language-plaintext highlighter-rouge">play.sh</code></p>
+</blockquote>
+
+<h3 id="execution">Execution</h3>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">./play.sh LANGUAGE_DIR SESSION_ID</code></p>
+
+  <p><code class="language-plaintext highlighter-rouge">./testRun MyOwnGameSession</code></p>
+</blockquote>
+
+<h3 id="language_dir"><code class="language-plaintext highlighter-rouge">LANGUAGE_DIR</code></h3>
+
+<ul>
+  <li>The directory where we are coding in: <code class="language-plaintext highlighter-rouge">Joueur.py</code></li>
+</ul>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">./play.sh Joueur.py testing_id</code></p>
+</blockquote>
+
+<h3 id="the-testrun-script">The <code class="language-plaintext highlighter-rouge">testRun</code> Script</h3>
+
+<ul>
+  <li>
+    <p>Set up to connect to the remote host <code class="language-plaintext highlighter-rouge">mst-ai.xyz</code>.</p>
+  </li>
+  <li>
+    <p>If running locally change this to <code class="language-plaintext highlighter-rouge">localhost (127.0.0.1)</code></p>
+  </li>
+</ul>
+
+<h3 id="server-software"><a href="https://github.com/siggame/Cerveau">Server Software</a></h3>
+
+<ul>
+  <li>
+    <p>Ignore the log files here</p>
+  </li>
+  <li>
+    <p>Find logs under <code class="language-plaintext highlighter-rouge">logs/gamelogs</code> in the server directory (if running locally)</p>
+  </li>
+</ul>]]></content><author><name>Carson Kempf</name></author><category term="AI" /><summary type="html"><![CDATA[Chess Program]]></summary></entry><entry><title type="html">Chess-Program-Requirements</title><link href="https://carsontkempf.github.io/Chess-Program-Requirements/" rel="alternate" type="text/html" title="Chess-Program-Requirements" /><published>2025-04-25T07:03:04-06:00</published><updated>2025-04-25T07:03:04-06:00</updated><id>https://carsontkempf.github.io/Chess-Program-Requirements</id><content type="html" xml:base="https://carsontkempf.github.io/Chess-Program-Requirements/"><![CDATA[<h1 id="game-assignment-set-chess">Game Assignment Set: Chess</h1>
+
+<p><img src="../assets/img/2025-04-25-13-10-49.png" alt="" /></p>
+
+<hr />
+
+<h2 id="rules">Rules</h2>
+
+<ul>
+  <li>Normal chess rules</li>
+</ul>
+
+<h3 id="exception">Exception</h3>
+
+<p>Instead of the official three board state repetition draw rule:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+For the last 8 moves:
+    If (no capture OR no promotions OR no pawn movement) AND (moves {0,1,2,3} == {4,5,6,7}):
+        A draw occurs
+
+# {0,1,2,3} == {4,5,6,7}    if the starting position (rank and file) and ending position (rank and file) of the moves are identical
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="ai-framework">AI Framework</h2>
+
+<h3 id="make_move"><code class="language-plaintext highlighter-rouge">make_move()</code></h3>
+
+<ul>
+  <li>Fill in the <code class="language-plaintext highlighter-rouge">make_move()</code> function of the AI class</li>
+</ul>
+
+<h3 id="each-call-to-make_move">Each call to <code class="language-plaintext highlighter-rouge">make_move()</code>:</h3>
+
+<ul>
+  <li>AI player returns a legal move</li>
+  <li>Use the search algorithm specified in the assignment to select which legal move</li>
+</ul>
+
+<h3 id="note">Note</h3>
+
+<ol>
+  <li><strong>NEVER</strong> modify the member variables of the AI framework classes</li>
+  <li><strong>IMPLEMENT</strong> the state of the board &amp; all data-structures</li>
+</ol>
+
+<hr />
+
+<h2 id="input">Input</h2>
+
+<h3 id="initial-states-and-fen-notation">Initial States and FEN Notation</h3>
+
+<ul>
+  <li>Program must support board states in <a href="https://en.wikipedia.org/wiki/Forsyth–Edwards_Notation">FEN notation</a></li>
+</ul>
+
+<ol>
+  <li>FEN starting position</li>
+</ol>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1</code></p>
+</blockquote>
+
+<ol>
+  <li>And after the move 1.e4:</li>
+</ol>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1</code></p>
+</blockquote>
+
+<ol>
+  <li>And then after 1…c5:</li>
+</ol>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2</code></p>
+</blockquote>
+
+<ol>
+  <li>And then after 2.Nf3:</li>
+</ol>
+
+<blockquote>
+  <p><code class="language-plaintext highlighter-rouge">rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2</code></p>
+</blockquote>
+
+<p>A FEN record contains six fields, each separated by a space. The fields are as follows:</p>
+
+<ol>
+  <li>Piece placement data:</li>
+</ol>
+
+<ul>
+  <li>
+    <p>Each rank is described, starting with rank 8 and ending with rank 1, with a “/” between each one; within each rank, the contents of the squares are described in order from the a-file to the h-file.</p>
+  </li>
+  <li>
+    <p>Each piece is identified by a single letter taken from the standard English names in algebraic notation (pawn = “P”, knight = “N”, bishop = “B”, rook = “R”, queen = “Q” and king = “K”).</p>
+  </li>
+  <li>
+    <p>White pieces are designated using uppercase letters (“PNBRQK”), while black pieces use lowercase letters (“pnbrqk”).</p>
+  </li>
+  <li>
+    <p>A set of one or more consecutive empty squares within a rank is denoted by a digit from “1” to “8”, corresponding to the number of squares.</p>
+  </li>
+</ul>
+
+<ol>
+  <li>
+    <p>Active color: “w” means that White is to move; “b” means that Black is to move.</p>
+  </li>
+  <li>
+    <p>Castling availability:</p>
+  </li>
+</ol>
+
+<ul>
+  <li>
+    <p>If neither side has the ability to castle, this field uses the character “-“.</p>
+  </li>
+  <li>
+    <p>Otherwise, this field contains one or more letters: “K” if White can castle kingside, “Q” if White can castle queenside, “k” if Black can castle kingside, and “q” if Black can castle queenside.</p>
+  </li>
+  <li>
+    <p>A situation that temporarily prevents castling does not prevent the use of this notation.</p>
+  </li>
+</ul>
+
+<ol>
+  <li>En passant target square:</li>
+</ol>
+
+<ul>
+  <li>
+    <p>This is a square over which a pawn has just passed while moving two squares.</p>
+  </li>
+  <li>
+    <p>It is given in algebraic notation.</p>
+  </li>
+  <li>
+    <p>If there is no en passant target square, this field uses the character “-“.</p>
+  </li>
+  <li>
+    <p>This is recorded regardless of whether there is a pawn in position to capture en passant.</p>
+  </li>
+  <li>
+    <p>An updated version of the spec has since made it so the target square is recorded only if a legal en passant capture is possible, but the old version of the standard is the one most commonly used.</p>
+  </li>
+</ul>
+
+<ol>
+  <li>Halfmove clock:</li>
+</ol>
+
+<ul>
+  <li>The number of halfmoves since the last capture or pawn advance, used for the fifty-move rule.</li>
+</ul>
+
+<ol>
+  <li>Fullmove number:</li>
+</ol>
+
+<ul>
+  <li>The number of the full moves. It starts at 1 and is incremented after Black’s move.</li>
+</ul>
+
+<p><img src="../assets/img/2025-04-25-13-31-47.png" alt="" /></p>
+
+<hr />
+
+<h2 id="output">Output</h2>
+
+<ul>
+  <li>Returns a move chosen by our algorithm</li>
+</ul>
+
+<h3 id="universal-chess-interface-notation">Universal Chess Interface Notation</h3>
+
+<p>Examples:</p>
+
+<blockquote>
+  <p>e2e4</p>
+
+  <p>e7e5</p>
+
+  <p>e1g1 (white short castling)</p>
+
+  <p>e7e8q (for promotion)</p>
+</blockquote>
+
+<ul>
+  <li>A “nullmove” from an engine to a GUI should be sent as 0000.</li>
+</ul>]]></content><author><name>Carson Kempf</name></author><category term="AI" /><summary type="html"><![CDATA[Game Assignment Set: Chess]]></summary></entry><entry><title type="html">To-Do-App</title><link href="https://carsontkempf.github.io/To-Do-App/" rel="alternate" type="text/html" title="To-Do-App" /><published>2025-04-23T10:32:59-06:00</published><updated>2025-04-23T10:32:59-06:00</updated><id>https://carsontkempf.github.io/To-Do-App</id><content type="html" xml:base="https://carsontkempf.github.io/To-Do-App/"><![CDATA[<p><a href="https://carsontkempf-cs4090-assignment-4.streamlit.app/">Test the App</a></p>
+
+<p><img src="/assets/img/2025-04-23-16-36-22.png" alt="" /></p>
+<h1 id="first-impressions">First Impressions</h1>
+
+<ul>
+  <li>Original code generated IDs via <code class="language-plaintext highlighter-rouge">len(tasks) + 1</code>, leading to duplicate IDs after deletions.</li>
+  <li>New tasks did not appear immediately; UI lacked <code class="language-plaintext highlighter-rouge">st.rerun()</code> calls for instant refresh.</li>
+  <li>Corrupted <code class="language-plaintext highlighter-rouge">tasks.json</code> printed warnings only to console, not visible in Streamlit UI.</li>
+  <li>Filter dropdowns built from <code class="language-plaintext highlighter-rouge">set(...)</code> produced unpredictable category order.</li>
+  <li>No built‑in button or mechanism to run tests from the Streamlit app.</li>
+  <li>Business logic (task creation and filtering) was mixed directly into UI code, making unit testing difficult.</li>
+</ul>
+
+<hr />
+
+<h2 id="unit-testing-coverage-and-refactoring-summary">Unit Testing Coverage and Refactoring Summary</h2>
+
+<p>Achieved <strong>100% overall</strong> coverage across all test suites for both <code class="language-plaintext highlighter-rouge">src/app.py</code> and <code class="language-plaintext highlighter-rouge">src/tasks.py</code> by:</p>
+
+<ol>
+  <li><strong>Streamlit Test Buttons in <code class="language-plaintext highlighter-rouge">app.py</code></strong>
+    <ul>
+      <li>“Run Unit Tests” triggers <code class="language-plaintext highlighter-rouge">pytest -q</code>.</li>
+      <li>“Run Coverage” triggers <code class="language-plaintext highlighter-rouge">pytest --cov=src --cov-report=html</code>.</li>
+      <li>“Run Param Tests” triggers <code class="language-plaintext highlighter-rouge">pytest tests/test_param.py</code>.</li>
+      <li>“Run Mock Tests” triggers <code class="language-plaintext highlighter-rouge">pytest tests/test_mock.py</code>.</li>
+      <li>“Run HTML Report” triggers <code class="language-plaintext highlighter-rouge">pytest --html=report.html --self-contained-html</code>.</li>
+    </ul>
+  </li>
+  <li><strong>Comprehensive Test Suites</strong><br />
+Consolidated and expanded test coverage with:
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">tests/test_basic.py</code> (basic unit tests)</li>
+      <li><code class="language-plaintext highlighter-rouge">tests/test_advanced.py</code> (fixtures &amp; parameterization)</li>
+      <li><code class="language-plaintext highlighter-rouge">tests/test_tdd.py</code> (TDD-driven examples)</li>
+      <li><code class="language-plaintext highlighter-rouge">tests/test_property.py</code> (hypothesis property-based tests)</li>
+      <li><code class="language-plaintext highlighter-rouge">tests/test_param.py</code> (parameterized tests)</li>
+      <li><code class="language-plaintext highlighter-rouge">tests/test_mock.py</code> (mocking tests)</li>
+    </ul>
+  </li>
+  <li><strong>Refactoring for Testability</strong>
+    <ul>
+      <li>Extracted pure logic into functions in <code class="language-plaintext highlighter-rouge">src/tasks.py</code> (<code class="language-plaintext highlighter-rouge">load_tasks</code>, <code class="language-plaintext highlighter-rouge">save_tasks</code>, <code class="language-plaintext highlighter-rouge">generate_unique_id</code>, <code class="language-plaintext highlighter-rouge">filter_tasks_by_*</code>, and new features like <code class="language-plaintext highlighter-rouge">edit_task</code>, <code class="language-plaintext highlighter-rouge">sort_tasks_by_due_date</code>).</li>
+      <li>Isolated UI-centric code in <code class="language-plaintext highlighter-rouge">src/app.py</code>, marking UI methods with <code class="language-plaintext highlighter-rouge"># pragma: no cover</code>.</li>
+      <li>Centralized filtering, sorting, and action logic into helper functions to enable isolated unit testing.</li>
+    </ul>
+  </li>
+</ol>
+
+<p><img src="/assets/img/2025-04-22-16-03-19.png" alt="" /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Tue, Apr 22 2025 - 04:14 PM      —      Rolla: ☀️   +71°F
+
+=============================================================
+
+(.venv) bash-3.2$ streamlit run src/app.py
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://10.106.50.237:8501
+
+  For better performance, install the Watchdog module:
+
+  $ xcode-select --install
+  $ pip install watchdog
+            
+.................................................................                                  [100%]
+============================================= tests coverage =============================================
+____________________________ coverage: platform darwin, python 3.13.1-final-0 ____________________________
+
+Name              Stmts   Miss  Cover   Missing
+-----------------------------------------------
+src/__init__.py       0      0   100%
+src/app.py          111      1    99%   62
+src/tasks.py         55      1    98%   176
+-----------------------------------------------
+TOTAL               166      2    99%
+65 passed in 1.10s
+.................................................................                                  [100%]
+============================================= tests coverage =============================================
+____________________________ coverage: platform darwin, python 3.13.1-final-0 ____________________________
+
+Name              Stmts   Miss  Cover   Missing
+-----------------------------------------------
+src/__init__.py       0      0   100%
+src/app.py          111      1    99%   62
+src/tasks.py         55      1    98%   176
+-----------------------------------------------
+TOTAL               166      2    99%
+Coverage HTML written to dir htmlcov
+65 passed in 1.19s
+......................................                                                             [100%]
+============================================= tests coverage =============================================
+____________________________ coverage: platform darwin, python 3.13.1-final-0 ____________________________
+
+Name              Stmts   Miss  Cover   Missing
+-----------------------------------------------
+src/__init__.py       0      0   100%
+src/app.py          111      2    98%   39, 62
+src/tasks.py         55      1    98%   176
+-----------------------------------------------
+TOTAL               166      3    98%
+38 passed in 0.82s
+......................................                                                             [100%]
+============================================= tests coverage =============================================
+____________________________ coverage: platform darwin, python 3.13.1-final-0 ____________________________
+
+Name              Stmts   Miss  Cover   Missing
+-----------------------------------------------
+src/__init__.py       0      0   100%
+src/app.py          111      2    98%   39, 62
+src/tasks.py         55      1    98%   176
+-----------------------------------------------
+TOTAL               166      3    98%
+38 passed in 0.89s
+.................................................................                                  [100%]
+============================================= tests coverage =============================================
+____________________________ coverage: platform darwin, python 3.13.1-final-0 ____________________________
+
+Name              Stmts   Miss  Cover   Missing
+-----------------------------------------------
+src/__init__.py       0      0   100%
+src/app.py          111      1    99%   62
+src/tasks.py         55      1    98%   176
+-----------------------------------------------
+TOTAL               166      2    99%
+- Generated html report: file:///Users/ctk/Programming/VSCodeProjects/School/Software%20Engineering/cs4090-assignment-4/report.html -
+65 passed in 1.11s
+
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="bug-reports">Bug Reports</h2>
+
+<h3 id="bug-1-completing-task-under-filter-overwrites-all-tasks">Bug 1: Completing task under filter overwrites all tasks</h3>
+<p><strong>Description:</strong> When marking a task as complete while filters are applied, only the filtered subset is saved back to <code class="language-plaintext highlighter-rouge">tasks.json</code>, causing other tasks to be lost.<br />
+<strong>Steps to Reproduce:</strong></p>
+<ol>
+  <li>Add at least two tasks in different categories.<br />
+<img src="/assets/img/2025-04-21-16-17-28.png" alt="" /></li>
+  <li>Apply a category filter so only one task is visible.<br />
+<img src="/assets/img/2025-04-21-16-18-03.png" alt="" /></li>
+  <li>Click “Complete” on the visible task.
+<img src="/assets/img/2025-04-21-16-18-42.png" alt="" /></li>
+  <li>Reopen the app or inspect <code class="language-plaintext highlighter-rouge">tasks.json</code>. 
+<img src="/assets/img/2025-04-21-16-19-12.png" alt="" />
+<strong>Expected Behavior:</strong> The selected task’s <code class="language-plaintext highlighter-rouge">completed</code> status updates; all other tasks remain unaffected in <code class="language-plaintext highlighter-rouge">tasks.json</code>.<br />
+<strong>Actual Behavior:</strong> <code class="language-plaintext highlighter-rouge">tasks.json</code> is overwritten with only the filtered task list—other tasks disappear.<br />
+<strong>Severity:</strong> High</li>
+</ol>
+
+<h3 id="bug-2-undo-complete-not-available">Bug 2: Undo complete not available</h3>
+<p><strong>Description:</strong> The UI button always reads “Complete” and the logic never supports toggling a completed task back to incomplete.<br />
+<strong>Steps to Reproduce:</strong></p>
+<ol>
+  <li>Add a task. 
+<img src="/assets/img/2025-04-21-16-20-16.png" alt="" /></li>
+  <li>Click “Complete” on that task.<br />
+<img src="/assets/img/2025-04-21-16-20-55.png" alt="" /></li>
+  <li>Try to undo by clicking the same button again.<br />
+<strong>Expected Behavior:</strong> After completion, the button label changes to “Undo” and clicking it toggles the task back to incomplete.<br />
+<strong>Actual Behavior:</strong> Button remains “Complete” and <code class="language-plaintext highlighter-rouge">decide_task_action</code> does not handle undo.</li>
+</ol>
+
+<p><strong>Severity:</strong> Medium</p>
+
+<h3 id="bug-3-button-actions-require-double-click">Bug 3: Button actions require double click</h3>
+<p><strong>Description:</strong> Button clicks (“Complete”, “Undo”, “Delete”) do not register on the first press; the user must click twice for action to execute.<br />
+<strong>Steps to Reproduce:</strong></p>
+<ol>
+  <li>Launch app with tasks visible.</li>
+  <li>Click “Complete” on a task once — nothing happens.<br />
+<img src="/assets/img/2025-04-21-16-34-22.png" alt="" /></li>
+  <li>Click “Complete” a second time — task completes.<br />
+<img src="/assets/img/2025-04-21-16-34-43.png" alt="" /></li>
+  <li>The same behavior applies to “Undo” and “Delete” buttons.<br />
+<strong>Expected Behavior:</strong> Single click on any action button immediately triggers its associated action.<br />
+<strong>Actual Behavior:</strong> First click only registers internally; second click is required for effect.<br />
+<strong>Severity:</strong> Medium</li>
+</ol>
+
+<h2 id="bug-fixes">Bug Fixes</h2>
+
+<h3 id="fix-for-bug-1-completing-task-under-filter-overwrites-all-tasks">Fix for Bug 1: Completing task under filter overwrites all tasks</h3>
+<p>Refactored <code class="language-plaintext highlighter-rouge">display_tasks</code> logic to load and save the full task list instead of the filtered subset, ensuring all tasks persist across filter-based actions.
+<img src="/assets/img/2025-04-21-16-32-23.png" alt="" />
+<img src="/assets/img/2025-04-21-16-32-54.png" alt="" />
+<img src="/assets/img/2025-04-21-16-33-20.png" alt="" /></p>
+
+<h3 id="fix-for-bug-2-undo-complete-not-available">Fix for Bug 2: Undo complete not available</h3>
+<p>Updated <code class="language-plaintext highlighter-rouge">decide_task_action</code> to handle “undo” state and modified <code class="language-plaintext highlighter-rouge">display_tasks</code> to toggle <code class="language-plaintext highlighter-rouge">completed=False</code> when “Undo” is clicked, providing toggle functionality.
+<img src="/assets/img/2025-04-21-16-31-01.png" alt="" />
+<img src="/assets/img/2025-04-21-16-31-26.png" alt="" /></p>
+
+<h3 id="fix-for-bug-3-button-actions-require-double-click">Fix for Bug 3: Button actions require double click</h3>
+<p>Removed redundant state reset in Streamlit after each action; replaced <code class="language-plaintext highlighter-rouge">return None</code> inside <code class="language-plaintext highlighter-rouge">display_tasks</code> with <code class="language-plaintext highlighter-rouge">st.experimental_rerun()</code> calls to immediately reflect state changes and ensure button press cycles reset correctly.</p>
+
+<p><img src="/assets/img/2025-04-21-16-51-38.png" alt="" /></p>
+
+<hr />
+<h2 id="new-feature-implementation-plan">New Feature Implementation Plan</h2>
+
+<ol>
+  <li><strong>Feature: Edit Task</strong>
+    <ul>
+      <li><strong>TDD Tests:</strong>
+        <ul>
+          <li>Write initial failing tests in <code class="language-plaintext highlighter-rouge">test_tdd.py</code> for editing a task’s <code class="language-plaintext highlighter-rouge">title</code>, <code class="language-plaintext highlighter-rouge">description</code>, <code class="language-plaintext highlighter-rouge">priority</code>, <code class="language-plaintext highlighter-rouge">category</code>, and <code class="language-plaintext highlighter-rouge">due_date</code>.<br />
+<img src="/assets/img/2025-04-22-12-18-55.png" alt="" /></li>
+        </ul>
+      </li>
+      <li><strong>Implementation Steps:</strong>
+        <ol>
+          <li>Add <code class="language-plaintext highlighter-rouge">edit_task(tasks, task_id, updates)</code> in <code class="language-plaintext highlighter-rouge">tasks.py</code> to apply changes.</li>
+          <li>Update <code class="language-plaintext highlighter-rouge">app.py</code> to include an “Edit” button per task that opens a form pre-filled with current values.</li>
+          <li>On form submit, call <code class="language-plaintext highlighter-rouge">edit_task</code>, save tasks, and rerun UI.<br />
+<img src="/assets/img/2025-04-22-12-19-58.png" alt="" /></li>
+        </ol>
+      </li>
+      <li><strong>Refactoring &amp; Validation:</strong>
+        <ul>
+          <li>Refactor UI logic into <code class="language-plaintext highlighter-rouge">handle_edit_task</code> for testability.</li>
+          <li>Confirm tests pass and UI reflects edited values.
+<img src="/assets/img/2025-04-22-12-21-09.png" alt="" /></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong>Feature: Overdue Task Highlighting</strong>
+    <ul>
+      <li><strong>TDD Tests:</strong>
+        <ul>
+          <li>Write failing tests to verify <code class="language-plaintext highlighter-rouge">get_overdue_tasks</code> returns only tasks with <code class="language-plaintext highlighter-rouge">due_date</code> &lt; today and <code class="language-plaintext highlighter-rouge">completed=False</code>.</li>
+          <li>Write a UI test to confirm overdue tasks are rendered with a specific CSS class or markdown style.<br />
+<img src="/assets/img/2025-04-22-12-31-45.png" alt="" /></li>
+        </ul>
+      </li>
+      <li><strong>Implementation Steps:</strong>
+        <ol>
+          <li>Use existing <code class="language-plaintext highlighter-rouge">get_overdue_tasks</code> or extend if needed.</li>
+          <li>In <code class="language-plaintext highlighter-rouge">app.py</code> rendering loop, check overdue status and wrap task title with <code class="language-plaintext highlighter-rouge">st.markdown(f"&lt;span class='overdue'&gt;...&lt;/span&gt;", unsafe_allow_html=True)</code>.</li>
+          <li>Add CSS for <code class="language-plaintext highlighter-rouge">.overdue { color: red; font-weight: bold; }</code> via <code class="language-plaintext highlighter-rouge">st.markdown</code> with <code class="language-plaintext highlighter-rouge">&lt;style&gt;</code>. 
+<img src="/assets/img/2025-04-22-12-33-31.png" alt="" /></li>
+        </ol>
+      </li>
+      <li><strong>Refactoring &amp; Validation:</strong>
+        <ul>
+          <li>Extract overdue-check logic into <code class="language-plaintext highlighter-rouge">is_task_overdue</code> for test coverage.</li>
+          <li>Run tests and verify overdue styling appears.
+<img src="/assets/img/2025-04-22-12-34-48.png" alt="" /></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong>Feature: Task Sorting by Due Date</strong>
+    <ul>
+      <li><strong>TDD Tests:</strong>
+        <ul>
+          <li>Write failing tests for <code class="language-plaintext highlighter-rouge">sort_tasks_by_due_date(tasks, ascending=True)</code> ensuring correct order.</li>
+          <li>Write UI tests for selecting sort order and rendering accordingly.<br />
+<img src="/assets/img/2025-04-22-13-52-08.png" alt="" /></li>
+        </ul>
+      </li>
+      <li><strong>Implementation Steps:</strong>
+        <ol>
+          <li>Implement <code class="language-plaintext highlighter-rouge">sort_tasks_by_due_date</code> in <code class="language-plaintext highlighter-rouge">tasks.py</code>.</li>
+          <li>Add a sort option in <code class="language-plaintext highlighter-rouge">app.py</code> sidebar (<code class="language-plaintext highlighter-rouge">st.selectbox</code>) for “Sort by Due Date: Ascending/Descending”.</li>
+          <li>Apply sorting function before rendering tasks.<br />
+<img src="/assets/img/2025-04-22-13-54-57.png" alt="" /></li>
+        </ol>
+      </li>
+      <li><strong>Refactoring &amp; Validation:</strong>
+        <ul>
+          <li>Centralize filter and sort logic in <code class="language-plaintext highlighter-rouge">compute_filters_and_sort</code> for testability.</li>
+          <li>Confirm tests pass and UI sorting works as expected.
+<img src="/assets/img/2025-04-22-13-53-48.png" alt="" />
+<img src="/assets/img/2025-04-22-13-54-04.png" alt="" /></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="features-working">Features Working</h3>
+<p><img src="/assets/img/2025-04-22-16-19-20.png" alt="" /></p>
+
+<h2 id="behaviordriven-development-bdd">Behavior‑Driven Development (BDD)</h2>
+
+<ul>
+  <li><strong>Tooling</strong>: We chose <code class="language-plaintext highlighter-rouge">pytest‑bdd</code> so we could write Gherkin scenarios and step definitions in Python.</li>
+  <li><strong>Feature File</strong>: <code class="language-plaintext highlighter-rouge">tests/feature/add_task.feature</code> describes 5 end‑to‑end behaviors:
+    <ol>
+      <li>Adding a task</li>
+      <li>Completing a task</li>
+      <li>Deleting a task</li>
+      <li>Filtering by category</li>
+      <li>Editing a task</li>
+    </ol>
+  </li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Feature: Task management
+
+  Scenario: Adding a new task
+    Given I start with no tasks
+    When I add a task with title "Buy milk" and description "Get 2% milk" and priority "High" and category "Personal" and due date "2025-05-01"
+    Then the task list contains exactly 1 task
+    And the task titled "Buy milk" has description "Get 2% milk"
+    And the task titled "Buy milk" has priority "High"
+    And the task titled "Buy milk" has category "Personal"
+    And the task titled "Buy milk" has due date "2025-05-01"
+    And the task titled "Buy milk" is not completed
+
+  Scenario: Completing a task
+    Given a task titled "Write report" with description "Draft v1" and priority "Medium" and category "Work" and due date "2025-06-01" exists
+    When I mark the task "Write report" as complete
+    Then the task "Write report" is marked completed
+
+  Scenario: Deleting a task
+    Given tasks titled "Old task" and "Keep task" exist
+    When I delete the task "Old task"
+    Then the task list does not contain "Old task"
+    And the task list still contains "Keep task"
+
+  Scenario: Filtering tasks by category
+    Given tasks titled "A" (category "Work") and "B" (category "Personal") and "C" (category "Work") exist
+    When I filter tasks by category "Work"
+    Then only tasks titled "A" and "C" are visible
+
+  Scenario: Editing a task
+    Given I have an existing task titled "Draft" with description "Initial" and priority "Low" and category "School" and due date "2025-07-01" exists
+    When I edit the task "Draft" changing title to "Final" and description to "Revised" and priority to "High" and category to "Work" and due date to "2025-07-15"
+    Then the task list contains a task titled "Final"
+    And that task has description "Revised"
+    And that task has priority "High"
+    And that task has category "Work"
+    And that task has due date "2025-07-15"
+
+</code></pre></div></div>
+
+<ul>
+  <li><strong>Step Definitions</strong>: Implemented in <code class="language-plaintext highlighter-rouge">tests/feature/steps/test_add_steps.py</code>. We use fixtures to set up <code class="language-plaintext highlighter-rouge">tmp_path</code> + <code class="language-plaintext highlighter-rouge">session_state</code>, then call our core functions (<code class="language-plaintext highlighter-rouge">handle_new_task</code>, <code class="language-plaintext highlighter-rouge">complete_task</code>, <code class="language-plaintext highlighter-rouge">delete_task</code>, etc.).</li>
+  <li><strong>Streamlit Integration</strong>:</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  def show_bdd_button():
+      if st.button("Run BDD Tests", key="bdd"):
+          subprocess.run(["pytest","tests/feature","-q"])
+</code></pre></div></div>
+<h3 id="test-output">Test Output</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>============================================== tests coverage ===============================================
+_____________________________ coverage: platform darwin, python 3.13.1-final-0 ______________________________
+
+Name              Stmts   Miss  Cover   Missing
+-----------------------------------------------
+src/__init__.py       0      0   100%
+src/app.py          113     72    36%   25-32, 36-62, 89-91, 100, 103, 106-110, 138-165, 173-195, 203, 206-207, 210, 213, 216-217, 220, 349-350
+src/tasks.py         59     20    66%   23-31, 71, 97, 110-111, 128-129, 140-141, 151-152, 159, 177, 180
+-----------------------------------------------
+TOTAL               172     92    47%
+5 passed in 0.77s
+</code></pre></div></div>
+
+<h1 id="what-ive-learned-throughout-this-process">What I’ve Learned Throughout This Process</h1>
+
+<p>Over the course of this assignment, I learned just how critical robust error handling and comprehensive test coverage are to software quality. Every bug— from the duplicate-ID issue to the double-click button glitch—taught me the importance of writing tests that not only confirm correct behavior but also anticipate edge cases.</p>
+
+<p>Debugging felt like incredibly exhaustive detective work: each pytest failure message pointed me to a new hypothesis, and each fix inspired fresh tests to lock down the behavior. Setting up BDD scenarios with pytest‑bdd forced me to think in terms of user stories and workflows, not just individual functions, which was a powerful shift in perspective.</p>
+
+<p>Balancing Streamlit’s reactive UI with pure‑logic functions drove home the value of separation of concerns—extracting business logic into <code class="language-plaintext highlighter-rouge">src/tasks.py</code> made unit and property‑based tests far more straightforward. I also saw how TDD accelerates design: writing failing tests for a feature before implementing it kept the scope focused and minimized regression.</p>
+
+<p>Adding the “Run Selected Tests” and “Run BDD Tests” buttons in the app highlighted how developer ergonomics can be built into the product itself—empowering users (and myself) to validate the entire suite with a single click. Watching coverage climb from 25% to over 97% was immensely satisfying and underscored that true confidence in code comes from seeing it exercise every branch, every corner case.</p>
+
+<p>Overall, this process taught me patience (sometimes the simplest typo can block a hundred lines of code), persistence, and pride in delivering a to‑do app that’s not just functional, but battle‑tested end to end.</p>]]></content><author><name>Carson Kempf</name></author><category term="Apps" /><summary type="html"><![CDATA[Test the App]]></summary></entry><entry><title type="html">River-Toad-Game</title><link href="https://carsontkempf.github.io/River-Toad-Game/" rel="alternate" type="text/html" title="River-Toad-Game" /><published>2025-04-16T10:04:10-06:00</published><updated>2025-04-16T10:04:10-06:00</updated><id>https://carsontkempf.github.io/River-Toad-Game</id><content type="html" xml:base="https://carsontkempf.github.io/River-Toad-Game/"><![CDATA[<h1 id="river-toad-game">River Toad Game</h1>
+
+<ul>
+  <li>Game to be solved by multiple algorithms</li>
+</ul>
+
+<hr />
+
+<h2 id="introduction">Introduction</h2>
+
+<ul>
+  <li>Turn based game like Frogger</li>
+  <li>Mr. Toad dies if he runs out of hp or a snake eats him</li>
+  <li>Mr. Toad can also eat flies for hp boosts</li>
+</ul>
+
+<h3 id="initially">Initially</h3>
+
+<ul>
+  <li>River and Banks are empty</li>
+  <li>Mr. Toad begins in the center</li>
+</ul>
+
+<hr />
+
+<h2 id="mr-toad">Mr. Toad</h2>
+
+<ul>
+  <li>Remains within the bottom row’s river cells</li>
+  <li>Each turn Mr. Toad may make an action</li>
+</ul>
+
+<h3 id="actions">Actions</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Action</th>
+      <th style="text-align: center">HP Lost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">Left 2</td>
+      <td style="text-align: center">3</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Left 1</td>
+      <td style="text-align: center">1</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Stay</td>
+      <td style="text-align: center">0</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Right 1</td>
+      <td style="text-align: center">1</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Right 2</td>
+      <td style="text-align: center">3</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="hp">HP</h3>
+
+<ul>
+  <li>Mr. Toad loses HP according to his actions</li>
+  <li>He can eat a fly to gain 5 hp</li>
+</ul>
+
+<hr />
+
+<h2 id="snakes">Snakes</h2>
+
+<ul>
+  <li>Spawn at the top row according to roll values</li>
+  <li>Can only spawn in the river cells</li>
+  <li>Move down one row each turn</li>
+  <li>Disappear when they reach the bottom row</li>
+</ul>
+
+<hr />
+
+<h2 id="flies">Flies</h2>
+
+<ul>
+  <li>Spawn at the top row according to roll values</li>
+  <li>Can only spawn on the bank cells</li>
+  <li>If Mr. Toad is adjacent to a fly, Mr. Toad gains 5 hp</li>
+  <li>Disappear when they reach the bottom row</li>
+</ul>
+
+<hr />
+
+<h2 id="game-turn">Game Turn</h2>
+
+<ul>
+  <li>Represented in 5 Phases</li>
+</ul>
+
+<h3 id="1-mr-toad-moves">1. Mr. Toad Moves</h3>
+
+<ul>
+  <li>Only moves within the river cells</li>
+  <li>HP is updated</li>
+  <li>Mr. Toad’s HP cannot be negative</li>
+</ul>
+
+<h3 id="2-snakes-move-down">2. Snakes Move Down</h3>
+
+<ul>
+  <li>Snakes can only occupy the river cells</li>
+</ul>
+
+<p>If a snake moves into an empty cell of the bottom row:</p>
+
+<blockquote>
+  <p>The snake disappears</p>
+</blockquote>
+
+<p>If the snake moves into the cell of the bottom row where Mr. Toad is:</p>
+
+<blockquote>
+  <p>Mr. Toad is caught and the game is over (after the flies move down, and new entities spawn at the top row)</p>
+</blockquote>
+
+<h3 id="3-flies-move-down">3. Flies Move Down</h3>
+
+<blockquote>
+  <p>Flies can only occupy the bank cells</p>
+</blockquote>
+
+<p>If a fly moves into a cell directly adjacent to Mr. Toad:</p>
+
+<blockquote>
+  <p>Mr. Toad gains 5 HP</p>
+</blockquote>
+
+<p>If a fly moves into a cell at the bottom row and isn’t eaten by Mr. Toad:</p>
+
+<blockquote>
+  <p>The fly disappears</p>
+</blockquote>
+
+<h3 id="4-entities-spawn">4. Entities Spawn</h3>
+
+<ul>
+  <li>The next roll is gotten from the input file</li>
+  <li>Snakes, a fly, or nothing spawns at the top row</li>
+</ul>
+
+<h3 id="5-evaluation">5. Evaluation</h3>
+
+<p>If Mr. Toad has 0 HP OR if Mr. Toad was caught by a snake:</p>
+
+<blockquote>
+  <p>The game ends</p>
+</blockquote>
+
+<hr />
+
+<h3 id="victory-condition">Victory Condition</h3>
+
+<ul>
+  <li>All the turns from the input file are completed</li>
+  <li>Mr. Toad is still alive</li>
+</ul>
+
+<hr />
+
+<h2 id="spawning-snakes-and-flies">Spawning Snakes and Flies</h2>
+
+<ul>
+  <li>Always spawn at the top row of the game board</li>
+  <li>Spawn according to the roll input</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Roll Number</th>
+      <th style="text-align: center">Left Bank</th>
+      <th style="text-align: center">River 1</th>
+      <th style="text-align: center">River 2</th>
+      <th style="text-align: center">River 3</th>
+      <th style="text-align: center">River 4</th>
+      <th style="text-align: center">River 5</th>
+      <th style="text-align: center">Right Bank</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">1</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">2</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">3</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">4</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">5</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">6</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">7</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">8</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">9</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">10</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">11</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">12</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">13</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">14</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">15</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">16</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">17</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">18</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">19</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">20</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">21</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">22</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">23</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">24</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">25</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">26</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">27</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">28</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">29</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">30</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">31</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">S</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">32</td>
+      <td style="text-align: center">F</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">33</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">””</td>
+      <td style="text-align: center">F</td>
+      <td style="text-align: center">””</td>
+    </tr>
+  </tbody>
+</table>]]></content><author><name>Carson Kempf</name></author><category term="AI" /><summary type="html"><![CDATA[River Toad Game]]></summary></entry><entry><title type="html">LangChain-With-Search</title><link href="https://carsontkempf.github.io/LangChain-With-Search/" rel="alternate" type="text/html" title="LangChain-With-Search" /><published>2025-04-16T02:42:31-06:00</published><updated>2025-04-16T02:42:31-06:00</updated><id>https://carsontkempf.github.io/LangChain-With-Search</id><content type="html" xml:base="https://carsontkempf.github.io/LangChain-With-Search/"><![CDATA[<hr />
+
+<h1 id="langchain-output">LangChain Output</h1>
+
+<p><a href="https://colab.research.google.com/drive/1SHFotzlgidp7ciQY6Hbbxi6qfnjiaTlv?usp=sharing">View in Google Collab</a></p>
+
+<hr />
+
+<h2 id="explanation">Explanation</h2>
+
+<h3 id="human-message">Human Message</h3>
+
+<ul>
+  <li>We separate each chat by the ‘role’ variable</li>
+  <li>The Human Message role simulates a query to the deepseek ai</li>
+</ul>
+
+<h3 id="ai-message">Ai Message</h3>
+
+<ul>
+  <li>Simulates the Ai Message ‘role’ in the conversation</li>
+</ul>
+
+<h3 id="tool-calls">Tool Calls</h3>
+
+<ul>
+  <li>The GPT returns which tools it wants to use after the initial query</li>
+</ul>
+
+<h3 id="tool-response-tavily-search-api">Tool Response (Tavily Search API)</h3>
+
+<ul>
+  <li>The GPT response sets off the Tavily search API</li>
+  <li>Tavily search API returns a summarized output meant for LLMs</li>
+</ul>
+
+<h3 id="final-ai-message">Final Ai Message</h3>
+
+<ul>
+  <li>Returns the response to the initial query</li>
+  <li>Response includes the summarized tool call</li>
+</ul>
+
+<hr />
+
+<h1 id="output">Output</h1>
+
+<hr />
+
+<h2 id="step-1">Step 1</h2>
+
+<ul>
+  <li>Human Message</li>
+  <li>AI Tool Call</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>===== Query: Tariff News =====
+================================ Human Message =================================
+
+Describe the latest news on international trade tariffs 2025.
+================================== Ai Message ==================================
+Tool Calls:
+  TavilySearch (call_0_a2bc101d-6b2e-48ba-be89-d55aa673c09f)
+ Call ID: call_0_a2bc101d-6b2e-48ba-be89-d55aa673c09f
+  Args:
+    __arg1: latest news on international trade tariffs 2025
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="step-2">Step 2</h2>
+
+<ul>
+  <li>Search API Response</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>================================= Tool Message =================================
+Name: TavilySearch
+
+{
+  "query": "latest news on international trade tariffs 2025",
+  "follow_up_questions": null,
+  "answer": null,
+  "images": [],
+  "results": [
+    {
+      "title": "US tariffs move could see three per cent fall in global trade ... - UN News",
+      "url": "https://news.un.org/en/story/2025/04/1162151",
+      "content": "US tariffs move could see three per cent fall in global trade, says top UN economist | UN News ![Image 2: Pamela Coke-Hamilton, Executive Director of the International Trade Centre (ITC).](https://global.unitednations.entermediadb.net/assets/mediadb/services/module/asset/downloads/preset/Libraries/Production%20Library/11-04-2025-UN-News-Pamela-Coke-Hamilton.jpg/image1170x530cropped.jpg) There will be geopolitical shifts and economic as well,\u201d said Pamela Coke-Hamilton, head of the International Trade Centre (ITC). As governments and global markets struggle to deal with the deep concerns and disruptions caused by volatility over trade tariffs, Rebeca Grynspan, the head of the UN trade and development agency (UNCTAD), told UN News on Thursday that the poorest countries \u2013 whose activities have a negligible effect on trade deficits \u2013 should be exempt.",
+      "score": 0.8302782,
+      "raw_content": null
+    },
+    {
+      "title": "Trump's tariffs risk a global trade war, as leaders plan next steps",
+      "url": "https://www.cnbc.com/2025/04/02/trump-tariffs-live-updates.html",
+      "content": "This was CNBC's coverage of President Donald Trump's April 2, 2025, announcement of new tariffs targeting dozens of U.S. trade partners. Pharmaceutical companies breathed a sigh of relief Wednesday after U.S. President Donald Trump revealed that they would not be subject to reciprocal tariffs \u2014 but that reprieve could prove fleeting as the White House moves ahead with plans for the sector. President Donald Trump and the White House laid out the U.S. reciprocal tariff rates that more than 180 countries and territories will face under his sweeping new trade policy. Exchange-traded funds tied to major U.S. stock indexes fell sharply in after-hours trading Wednesday after President Trump imposed sweeping tariffs on goods imported to the U.S. The SPDR S&amp;P 500 ETF Trust (SPY) tumbled 2.2%.",
+      "score": 0.8020137,
+      "raw_content": null
+    },
+    {
+      "title": "International Trade Law Updates for March 2025 - National Law Review",
+      "url": "https://natlawreview.com/article/br-international-trade-report-march-2025",
+      "content": "U.S. trade deficit rose sharply in January ahead of Trump tariffs. The U.S. trade deficit grew by 34 percent in January to $131.4 billion, largely driven by a 10 percent increase in imports, which",
+      "score": 0.7451949,
+      "raw_content": null
+    },
+    {
+      "title": "Here's what's about to become more expensive with the next round of ...",
+      "url": "https://www.cnn.com/2025/04/15/economy/next-round-of-tariffs-cost/index.html",
+      "content": "CNN10 About CNN \u201cThe risk from [imposing duties] on imports of products where there are few substitutes is certainly greater, and that\u2019s why there have been some exemptions and reductions in tariffs and exclusions of products that are of key importance to the US,\u201d Gregory Daco, chief economist at EY-Parthenon, told CNN in an interview. Although the bipartisan CHIPS and Science Act passed during the Biden administration helped incentivize chipmakers like TSMC to open US facilities, even if tariffs do spur more domestic chip production, America still lacks electronic assembly capabilities, John Dallesasse, an electrical and computer engineering professor at the University of Illinois Urbana-Champaign, previously told CNN. These are the hardest-hit US trading partners under Trump\u2019s tariffs Apr 4, 2025 3 minute readmin read More from CNN CNN10 About CNN",
+      "score": 0.6102915,
+      "raw_content": null
+    },
+    {
+      "title": "Regulating Imports with a Reciprocal Tariff to Rectify Trade Practices ...",
+      "url": "https://www.whitehouse.gov/presidential-actions/2025/04/regulating-imports-with-a-reciprocal-tariff-to-rectify-trade-practices-that-contribute-to-large-and-persistent-annual-united-states-goods-trade-deficits/",
+      "content": "TRUMP, President of the United States of America, find that underlying conditions, including a lack of reciprocity in our bilateral trade relationships, disparate tariff rates and non-tariff barriers, and U.S. trading partners\u2019 economic policies that suppress domestic wages and consumption, as indicated by large and persistent annual U.S. goods trade deficits, constitute an unusual and extraordinary threat to the national security and economy of the United States.",
+      "score": 0.1476169,
+      "raw_content": null
+    }
+  ],
+  "response_time": 1.36
+}
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="step-3">Step 3</h2>
+
+<ul>
+  <li>Query Response</li>
+</ul>
+
+<p>================================== Ai Message ==================================</p>
+
+<p>Here are some of the latest updates on international trade tariffs for 2025:</p>
+
+<ol>
+  <li><strong>UN News Report</strong>:
+    <ul>
+      <li>The U.S. tariffs could lead to a 3% decline in global trade, according to a top UN economist. The International Trade Centre (ITC) highlighted concerns about geopolitical and economic shifts due to tariff volatility. There are calls for exemptions for the poorest countries, as their trade activities have minimal impact on trade deficits.</li>
+      <li><a href="https://news.un.org/en/story/2025/04/1162151">Read more here</a></li>
+    </ul>
+  </li>
+  <li><strong>CNBC Coverage</strong>:
+    <ul>
+      <li>President Donald Trump announced new tariffs targeting over 180 countries, raising fears of a global trade war. While pharmaceutical companies were temporarily exempt, the broader implications for U.S. stock markets and trade partners were significant.</li>
+      <li><a href="https://www.cnbc.com/2025/04/02/trump-tariffs-live-updates.html">Details here</a></li>
+    </ul>
+  </li>
+  <li><strong>National Law Review</strong>:
+    <ul>
+      <li>The U.S. trade deficit surged by 34% in January 2025, driven by increased imports, ahead of the implementation of new tariffs.</li>
+      <li><a href="https://natlawreview.com/article/br-international-trade-report-march-2025">More information</a></li>
+    </ul>
+  </li>
+  <li><strong>CNN Analysis</strong>:
+    <ul>
+      <li>The next round of tariffs is expected to make certain products more expensive, with exemptions for critical items. The U.S. still faces challenges in domestic production, particularly in electronics assembly.</li>
+      <li><a href="https://www.cnn.com/2025/04/15/economy/next-round-of-tariffs-cost/index.html">Full article</a></li>
+    </ul>
+  </li>
+  <li><strong>White House Announcement</strong>:
+    <ul>
+      <li>President Trump issued a directive to regulate imports with reciprocal tariffs, citing persistent trade deficits as a threat to national security and the economy.</li>
+      <li><a href="https://www.whitehouse.gov/presidential-actions/2025/04/regulating-imports-with-a-reciprocal-tariff-to-rectify-trade-practices-that-contribute-to-large-and-persistent-annual-united-states-goods-trade-deficits/">Official statement</a></li>
+    </ul>
+  </li>
+</ol>
+
+<p>These updates highlight the ongoing debates and impacts of trade tariffs on global markets and economies. Let me know if you’d like more details on any specific aspect!</p>
+
+<hr />
+
+<h2 id="step-4">Step 4</h2>
+
+<ul>
+  <li>Query Without Tool Call</li>
+</ul>
+
+<p>===== Query: Who built you? =====</p>
+
+<p>================================ Human Message =================================</p>
+
+<p>Who built you?</p>
+
+<p>================================== Ai Message ==================================</p>
+
+<p>I was created by <strong>OpenAI</strong>, a research organization focused on developing artificial intelligence to benefit humanity. OpenAI is known for its advancements in AI technologies, including models like GPT-3 and GPT-4, which power assistants like me. My purpose is to assist users by providing information, answering questions, and helping with various tasks. Let me know how I can assist you!</p>]]></content><author><name>Carson Kempf</name></author><category term="LangChain" /><summary type="html"><![CDATA[]]></summary></entry><entry><title type="html">A-Star-Search-Assignment</title><link href="https://carsontkempf.github.io/A-Star-Search-Assignment/" rel="alternate" type="text/html" title="A-Star-Search-Assignment" /><published>2025-04-15T03:41:54-06:00</published><updated>2025-04-15T03:41:54-06:00</updated><id>https://carsontkempf.github.io/A-Star-Search-Assignment</id><content type="html" xml:base="https://carsontkempf.github.io/A-Star-Search-Assignment/"><![CDATA[<hr />
+
+<h1 id="a-search">A* Search</h1>
+
+<hr />
+
+<h2 id="assignment">Assignment</h2>
+
+<p>Goal</p>
+
+<ul>
+  <li>Create a program that implements A* Search over the River Toad game</li>
+  <li>Implements graph search to determine the sequence of actions</li>
+</ul>
+
+<hr />
+
+<h2 id="specifications">Specifications</h2>
+
+<h3 id="inputoutput-structure">Input/Output Structure</h3>
+
+<ul>
+  <li>Same as previous projects</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python3 src/puzzle4.py "$1" "$2"
+</code></pre></div></div>
+
+<p>$1</p>
+<ul>
+  <li>Input file</li>
+</ul>
+
+<p>$2</p>
+<ul>
+  <li>Output file</li>
+</ul>
+
+<h3 id="output-grading">Output Grading</h3>
+
+<ul>
+  <li>Output file is the only thing being graded</li>
+</ul>
+
+<p>’#’</p>
+<ul>
+  <li>Bank Cell</li>
+</ul>
+
+<p>’ ‘</p>
+<ul>
+  <li>Empty River Cell</li>
+</ul>
+
+<p>‘S’</p>
+<ul>
+  <li>Snake Cell</li>
+</ul>
+
+<p>‘F’</p>
+<ul>
+  <li>Fly Cell</li>
+</ul>
+
+<p>‘T’</p>
+<ul>
+  <li>Toad Cell</li>
+</ul>
+
+<p>‘X’</p>
+<ul>
+  <li>Dead Toad Cell</li>
+</ul>
+
+<h3 id="goal">Goal</h3>
+
+<ul>
+  <li>Mr. Toad is alive at the end of the search</li>
+</ul>
+
+<hr />
+
+<h2 id="heuristic-function">Heuristic Function</h2>
+
+<h3 id="considering-mr-toad-plans">Considering Mr. Toad Plans</h3>
+
+<ul>
+  <li>Determined by both
+    <ol>
+      <li>Plan Cost</li>
+      <li>A Heuristic Function</li>
+    </ol>
+  </li>
+</ul>
+
+<h3 id="cost-function">Cost Function</h3>
+
+<p>cost(s)</p>
+<ul>
+  <li>Returns the cost of reaching the game state s</li>
+  <li>From the initial state</li>
+</ul>
+
+<h3 id="heuristic-function-1">Heuristic Function</h3>
+
+<p>h(s)</p>
+<ul>
+  <li>Takes a game state s</li>
+  <li>Returns an estimate of how close s is to the goal</li>
+</ul>
+
+<h3 id="graph-search-function">Graph Search Function</h3>
+
+<p>f(s) = cost(s) + h(s)</p>
+<ul>
+  <li>Plans are explored in the order of f(s)</li>
+</ul>
+
+<h3 id="note">Note</h3>
+
+<ul>
+  <li>cost(s) and h(s) functions should be clearly identified by the graders</li>
+  <li>Not required that the heuristic function to lead to optimal solutions</li>
+</ul>
+
+<hr />
+
+<h2 id="initial-game-board-preconditions">Initial Game Board Preconditions</h2>
+
+<ul>
+  <li>There is at least one way to achieve a victory from the initial input field</li>
+</ul>
+
+<hr />
+
+<h2 id="input-file-format">Input File Format</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>5 # number of rolls following this line
+21
+21
+10
+14
+27
+
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="output-file-format">Output File Format</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GAGAF
+7
+#SS SS#
+# SSS #
+# S S #
+#S S S#
+#   T #
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="notes">Notes</h2>
+
+<ul>
+  <li>Different implementations output different solutions</li>
+</ul>
+
+<hr />
+
+<h2 id="submission">Submission</h2>
+
+<h3 id="main-file">Main File</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>puzzle4.py
+</code></pre></div></div>
+
+<hr />
+
+<h1 id="primer-for-puzzle-assignment">Primer for Puzzle Assignment</h1>
+
+<hr />
+
+<h2 id="intuition">Intuition</h2>
+
+<ul>
+  <li>Explore the River Toad game tree</li>
+  <li>Explore the plans by imposing the plans based on:
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>function of cost + heuristic function
+</code></pre></div>    </div>
+  </li>
+  <li>Use a priority queue to store candidate plans</li>
+</ul>
+
+<h3 id="final-implementation">Final Implementation</h3>
+
+<ul>
+  <li>Breadth-First Search</li>
+  <li>With a priority queue instead of a regular queue</li>
+</ul>
+
+<hr />
+
+<h2 id="implementation">Implementation</h2>
+
+<ul>
+  <li>Use the GameBoard and TransitionFunction()</li>
+</ul>
+
+<h3 id="gameboard">GameBoard</h3>
+
+<ul>
+  <li>A “snapshot” of the River Toad game</li>
+  <li>Includes the location of Mr. Toad, the snakes, and the flies</li>
+</ul>
+
+<h3 id="transitionfunctionsp---s">TransitionFunction(s,p) -&gt; s’</h3>
+
+<p>Input</p>
+<ul>
+  <li>s: a GameBoard</li>
+  <li>p: A sequence of Mr. Toad’s actions</li>
+</ul>
+
+<p>Output</p>
+<ul>
+  <li>s’: the GameBoard that results from executing p in s</li>
+</ul>
+
+<hr />
+
+<h2 id="refining-a-search">Refining A* Search</h2>
+
+<h3 id="main-change">Main Change</h3>
+
+<ul>
+  <li>The frontier’s priority-queue</li>
+  <li>Sequences of actions / plans are now ordered by how far they are from the initial state</li>
+  <li>Determined by a cost function + how close they get to the final goal (heuristic function)</li>
+</ul>
+
+<hr />
+
+<h2 id="pseudocode">PseudoCode</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FUNCTION River-Toad-Astar-GS
+INPUT 
+    s0 : the initial GameBoard
+    goal(s) : boolean function that tests if the goal is true in GameBoard s.
+    cost(s) : A cost function that returns the "cost" from the initial board to s.
+    h(s) : A heuristic function that returns an estimate of the "cost" from s to the goal.
+ 
+OUTPUT : a sequence of actions that takes the game from s0 to a state that satisfies the goal.
+
+VAR frontier : Priority-Queue of sequences of actions.
+               // Smallest priority value is highest priority
+
+==============================================================================================
+BEGIN
+    enqueue [] (empty sequence) into frontier
+    
+    WHILE frontier is not empty
+    
+        dequeue sequence of actions p = [a0, a1, a2, ..., ak] from frontier
+        // p has highest priority / smallest priority in frontier.
+        
+        sk ← TransitionFunction( s0, p )
+        // sk is the GameBoard that results from executing p in s0
+        
+        IF goal(sk)
+            RETURN p
+            
+        FOR every valid action a at sk
+            px ← [a0, a1, a2, ..., ak, a]
+            sx ← TransitionFunction( s0, px )
+            // sx is the GameBoard that results from executing px in s0
+            
+            enqueue px into frontier with priority cost(sx) + h(sx)
+            // cost() is the cost function
+            // h() is the heuristic function
+            
+        ENDF
+    ENDW
+END.
+</code></pre></div></div>
+<hr />
+
+<h2 id="further-refinement">Further Refinement</h2>
+
+<ul>
+  <li>May use different cost and heuristic functions than the assignment</li>
+  <li>Not required to implement pruning on this assignment</li>
+  <li>It may help speed up execution</li>
+</ul>]]></content><author><name>Carson Kempf</name></author><category term="AI" /><summary type="html"><![CDATA[]]></summary></entry></feed>
