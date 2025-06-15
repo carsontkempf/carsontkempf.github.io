@@ -36,6 +36,11 @@ function serializeErrorForReporting(error) {
 }
 
 async function reportErrorToServer(errorToReport) {
+    // Skip error reporting if we're in development and no error server is running
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('[Auth.js] Skipping error reporting in development environment');
+        return;
+    }
     const errorDetails = serializeErrorForReporting(errorToReport);
     let requestBody;
 
@@ -67,11 +72,24 @@ async function reportErrorToServer(errorToReport) {
     }
 
     try {
-        await fetch('http://localhost:3001/log-client-error', { // Dedicated error logging server
+        const response = await fetch('http://localhost:3001/log-client-error', { // Dedicated error logging server
             method: 'POST',
             headers: { 'Content-Type': 'application/json', },
             body: requestBody,
         });
+        if (!response.ok) {
+            console.warn('[Auth.js] Error logging server returned non-OK status:', response.status, response.statusText);
+            return; // Don't try to parse response if it's not OK
+        }
+        // Only try to parse as JSON if response is OK
+        const responseText = await response.text();
+        if (responseText && responseText !== 'Not found.') {
+            try {
+                JSON.parse(responseText); // Validate it's JSON
+            } catch (parseError) {
+                console.warn('[Auth.js] Server returned non-JSON response:', responseText);
+            }
+        }
     } catch (reportingError) {
         console.warn('[Auth.js] Failed to report error to server:', reportingError, '(Original error was:', errorToReport, ')');
     }
@@ -152,40 +170,90 @@ const auth0Domain = 'dev-l57dcpkhob0u7ykb.us.auth0.com';
 const auth0ClientId = 'Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC'; // Ensure this is the Client ID for your "Carson's Meditations" APPLICATION
 const auth0Audience = 'https://carsontkempf.github.io/api/carsons-meditations'; // <-- UPDATE THIS to your new API Identifier
 
+// To be determined once on DOMContentLoaded
+let siteBaseUrl = '';
+
+function determineSiteBaseUrl() {
+	const baseElement = document.querySelector('base[href]');
+	// For GitHub Pages, site.baseurl is usually empty for user/org pages (carsontkempf.github.io)
+	// and /repo-name for project pages.
+	if (baseElement) {
+		try {
+			// Get the full href, then extract the pathname, then remove trailing slash
+			const fullBaseHref = new URL(baseElement.href, window.location.origin).href;
+			siteBaseUrl = new URL(fullBaseHref).pathname.replace(/\/$/, '');
+		} catch (e) {
+			siteAuthLog('determineSiteBaseUrl: Could not parse base href, defaulting to empty base URL.', baseElement.href, e);
+			siteBaseUrl = '';
+		}
+	} else {
+		// Fallback if no <base> tag: For localhost or root deployments, base is empty.
+		// For GitHub Pages project sites, this would need more specific logic if not using <base> tag.
+		siteBaseUrl = ''; // Default to empty if no base tag, common for root deployments.
+		siteAuthLog(`determineSiteBaseUrl: No <base> tag found, assuming root deployment. siteBaseUrl: "${siteBaseUrl}"`);
+	}
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
 	siteAuthLog('DOMContentLoaded event fired. Starting Auth0 initialization process.');
 	siteAuthLog('Auth0 Config:', { auth0Domain, auth0ClientId, auth0Audience });
 
 	const loginButton = document.getElementById('btn-login');
+	// Define and assign core methods to siteAuth EARLY
+	// so they are available when updateUI or other functions run.
+	async function appLogin() {
+		siteAuthLog('[Auth.js] appLogin (siteAuth.login) called, preparing for Auth0 redirect.');
+		try {
+			if (!window.siteAuth.auth0Client) {
+				siteAuthError('[Auth.js] appLogin: auth0Client is not initialized! Cannot redirect.');
+				return;
+			}
+			await window.siteAuth.auth0Client.loginWithRedirect({
+				authorizationParams: {
+					redirect_uri: window.location.origin,
+					audience: auth0Audience
+				}
+			});
+			siteAuthLog('[Auth.js] appLogin: loginWithRedirect initiated.');
+		} catch (e) {
+			siteAuthError('[Auth.js] appLogin: Error during loginWithRedirect', e);
+		}
+	}
+	window.siteAuth.login = appLogin;
+	siteAuthLog('login function (appLogin) assigned to window.siteAuth.login');
+
+
 	const logoutButton = document.getElementById('btn-logout');
 	const userInfoP = document.getElementById('user-info');
 	siteAuthLog('UI Elements:', { loginButton, logoutButton, userInfoP });
 
-	async function waitForAuth0Spa() {
-		siteAuthLog('waitForAuth0Spa: Starting to wait for Auth0 SPA SDK (window.auth0spa)...');
+	determineSiteBaseUrl(); // Determine and set siteBaseUrl
+	window.siteAuth.siteBaseUrl = siteBaseUrl; // Make it accessible if needed elsewhere
+
+	async function waitForAuth0Sdk() {
+		siteAuthLog('waitForAuth0Sdk: Starting to wait for Auth0 SDK (window.auth0)...');
 		return new Promise((resolve, reject) => {
 			const maxRetries = 70; // Try for 7 seconds (70 * 100ms)
 			let retries = 0;
 			const intervalId = setInterval(() => {
-				const spaLib = window.auth0spa;
-				const createClientFn = spaLib ? spaLib.createAuth0Client : undefined;
+				const auth0Sdk = window.auth0;
+				const createClientFn = auth0Sdk ? auth0Sdk.createAuth0Client : undefined;
 
-				siteAuthLog(`waitForAuth0Spa: Retry #${retries + 1}. ` +
-					`window.auth0spa type: ${typeof spaLib}, ` +
+				siteAuthLog(`waitForAuth0Sdk: Retry #${retries + 1}. ` +
+					`window.auth0 type: ${typeof auth0Sdk}, ` +
 					`createAuth0Client type: ${typeof createClientFn}`);
 
-				if (typeof window.auth0spa !== 'undefined' && typeof window.auth0spa.createAuth0Client === 'function') {
+				if (auth0Sdk && typeof auth0Sdk.createAuth0Client === 'function') {
 					clearInterval(intervalId);
-					siteAuthLog("waitForAuth0Spa: Auth0 SPA SDK (window.auth0spa) is now available and createAuth0Client is a function.");
+					siteAuthLog("waitForAuth0Sdk: Auth0 SDK (window.auth0.createAuth0Client) is now available.");
 					resolve();
 				} else {
 					retries++;
 					if (retries >= maxRetries) {
 						clearInterval(intervalId);
-						siteAuthError(`CRITICAL: Auth0 SPA SDK (window.auth0spa) did not become available after ${maxRetries} retries. ` +
-							`Last state: window.auth0spa type: ${typeof spaLib}, createAuth0Client type: ${typeof createClientFn}`);
-						reject(new Error('Auth0 SDK (window.auth0spa) timed out or is not valid.'));
+						siteAuthError(`CRITICAL: Auth0 SDK (window.auth0.createAuth0Client) did not become available after ${maxRetries} retries. ` +
+							`Last state: window.auth0 type: ${typeof auth0Sdk}, createAuth0Client type: ${typeof createClientFn}`);
+						reject(new Error('Auth0 SDK (window.auth0.createAuth0Client) timed out or is not valid.'));
 					}
 				}
 			}, 100);
@@ -195,17 +263,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 		async function configureClient() {
 			try {
 				siteAuthLog('configureClient: Attempting to configure Auth0 client...');
-				if (typeof window.auth0spa === 'undefined' || typeof window.auth0spa.createAuth0Client !== 'function') {
-					siteAuthError('CRITICAL: window.auth0spa is undefined or not a function when calling createAuth0Client. Auth0 SDK might not be loaded or initialized correctly.');
-					throw new Error('Auth0 SDK (window.auth0spa) is not available or invalid.');
+				if (!window.auth0 || typeof window.auth0.createAuth0Client !== 'function') {
+					siteAuthError('CRITICAL: window.auth0 or window.auth0.createAuth0Client is not available. Auth0 SDK might not be loaded or initialized correctly.');
+					throw new Error('Auth0 SDK (window.auth0.createAuth0Client) is not available or invalid.');
 				}
-				window.siteAuth.auth0Client = await window.auth0spa.createAuth0Client({
+				const clientOptions = {
 					domain: auth0Domain,
-					client_id: auth0ClientId,
+					clientId: auth0ClientId, // Corrected to camelCase
 					authorizationParams: {
-						redirect_uri: window.location.origin,
+						redirect_uri: window.location.origin, // Ensure this matches Auth0 allowed callback URLs
 						audience: auth0Audience
 					},
+				};
+				siteAuthLog(`configureClient: About to call createAuth0Client with options:`, JSON.parse(JSON.stringify(clientOptions)));
+				window.siteAuth.auth0Client = await window.auth0.createAuth0Client({
+					...clientOptions // Spread the defined options
 				});
 				siteAuthLog('configureClient: Auth0 client configured successfully.', window.siteAuth.auth0Client);
 			} catch (err) {
@@ -246,12 +318,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 			window.siteAuth.isAuthenticated = isAuthenticated;
 
 			siteAuthLog('updateUI: Setting button visibility based on isAuthenticated:', isAuthenticated);
-			if (loginButton) loginButton.style.display = isAuthenticated ? 'none' : 'inline';
+			
+			const currentSiteBaseUrl = window.siteAuth.siteBaseUrl || ''; // Use stored or default to empty
+   			const dashboardButton = document.getElementById('btn-dashboard');
+
+			if (loginButton) {
+				if (isAuthenticated) {
+   					// When authenticated, the main "login" button might be hidden or repurposed.
+   					// For clarity, let's assume #btn-login is hidden and #btn-dashboard is shown.
+   					loginButton.style.display = 'none'; 
+   					if (dashboardButton) dashboardButton.style.display = 'inline';
+				} else {
+					loginButton.textContent = 'Log In';
+					// Do NOT override the onclick here. Rely on the HTML's onclick="siteAuth.login()"
+					// which should call the siteAuth.login method responsible for Auth0 redirect.
+					// Ensure window.siteAuth.login is correctly defined elsewhere to call 
+					// auth0Client.loginWithRedirect().
+					// If we need to be absolutely sure the correct handler is attached (e.g., if it could be cleared):
+					if (typeof window.siteAuth.login === 'function') {
+						loginButton.onclick = window.siteAuth.login;
+					} else {
+						siteAuthError('updateUI: window.siteAuth.login is not a function! Login button may not work as expected.');
+					}
+					loginButton.style.display = 'inline';
+   					if (dashboardButton) dashboardButton.style.display = 'none';
+				}
+			}
+
 			if (logoutButton) logoutButton.style.display = isAuthenticated ? 'inline' : 'none';
+   			// If loginButton is not found, but dashboardButton is, ensure its visibility is also handled.
+   			else if (dashboardButton) dashboardButton.style.display = isAuthenticated ? 'inline' : 'none';
 
 			if (isAuthenticated) {
 				siteAuthLog('updateUI: User is authenticated. Fetching user profile...');
-				window.siteAuth.user = await window.siteAuth.auth0Client.getUser();
+				window.siteAuth.user = await window.siteAuth.auth0Client.getUser() || {}; // Ensure user is an object
 				siteAuthLog('updateUI: User profile fetched:', window.siteAuth.user);
 				if (userInfoP) {
 					userInfoP.textContent = `Welcome, ${window.siteAuth.user.name}!`;
@@ -296,31 +396,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 			siteAuthLog('updateUI: Finished. siteAuth state:', JSON.parse(JSON.stringify(window.siteAuth))); // stringify to avoid circular refs in console
 		}
 
-		// The main login button in default.html now redirects to /login/
-		// This event listener in auth.js is less critical for that button,
-		// but we'll keep it in case a #btn-login is used elsewhere that expects this behavior.
-		if (loginButton && loginButton.getAttribute('onclick') === null) { // Only add if no inline onclick exists
-			// loginButton.addEventListener('click', async () => {
-			// 	siteAuthLog('Login button clicked (from auth.js). siteAuth.auth0Client:', window.siteAuth.auth0Client);
-			// 	if (!window.siteAuth.auth0Client) {
-			// 		siteAuthError('Auth0 client (window.siteAuth.auth0Client) is not available when login button clicked.');
-			// 		alert('Authentication system not ready. Please try again in a moment or refresh the page.');
-			// 		return;
-			// 	}
-			// 	try {
-			// 		siteAuthLog('Attempting loginWithRedirect. Configured audience for redirect:', auth0Audience);
-			// 		await window.siteAuth.auth0Client.loginWithRedirect({
-			// 			authorizationParams: {
-			// 				redirect_uri: window.location.origin,
-			// 				audience: auth0Audience
-			// 			}
-			// 		});
-			//      siteAuthLog('loginWithRedirect initiated.');
-			// 	} catch (err) {
-			// 		siteAuthError('Error during loginWithRedirect:', err);
-			// 		alert('Error during login attempt. Check console.');
-			// 	}
-			// });
+		// The #btn-login's onclick is now fully managed by updateUI.
+		if (loginButton) {
 			siteAuthLog('#btn-login found and no inline onclick. Event listener would be attached if uncommented.');
 		} else {
 			siteAuthLog('#btn-login not found or has inline onclick during initial setup.');
@@ -391,9 +468,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 			siteAuthLog(`checkAccess: isAuthenticated: ${isAuthenticated}`);
 			if (!isAuthenticated) {
 				if (requiredLevel) {
-					console.log('User not authenticated. Redirecting to login for access check.');
-					await window.siteAuth.auth0Client.loginWithRedirect({
+					siteAuthLog('checkAccess: User not authenticated and requiredLevel set. Redirecting to login.');
+					const loginOptions = {
 						appState: { targetUrl: window.location.pathname }
+						// The SDK should automatically pick up client_id, domain, redirect_uri, audience from its initial config
+					};
+					siteAuthLog('checkAccess: Calling loginWithRedirect with options:', JSON.parse(JSON.stringify(loginOptions)));
+					await window.siteAuth.auth0Client.loginWithRedirect({
 					});
 					siteAuthLog('checkAccess: User not authenticated and requiredLevel set. Redirecting to login. Returning false.');
 					return false;
@@ -440,25 +521,94 @@ document.addEventListener('DOMContentLoaded', async () => {
 		window.siteAuth.checkAccess = checkAccess;
 		siteAuthLog('checkAccess function assigned to window.siteAuth.checkAccess');
 
+		async function performRedirects() {
+			siteAuthLog('performRedirects: Checking authentication status for potential redirects.');
+			if (!window.siteAuth.auth0Client) {
+				siteAuthLog('performRedirects: Auth0 client not ready, cannot perform redirects yet.');
+				return;
+			}
+		
+			// Ensure isAuthenticated status is fresh by relying on updateUI having set it.
+			const isAuthenticated = window.siteAuth.isAuthenticated;
+		
+			const currentSiteBaseUrl = window.siteAuth.siteBaseUrl || ''; // Use the globally determined siteBaseUrl
+			
+			// Get current path relative to the site's base URL
+			let currentPath = window.location.pathname.replace(/\/$/, ""); // Normalize current path (remove trailing slash)
+			if (siteBaseUrl && currentPath.startsWith(siteBaseUrl)) {
+				currentPath = currentPath.substring(siteBaseUrl.length);
+			}
+			currentPath = currentPath || '/'; // Ensure it's at least '/' if empty after stripping base or if it was exactly siteBaseUrl
+		
+			siteAuthLog(`performRedirects: Current relative path: "${currentPath}", Base URL: "${currentSiteBaseUrl}", isAuthenticated: ${isAuthenticated}`);
+		
+			const loginPageRelative = '/login';
+			const dashboardPageRelative = '/dashboard';
+			// Define public paths that DON'T require login (relative to siteBaseUrl).
+			// Ensure dashboardPageRelative is NOT in this list.
+			const publicPathsRelative = ['/', '/about', '/contact', '/terms']; // Example: homepage is public. /login is implicitly public.
+
+			if (isAuthenticated) {
+				// User is logged in
+				if (currentPath === loginPageRelative || currentPath === '/') { // If on login page or homepage
+					siteAuthLog(`performRedirects: User authenticated and on "${currentPath}". Redirecting to dashboard ("${currentSiteBaseUrl}${dashboardPageRelative}/").`);
+					window.location.href = `${currentSiteBaseUrl}${dashboardPageRelative}/`;
+				}
+				// If authenticated and already on dashboard or another allowed page, do nothing.
+			} else {
+				// User is NOT logged in
+				// If trying to access a page that is not public and not the login page itself, redirect to login.
+				if (!publicPathsRelative.includes(currentPath) && currentPath !== loginPageRelative) {
+					siteAuthLog(`performRedirects: User NOT authenticated and on protected page "${currentPath}". Redirecting to login ("${currentSiteBaseUrl}${loginPageRelative}/").`);
+					window.location.href = `${currentSiteBaseUrl}${loginPageRelative}/`;
+				}
+			}
+		}
+
 		// Initialize and handle redirect
 		try {
 			siteAuthLog('Main initialization: Starting try block.');
-			await waitForAuth0Spa(); // Wait for the SDK to be ready
-			siteAuthLog('Main initialization: waitForAuth0Spa completed.');
+			await waitForAuth0Sdk(); // Wait for the SDK to be ready
+			siteAuthLog('Main initialization: waitForAuth0Sdk completed.');
 			await configureClient();
 			siteAuthLog('Main initialization: configureClient completed.');
 
 			if (window.siteAuth.auth0Client && window.location.search.includes('code=') && window.location.search.includes('state=')) {
 				try {
+					const currentUrl = window.location.href;
+					siteAuthLog(`Main initialization: Found "code" and "state" in URL (${currentUrl}). Attempting handleRedirectCallback().`);
+					
+					// Log the SDK's configured options right before handleRedirectCallback
+					if (window.siteAuth.auth0Client.options) {
+						// Be careful with logging the full options object if it contains sensitive defaults or too much data.
+						// Let's log key parts.
+						const opts = window.siteAuth.auth0Client.options;
+						siteAuthLog('Main initialization: Auth0 client options before handleRedirectCallback:', {
+							domain: opts.domain,
+							client_id: opts.clientId, // Note: SDK stores it as clientId
+							redirect_uri: opts.authorizationParams ? opts.authorizationParams.redirect_uri : 'N/A',
+							audience: opts.authorizationParams ? opts.authorizationParams.audience : 'N/A'
+						});
+					} else {
+						siteAuthLog('Main initialization: Auth0 client.options is undefined before handleRedirectCallback. This is unexpected.');
+					}
 					const result = await window.siteAuth.auth0Client.handleRedirectCallback();
+					siteAuthLog('Main initialization: handleRedirectCallback() completed successfully. Result:', result);
+
 					if (result && result.appState && result.appState.targetUrl) {
+						siteAuthLog(`Main initialization: handleRedirectCallback successful. Redirecting to appState.targetUrl: ${result.appState.targetUrl}`);
 						window.history.replaceState({}, document.title, result.appState.targetUrl);
 					} else {
-						siteAuthLog('Main initialization: handleRedirectCallback successful. Cleaning URL.');
+						siteAuthLog('Main initialization: handleRedirectCallback successful. Cleaning URL (no specific appState.targetUrl).');
 						window.history.replaceState({}, document.title, window.location.pathname);
 					}
 				} catch (err) {
-					siteAuthError("Main initialization: Error handling redirect callback: ", err);
+					// Log the error object itself for more details if it's an Auth0 error object
+					if (err.error && err.error_description) { // Auth0 errors often have these properties
+						siteAuthError(`Main initialization: Auth0 Error from handleRedirectCallback: ${err.error} - ${err.error_description}. Full error object:`, err);
+					} else {
+						siteAuthError("Main initialization: Generic error from handleRedirectCallback: ", err);
+					}
 					window.history.replaceState({}, document.title, window.location.pathname);
 				}
 			} else if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
@@ -470,6 +620,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 			siteAuthLog('Main initialization: Calling updateUI.');
 			await updateUI();
 			siteAuthLog('Main initialization: updateUI completed.');
+			
+			// Dispatch the siteAuthReady event to notify other scripts that auth is initialized
+			const authReadyEvent = new CustomEvent('siteAuthReady', {
+				detail: window.siteAuth
+			});
+			document.dispatchEvent(authReadyEvent);
+			siteAuthLog('Main initialization: Dispatched siteAuthReady event.');
+			
+			await performRedirects(); // Call the redirect logic after UI and auth state are known
+			siteAuthLog('Main initialization: performRedirects completed.');
 		} catch (error) {
 			siteAuthError("Main initialization: Error during Auth0 initialization process (outer try/catch):", error);
 			if (userInfoP) {
