@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en-US" data-theme="light">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Chrome-Extension | Carson’s Meditations</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Chrome-Extension" />
+<meta name="author" content="Carson Kempf" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Check out our extension!" />
+<meta property="og:description" content="Check out our extension!" />
+<link rel="canonical" href="https://carsontkempf.github.io/Chrome-Extension/" />
+<meta property="og:url" content="https://carsontkempf.github.io/Chrome-Extension/" />
+<meta property="og:site_name" content="Carson’s Meditations" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-05-24T14:57:40-06:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Chrome-Extension" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Carson Kempf"},"dateModified":"2025-05-24T14:57:40-06:00","datePublished":"2025-05-24T14:57:40-06:00","description":"Check out our extension!","headline":"Chrome-Extension","mainEntityOfPage":{"@type":"WebPage","@id":"https://carsontkempf.github.io/Chrome-Extension/"},"url":"https://carsontkempf.github.io/Chrome-Extension/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=b4a6cf313c17d87e16de50d0a09fa0c58770e3e7">
+    <!--[if lt IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <![endif]-->
+    <!-- Load Auth0 SPA SDK deferred to avoid issues with document.write and improve performance -->
+    <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        if (theme && theme !== 'light') {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      })();
+    </script>
+
+  </head>
+  <body>
+    <div class="theme-switch">
+    <input type="radio" id="ts-light" name="theme" value="light" checked>
+    <input type="radio" id="ts-dark" name="theme" value="dark">
+    <input type="radio" id="ts-lr" name="theme" value="lr">
+    <div class="slider"></div>
+    <label for="ts-light" class="opt"></label>
+    <label for="ts-dark" class="opt"></label>
+    <label for="ts-lr" class="opt"></label>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var saved = localStorage.getItem('theme') || 'light';
+      var radio = document.getElementById('ts-' + saved);
+      if (radio) radio.checked = true;
+      document.documentElement.setAttribute('data-theme', saved);
+    });
+    document.querySelectorAll('.theme-switch input').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var mode = this.value;
+        document.documentElement.setAttribute('data-theme', mode);
+        localStorage.setItem('theme', mode);
+      });
+    });
+  </script>
+    <div class="wrapper">
+      <!-- Header Section -->
+      <aside class="header">
+        <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DSMK52452T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-DSMK52452T');
+  </script>
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" -->
+
+<header>
+  <h1>
+    <a href="/">Carson's Meditations</a>
+  </h1>
+
+  
+
+  <p class="skinny">
+    My site for my reflections on all types of projects
+  </p>
+
+  <p class="view">
+    <a href="/resume">Check Out My Resume</a>
+  </p>
+
+  
+  
+    <p>
+      <a href="https://github.com/carsontkempf">View My GitHub Profile</a>
+    </p>
+  
+</header>
+
+<!-- end custom head snippets -->
+      </aside>
+      <aside class="sidebar">
+        <div class="sidebar skinny">
+
+    
+
+    <h2>LangChain</h2>
+
+  <ol>
+    <ul>
+      
+        <li><a href="/LangChain-With-Search/">LangChain-With-Search</a></li>
+      
+        <li><a href="/LangChain-Tools/">LangChain-Tools</a></li>
+      
+        <li><a href="/LangChain-Conceptual-Guide/">LangChain-Conceptual-Guide</a></li>
+      
+        <li><a href="/LangChain/">LangChain Overview</a></li>
+      
+    </ul>
+  </ol>
+
+
+    
+
+    <h2>AI</h2>
+
+  <ol>
+    <ul>
+      
+        <li><a href="/Computer-Chess-Program/">Computer-Chess-Program</a></li>
+      
+        <li><a href="/Chess-Program/">Chess-Program</a></li>
+      
+        <li><a href="/Chess-Program-Requirements/">Chess-Program-Requirements</a></li>
+      
+        <li><a href="/River-Toad-Game/">River-Toad-Game</a></li>
+      
+        <li><a href="/A-Star-Search-Assignment/">A-Star-Search-Assignment</a></li>
+      
+    </ul>
+  </ol>
+
+
+    
+
+    <h2>Apps</h2>
+
+  <ol>
+    <ul>
+      
+        <li><a href="/LangGraph-ChatBot/">LangGraph-ChatBot</a></li>
+      
+        <li><a href="/To-Do-App/">To-Do-App</a></li>
+      
+    </ul>
+  </ol>
+
+
+    
+
+    <h2>Extensions</h2>
+
+  <ol>
+    <ul>
+      
+        <li><a href="/Chrome-Extension/">Chrome-Extension</a></li>
+      
+        <li><a href="/VSCode-Extension/">VSCode-Extension</a></li>
+      
+    </ul>
+  </ol>
+
+
+    
+</div>
+      </aside>
+      <!-- Body Section -->
+      <section class="main-content">
+        <small>24 May 2025</small>
+<h1>Chrome-Extension</h1>
+
+<p class="view">by Carson Kempf</p>
+
+<h3 id="check-out-our-extension"><a href="https://chromewebstore.google.com/detail/chrome-to-do-list/cjbofglecjgeekcimjbcdkkfiiapnmmj?utm_source=item-share-cb">Check out our extension!</a></h3>
+
+<h1 id="todo-list-extension">Todo List Extension</h1>
+
+<h2 id="project-structure">Project Structure</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root/
+├ manifest.json
+├ images/ *.png
+├ sounds/slot_machine_payout.wav
+├ templates/ todo.html, dashboard.html
+├ styles/ todo.css, dashboard.css
+├ scripts/
+├ load-templates.js
+├ todo.js
+└ dashboard.js
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="data-structures">Data Structures</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Var</th>
+      <th>File</th>
+      <th>Type</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">tasks</code></td>
+      <td>todo.js</td>
+      <td><code class="language-plaintext highlighter-rouge">Array&lt;{title,url}&gt;</code></td>
+      <td>persisted</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">timers</code></td>
+      <td>dashboard.js</td>
+      <td><code class="language-plaintext highlighter-rouge">Array&lt;Timer&gt;</code></td>
+      <td>runtime</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="core-functions">Core Functions</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>File</th>
+      <th>Function</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>load-templates.js</td>
+      <td>inject templates</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>todo.js</td>
+      <td>waitForDocumentLoad · loadTasks · saveTasks · renderTasks · handleAddButton</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>dashboard.js</td>
+      <td>formatTime · tickTimer · renderTimers · waitForElement</td>
+      <td> </td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="features">Features</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Priority</th>
+      <th>Feature</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>★★★</td>
+      <td>Site blocker</td>
+    </tr>
+    <tr>
+      <td>★★★</td>
+      <td>Tag filter UI</td>
+    </tr>
+    <tr>
+      <td>★★</td>
+      <td>Stopwatch mode</td>
+    </tr>
+    <tr>
+      <td>★★</td>
+      <td>Productivity charts</td>
+    </tr>
+    <tr>
+      <td>★</td>
+      <td>Cloud sync</td>
+    </tr>
+    <tr>
+      <td>★</td>
+      <td>Collaboration</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h1 id="develop-with-us">Develop with us!</h1>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">chrome://extensions</code> → <strong>Developer Mode</strong> ON</li>
+  <li><strong>Load unpacked</strong> → select project root</li>
+  <li>Confirm <em>Chrome To‑Do List</em> v2.3 appears</li>
+</ol>
+
+<h3 id="github-repo">GitHub Repo:</h3>
+
+<p><a href="https://github.com/carsontkempf/S.E.-Capstone-I">Main Branch</a></p>
+
+<p><a href="https://github.com/carsontkempf/S.E.-Capstone-I/tree/develop">Develop Branch</a></p>
+
+      </section>
+      <!-- Footer Section -->
+      <section class="footer">
+        <footer>
+
+
+</footer>
+      </section>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+    <div class="sidebar-toggle-btn" id="sidebar-toggle-btn" style="--icon-offset-y: -3px;">
+  <span class="toggle-icon">☰</span>
+</div>
+<script>
+  document.getElementById('sidebar-toggle-btn').addEventListener('click', function() {
+    var root = document.documentElement;
+    if (root.getAttribute('data-sidebar') === 'expanded') {
+      root.removeAttribute('data-sidebar');
+    } else {
+      root.setAttribute('data-sidebar', 'expanded');
+    }
+  });
+  // call with a number (positive or negative) to move the icon vertically
+  function setIconOffset(y) {
+    document.getElementById('sidebar-toggle-btn')
+      .style.setProperty('--icon-offset-y', y + 'px');
+  }
+</script>
+<style>
+  .sidebar-toggle-btn .toggle-icon {
+    display: inline-block;
+    transform: translateY(var(--icon-offset-y));
+  }
+</style>
+
+    <!-- Auth0 UI Integration -->
+    <!-- /Users/ctk/Programming/VSCodeProjects/carsontkempf.github.io/_includes/auth_ui.html -->
+<div id="auth-status-buttons" style="position: fixed; top: 10px; right: 10px; z-index: 1000; background: white; padding: 5px; border: 1px solid #ccc;">
+    <button id="btn-login" onclick="siteAuth.login()" style="display: none;">Log In</button>
+    <p id="user-info" style="display: none; margin: 0;"></p>
+    <a href="/dashboard/" id="btn-dashboard" style="display: none;">Dashboard</a>
+    <button id="btn-logout" onclick="siteAuth.logout()" style="display: none;">Log Out</button>
+</div>
+
+    <!-- Your custom auth script, can remain deferred -->
+    <script defer src="/assets/js/auth.js"></script>
+  </body>
+</html>

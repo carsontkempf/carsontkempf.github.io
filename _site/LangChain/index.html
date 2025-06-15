@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en-US" data-theme="light">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>LangChain Overview | Carson’s Meditations</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="LangChain Overview" />
+<meta name="author" content="Carson Kempf" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="LangChain" />
+<meta property="og:description" content="LangChain" />
+<link rel="canonical" href="https://carsontkempf.github.io/LangChain/" />
+<meta property="og:url" content="https://carsontkempf.github.io/LangChain/" />
+<meta property="og:site_name" content="Carson’s Meditations" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-04-14T06:00:00-06:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="LangChain Overview" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Carson Kempf"},"dateModified":"2025-04-14T06:00:00-06:00","datePublished":"2025-04-14T06:00:00-06:00","description":"LangChain","headline":"LangChain Overview","mainEntityOfPage":{"@type":"WebPage","@id":"https://carsontkempf.github.io/LangChain/"},"url":"https://carsontkempf.github.io/LangChain/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=b4a6cf313c17d87e16de50d0a09fa0c58770e3e7">
+    <!--[if lt IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <![endif]-->
+    <!-- Load Auth0 SPA SDK deferred to avoid issues with document.write and improve performance -->
+    <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        if (theme && theme !== 'light') {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      })();
+    </script>
+
+  </head>
+  <body>
+    <div class="theme-switch">
+    <input type="radio" id="ts-light" name="theme" value="light" checked>
+    <input type="radio" id="ts-dark" name="theme" value="dark">
+    <input type="radio" id="ts-lr" name="theme" value="lr">
+    <div class="slider"></div>
+    <label for="ts-light" class="opt"></label>
+    <label for="ts-dark" class="opt"></label>
+    <label for="ts-lr" class="opt"></label>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var saved = localStorage.getItem('theme') || 'light';
+      var radio = document.getElementById('ts-' + saved);
+      if (radio) radio.checked = true;
+      document.documentElement.setAttribute('data-theme', saved);
+    });
+    document.querySelectorAll('.theme-switch input').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var mode = this.value;
+        document.documentElement.setAttribute('data-theme', mode);
+        localStorage.setItem('theme', mode);
+      });
+    });
+  </script>
+    <div class="wrapper">
+      <!-- Header Section -->
+      <aside class="header">
+        <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DSMK52452T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-DSMK52452T');
+  </script>
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" -->
+
+<header>
+  <h1>
+    <a href="/">Carson's Meditations</a>
+  </h1>
+
+  
+
+  <p class="skinny">
+    My site for my reflections on all types of projects
+  </p>
+
+  <p class="view">
+    <a href="/resume">Check Out My Resume</a>
+  </p>
+
+  
+  
+    <p>
+      <a href="https://github.com/carsontkempf">View My GitHub Profile</a>
+    </p>
+  
+</header>
+
+<!-- end custom head snippets -->
+      </aside>
+      <aside class="sidebar">
+        <div class="sidebar skinny">
+
+    
+
+    <h2>LangChain</h2>
+
+  <ol>
+    <ul>
+      
+        <li><a href="/LangChain-With-Search/">LangChain-With-Search</a></li>
+      
+        <li><a href="/LangChain-Tools/">LangChain-Tools</a></li>
+      
+        <li><a href="/LangChain-Conceptual-Guide/">LangChain-Conceptual-Guide</a></li>
+      
+        <li><a href="/LangChain/">LangChain Overview</a></li>
+      
+    </ul>
+  </ol>
+
+
+    
+
+    <h2>AI</h2>
+
+  <ol>
+    <ul>
+      
+        <li><a href="/Computer-Chess-Program/">Computer-Chess-Program</a></li>
+      
+        <li><a href="/Chess-Program/">Chess-Program</a></li>
+      
+        <li><a href="/Chess-Program-Requirements/">Chess-Program-Requirements</a></li>
+      
+        <li><a href="/River-Toad-Game/">River-Toad-Game</a></li>
+      
+        <li><a href="/A-Star-Search-Assignment/">A-Star-Search-Assignment</a></li>
+      
+    </ul>
+  </ol>
+
+
+    
+
+    <h2>Apps</h2>
+
+  <ol>
+    <ul>
+      
+        <li><a href="/LangGraph-ChatBot/">LangGraph-ChatBot</a></li>
+      
+        <li><a href="/To-Do-App/">To-Do-App</a></li>
+      
+    </ul>
+  </ol>
+
+
+    
+
+    <h2>Extensions</h2>
+
+  <ol>
+    <ul>
+      
+        <li><a href="/Chrome-Extension/">Chrome-Extension</a></li>
+      
+        <li><a href="/VSCode-Extension/">VSCode-Extension</a></li>
+      
+    </ul>
+  </ol>
+
+
+    
+</div>
+      </aside>
+      <!-- Body Section -->
+      <section class="main-content">
+        <small>14 April 2025</small>
+<h1>LangChain Overview</h1>
+
+<p class="view">by Carson Kempf</p>
+
+<h1 id="langchain">LangChain</h1>
+
+<hr />
+
+<ul>
+  <li>LangChain is a framework for LLM applications</li>
+</ul>
+
+<hr />
+
+<h2 id="introduction">Introduction</h2>
+
+<h3 id="installation--setup">Installation &amp; Setup</h3>
+
+<ol>
+  <li>Install package
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip install -qU "langchain[deepseek]" 
+</code></pre></div>    </div>
+  </li>
+  <li>Get Environment Variables and Chat Model</li>
+</ol>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import getpass
+import os
+
+if not os.environ.get("OPENAI_API_KEY"):
+  os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter API key for OpenAI: ")
+
+from langchain.chat_models import init_chat_model
+
+model = init_chat_model("gpt-4o-mini", model_provider="openai")
+</code></pre></div></div>
+
+<ol>
+  <li>First API Call
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>model.invoke("Hello, world!")
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<hr />
+
+<h2 id="architecture">Architecture</h2>
+
+<h4 id="some-open-source-libraries">Some Open Source Libraries</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>langchain-core
+</code></pre></div></div>
+<ul>
+  <li>Basic chat model features
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>langchain-deepseek
+</code></pre></div>    </div>
+  </li>
+  <li>Integration package specifically for the deepseek chat models
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>langchain
+</code></pre></div>    </div>
+  </li>
+  <li>Chains, agents, and retrieval strategies that orchestrate an application’s actual, logically implemented features
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>langgraph
+</code></pre></div>    </div>
+  </li>
+  <li>Framework for orchestration</li>
+  <li>Represents an application’s LLM steps as edges and nodes in a graph</li>
+</ul>
+
+<hr />
+<h2 id="tutorials">Tutorials</h2>
+
+<h3 id="simple-llm-with-chat-model-and-prompt-templates">Simple LLM with Chat Model and Prompt Templates</h3>
+
+<ol>
+  <li>Installation
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip install langchain
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h4 id="note-use-langsmith">Note: Use LangSmith!</h4>
+<ul>
+  <li>Used to construct more complex applications</li>
+  <li>Can inspect agents and chains more easily</li>
+  <li>LangSmith Environment Variables</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export LANGSMITH_TRACING="true"
+export LANGSMITH_API_KEY="..."
+export LANGSMITH_PROJECT="default" # or any other project name
+</code></pre></div></div>
+<ol>
+  <li>Simple Call to a Chat Model</li>
+</ol>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from langchain_core.messages import HumanMessage, SystemMessage
+
+messages = [
+    SystemMessage("Translate the following from English into Italian"),
+    HumanMessage("hi!"),
+]
+
+model.invoke(messages)
+</code></pre></div></div>
+<ul>
+  <li>A ChatModel (model.invoke) is a LangChain runnable</li>
+  <li>LangChain Runnables
+    <ul>
+      <li>Expose an interface to interact with a chat model</li>
+    </ul>
+  </li>
+  <li>Example Langchain Message
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>AIMessage(content='Ciao!', additional_kwargs={'refusal': None}, response_metadata={'token_usage': {'completion_tokens': 3, 'prompt_tokens': 20, 'total_tokens': 23, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 0, 'rejected_prediction_tokens': 0}, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0}}, 'model_name': 'gpt-4o-mini-2024-07-18', 'system_fingerprint': 'fp_0705bf87c0', 'finish_reason': 'stop', 'logprobs': None}, id='run-32654a56-627c-40e1-a141-ad9350bbfd3e-0', usage_metadata={'input_tokens': 20, 'output_tokens': 3, 'total_tokens': 23, 'input_token_details': {'audio': 0, 'cache_read': 0}, 'output_token_details': {'audio': 0, 'reasoning': 0}})
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h4 id="message-objects">Message Objects</h4>
+
+<ul>
+  <li>ChatModels receive message objects as inputs</li>
+  <li>They generate message objects as outputs in return</li>
+  <li>Message objects store a role for the chat</li>
+  <li>Message objects store other useful metadata like token usage counts and tool calls</li>
+  <li>OpenAI Format</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>model.invoke("Hello")
+
+model.invoke([{"role": "user", "content": "Hello"}])
+
+model.invoke([HumanMessage("Hello")])
+</code></pre></div></div>
+
+<h4 id="streaming">Streaming</h4>
+<ul>
+  <li>Remember: Chat Models are Runnables</li>
+  <li>Runnables expose interfaces from the API to the developer</li>
+  <li>Runnables interface includes
+    <ul>
+      <li>Async mode of invocation</li>
+      <li>Streaming mode of invocation</li>
+    </ul>
+  </li>
+  <li>This way, we can stream individual tokens from a chat model</li>
+  <li>Streaming tokens as they arrive instead of once they are all compiled and sent at once</li>
+  <li>
+    <p>Streaming Usage</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>for token in model.stream(messages):
+    print(token.content, end="|")
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h4 id="prompt-templates">Prompt Templates</h4>
+
+<ul>
+  <li>Transformations
+    <ul>
+      <li>Often transformations are made on the user input before being sent to the AI model</li>
+      <li>Including
+        <ul>
+          <li>Adding a system message or metadata</li>
+          <li>Formatting a template with user input</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Example
+```
+from langchain_core.prompts import ChatPromptTemplate</li>
+</ul>
+
+<p>system_template = “Translate the following from English into {language}”</p>
+
+<p>prompt_template = ChatPromptTemplate.from_messages(
+    [(“system”, system_template), (“user”, “{text}”)]
+)</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code></code></pre></div></div>
+<p>language</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>* The language to translate text into
+</code></pre></div></div>
+<p>text</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>* The text to be translated
+
+* Note:
+  * ChatPromptTemplate supports multiple message roles
+  * In our example we formatted the language variable as a system message
+  * We formatted the user text into a user message
+
+* How to Invoke a Template with Correct Parameters
+</code></pre></div></div>
+<p>prompt = prompt_template.invoke({“language”: “Italian”, “text”: “hi!”})</p>
+
+<p>prompt</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+* What  **prompt**  Returns:
+</code></pre></div></div>
+<p>ChatPromptValue(messages=[SystemMessage(content=’Translate the following from English into Italian’, additional_kwargs={}, response_metadata={}), HumanMessage(content=’hi!’, additional_kwargs={}, response_metadata={})])</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>* What **prompt.to_messages()** Returns:
+</code></pre></div></div>
+<p>[SystemMessage(content=’Translate the following from English into Italian’, additional_kwargs={}, response_metadata={}),
+ HumanMessage(content=’hi!’, additional_kwargs={}, response_metadata={})]</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>* How to Actually Get a Response From our Invocation:
+</code></pre></div></div>
+<p>response = model.invoke(prompt)
+print(response.content)
+```</p>
+
+<h1 id="topics-to-explore-next">Topics To Explore Next</h1>
+
+<ul>
+  <li><a href="https://python.langchain.com/docs/concepts/">Conceptual Guide</a></li>
+  <li><a href="https://python.langchain.com/docs/concepts/tools/">Tools / Function Calling</a>
+    <ul>
+      <li>For some reason, a separate <a href="https://python.langchain.com/docs/concepts/tool_calling/">tool calling</a> doc exists</li>
+    </ul>
+  </li>
+  <li><a href="https://python.langchain.com/docs/concepts/agents/">Agents / Calling External APIs</a>
+    <ul>
+      <li><a href="https://python.langchain.com/docs/concepts/architecture/#langgraph">LangGraph</a> is recommended for constructing agents</li>
+    </ul>
+  </li>
+</ul>
+
+
+      </section>
+      <!-- Footer Section -->
+      <section class="footer">
+        <footer>
+
+
+</footer>
+      </section>
+    </div>
+    <script src="/assets/js/scale.fix.js"></script>
+    <div class="sidebar-toggle-btn" id="sidebar-toggle-btn" style="--icon-offset-y: -3px;">
+  <span class="toggle-icon">☰</span>
+</div>
+<script>
+  document.getElementById('sidebar-toggle-btn').addEventListener('click', function() {
+    var root = document.documentElement;
+    if (root.getAttribute('data-sidebar') === 'expanded') {
+      root.removeAttribute('data-sidebar');
+    } else {
+      root.setAttribute('data-sidebar', 'expanded');
+    }
+  });
+  // call with a number (positive or negative) to move the icon vertically
+  function setIconOffset(y) {
+    document.getElementById('sidebar-toggle-btn')
+      .style.setProperty('--icon-offset-y', y + 'px');
+  }
+</script>
+<style>
+  .sidebar-toggle-btn .toggle-icon {
+    display: inline-block;
+    transform: translateY(var(--icon-offset-y));
+  }
+</style>
+
+    <!-- Auth0 UI Integration -->
+    <!-- /Users/ctk/Programming/VSCodeProjects/carsontkempf.github.io/_includes/auth_ui.html -->
+<div id="auth-status-buttons" style="position: fixed; top: 10px; right: 10px; z-index: 1000; background: white; padding: 5px; border: 1px solid #ccc;">
+    <button id="btn-login" onclick="siteAuth.login()" style="display: none;">Log In</button>
+    <p id="user-info" style="display: none; margin: 0;"></p>
+    <a href="/dashboard/" id="btn-dashboard" style="display: none;">Dashboard</a>
+    <button id="btn-logout" onclick="siteAuth.logout()" style="display: none;">Log Out</button>
+</div>
+
+    <!-- Your custom auth script, can remain deferred -->
+    <script defer src="/assets/js/auth.js"></script>
+  </body>
+</html>

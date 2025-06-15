@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ee8cf0e0-d765-47e6-baa4-7a6821da7203" name="Changes" comment="Fixing Footer actually" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="PUSH_AUTO_UPDATE" value="true" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;carsontkempf&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/carsontkempf/carsontkempf.github.io.git&quot;,
+    &quot;accountId&quot;: &quot;56eb4f4b-e6c0-45b3-9499-7448827992d7&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="2vMyw4Fgg4kK7djpczHR6Nyqk9w" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+    <option name="showScratchesAndConsoles" value="false" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Notification.DisplayName-DoNotAsk-Vcs Notifications&quot;: &quot;VCS notifications&quot;,
+    &quot;Notification.DoNotAsk-Vcs Notifications&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/ctk/Programming/PycharmProjects/carsontkempf.github.io&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.stylelint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.stylelint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;advanced.settings&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/_posts" />
+      <recent name="$PROJECT_DIR$/assets/fonts/Noto-Sans-regular" />
+      <recent name="$PROJECT_DIR$/assets/fonts/Noto-Sans-italic" />
+      <recent name="$PROJECT_DIR$/assets/fonts/Noto-Sans-700italic" />
+      <recent name="$PROJECT_DIR$/assets/fonts/Noto-Sans-700" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/_scss" />
+      <recent name="$PROJECT_DIR$/assets/css" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.19072.16" />
+        <option value="bundled-python-sdk-8336bb23522e-2767605e8bc2-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.19072.16" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ee8cf0e0-d765-47e6-baa4-7a6821da7203" name="Changes" comment="" />
+      <created>1728319363326</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1728319363326</updated>
+      <workItem from="1728319363326" duration="339000" />
+      <workItem from="1729113517472" duration="327000" />
+      <workItem from="1729117582258" duration="30000" />
+      <workItem from="1743969475507" duration="25923000" />
+      <workItem from="1744026427874" duration="3131000" />
+      <workItem from="1744119911109" duration="7126000" />
+      <workItem from="1744134487466" duration="118000" />
+      <workItem from="1744138540018" duration="871000" />
+      <workItem from="1744309285039" duration="18000" />
+      <workItem from="1744641965164" duration="3172000" />
+      <workItem from="1744646206059" duration="49000" />
+      <workItem from="1744646528302" duration="3270000" />
+      <workItem from="1744649978613" duration="274000" />
+      <workItem from="1744666014380" duration="5720000" />
+      <workItem from="1744671860155" duration="35000" />
+      <workItem from="1744679645392" duration="1160000" />
+      <workItem from="1744681315288" duration="596000" />
+      <workItem from="1744716568218" duration="7390000" />
+      <workItem from="1744724004815" duration="688000" />
+      <workItem from="1744728045402" duration="3973000" />
+      <workItem from="1744766177254" duration="12193000" />
+      <workItem from="1744837380716" duration="5045000" />
+      <workItem from="1744983010012" duration="2062000" />
+    </task>
+    <task id="LOCAL-00095" summary="Trying to fix the navigation part still">
+      <option name="closed" value="true" />
+      <created>1744044993853</created>
+      <option name="number" value="00095" />
+      <option name="presentableId" value="LOCAL-00095" />
+      <option name="project" value="LOCAL" />
+      <updated>1744044993853</updated>
+    </task>
+    <task id="LOCAL-00096" summary="Trying to scale the text">
+      <option name="closed" value="true" />
+      <created>1744120155867</created>
+      <option name="number" value="00096" />
+      <option name="presentableId" value="LOCAL-00096" />
+      <option name="project" value="LOCAL" />
+      <updated>1744120155867</updated>
+    </task>
+    <task id="LOCAL-00097" summary="Trying to scale the text on the body text">
+      <option name="closed" value="true" />
+      <created>1744120287243</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1744120287243</updated>
+    </task>
+    <task id="LOCAL-00098" summary="Scaling body text in the external style sheet">
+      <option name="closed" value="true" />
+      <created>1744120918076</created>
+      <option name="number" value="00098" />
+      <option name="presentableId" value="LOCAL-00098" />
+      <option name="project" value="LOCAL" />
+      <updated>1744120918076</updated>
+    </task>
+    <task id="LOCAL-00099" summary="Scaling body text in the external style sheet more">
+      <option name="closed" value="true" />
+      <created>1744121082163</created>
+      <option name="number" value="00099" />
+      <option name="presentableId" value="LOCAL-00099" />
+      <option name="project" value="LOCAL" />
+      <updated>1744121082163</updated>
+    </task>
+    <task id="LOCAL-00100" summary="Moving things around">
+      <option name="closed" value="true" />
+      <created>1744121556062</created>
+      <option name="number" value="00100" />
+      <option name="presentableId" value="LOCAL-00100" />
+      <option name="project" value="LOCAL" />
+      <updated>1744121556062</updated>
+    </task>
+    <task id="LOCAL-00101" summary="Moving things around more. Removed double head-custom">
+      <option name="closed" value="true" />
+      <created>1744121944300</created>
+      <option name="number" value="00101" />
+      <option name="presentableId" value="LOCAL-00101" />
+      <option name="project" value="LOCAL" />
+      <updated>1744121944300</updated>
+    </task>
+    <task id="LOCAL-00102" summary="Moving things around more. Trying to move footer to be in a different file and made head-custom.html an aside now.">
+      <option name="closed" value="true" />
+      <created>1744122562441</created>
+      <option name="number" value="00102" />
+      <option name="presentableId" value="LOCAL-00102" />
+      <option name="project" value="LOCAL" />
+      <updated>1744122562441</updated>
+    </task>
+    <task id="LOCAL-00103" summary="Scaling problems still.">
+      <option name="closed" value="true" />
+      <created>1744123079761</created>
+      <option name="number" value="00103" />
+      <option name="presentableId" value="LOCAL-00103" />
+      <option name="project" value="LOCAL" />
+      <updated>1744123079761</updated>
+    </task>
+    <task id="LOCAL-00104" summary="Scaling problems still. added aside styles.">
+      <option name="closed" value="true" />
+      <created>1744123504966</created>
+      <option name="number" value="00104" />
+      <option name="presentableId" value="LOCAL-00104" />
+      <option name="project" value="LOCAL" />
+      <updated>1744123504966</updated>
+    </task>
+    <task id="LOCAL-00105" summary="Trying to clamp h1 font size">
+      <option name="closed" value="true" />
+      <created>1744124072027</created>
+      <option name="number" value="00105" />
+      <option name="presentableId" value="LOCAL-00105" />
+      <option name="project" value="LOCAL" />
+      <updated>1744124072027</updated>
+    </task>
+    <task id="LOCAL-00106" summary="fixing header to remove repeated variable declarations.">
+      <option name="closed" value="true" />
+      <created>1744124430526</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1744124430526</updated>
+    </task>
+    <task id="LOCAL-00107" summary="Trying harder?">
+      <option name="closed" value="true" />
+      <created>1744124865850</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1744124865850</updated>
+    </task>
+    <task id="LOCAL-00108" summary="Fudging with the formatting on the header seciton">
+      <option name="closed" value="true" />
+      <created>1744125710619</created>
+      <option name="number" value="00108" />
+      <option name="presentableId" value="LOCAL-00108" />
+      <option name="project" value="LOCAL" />
+      <updated>1744125710619</updated>
+    </task>
+    <task id="LOCAL-00109" summary="Fudging with the formatting on the header seciton">
+      <option name="closed" value="true" />
+      <created>1744126446259</created>
+      <option name="number" value="00109" />
+      <option name="presentableId" value="LOCAL-00109" />
+      <option name="project" value="LOCAL" />
+      <updated>1744126446259</updated>
+    </task>
+    <task id="LOCAL-00110" summary="fudging with word-break">
+      <option name="closed" value="true" />
+      <created>1744127072364</created>
+      <option name="number" value="00110" />
+      <option name="presentableId" value="LOCAL-00110" />
+      <option name="project" value="LOCAL" />
+      <updated>1744127072364</updated>
+    </task>
+    <task id="LOCAL-00111" summary="fudging with white-space breaks">
+      <option name="closed" value="true" />
+      <created>1744134561603</created>
+      <option name="number" value="00111" />
+      <option name="presentableId" value="LOCAL-00111" />
+      <option name="project" value="LOCAL" />
+      <updated>1744134561604</updated>
+    </task>
+    <task id="LOCAL-00112" summary="fudging with white-space breaks">
+      <option name="closed" value="true" />
+      <created>1744645138782</created>
+      <option name="number" value="00112" />
+      <option name="presentableId" value="LOCAL-00112" />
+      <option name="project" value="LOCAL" />
+      <updated>1744645138783</updated>
+    </task>
+    <task id="LOCAL-00113" summary="Fixed frontmatter formatting">
+      <option name="closed" value="true" />
+      <created>1744646242714</created>
+      <option name="number" value="00113" />
+      <option name="presentableId" value="LOCAL-00113" />
+      <option name="project" value="LOCAL" />
+      <updated>1744646242714</updated>
+    </task>
+    <task id="LOCAL-00114" summary="Trying to fix aside style by altering the display and the justify-content variables.">
+      <option name="closed" value="true" />
+      <created>1744647159075</created>
+      <option name="number" value="00114" />
+      <option name="presentableId" value="LOCAL-00114" />
+      <option name="project" value="LOCAL" />
+      <updated>1744647159075</updated>
+    </task>
+    <task id="LOCAL-00115" summary="Trying to make the sidebar more uniform">
+      <option name="closed" value="true" />
+      <created>1744647484501</created>
+      <option name="number" value="00115" />
+      <option name="presentableId" value="LOCAL-00115" />
+      <option name="project" value="LOCAL" />
+      <updated>1744647484501</updated>
+    </task>
+    <task id="LOCAL-00116" summary="Trying to make the sidebar more uniform and better">
+      <option name="closed" value="true" />
+      <created>1744647643062</created>
+      <option name="number" value="00116" />
+      <option name="presentableId" value="LOCAL-00116" />
+      <option name="project" value="LOCAL" />
+      <updated>1744647643063</updated>
+    </task>
+    <task id="LOCAL-00117" summary="Trying to use white-space settings">
+      <option name="closed" value="true" />
+      <created>1744647998244</created>
+      <option name="number" value="00117" />
+      <option name="presentableId" value="LOCAL-00117" />
+      <option name="project" value="LOCAL" />
+      <updated>1744647998244</updated>
+    </task>
+    <task id="LOCAL-00118" summary="Trying to clamp the font sizes.">
+      <option name="closed" value="true" />
+      <created>1744648461799</created>
+      <option name="number" value="00118" />
+      <option name="presentableId" value="LOCAL-00118" />
+      <option name="project" value="LOCAL" />
+      <updated>1744648461799</updated>
+    </task>
+    <task id="LOCAL-00119" summary="Trying to make the title box scale">
+      <option name="closed" value="true" />
+      <created>1744648690802</created>
+      <option name="number" value="00119" />
+      <option name="presentableId" value="LOCAL-00119" />
+      <option name="project" value="LOCAL" />
+      <updated>1744648690802</updated>
+    </task>
+    <task id="LOCAL-00120" summary="Trying to make the title box scale and stay in the box.">
+      <option name="closed" value="true" />
+      <created>1744648908401</created>
+      <option name="number" value="00120" />
+      <option name="presentableId" value="LOCAL-00120" />
+      <option name="project" value="LOCAL" />
+      <updated>1744648908401</updated>
+    </task>
+    <task id="LOCAL-00121" summary="Trying to make the title box scale and stay in the box.">
+      <option name="closed" value="true" />
+      <created>1744649487779</created>
+      <option name="number" value="00121" />
+      <option name="presentableId" value="LOCAL-00121" />
+      <option name="project" value="LOCAL" />
+      <updated>1744649487779</updated>
+    </task>
+    <task id="LOCAL-00122" summary="Centering everything">
+      <option name="closed" value="true" />
+      <created>1744649686698</created>
+      <option name="number" value="00122" />
+      <option name="presentableId" value="LOCAL-00122" />
+      <option name="project" value="LOCAL" />
+      <updated>1744649686698</updated>
+    </task>
+    <task id="LOCAL-00123" summary="Trying to fix the &lt;p&gt; style">
+      <option name="closed" value="true" />
+      <created>1744649800965</created>
+      <option name="number" value="00123" />
+      <option name="presentableId" value="LOCAL-00123" />
+      <option name="project" value="LOCAL" />
+      <updated>1744649800965</updated>
+    </task>
+    <task id="LOCAL-00124" summary="Trying to fix the sidebar">
+      <option name="closed" value="true" />
+      <created>1744650248448</created>
+      <option name="number" value="00124" />
+      <option name="presentableId" value="LOCAL-00124" />
+      <option name="project" value="LOCAL" />
+      <updated>1744650248449</updated>
+    </task>
+    <task id="LOCAL-00125" summary="Trying to fix the sidebar with styles.">
+      <option name="closed" value="true" />
+      <created>1744666271184</created>
+      <option name="number" value="00125" />
+      <option name="presentableId" value="LOCAL-00125" />
+      <option name="project" value="LOCAL" />
+      <updated>1744666271185</updated>
+    </task>
+    <task id="LOCAL-00126" summary="Trying to fix the sidebar more.">
+      <option name="closed" value="true" />
+      <created>1744666874551</created>
+      <option name="number" value="00126" />
+      <option name="presentableId" value="LOCAL-00126" />
+      <option name="project" value="LOCAL" />
+      <updated>1744666874551</updated>
+    </task>
+    <task id="LOCAL-00127" summary="Trying to fix the sidebar more and fix the whitespace.">
+      <option name="closed" value="true" />
+      <created>1744667085633</created>
+      <option name="number" value="00127" />
+      <option name="presentableId" value="LOCAL-00127" />
+      <option name="project" value="LOCAL" />
+      <updated>1744667085633</updated>
+    </task>
+    <task id="LOCAL-00128" summary="Sidebar changes.">
+      <option name="closed" value="true" />
+      <created>1744667433258</created>
+      <option name="number" value="00128" />
+      <option name="presentableId" value="LOCAL-00128" />
+      <option name="project" value="LOCAL" />
+      <updated>1744667433258</updated>
+    </task>
+    <task id="LOCAL-00129" summary="Sidebar changes again">
+      <option name="closed" value="true" />
+      <created>1744667576920</created>
+      <option name="number" value="00129" />
+      <option name="presentableId" value="LOCAL-00129" />
+      <option name="project" value="LOCAL" />
+      <updated>1744667576920</updated>
+    </task>
+    <task id="LOCAL-00130" summary="Sidebar changes again trying to align text.">
+      <option name="closed" value="true" />
+      <created>1744667868688</created>
+      <option name="number" value="00130" />
+      <option name="presentableId" value="LOCAL-00130" />
+      <option name="project" value="LOCAL" />
+      <updated>1744667868688</updated>
+    </task>
+    <task id="LOCAL-00131" summary="Trying to fix word breaking.">
+      <option name="closed" value="true" />
+      <created>1744668212836</created>
+      <option name="number" value="00131" />
+      <option name="presentableId" value="LOCAL-00131" />
+      <option name="project" value="LOCAL" />
+      <updated>1744668212836</updated>
+    </task>
+    <task id="LOCAL-00132" summary="Aligning items on the left.">
+      <option name="closed" value="true" />
+      <created>1744668503438</created>
+      <option name="number" value="00132" />
+      <option name="presentableId" value="LOCAL-00132" />
+      <option name="project" value="LOCAL" />
+      <updated>1744668503438</updated>
+    </task>
+    <task id="LOCAL-00133" summary="Trying to sort by categories.">
+      <option name="closed" value="true" />
+      <created>1744668869697</created>
+      <option name="number" value="00133" />
+      <option name="presentableId" value="LOCAL-00133" />
+      <option name="project" value="LOCAL" />
+      <updated>1744668869697</updated>
+    </task>
+    <task id="LOCAL-00134" summary="Trying to fix the sidebar.">
+      <option name="closed" value="true" />
+      <created>1744669326765</created>
+      <option name="number" value="00134" />
+      <option name="presentableId" value="LOCAL-00134" />
+      <option name="project" value="LOCAL" />
+      <updated>1744669326766</updated>
+    </task>
+    <task id="LOCAL-00135" summary="Fixing the actual content">
+      <option name="closed" value="true" />
+      <created>1744669457501</created>
+      <option name="number" value="00135" />
+      <option name="presentableId" value="LOCAL-00135" />
+      <option name="project" value="LOCAL" />
+      <updated>1744669457501</updated>
+    </task>
+    <task id="LOCAL-00136" summary="Changing the navigation bar.">
+      <option name="closed" value="true" />
+      <created>1744669695909</created>
+      <option name="number" value="00136" />
+      <option name="presentableId" value="LOCAL-00136" />
+      <option name="project" value="LOCAL" />
+      <updated>1744669695909</updated>
+    </task>
+    <task id="LOCAL-00137" summary="Making sidebar fonts bigger">
+      <option name="closed" value="true" />
+      <created>1744669933825</created>
+      <option name="number" value="00137" />
+      <option name="presentableId" value="LOCAL-00137" />
+      <option name="project" value="LOCAL" />
+      <updated>1744669933825</updated>
+    </task>
+    <task id="LOCAL-00138" summary="Fixing categories">
+      <option name="closed" value="true" />
+      <created>1744680541854</created>
+      <option name="number" value="00138" />
+      <option name="presentableId" value="LOCAL-00138" />
+      <option name="project" value="LOCAL" />
+      <updated>1744680541854</updated>
+    </task>
+    <task id="LOCAL-00139" summary="Fixing Footer">
+      <option name="closed" value="true" />
+      <created>1744818296068</created>
+      <option name="number" value="00139" />
+      <option name="presentableId" value="LOCAL-00139" />
+      <option name="project" value="LOCAL" />
+      <updated>1744818296068</updated>
+    </task>
+    <task id="LOCAL-00140" summary="Fixing Footer actually">
+      <option name="closed" value="true" />
+      <created>1744818341638</created>
+      <option name="number" value="00140" />
+      <option name="presentableId" value="LOCAL-00140" />
+      <option name="project" value="LOCAL" />
+      <updated>1744818341638</updated>
+    </task>
+    <task id="LOCAL-00141" summary="Fixing Footer actually">
+      <option name="closed" value="true" />
+      <created>1744818688279</created>
+      <option name="number" value="00141" />
+      <option name="presentableId" value="LOCAL-00141" />
+      <option name="project" value="LOCAL" />
+      <updated>1744818688279</updated>
+    </task>
+    <task id="LOCAL-00142" summary="Fixing Footer actually">
+      <option name="closed" value="true" />
+      <created>1744819163572</created>
+      <option name="number" value="00142" />
+      <option name="presentableId" value="LOCAL-00142" />
+      <option name="project" value="LOCAL" />
+      <updated>1744819163572</updated>
+    </task>
+    <task id="LOCAL-00143" summary="Fixing Footer actually">
+      <option name="closed" value="true" />
+      <created>1744819507268</created>
+      <option name="number" value="00143" />
+      <option name="presentableId" value="LOCAL-00143" />
+      <option name="project" value="LOCAL" />
+      <updated>1744819507268</updated>
+    </task>
+    <option name="localTasksCounter" value="144" />
+    <servers />
+  </component>
+  <component name="TerminalProjectNonSharedOptionsProvider">
+    <option name="startingDirectory" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Trying to make the sidebar more uniform" />
+    <MESSAGE value="Trying to make the sidebar more uniform and better" />
+    <MESSAGE value="Trying to use white-space settings" />
+    <MESSAGE value="Trying to clamp the font sizes." />
+    <MESSAGE value="Trying to make the title box scale" />
+    <MESSAGE value="Trying to make the title box scale and stay in the box." />
+    <MESSAGE value="Centering everything" />
+    <MESSAGE value="Trying to fix the &lt;p&gt; style" />
+    <MESSAGE value="Trying to fix the sidebar" />
+    <MESSAGE value="Trying to fix the sidebar with styles." />
+    <MESSAGE value="Trying to fix the sidebar more." />
+    <MESSAGE value="Trying to fix the sidebar more and fix the whitespace." />
+    <MESSAGE value="Sidebar changes." />
+    <MESSAGE value="Sidebar changes again" />
+    <MESSAGE value="Sidebar changes again trying to align text." />
+    <MESSAGE value="Trying to fix word breaking." />
+    <MESSAGE value="Aligning items on the left." />
+    <MESSAGE value="Trying to sort by categories." />
+    <MESSAGE value="Trying to fix the sidebar." />
+    <MESSAGE value="Fixing the actual content" />
+    <MESSAGE value="Changing the navigation bar." />
+    <MESSAGE value="Making sidebar fonts bigger" />
+    <MESSAGE value="Fixing categories" />
+    <MESSAGE value="Fixing Footer" />
+    <MESSAGE value="Fixing Footer actually" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixing Footer actually" />
+  </component>
+</project>

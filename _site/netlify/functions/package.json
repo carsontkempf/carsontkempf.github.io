@@ -1,0 +1,14 @@
+{
+    "name": "netlify-functions",
+    "version": "1.0.0",
+    "description": "Dependencies for Netlify serverless functions",
+    "main": "get-api-key.js",
+    "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+    "express-oauth2-jwt-bearer": "^1.6.0"
+    }
+}
