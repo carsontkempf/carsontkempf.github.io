@@ -1,738 +1,229 @@
-@charset "UTF-8";
 @import "fonts";
 @import "rouge-github";
 
 // **********************************************************************************************
-// Base Typography and Headings
+// 1. Root Variables & Base Setup
 // **********************************************************************************************
-h1 {
-  padding-top: 7px;
-}
-h2 {
-  padding-left: 5px;
-}
-h1, h2, h3, h4, h5, h6 {
-  color: #222;
-  margin: 0.25rem 0;
-}
-h1, h2, h3 {
-  line-height: 2;
+:root {
+  --border-radius: 12px;
+  --base-padding: 1.5rem;
+  --grid-gap: 1.5rem;
+
+  // Light Theme (Default)
+  --bg-page: #EEE3CB;
+  --bg-tile: #D7C0AE;
+  --text-main: #3D352E;
+  --text-heading: #222;
+  --bg-accent: #9BABB8;
+  --link-bg: #E6D7B6;
 }
 
-// **********************************************************************************************
-// Global Elements
-// **********************************************************************************************
 body {
-  font-size: inherit;
-  background-color: #EEE3CB;
-  padding: 3.125rem;
-  font: normal 0.875rem/1.5 "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: #967E76;
-  font-weight: 400;
-}
-a {
-  color: #0000EE;
-  text-decoration: underline;
-}
-a:hover,
-a:focus {
-  color: #0000EE;
-  text-decoration: underline;
-}
-a small {
-  font-size: 11px;
-  color: #777;
-  margin-top: -0.3em;
-  display: block;
-}
-a:hover small {
-  color: #777;
-}
-pre {
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-code {
-  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
-  "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-  padding: 2px 4px;          /* small chip for inline code */
-  border-radius: 3px;
-  background-clip: padding-box;
-}
-
-/* Remove extra padding/background for code blocks inside <pre> */
-pre code {
-  padding: 0;
-  background: none;
-  border-radius: 0;
-}
-blockquote {
-  border-left: 4px solid #e5e5e5;
-  margin: 1.25rem 0;
-  padding: 0.5rem 1rem;
-  font-style: italic;
-}
-ul, ol {
+  font-family: "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-main);
   margin: 0;
-  padding: 0;
-}
-ol {
-  margin: 0 0 1.25rem;
-}
-li {
-  margin: 0;
-  padding: 0;
-  align-text: left;
-}
-table {
-  width: auto;                /* shrink‑wrap table to content width          */
-  table-layout: auto;         /* let browser size columns by widest cell     */
-  border-collapse: collapse;
-  border: none;
-}
-th, td, table {
-    border: 1px solid #000;
-    padding: 2px 5px;         /* 2 px top/bottom, 5 px left/right            */
-  }
-
-thead th {
-  border: 2px solid #000;
-}
-hr {
-  /* 15 px space above & below every markdown ‘---’ separator */
-  padding: 15px 0;
-  margin: 15px 0;
-  border: 0;
-  border-top: 1px solid #e5e5e5;
+  padding: var(--base-padding);
+  font-size: 100%;
+  line-height: 1.6;
 }
 
 // **********************************************************************************************
-// Layout Containers
+// 2. Main Page Grid Layout
 // **********************************************************************************************
 .wrapper {
+  display: grid;
+  gap: var(--grid-gap);
+  // Mobile-first: single column layout
+  grid-template-areas:
+    "header"
+    "main"
+    "footer";
+}
+
+// Desktop layout
+@media (min-width: 768px) {
+  .wrapper {
+    // Default desktop state: sidebar is collapsed, so it has no column
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "main"
+      "footer";
+  }
+
+  // Expanded desktop state: a 2-column grid
+  [data-sidebar="expanded"] .wrapper {
+    grid-template-columns: 280px 1fr;
+    grid-template-areas:
+      "header   main"
+      "sidebar  main"
+      "footer   footer";
+  }
+}
+
+// **********************************************************************************************
+// 3. Modular Tile Style
+// **********************************************************************************************
+%tile {
+  background-color: var(--bg-tile);
+  border-radius: var(--border-radius);
+  padding: var(--base-padding);
   position: relative;
-  width: 100%;
-  margin: 0 auto;
-}
-.sidebar {
-  top: 30vw;
-  align-text: left;
-  align-items: flex-start;
-  overflow-wrap: normal;
-  white-space: normal;
-  hyphens: none;
-  display: flex;
-  transition: width 0.3s ease, height 0.3s ease, top 0.3s ease;
-  flex-direction: column;
-  bottom: 0;
-  background-color: #9BABB8;
-  padding: 0;
-}
-.header {
-  padding-bottom: 10px;
-  background-color: #9BABB8;
-}
-footer, .footer {
-  position: relative;
-  margin-left: 20vw;
-  text-align: center;
-  font-size: 1rem;
-  padding: 1rem;
-  box-sizing: border-box;
-}
-.main-content {
-  font-size: 1rem;
-  margin-left: 20vw;
-  padding-bottom: 2rem;
   width: auto;
-}
-aside {
-  font-size: 0.75vw;
-  margin: 0 auto;
-  white-space: normal;
-  hyphens: none;
-  position: fixed;
-  padding: 0;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 12.5vw;
-  box-sizing: border-box;
-  background-color: #9BABB8;
-  display: flex;
-  overflow-x: hidden;
-  flex-direction: column;
-}
-header {
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  top: 15px;
-  bottom: 300px;
-  white-space: break-spaces;
-  -webkit-font-smoothing: subpixel-antialiased;
-}
-
-// ***********************************************
-// Sidebar Navigation
-// ***********************************************
-.sidebar ol,
-.sidebar ul {
+  height: auto;
   margin: 0;
-  padding: 0;
-  list-style: none;
-  width: 250%;
-}
-.sidebar li:has(> ul) > span,
-.sidebar li:has(> ul) > a:first-child { // Assumes the link is the folder name and is the first child
-  display: block;
-  padding: 0.5em 0.8em; // Consistent padding
-  margin: 0;
-  text-decoration: none; // For <a> tags
-  // Font properties and color will be set by more specific rules or themes.
 }
 
-// Style for TOP-LEVEL "Parent Directory" labels
-// These are direct children of the first <ul> (or <ol>) in .sidebar
-.sidebar > ul > li:has(> ul) > span,
-.sidebar > ol > li:has(> ul) > span,
-.sidebar > ul > li:has(> ul) > a:first-child,
-.sidebar > ol > li:has(> ul) > a:first-child {
-  font-weight: bold;
-  font-size: 1.15em; // Larger text for parent directories
-}
-
-// Style for SUB-DIRECTORY labels (second level folders)
-// These are nested one level deeper
-.sidebar > ul > li > ul > li:has(> ul) > span,
-.sidebar > ol > li > ol > li:has(> ul) > span,
-.sidebar > ul > li > ul > li:has(> ul) > a:first-child,
-.sidebar > ol > li > ol > li:has(> ul) > a:first-child {
-  font-weight: bold; // Can be normal (e.g., font-weight: 500;) if preferred for less emphasis
-  font-size: 1.05em; // Slightly smaller than top-level, or same as posts
-}
-// Example for a third-level directory, if needed (uncomment and adjust):
-// .sidebar > ul > li > ul > li > ul > li:has(> ul) > span,
-// .sidebar > ol > li > ol > li > ol > li:has(> ul) > span,
-// .sidebar > ul > li > ul > li > ul > li:has(> ul) > a:first-child,
-// .sidebar > ol > li > ol > li > ol > li:has(> ul) > a:first-child {
-//   font-weight: normal;
-//   font-size: 1em;
-// }
-
-// Indentation for ALL nested lists to create the tree structure
-.sidebar ul ul,
-.sidebar ol ol {
-  padding-left: 1.2em; // Adjust indentation as needed
-  width: 100%; // Contain nested lists within their parent li's width,
-               // especially if the top-level ul/ol has an unusual width like 250%.
-}
-
-// --- Existing/Modified Link Styling for Posts ---
-
-// General style for all clickable links (posts and potentially directory links if not styled above)
-// Ensures post links are at base size and normal weight.
-// Directory <a> tags styled by :has() above will retain their specific font styles.
-.sidebar ol a,
-.sidebar ul li a {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-  padding: .4em .8em;
-  margin: 0;
-  background: none;
-  color: #000;
-  text-decoration: none;
-}
-.sidebar li a:hover {
-  background-color: rgba(0,0,0,0.1);
-  text-decoration: none;
-  font-size: 1em; // Base size for post links
-  font-weight: normal; // Normal weight for post links
-}
-.sidebar ol a:hover,
-.sidebar ul li a:hover {
-  background-color: rgba(0,0,0,0.1); // Default hover color
-  text-decoration: none;
-}
-
-.sidebar ol li:nth-child(odd) a {
-  background: #B0B1B7;
-}
-.sidebar ol li:nth-child(even) a {
-  background: #D3D4DA;
-}
-
-// ***********************************************
-// Responsive Media Queries
-// ***********************************************
-@media print, screen and (max-width: 960px) {
-  .wrapper { width: auto; margin: 0; }
-  header, section, footer { float: none; position: static; width: auto; }
-  header { padding-right: 320px; }
-  section { border:1px solid #e5e5e5; border-width:1px 0; padding:20px 0; margin:0 0 20px; }
-  header a small { display: inline; }
-}
-@media print, screen and (max-width: 720px) {
-  body { word-wrap: break-word; }
-  header { padding: 0; }
-  header ul, header p.view { position: static; }
-  pre, code { word-wrap: normal; }
-}
-@media print, screen and (max-width: 480px) {
-  body { padding: 15px; }
-}
-@media print {
-  body { padding: 0.4in; font-size:12pt; color:#444; }
-}
-
-
-// ***********************************************
-// Theme Switcher
-// ***********************************************
-.theme-switch {
-  /* Geometry */
-  --switch-height: 2em;                              /* outer height incl. border */
-  --border-width: 3px;                               /* stroke thickness */
-  --knob-gap: 0px;                           /* cushion so knob clears curved border */
-  --knob-offset: 3px;                       /* lifts knob & hovers upward */
-  --knob-xoffset: 3px;                     /* horizontal cushion from right & left */
-  --knob-leftoffset: -3px;                 /* horizontal cushion on left side */
-  --knob-size: calc(var(--switch-height) - (var(--border-width) + var(--knob-gap)) * 2);
-
+// Position controls within the header tile
+.header {
+  // Ensure it's a positioning context for its children
   position: relative;
-  left: 7vw;
-  display: block;
-  margin: 0 auto;
-  width: calc(
-    var(--knob-size) * 3
-    + (var(--border-width) + var(--knob-gap) + var(--knob-leftoffset))   /* left side */
-    + (var(--border-width) + var(--knob-gap) + var(--knob-xoffset))      /* right side */
-  );
-  height: var(--switch-height);
-  border-radius: calc(var(--switch-height) / 2);
-  border: var(--border-width) solid #000;
-  background-color: inherit;
-  padding: 0;
-  box-sizing: border-box;
 }
 
-/* Adopt the same box model for all descendants */
-.theme-switch *,
-.theme-switch *::before,
-.theme-switch *::after {
-  box-sizing: inherit;
-}
-
-/* Invisible radio inputs—one per segment */
-.theme-switch input {
+#auth-status {
   position: absolute;
-  top: calc(var(--border-width) + var(--knob-gap) - var(--knob-offset));
-  width: var(--knob-size);
-  height: var(--knob-size);
-  opacity: 0;
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
+  bottom: var(--base-padding);
+  right: var(--base-padding);
+  // Add styling to match the new location
+  background-color: var(--bg-page);
+  padding: 0.5rem;
+  border-radius: var(--border-radius);
 }
-#ts-light { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset)); }
-#ts-dark  { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset) + var(--knob-size)); }
-#ts-lr    { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset) + var(--knob-size) * 2); }
 
-/* Hover indicator circles */
-.theme-switch .opt {
+// Override the fixed position of the theme switch when it's inside the header
+.header .theme-switch {
   position: absolute;
-  top: calc(var(--border-width) + var(--knob-gap) - var(--knob-offset));
-  width: var(--knob-size);
-  height: var(--knob-size);
-  border-radius: 50%;
-  background: transparent;
-  pointer-events: auto;
-  transition: background-color 0.2s ease;
-  z-index: 2;                              /* above slider */
-}
-label[for="ts-light"] { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset)); }
-label[for="ts-dark"]  { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset) + var(--knob-size)); }
-label[for="ts-lr"]    { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset) + var(--knob-size) * 2); }
-
-.theme-switch .opt:hover {
-  background-color: rgba(0, 0, 0, 0.15);
+  top: var(--base-padding);
+  right: var(--base-padding);
 }
 
-/* Sliding knob */
-.theme-switch .slider {
-  position: absolute;
-  top: calc(var(--border-width) + var(--knob-gap) - var(--knob-offset));
-  left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset));
-  width: var(--knob-size);
-  height: var(--knob-size);
-  border-radius: 50%;
-  background: #fff;
-  transition: left 0.3s ease;
-  z-index: 1;
+.sidebar {
+  grid-area: sidebar;
+  @extend %tile;
+  background-color: var(--bg-accent);
+  // Hide the sidebar by default on all screen sizes
+  display: none;
 }
 
-/* Checked‑driven knob positions */
-#ts-light:checked ~ .slider { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset)); }
-#ts-dark:checked  ~ .slider { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset) + var(--knob-size)); }
-#ts-lr:checked    ~ .slider { left: calc(var(--border-width) + var(--knob-gap) + var(--knob-leftoffset) + var(--knob-size) * 2); }
+.main-content {
+  grid-area: main;
+  @extend %tile;
+}
 
+.footer {
+  grid-area: footer;
+  @extend %tile;
+  text-align: center;
+}
 
 // **********************************************************************************************
-// Expanded Sidebar
+// 4. Content & Typography
 // **********************************************************************************************
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-heading);
+  margin: 0 0 1rem 0;
+  line-height: 1.2;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.main-content a {
+  background-color: var(--link-bg);
+  padding: 0.2em 0.5em;
+  border-radius: 999px;
+}
+
+pre, code {
+  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas, monospace;
+}
+
+pre {
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  overflow-x: auto;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius);
+}
+
+// **********************************************************************************************
+// 5. Component-Specific Styles (Overlays)
+// **********************************************************************************************
+.theme-switch {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 1001;
+  background: var(--bg-accent);
+  padding: 0.5rem;
+  border-radius: var(--border-radius);
+}
 
 .sidebar-toggle-btn {
   position: fixed;
-  bottom: 1rem;
-  right: 1rem;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1001;
+  cursor: pointer;
+  background-color: var(--bg-accent);
+  color: var(--text-heading);
+  border-radius: 50%;
   width: 3rem;
   height: 3rem;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
   font-size: 1.5rem;
-  line-height: 2.8rem;
-  z-index: 10001;
-  cursor: pointer;
 }
 
-// Expanded Sidebar
-[data-sidebar="expanded"] {
-  .sidebar {
-    width: 80% !important;
-    font-size: 1.25rem;
-    top: 0 !important;
-    height: 100vh !important;
-    z-index: 10000;
-  }
+// Styles for the expanded sidebar state
+[data-sidebar="expanded"] .sidebar {
+  display: block; // Make the sidebar visible
+  // On mobile, it appears as a fixed overlay
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 70%;
+  height: 100vh;
+  z-index: 1000;
+  overflow-y: auto;
 }
 
-// **********************************************************************************************
-// Light Theme
-// **********************************************************************************************
- [data-theme="light"] {
-  .sidebar-toggle-btn {
-    background-color: #967E76;
-  }
-  /* Darker line separator in light mode */
-  hr {
-    padding: 15px 0;
-    border-top: 1px solid #888;   /* darker than global #e5e5e5 */
-  }
-  /* Light‑mode blockquote gets lighter‑than‑pre background */
-  blockquote {
-    background-color: #EBE0D6;   /* 50 % lighter than #D7C0AE */
-    color: #967E76;              /* same text colour used in <pre> */
-    border-left-color: #D7C0AE;  /* keep accent consistent */
-  }
-  /* Light mode link circles */
-  .header a,
-  .main-content a {
-    background-color: #E6D7B6;
-    color: inherit;
-    padding: 0.3em 0.6em;
-    border-radius: 9999px;
-    text-decoration: none;
-  }
-
-  /* Ensure rounded corners on both sides for pre in light mode */
-  pre {
-    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
-                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-    background-color: #D7C0AE;
-    color: #967E76;
-    padding: 15px;
-    border-radius: 10px;
-    background-clip: padding-box;
-    overflow-x: auto;
-    display: block;
-    width: 100%;
-    z-index: 2;
-  }
-
-  /* Light mode Rouge inline code */
-  code.language-plaintext.highlighter-rouge {
+// On desktop, the expanded sidebar is part of the grid
+@media (min-width: 768px) {
+  [data-sidebar="expanded"] .sidebar {
+    // Unset mobile overlay styles and let the grid control it
     position: relative;
-    z-index: 1;
-    background-color: #D7C0AE;
-    color: #967E76;
-    border-radius: 5px;
-    padding: 2px 4px;
-  }
-
-  /* Light mode Rouge block highlight background */
-  .language-plaintext.highlighter-rouge .highlight,
-  .language-plaintext.highlighter-rouge pre.highlight {
-    background-color: #D7C0AE;
-    color: #967E76;
-    border-radius: 5px;
-    padding: 0.5em;
-    overflow-x: auto;
-    background-clip: padding-box;
-  }
-
-  /* Light mode inline code default */
-  .theme-switch { background-color: #9BABB8; }
-  code {
-    position: relative;
-    z-index: 1;
-    background-color: #D7C0AE;
-    color: #967E76;
-    z-index: 2;
-  }
-}
-// **********************************************************************************************
-// Dark Theme
-// **********************************************************************************************
- [data-theme="dark"] {
-  .sidebar-toggle-btn {
-    background-color: #353532;
-  }
-  .theme-switch { background-color: #697565; }
-  body {
-    background-color: #3C3D37; /* dark neutral background */ 
-    color: #ECDFCC;            /* high-contrast text */ 
-  }
-  .sidebar, .footer {
-    background-color: #697565; /* swapped to code bg */
-  }
-  .header, .footer {
-    background-color: #697565; /* swapped to code bg */
-    color: #ECDFCC;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    color: #ECDFCC;             /* force all headings to contrast color */ 
-  }
-  a {
-    color: #ECDFCC;             /* links contrast on dark background */ 
-  }
-  a:hover, a:focus {
-    color: #697565;             /* accent hover state */ 
-  }
-  blockquote {
-    border-left-color: #697565; /* accent border */ 
-    color: #ECDFCC;             /* light quote text */ 
-    background-color: #CDBEB7;  /* 50 % lighter than #9A7E6F */
-  }
-  table {
-    border-collapse: collapse;
-    background-color: #3C3D37;  /* table background */ 
-  }
-  th, td {
-    border: 1px solid #000;
-    padding: 2px 5px;
-    text-align: left;
-    color: #ECDFCC;
-  }
-  hr {
-    margin: 1.5rem 0;
-    border: 0;
-    border-top: 1px solid #697565; /* accent separator */ 
-  }
-  .sidebar li a {
-    display: block;
-    position: relative;
-    left: 0;
-    right: 0;
-    width: 100%;
-    margin: 0;
-    padding: .5em 1em;
-    box-sizing: border-box;
-    background: none;
-    color: #000;
-  }
-  /* Dark mode link circles */
-  .header a,
-  .main-content a {
-    background-color: #353532;     /* slightly darker than #3C3D37 */
-    color: inherit;
-    padding: 0.3em 0.6em;
-    border-radius: 9999px;
-    text-decoration: none;
-  }
-
-  /* Ensure rounded corners on both sides for pre in dark mode */
-  pre {
-    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
-                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-    background-color: #9A7E6F;
-    color: #ECDFCC;
-    padding: 15px;
-    border-radius: 10px;
-    background-clip: padding-box;
-    overflow-x: auto;
-    display: block;
-    width: 100%;
-    z-index: 2;
-  }
-
-  /* Dark mode Rouge inline code */
-  code.language-plaintext.highlighter-rouge {
-    position: relative;
-    z-index: 1;
-    background-color: #9A7E6F;
-    color: #ECDFCC;
-    border-radius: 5px;
-    padding: 2px 4px;
-  }
-
-  /* Dark mode Rouge block highlight background */
-  .language-plaintext.highlighter-rouge .highlight,
-  .language-plaintext.highlighter-rouge pre.highlight {
-    background-color: #9A7E6F;
-    color: #ECDFCC;
-    border-radius: 5px;
-    padding: 0.5em;
-    overflow-x: auto;
-    background-clip: padding-box;
-  }
-
-  /* Dark mode inline code default */
-  code {
-    position: relative;
-    z-index: 1;
-    background-color: #9A7E6F;
-    color: #ECDFCC;
-    z-index: 2;
-  }
-}
-// **********************************************************************************************
-// Leah Theme
-// **********************************************************************************************
- [data-theme="lr"] {
-  .sidebar-toggle-btn {
-    background-color: #BE5985;
-  }
-  .theme-switch { background-color: #FFB8E0; }
-  body {
-    background-color: #FFEDFA; /* main background */
-    color: #BE5985;            /* text color */
-  }
-  .sidebar, .header, .footer {
-    background-color: #FFB8E0; /* sidebar/header/footer background */
-    color: #BE5985;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    color: #BE5985;            /* headings */
-  }
-  a {
-    color: #BE5985;            /* links */
-  }
-  a:hover, a:focus {
-    color: #E8C2CA;            /* link hover */
-  }
-  blockquote {
-    border-left-color: #E8C2CA; /* blockquote border */
-    color: #BE5985;
-    background-color: #F6BFD4;  /* 50 % lighter than #EC7FA9 */
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #F7D1CD;
-  }
-  th, td {
-    border: 1px solid #000;
-    padding: 2px 5px;
-    text-align: left;
-    color: #BE5985;
-  }
-  hr {
-    padding: 15px 0;
-    margin: 1.5rem 0;
-    border: 0;
-    border-top: 1px solid #E8C2CA; /* separator */
-  }
-  .sidebar li a {
-    display: block;
-    position: relative;
-    left: 0;
-    right: 0;
-    width: 100%;
-    margin: 0;
-    padding: .5em 1em;
-    box-sizing: border-box;
-    background: none;
-    color: #000;
-  }
-  /* LR mode link circles */
-  .header a,
-  .main-content a {
-    background-color: #F7D1E9;     /* slightly darker than #FFEDFA */
-    color: inherit;
-    padding: 0.3em 0.6em;
-    border-radius: 9999px;
-    text-decoration: none;
-  }
-
-  /* Ensure rounded corners on both sides for pre in LR mode */
-  pre {
-    font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas,
-                 "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
-    background-color: #EC7FA9;
-    color: #BE5985;
-    padding: 15px;
-    border-radius: 10px;
-    background-clip: padding-box;
-    overflow-x: auto;
-    display: block;
-    width: 100%;
-    z-index: 2;
-  }
-
-  /* LR mode Rouge inline code */
-  code.language-plaintext.highlighter-rouge {
-    position: relative;
-    z-index: 1;
-    background-color: #EC7FA9;
-    color: #BE5985;
-    border-radius: 5px;
-    padding: 2px 4px;
-  }
-
-  /* LR mode Rouge block highlight background */
-  .language-plaintext.highlighter-rouge .highlight,
-  .language-plaintext.highlighter-rouge pre.highlight {
-    background-color: #EC7FA9;
-    color: #BE5985;
-    border-radius: 5px;
-    padding: 0.5em;
-    overflow-x: auto;
-    background-clip: padding-box;
-  }
-
-  /* LR mode inline code default */
-  code {
-    position: relative;
-    z-index: 1;
-    background-color: #EC7FA9;
-    color: #BE5985;
-    z-index: 2;
+    width: auto;
+    height: auto;
+    z-index: auto;
   }
 }
 
 // **********************************************************************************************
-// Final Image & Link Adjustments
+// 6. Themes
 // **********************************************************************************************
-.main-content img {
-  display: block;              // occupy full line, prevents inline text wrap
-  margin: 1rem auto;           // top/bottom spacing, centered horizontally
-  width: 67%;
-  height: auto;
-  clear: both;                 // force next content to start below image
+[data-theme="dark"] {
+  --bg-page: #3C3D37;
+  --bg-tile: #2D2D2A;
+  --text-main: #ECDFCC;
+  --text-heading: #FFFFFF;
+  --bg-accent: #697565;
+  --link-bg: #353532;
 }
-.header h1 a {
-  background: none !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-  text-decoration: none !important;
-  color: inherit !important;
+
+[data-theme="lr"] {
+  --bg-page: #FFEDFA;
+  --bg-tile: #F6BFD4;
+  --text-main: #8E446A;
+  --text-heading: #BE5985;
+  --bg-accent: #FFB8E0;
+  --link-bg: #F7D1E9;
 }

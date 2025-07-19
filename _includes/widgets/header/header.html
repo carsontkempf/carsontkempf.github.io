@@ -1,7 +1,7 @@
 <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
 
 <!-- Setup Google Analytics -->
-{% include head-custom-google-analytics.html %}
+{% include components/seo/google-analytics.html %}
 
 <!-- You can set your favicon here -->
 <!-- link rel="shortcut icon" type="image/x-icon" href="{{ '/favicon.ico' | relative_url }}" -->
@@ -18,6 +18,9 @@
   <p class="skinny">
     {{ site.description | default: site.github.project_tagline }}
   </p>
+
+  {% include components/ui/theme-switch.html %}
+  {% include components/auth/status.html %}
 
   <p class="view">
     <a href="{{ site.baseurl }}/resume">Check Out My Resume</a>

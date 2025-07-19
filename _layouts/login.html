@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  {% include /widgets/header/head.html %}
+
+  <body>
+    {% include components/ui/theme-switch.html %}
+
+    <div class="wrapper">
+      <section class="main-content">
+        {{ content }}
+      </section>
+
+      {% include widgets/footer/main.html %}
+    </div>
+
+    {% include components/ui/sidebar-toggle.html %}
+  </body>
+</html>

@@ -1,5 +1,5 @@
 ---
-layout: login_layout
+layout: login
 title: Log In
 permalink: /login/
 ---

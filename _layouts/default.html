@@ -1,56 +1,23 @@
 <!DOCTYPE html>
-<html lang="en-US" data-theme="{{ localStorage.theme | default: 'light' }}">
-  <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% seo %}
-    <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
-    <!--[if lt IE 9]>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <![endif]-->
-    <!-- Load Auth0 SPA SDK deferred to avoid issues with document.write and improve performance -->
-    <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <script>
-      (function() {
-        var theme = localStorage.getItem('theme');
-        if (theme && theme !== 'light') {
-          document.documentElement.setAttribute('data-theme', theme);
-        }
-      })();
-    </script>
+<html lang="en-US">
 
-  </head>
+  {% include widgets/header/head.html %}
+
   <body>
-    {% include theme-switch.html %}
     <div class="wrapper">
-      <!-- Header Section -->
-      <aside class="header">
-        {% include head-custom.html %}
-      </aside>
-      <aside class="sidebar">
-        {% include sidebar.html %}
-      </aside>
-      <!-- Body Section -->
+      <header>
+        {% include widgets/header/main.html %}
+      </header>
+
+      {% include widgets/sidebar/main.html %}
+
       <section class="main-content">
         {{ content }}
       </section>
-      <!-- Footer Section -->
-      <section class="footer">
-        {% include footer.html %}
-      </section>
-    </div>
-    <script src="{{ site.baseurl }}/assets/js/scale.fix.js"></script>
-    {% include sidebar-toggle.html %}
 
-    <!-- Auth0 Integration -->
-    <div id="auth-status" style="position: fixed; top: 10px; right: 10px; z-index: 1000; background: white; padding: 5px; border: 1px solid #ccc;">
-        <button id="btn-login" onclick="window.location.href='{{ '/login/' | relative_url }}';">Log In</button>
-        <p id="user-info" style="display: none; margin: 0;"></p>
-        <button id="btn-logout" style="display: none;">Log Out</button>
+      <footer>
+        {% include widgets/footer/main.html %}
+      </footer>
     </div>
-
-    <!-- Your custom auth script, can remain deferred -->
-    <script defer src="{{ '/assets/js/auth.js' | relative_url }}"></script>
   </body>
 </html>
