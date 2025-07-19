@@ -521,49 +521,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 		window.siteAuth.checkAccess = checkAccess;
 		siteAuthLog('checkAccess function assigned to window.siteAuth.checkAccess');
 
-		async function performRedirects() {
-			siteAuthLog('performRedirects: Checking authentication status for potential redirects.');
-			if (!window.siteAuth.auth0Client) {
-				siteAuthLog('performRedirects: Auth0 client not ready, cannot perform redirects yet.');
-				return;
-			}
-		
-			// Ensure isAuthenticated status is fresh by relying on updateUI having set it.
-			const isAuthenticated = window.siteAuth.isAuthenticated;
-		
-			const currentSiteBaseUrl = window.siteAuth.siteBaseUrl || ''; // Use the globally determined siteBaseUrl
-			
-			// Get current path relative to the site's base URL
-			let currentPath = window.location.pathname.replace(/\/$/, ""); // Normalize current path (remove trailing slash)
-			if (siteBaseUrl && currentPath.startsWith(siteBaseUrl)) {
-				currentPath = currentPath.substring(siteBaseUrl.length);
-			}
-			currentPath = currentPath || '/'; // Ensure it's at least '/' if empty after stripping base or if it was exactly siteBaseUrl
-		
-			siteAuthLog(`performRedirects: Current relative path: "${currentPath}", Base URL: "${currentSiteBaseUrl}", isAuthenticated: ${isAuthenticated}`);
-		
-			const loginPageRelative = '/login';
-			const dashboardPageRelative = '/dashboard';
-			// Define public paths that DON'T require login (relative to siteBaseUrl).
-			// Ensure dashboardPageRelative is NOT in this list.
-			const publicPathsRelative = ['/', '/about', '/contact', '/terms']; // Example: homepage is public. /login is implicitly public.
+async function performRedirects() {
+    siteAuthLog('performRedirects: Checking authentication status for potential redirects.');
+    const isAuthenticated = window.siteAuth.isAuthenticated;
+    const currentSiteBaseUrl = window.siteAuth.siteBaseUrl || '';
+    
+    // Get current path relative to the site's base URL
+    let currentPath = window.location.pathname.replace(/\/$/, ""); // Normalize path
+    if (currentSiteBaseUrl && currentPath.startsWith(currentSiteBaseUrl)) {
+        currentPath = currentPath.substring(currentSiteBaseUrl.length);
+    }
+    currentPath = currentPath || '/';
 
-			if (isAuthenticated) {
-				// User is logged in
-				if (currentPath === loginPageRelative || currentPath === '/') { // If on login page or homepage
-					siteAuthLog(`performRedirects: User authenticated and on "${currentPath}". Redirecting to dashboard ("${currentSiteBaseUrl}${dashboardPageRelative}/").`);
-					window.location.href = `${currentSiteBaseUrl}${dashboardPageRelative}/`;
-				}
-				// If authenticated and already on dashboard or another allowed page, do nothing.
-			} else {
-				// User is NOT logged in
-				// If trying to access a page that is not public and not the login page itself, redirect to login.
-				if (!publicPathsRelative.includes(currentPath) && currentPath !== loginPageRelative) {
-					siteAuthLog(`performRedirects: User NOT authenticated and on protected page "${currentPath}". Redirecting to login ("${currentSiteBaseUrl}${loginPageRelative}/").`);
-					window.location.href = `${currentSiteBaseUrl}${loginPageRelative}/`;
-				}
-			}
-		}
+    siteAuthLog(`performRedirects: Path is "${currentPath}", Auth status: ${isAuthenticated}`);
+
+    const loginPage = '/login';
+    const dashboardPage = '/dashboard';
+
+    if (isAuthenticated) {
+        // If a logged-in user is on the login page, send them to the dashboard.
+        if (currentPath === loginPage) {
+            siteAuthLog(`Redirecting authenticated user from login to dashboard.`);
+            window.location.href = `${currentSiteBaseUrl}${dashboardPage}/`;
+        }
+    } else {
+        // If a logged-out user tries to access the dashboard, send them to login.
+        if (currentPath === dashboardPage) {
+            siteAuthLog(`Redirecting unauthenticated user from dashboard to login.`);
+            window.location.href = `${currentSiteBaseUrl}${loginPage}/`;
+        }
+    }
+    // For all other cases, do nothing. This allows anyone to view any other page.
+}
 
 		// Initialize and handle redirect
 		try {
