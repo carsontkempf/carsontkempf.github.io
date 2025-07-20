@@ -5,7 +5,7 @@
 // 1. Root Variables & Base Setup
 // **********************************************************************************************
 :root {
-  --border-radius: 12px;
+  --border-radius: 18px;
   --base-padding: 1.5rem;
   --grid-gap: 1.5rem;
 
@@ -31,12 +31,12 @@ body {
 // **********************************************************************************************
 // 2. Main Page Grid Layout
 // **********************************************************************************************
+// 2. Main Page Grid Layout
 .wrapper {
   display: grid;
   gap: var(--grid-gap);
-  // Mobile-first: single column layout
+  // Mobile-first: single column layout (NO header area)
   grid-template-areas:
-    "header"
     "main"
     "footer";
 }
@@ -47,16 +47,14 @@ body {
     // Default desktop state: sidebar is collapsed, so it has no column
     grid-template-columns: 1fr;
     grid-template-areas:
-      "header"
       "main"
       "footer";
   }
 
-  // Expanded desktop state: a 2-column grid
+  // Expanded desktop state: a 2-column grid (NO header area)
   [data-sidebar="expanded"] .wrapper {
     grid-template-columns: 280px 1fr;
     grid-template-areas:
-      "header   main"
       "sidebar  main"
       "footer   footer";
   }
@@ -75,20 +73,48 @@ body {
   margin: 0;
 }
 
-// Position controls within the header tile
 .header {
-  // Ensure it's a positioning context for its children
+  // Apply the base tile style
+  @extend %tile;
+  background-color: var(--bg-accent);
+
+  // Make the header sticky
   position: relative;
+  top: 0;
+  z-index: 100; // Ensure it stays on top of other content
 }
 
+// This section styles the buttons that are INSIDE the header
 #auth-status {
+  // This container is now ONLY used for positioning
   position: absolute;
   bottom: var(--base-padding);
   right: var(--base-padding);
-  // Add styling to match the new location
-  background-color: var(--bg-page);
-  padding: 0.5rem;
-  border-radius: var(--border-radius);
+  display: flex; // Align items neatly
+  gap: 0.5rem; // Add space between button and text
+  align-items: center;
+}
+
+// Style the ACTUAL buttons inside the auth container
+#auth-status button {
+  background-color: var(--bg-accent);
+  color: var(--text-heading);
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 9999px; // This creates the "pill" shape
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: transform 0.2s ease;
+}
+
+#auth-status button:hover {
+  transform: scale(1.05);
+}
+
+// Style the "Welcome, User!" text
+#auth-status #user-info {
+  font-weight: bold;
 }
 
 // Override the fixed position of the theme switch when it's inside the header
@@ -226,4 +252,71 @@ img {
   --text-heading: #BE5985;
   --bg-accent: #FFB8E0;
   --link-bg: #F7D1E9;
+}
+
+// **********************************************************************************************
+// 7. Login Page Specifics
+// **********************************************************************************************
+.layout-login .main-content {
+  // Center the login card vertically within the main tile
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 60vh; // Ensure it takes up significant space
+}
+
+.login-card {
+  background-color: var(--bg-page); // Use page background to stand out from the tile
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto; // Center horizontally
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.login-card h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: var(--text-heading);
+}
+
+.login-btn {
+  display: inline-block;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--text-heading);
+  background-color: var(--bg-accent);
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.login-btn:hover {
+  transform: scale(1.03);
+  text-decoration: none;
+}
+
+// **********************************************************************************************
+// 8. Dashboard Page Specifics
+// **********************************************************************************************
+
+#dashboard-content-wrapper .dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  // Use a theme variable for the border
+  border-bottom: 1px solid var(--text-main);
+  margin-bottom: 1rem;
+}
+
+#dashboard-content-wrapper .dashboard-main-content h2,
+#dashboard-content-wrapper .dashboard-main-content p {
+  margin-bottom: 1rem;
 }

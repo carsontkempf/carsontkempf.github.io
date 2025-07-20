@@ -31,21 +31,14 @@
         "netlify.toml": true,
         "jest.config.js": true,
         "Gemfile": true,
-        "netlify/": true,
-        "Testing/": true,
-        "_posts/": true,
-        "_config.yml": true,
-        ".gitignore": true,
         "404.html": true,
-        "about.md": true,
-        "CLAUDE.md": true,
-        "dashboard.md": true,
-        "index.md": true,
-        "login.md": true,
-        "my-account.md": true,
+        ".gitignore": true,
+        "Testing/": true,
+        "netlify/": true,
+        "_posts/": true,
         "assets/css/": true,
-        "assets/img/": true,
         "assets/fonts/": true,
+        "assets/img/": true,
         "assets/js/auth0-spa-sdk-v2.0.js": true,
         "assets/js/scale.fix.js": true
     },
@@ -133,7 +126,21 @@
                     "_sass/_jekyll-theme-minimal.css",
                     "_sass/_fonts.scss",
                     "_sass/_fonts.css.map",
-                    "_sass/_fonts.css"
+                    "_sass/_fonts.css",
+                    "package.json",
+                    "netlify.toml",
+                    "jest.config.js",
+                    "Gemfile",
+                    "404.html",
+                    ".gitignore",
+                    "Testing/",
+                    "netlify/",
+                    "_posts/",
+                    "assets/css/",
+                    "assets/fonts/",
+                    "assets/img/",
+                    "assets/js/auth0-spa-sdk-v2.0.js",
+                    "assets/js/scale.fix.js"
                 ]
             },
             {
@@ -168,10 +175,19 @@
                 "peek": [
                     "assets/"
                 ]
+            },
+            {
+                "hidden": [
+                    "$Default"
+                ],
+                "name": "Less Strict",
+                "description": "",
+                "detail": "",
+                "peek": []
             }
         ]
     },
-    "hidefiles.selectedProfile": "Strict"
+    "hidefiles.selectedProfile": "Default"
 }
 
 
