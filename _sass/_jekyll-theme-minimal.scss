@@ -1,21 +1,17 @@
 @import "fonts";
 @import "rouge-github";
 
-// **********************************************************************************************
 // 1. Root Variables & Base Setup
-// **********************************************************************************************
+// =============================================================================
 :root {
-  // --- Sizing Variables ---
-  --button-size: 3.5rem; // ~56px
-  // The collapsed width is now explicitly the button's width plus some padding
-  --sidebar-width-collapsed: calc(var(--button-size) + 2rem);
+  --button-size: 3.5rem;
+  --sidebar-width-collapsed: 5.5rem;
   --sidebar-width-expanded: 280px;
-
   --border-radius: 12px;
   --base-padding: 1.5rem;
   --grid-gap: 1.5rem;
 
-  // Light Theme (Default)
+  // Theme Colors
   --bg-page: #EEE3CB;
   --bg-tile: #D7C0AE;
   --text-main: #3D352E;
@@ -29,161 +25,98 @@ body {
   background-color: var(--bg-page);
   color: var(--text-main);
   margin: 0;
-  
-  // --- The New Page-Level Grid ---
-  display: grid;
-  height: 100vh;
-  // Define columns: a sidebar column and a main content column
-  grid-template-columns: var(--sidebar-width-collapsed) 1fr;
-  // Define rows: a header row and a main content row that fills the rest
-  grid-template-rows: auto 1fr;
-  grid-template-areas:
-    "sidebar header"
-    "sidebar main";
-  transition: grid-template-columns 0.3s ease-in-out;
+  // The body is no longer a grid container
 }
 
-// When the sidebar is expanded, only the column width changes
 [data-sidebar="expanded"] body {
   grid-template-columns: var(--sidebar-width-expanded) 1fr;
 }
 
-
-.header {
-  grid-area: header; // Assign to the 'header' grid area
-  @extend %tile;
-  background-color: var(--bg-accent);
-  position: sticky; // Make header sticky within its column
-  top: 0;
-  z-index: 100;
-}
-
-.wrapper {
-  grid-area: main; // Assign to the 'main' grid area
-  overflow-y: auto; // This is now the primary scrolling area
-  padding: var(--grid-gap);
-}
-
-// On desktop, the sidebar is a permanent column
-@media (min-width: 768px) {
-  .wrapper {
-    grid-template-columns: var(--sidebar-width-collapsed) 1fr;
-    grid-template-areas:
-      "sidebar  main"
-      "footer   footer";
-    // Animate the change in the column width
-    transition: grid-template-columns 0.3s ease-in-out;
-  }
-
-  // When expanded, the sidebar column grows
-  [data-sidebar="expanded"] .wrapper {
-    grid-template-columns: var(--sidebar-width-expanded) 1fr;
-  }
-}
-
-// **********************************************************************************************
-// 3. Modular Tile Style
-// **********************************************************************************************
+// 2. Main Layout Components
+// =============================================================================
 %tile {
   background-color: var(--bg-tile);
   border-radius: var(--border-radius);
   padding: var(--base-padding);
+  box-sizing: border-box;
   position: relative;
-  width: auto;
-  height: auto;
-  margin: 0;
 }
 
 .header {
-  // Apply the base tile style
+  grid-area: header;
   @extend %tile;
   background-color: var(--bg-accent);
-
-  // Make the header sticky
-  position: relative;
-  top: 0;
-  z-index: 100; // Ensure it stays on top of other content
-}
-
-// This section styles the buttons that are INSIDE the header
-#auth-status {
-  // This container is now ONLY used for positioning
-  position: absolute;
-  bottom: var(--base-padding);
-  right: var(--base-padding);
-  display: flex; // Align items neatly
-  gap: 0.5rem; // Add space between button and text
-  align-items: center;
-}
-
-// Style the ACTUAL buttons inside the auth container
-#auth-status button {
-  background-color: var(--bg-accent);
-  color: var(--text-heading);
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 9999px; // This creates the "pill" shape
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 0.9rem;
-  transition: transform 0.2s ease;
-}
-
-#auth-status button:hover {
-  transform: scale(1.05);
-}
-
-// Style the "Welcome, User!" text
-#auth-status #user-info {
-  font-weight: bold;
-}
-
-// Override the fixed position of the theme switch when it's inside the header
-.header .theme-switch {
-  position: absolute;
-  top: var(--base-padding);
-  right: var(--base-padding);
+  // This makes the header a normal, scrolling element
+  position: static; 
 }
 
 .sidebar {
-  grid-area: sidebar;
-  background-color: var(--bg-accent);
-  padding: 1rem; // Use a smaller padding for the container
-  box-sizing: border-box;
-  position: relative;
+  // --- This is now a fixed panel ---
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh; // Always full viewport height
   
-  // Use Flexbox to control the content and the button
+  // --- Sizing and Collapse ---
+  width: var(--sidebar-width-collapsed);
+  transition: width 0.3s ease-in-out;
+
+  // --- Styling ---
+  background-color: var(--bg-accent);
+  padding: 1rem;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  z-index: 200;
 }
 
-// --- Content Visibility ---
-// By default, make the sidebar content invisible and transparent.
-.sidebar > *:not(.sidebar-toggle-btn) {
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
-}
-// When expanded, make the content visible and opaque.
-[data-sidebar="expanded"] .sidebar > *:not(.sidebar-toggle-btn) {
-  visibility: visible;
-  opacity: 1;
+[data-sidebar="expanded"] .sidebar {
+  width: var(--sidebar-width-expanded);
 }
 
-// --- Button Positioning ---
+// This is the new wrapper for all scrolling content
+.page-content {
+  // The margin creates space for the sidebar
+  margin-left: var(--sidebar-width-collapsed);
+  transition: margin-left 0.3s ease-in-out;
+}
+
+[data-sidebar="expanded"] .page-content {
+  margin-left: var(--sidebar-width-expanded);
+}
+
+// The header is now a simple, static element
+.header {
+  @extend %tile;
+  background-color: var(--bg-accent);
+  position: static; // Ensures it scrolls with the page
+}
+
+// The wrapper is now just for padding inside the page-content
+.wrapper {
+  padding: var(--grid-gap);
+}
+
+
+// 3. Sidebar Content & Button
+// =============================================================================
+.sidebar-content {
+  display: none; // Hidden by default
+}
+[data-sidebar="expanded"] .sidebar-content {
+  display: block; // Visible when expanded
+}
+
 .sidebar-toggle-btn {
-  // Use flexbox margins to push the button to the bottom
-  margin-top: auto;
-  // Center the button horizontally
-  align-self: center;
-
+  margin-top: auto;   // Pushes button to the bottom
+  align-self: center; // Centers button horizontally
   cursor: pointer;
   background-color: var(--bg-page);
   color: var(--text-heading);
   border-radius: 50%;
   width: var(--button-size);
   height: var(--button-size);
-  // Use flex-shrink: 0 to prevent the button from shrinking
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -192,174 +125,53 @@ body {
   border: none;
 }
 
-// On desktop, the expanded sidebar stays in the grid
-@media (min-width: 768px) {
-  [data-sidebar="expanded"] .sidebar {
-    position: relative;
-    width: auto;
-    height: auto;
-    z-index: auto;
-  }
+// 4. Header Content & Buttons
+// =============================================================================
+.header-content {
+  padding-right: 6rem;
 }
+
+.header .theme-switch {
+  position: absolute;
+  top: var(--base-padding);
+  right: var(--base-padding);
+}
+
+#auth-status {
+  position: absolute;
+  bottom: var(--base-padding);
+  right: var(--base-padding);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+// (Other minor styles like typography, login card, etc. would go here)
 
 // **********************************************************************************************
-// 4. Content & Typography
+// 5. General Typography & Content
 // **********************************************************************************************
-h1, h2, h3, h4, h5, h6 {
-  color: var(--text-heading);
-  margin: 0 0 1rem 0;
-  line-height: 1.2;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.main-content a {
-  background-color: var(--link-bg);
-  padding: 0.2em 0.5em;
-  border-radius: 999px;
-}
-
-pre, code {
-  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, Consolas, monospace;
-}
-
-pre {
-  padding: 1rem;
-  border-radius: var(--border-radius);
-  overflow-x: auto;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  border-radius: var(--border-radius);
-}
+h1, h2, h3 { color: var(--text-heading); margin: 0 0 1rem 0; }
+a { color: inherit; text-decoration: none; }
+pre { padding: 1rem; border-radius: var(--border-radius); overflow-x: auto; }
+img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
 
 // **********************************************************************************************
-// 5. Component-Specific Styles (Overlays)
-// **********************************************************************************************
-.theme-switch {
-  position: fixed;
-  top: 1.5rem;
-  right: 1.5rem;
-  z-index: 1001;
-  background: var(--bg-accent);
-  padding: 0.5rem;
-  border-radius: var(--border-radius);
-}
-
-
-// Styles for the expanded sidebar state
-[data-sidebar="expanded"] .sidebar {
-  display: block; // Make the sidebar visible
-  // On mobile, it appears as a fixed overlay
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 70%;
-  height: 100vh;
-  z-index: 1000;
-  overflow-y: auto;
-}
-
-// On desktop, the expanded sidebar is part of the grid
-@media (min-width: 768px) {
-  [data-sidebar="expanded"] .sidebar {
-    // Unset mobile overlay styles and let the grid control it
-    position: relative;
-    width: auto;
-    height: auto;
-    z-index: auto;
-  }
-}
-
-// **********************************************************************************************
-// 6. Themes
-// **********************************************************************************************
-[data-theme="dark"] {
-  --bg-page: #222222;
-  --bg-tile: #2D2D2A;
-  --text-main: #ECDFCC;
-  --text-heading: #FFFFFF;
-  --bg-accent: #123458;
-  --link-bg: #353532;
-}
-
-[data-theme="lr"] {
-  --bg-page: #FFEDFA;
-  --bg-tile: #F6BFD4;
-  --text-main: #8E446A;
-  --text-heading: #BE5985;
-  --bg-accent: #FFB8E0;
-  --link-bg: #F7D1E9;
-}
-
-// **********************************************************************************************
-// 7. Login Page Specifics
+// 6. Page-Specific Styles (Login, Dashboard)
 // **********************************************************************************************
 .layout-login .main-content {
-  // Center the login card vertically within the main tile
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 60vh; // Ensure it takes up significant space
+  min-height: 60vh;
 }
-
 .login-card {
-  background-color: var(--bg-page); // Use page background to stand out from the tile
+  background-color: var(--bg-page);
   padding: 2rem;
   border-radius: var(--border-radius);
   text-align: center;
   max-width: 400px;
   width: 100%;
-  margin: 0 auto; // Center horizontally
+  margin: 0 auto;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.login-card h2 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: var(--text-heading);
-}
-
-.login-btn {
-  display: inline-block;
-  width: 100%;
-  padding: 0.8rem 1rem;
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: var(--text-heading);
-  background-color: var(--bg-accent);
-  border: none;
-  border-radius: 9999px;
-  cursor: pointer;
-  text-decoration: none;
-  transition: transform 0.2s ease;
-}
-
-.login-btn:hover {
-  transform: scale(1.03);
-  text-decoration: none;
-}
-
-// **********************************************************************************************
-// 8. Dashboard Page Specifics
-// **********************************************************************************************
-
-#dashboard-content-wrapper .dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 1rem;
-  // Use a theme variable for the border
-  border-bottom: 1px solid var(--text-main);
-  margin-bottom: 1rem;
-}
-
-#dashboard-content-wrapper .dashboard-main-content h2,
-#dashboard-content-wrapper .dashboard-main-content p {
-  margin-bottom: 1rem;
 }

@@ -1,29 +1,25 @@
 <!DOCTYPE html>
 <html lang="en-US">
-
   {% include widgets/header/head.html %}
-
   <body>
-    {% comment %} These three elements are now all direct children of the body {% endcomment %}
     <aside class="sidebar">
       {% include widgets/sidebar/sidebar.html %}
       {% include components/ui/sidebar-toggle.html %}
     </aside>
 
-    <header class="header">
-      {% include widgets/header/main.html %}
-    </header>
-    
-    <div class="wrapper">
-      <main class="main-content">
-        {{ content }}
-      </main>
-      <footer class="footer">
-        {% include widgets/footer/main.html %}
-      </footer>
+    <div class="page-content">
+      <header class="header">
+        {% include widgets/header/main.html %}
+      </header>
+      
+      <div class="wrapper">
+        <main class="main-content">
+          {{ content }}
+        </main>
+        <footer class="footer">
+          {% include widgets/footer/footer.html %}
+        </footer>
+      </div>
     </div>
-
-    {% comment %} Global components like the theme switch remain at the end {% endcomment %}
-    {% include components/ui/theme-switch.html %}
   </body>
 </html>

@@ -6,8 +6,8 @@
     <label for="ts-light" class="opt"></label>
     <label for="ts-dark" class="opt"></label>
     <label for="ts-lr" class="opt"></label>
-  </div>
-  <script>
+</div>
+<script>
     document.addEventListener('DOMContentLoaded', function() {
       var saved = localStorage.getItem('theme') || 'light';
       var radio = document.getElementById('ts-' + saved);
@@ -21,4 +21,4 @@
         localStorage.setItem('theme', mode);
       });
     });
-  </script>
+</script>
