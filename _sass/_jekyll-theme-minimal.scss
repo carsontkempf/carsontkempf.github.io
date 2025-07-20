@@ -4,8 +4,9 @@
 // 1. Root Variables & Base Setup
 // =============================================================================
 :root {
+  --sidebar-offset: 1rem; // Added variable for spacing
   --button-size: 3.5rem;
-  --sidebar-width-collapsed: 5.5rem;
+  --sidebar-width-collapsed: var(--button-size);
   --sidebar-width-expanded: 280px;
   --border-radius: 12px;
   --base-padding: 1.5rem;
@@ -54,36 +55,38 @@ body {
   // --- This is now a fixed panel ---
   position: fixed;
   top: 0;
-  left: 0;
+  left: var(--sidebar-offset); // Changed
   height: 100vh; // Always full viewport height
   
   // --- Sizing and Collapse ---
   width: var(--sidebar-width-collapsed);
-  transition: width 0.3s ease-in-out;
+  transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
 
   // --- Styling ---
   background-color: var(--bg-accent);
-  padding: 1rem;
+  padding: 1rem 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   z-index: 200;
+  border-radius: var(--border-radius); // Added for better visuals
 }
 
 [data-sidebar="expanded"] .sidebar {
   width: var(--sidebar-width-expanded);
+  padding: 1rem;
 }
 
 // This is the new wrapper for all scrolling content
 .page-content {
-  // The margin creates space for the sidebar
-  margin-left: var(--sidebar-width-collapsed);
+  // The margin creates space for the sidebar and its offset
+  margin-left: calc(var(--sidebar-width-collapsed) + var(--sidebar-offset)); // Changed
   transition: margin-left 0.3s ease-in-out;
 }
 
 [data-sidebar="expanded"] .page-content {
-  margin-left: var(--sidebar-width-expanded);
+  margin-left: calc(var(--sidebar-width-expanded) + var(--sidebar-offset)); // Changed
 }
 
 // The header is now a simple, static element
@@ -110,6 +113,7 @@ body {
 
 .sidebar-toggle-btn {
   margin-top: auto;   // Pushes button to the bottom
+  margin-bottom: 1rem; // Adds some space at the bottom
   align-self: center; // Centers button horizontally
   cursor: pointer;
   background-color: var(--bg-page);
