@@ -17,6 +17,12 @@
   }
 </script>
 <style>
+  .sidebar-toggle-btn {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 210; /* Needs to be higher than the sidebar's z-index (200) */
+  }
   .sidebar-toggle-btn .toggle-icon {
     display: inline-block;
     transform: translateY(var(--icon-offset-y));
