@@ -4,7 +4,7 @@
 // 1. Root Variables & Base Setup
 // =============================================================================
 :root {
-  --sidebar-offset: 1rem; // Added variable for spacing
+  --sidebar-offset: 1rem;
   --button-size: 3.5rem;
   --sidebar-width-collapsed: var(--button-size);
   --sidebar-width-expanded: 280px;
@@ -26,7 +26,6 @@ body {
   background-color: var(--bg-page);
   color: var(--text-main);
   margin: 0;
-  // The body is no longer a grid container
 }
 
 [data-sidebar="expanded"] body {
@@ -47,56 +46,24 @@ body {
   grid-area: header;
   @extend %tile;
   background-color: var(--bg-accent);
-  // This makes the header a normal, scrolling element
-  position: static; 
+  position: static;
 }
 
-.sidebar {
-  // --- This is now a fixed panel ---
-  position: fixed;
-  top: 0;
-  left: var(--sidebar-offset); // Changed
-  height: 100vh; // Always full viewport height
-  
-  // --- Sizing and Collapse ---
-  width: var(--sidebar-width-collapsed);
-  transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
-
-  // --- Styling ---
-  background-color: var(--bg-accent);
-  padding: 1rem 0;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  z-index: 200;
-  border-radius: var(--border-radius); // Added for better visuals
-}
-
-[data-sidebar="expanded"] .sidebar {
-  width: var(--sidebar-width-expanded);
-  padding: 1rem;
-}
-
-// This is the new wrapper for all scrolling content
 .page-content {
-  // The margin creates space for the sidebar and its offset
-  margin-left: calc(var(--sidebar-width-collapsed) + var(--sidebar-offset)); // Changed
+  margin-left: calc(var(--sidebar-width-collapsed) + var(--sidebar-offset));
   transition: margin-left 0.3s ease-in-out;
 }
 
 [data-sidebar="expanded"] .page-content {
-  margin-left: calc(var(--sidebar-width-expanded) + var(--sidebar-offset)); // Changed
+  margin-left: calc(var(--sidebar-width-expanded) + var(--sidebar-offset));
 }
 
-// The header is now a simple, static element
 .header {
   @extend %tile;
   background-color: var(--bg-accent);
-  position: static; // Ensures it scrolls with the page
+  position: static;
 }
 
-// The wrapper is now just for padding inside the page-content
 .wrapper {
   padding: var(--grid-gap);
 }
@@ -104,17 +71,72 @@ body {
 
 // 3. Sidebar Content & Button
 // =============================================================================
-.sidebar-content {
-  display: none; // Hidden by default
-}
-[data-sidebar="expanded"] .sidebar-content {
-  display: block; // Visible when expanded
+//
+// MAIN SIDEBAR STYLES
+//
+
+.sidebar {
+  position: fixed;
+  left: var(--sidebar-offset);
+  bottom: var(--sidebar-offset);
+  width: var(--sidebar-width-collapsed);
+  height: calc(var(--button-size) + 2rem); 
+  transition: all 0.3s ease-in-out;
+  background-color: var(--bg-accent);
+  padding: 1rem 0;
+  box-sizing: border-box;
+  display: flex; 
+  z-index: 9;
+  border-radius: 5rem;
 }
 
+// When the sidebar is expanded, ensure it remains the positioning context
+[data-sidebar="expanded"] .sidebar {
+  position: fixed; // Re-asserts the position context
+  width: var(--sidebar-width-expanded);
+  height: calc(100vh - (var(--sidebar-offset) * 2));
+  top: var(--sidebar-offset);
+  bottom: var(--sidebar-offset);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  overflow-y: auto;
+}
+
+[data-sidebar="expanded"] .sidebar-toggle-btn {
+  position: absolute;
+  right: var(--sidebar-offset);
+  bottom: var(--sidebar-offset);
+  z-index: 10; 
+
+  // Unset positioning from the collapsed state
+  left: auto;
+  transform: none;
+}
+
+//
+// SIDEBAR CONTENT STYLES
+//
+
+.sidebar-content {
+  display: none;
+}
+
+[data-sidebar="expanded"] .sidebar-content {
+  display: block;
+  // Adds space at the end of the list so it doesn't hide behind the button
+  padding-bottom: calc(var(--button-size) + 1rem); 
+}
+
+//
+// SIDEBAR TOGGLE BUTTON STYLES
+//
+
 .sidebar-toggle-btn {
-  margin-top: auto;   // Pushes button to the bottom
-  margin-bottom: 1rem; // Adds some space at the bottom
-  align-self: center; // Centers button horizontally
+  position: absolute; // Always positioned absolutely within the sidebar
+  bottom: 1rem; // Vertically centered due to parent padding
+  left: 50%; // Horizontally centered
+  transform: translateX(-50%); // Fine-tunes the horizontal centering
+  z-index: 10; 
   cursor: pointer;
   background-color: var(--bg-page);
   color: var(--text-heading);
@@ -128,6 +150,7 @@ body {
   font-size: 1.5rem;
   border: none;
 }
+
 
 // 4. Header Content & Buttons
 // =============================================================================
