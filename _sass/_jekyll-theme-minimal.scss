@@ -10,11 +10,11 @@
   --grid-gap: 1.5rem;
 
   // Light Theme (Default)
-  --bg-page: #EEE3CB;
-  --bg-tile: #D7C0AE;
+  --bg-page: #FDFAF6;
+  --bg-tile: #FAF1E6;
   --text-main: #3D352E;
   --text-heading: #222;
-  --bg-accent: #9BABB8;
+  --bg-accent: #99BC85;
   --link-bg: #E6D7B6;
 }
 
@@ -31,11 +31,9 @@ body {
 // **********************************************************************************************
 // 2. Main Page Grid Layout
 // **********************************************************************************************
-// 2. Main Page Grid Layout
 .wrapper {
   display: grid;
   gap: var(--grid-gap);
-  // Mobile-first: single column layout (NO header area)
   grid-template-areas:
     "main"
     "footer";
@@ -44,19 +42,17 @@ body {
 // Desktop layout
 @media (min-width: 768px) {
   .wrapper {
-    // Default desktop state: sidebar is collapsed, so it has no column
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "main"
-      "footer";
-  }
-
-  // Expanded desktop state: a 2-column grid (NO header area)
-  [data-sidebar="expanded"] .wrapper {
-    grid-template-columns: 280px 1fr;
+    // ALWAYS have a column for the sidebar. It starts collapsed.
+    grid-template-columns: 60px 1fr;
     grid-template-areas:
       "sidebar  main"
       "footer   footer";
+    transition: grid-template-columns 0.3s ease;
+  }
+
+  // When expanded, the sidebar column grows.
+  [data-sidebar="expanded"] .wrapper {
+    grid-template-columns: 280px 1fr;
   }
 }
 
@@ -128,19 +124,33 @@ body {
   grid-area: sidebar;
   @extend %tile;
   background-color: var(--bg-accent);
-  // Hide the sidebar by default on all screen sizes
-  display: none;
+  
+  // Hide content that overflows when collapsed
+  overflow: hidden;
+  // This will be important for positioning the button
+  position: relative; 
 }
 
-.main-content {
-  grid-area: main;
-  @extend %tile;
+// On mobile, the expanded sidebar still works as an overlay
+[data-sidebar="expanded"] .sidebar {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: calc(100vw - 5rem);
+  height: 100vh;
+  z-index: 1000;
+  overflow-y: auto;
 }
 
-.footer {
-  grid-area: footer;
-  @extend %tile;
-  text-align: center;
+// On desktop, the expanded sidebar stays in the grid
+@media (min-width: 768px) {
+  [data-sidebar="expanded"] .sidebar {
+    position: relative;
+    width: auto;
+    height: auto;
+    z-index: auto;
+  }
 }
 
 // **********************************************************************************************
@@ -193,7 +203,8 @@ img {
 }
 
 .sidebar-toggle-btn {
-  position: fixed;
+  // Position the button relative to the sidebar container
+  position: absolute;
   bottom: 1.5rem;
   right: 1.5rem;
   z-index: 1001;
@@ -207,6 +218,8 @@ img {
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
+  // Add a border to make it stand out from the sidebar background
+  border: 2px solid var(--text-main);
 }
 
 // Styles for the expanded sidebar state
@@ -237,11 +250,11 @@ img {
 // 6. Themes
 // **********************************************************************************************
 [data-theme="dark"] {
-  --bg-page: #3C3D37;
+  --bg-page: #222222;
   --bg-tile: #2D2D2A;
   --text-main: #ECDFCC;
   --text-heading: #FFFFFF;
-  --bg-accent: #697565;
+  --bg-accent: #123458;
   --link-bg: #353532;
 }
 

@@ -1,5 +1,5 @@
 <div id="auth-status">
-    <button id="btn-login" onclick="siteAuth.login()">Log In</button>    
+    <button id="btn-login" onclick="authService.login()">Log In</button>
     <a href="{{ '/dashboard/' | relative_url }}" id="btn-dashboard" style="display: none;">Dashboard</a>
-    <button id="btn-logout" style="display: none;">Log Out</button>
+    <button id="btn-logout" onclick="authService.logout()" style="display: none;">Log Out</button>
 </div>
