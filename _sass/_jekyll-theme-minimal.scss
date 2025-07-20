@@ -100,6 +100,8 @@ body {
   padding: 1rem;
   border-radius: calc(var(--sidebar-border-radius) - 35px); 
   overflow-y: auto;
+  overflow-x: hidden; // Add this to contain wide content
+
 }
 
 [data-sidebar="expanded"] .sidebar-toggle-btn {
@@ -113,16 +115,13 @@ body {
   transform: none;
 }
 
-//
-// SIDEBAR CONTENT STYLES
-//
-
 .sidebar-content {
   display: none;
 }
 
 [data-sidebar="expanded"] .sidebar-content {
   display: block;
+  
 }
 
 .sidebar-toggle-btn {
@@ -130,7 +129,7 @@ body {
   bottom: 3rem; // Increased from 1rem to move the button up
   left: 50%;
   // Below, calc() shifts the button right by 4px after centering it
-  transform: translateX(calc(-50% + 28px)); 
+  transform: translateX(calc(-50% + 1.75rem)); 
   z-index: 10; 
   cursor: pointer;
   background-color: var(--bg-page);
