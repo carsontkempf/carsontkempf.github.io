@@ -5,16 +5,22 @@
 // 1. Root Variables & Base Setup
 // **********************************************************************************************
 :root {
-  --border-radius: 18px;
+  // --- Sizing Variables ---
+  --button-size: 3.5rem; // ~56px
+  // The collapsed width is now explicitly the button's width plus some padding
+  --sidebar-width-collapsed: calc(var(--button-size) + 2rem);
+  --sidebar-width-expanded: 280px;
+
+  --border-radius: 12px;
   --base-padding: 1.5rem;
   --grid-gap: 1.5rem;
 
   // Light Theme (Default)
-  --bg-page: #FDFAF6;
-  --bg-tile: #FAF1E6;
+  --bg-page: #EEE3CB;
+  --bg-tile: #D7C0AE;
   --text-main: #3D352E;
   --text-heading: #222;
-  --bg-accent: #99BC85;
+  --bg-accent: #9BABB8;
   --link-bg: #E6D7B6;
 }
 
@@ -23,36 +29,55 @@ body {
   background-color: var(--bg-page);
   color: var(--text-main);
   margin: 0;
-  padding: var(--base-padding);
-  font-size: 100%;
-  line-height: 1.6;
-}
-
-// **********************************************************************************************
-// 2. Main Page Grid Layout
-// **********************************************************************************************
-.wrapper {
+  
+  // --- The New Page-Level Grid ---
   display: grid;
-  gap: var(--grid-gap);
+  height: 100vh;
+  // Define columns: a sidebar column and a main content column
+  grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+  // Define rows: a header row and a main content row that fills the rest
+  grid-template-rows: auto 1fr;
   grid-template-areas:
-    "main"
-    "footer";
+    "sidebar header"
+    "sidebar main";
+  transition: grid-template-columns 0.3s ease-in-out;
 }
 
-// Desktop layout
+// When the sidebar is expanded, only the column width changes
+[data-sidebar="expanded"] body {
+  grid-template-columns: var(--sidebar-width-expanded) 1fr;
+}
+
+
+.header {
+  grid-area: header; // Assign to the 'header' grid area
+  @extend %tile;
+  background-color: var(--bg-accent);
+  position: sticky; // Make header sticky within its column
+  top: 0;
+  z-index: 100;
+}
+
+.wrapper {
+  grid-area: main; // Assign to the 'main' grid area
+  overflow-y: auto; // This is now the primary scrolling area
+  padding: var(--grid-gap);
+}
+
+// On desktop, the sidebar is a permanent column
 @media (min-width: 768px) {
   .wrapper {
-    // ALWAYS have a column for the sidebar. It starts collapsed.
-    grid-template-columns: 60px 1fr;
+    grid-template-columns: var(--sidebar-width-collapsed) 1fr;
     grid-template-areas:
       "sidebar  main"
       "footer   footer";
-    transition: grid-template-columns 0.3s ease;
+    // Animate the change in the column width
+    transition: grid-template-columns 0.3s ease-in-out;
   }
 
-  // When expanded, the sidebar column grows.
+  // When expanded, the sidebar column grows
   [data-sidebar="expanded"] .wrapper {
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: var(--sidebar-width-expanded) 1fr;
   }
 }
 
@@ -122,25 +147,49 @@ body {
 
 .sidebar {
   grid-area: sidebar;
-  @extend %tile;
   background-color: var(--bg-accent);
+  padding: 1rem; // Use a smaller padding for the container
+  box-sizing: border-box;
+  position: relative;
   
-  // Hide content that overflows when collapsed
-  overflow: hidden;
-  // This will be important for positioning the button
-  position: relative; 
+  // Use Flexbox to control the content and the button
+  display: flex;
+  flex-direction: column;
 }
 
-// On mobile, the expanded sidebar still works as an overlay
-[data-sidebar="expanded"] .sidebar {
-  display: block;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: calc(100vw - 5rem);
-  height: 100vh;
-  z-index: 1000;
-  overflow-y: auto;
+// --- Content Visibility ---
+// By default, make the sidebar content invisible and transparent.
+.sidebar > *:not(.sidebar-toggle-btn) {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+// When expanded, make the content visible and opaque.
+[data-sidebar="expanded"] .sidebar > *:not(.sidebar-toggle-btn) {
+  visibility: visible;
+  opacity: 1;
+}
+
+// --- Button Positioning ---
+.sidebar-toggle-btn {
+  // Use flexbox margins to push the button to the bottom
+  margin-top: auto;
+  // Center the button horizontally
+  align-self: center;
+
+  cursor: pointer;
+  background-color: var(--bg-page);
+  color: var(--text-heading);
+  border-radius: 50%;
+  width: var(--button-size);
+  height: var(--button-size);
+  // Use flex-shrink: 0 to prevent the button from shrinking
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  border: none;
 }
 
 // On desktop, the expanded sidebar stays in the grid
@@ -202,25 +251,6 @@ img {
   border-radius: var(--border-radius);
 }
 
-.sidebar-toggle-btn {
-  // Position the button relative to the sidebar container
-  position: absolute;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  z-index: 1001;
-  cursor: pointer;
-  background-color: var(--bg-accent);
-  color: var(--text-heading);
-  border-radius: 50%;
-  width: 3rem;
-  height: 3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  // Add a border to make it stand out from the sidebar background
-  border: 2px solid var(--text-main);
-}
 
 // Styles for the expanded sidebar state
 [data-sidebar="expanded"] .sidebar {
