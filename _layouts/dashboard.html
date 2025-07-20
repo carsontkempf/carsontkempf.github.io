@@ -1,18 +1,61 @@
 ---
 layout: default
 title: Dashboard
+permalink: /dashboard/
 ---
 
-<div id="dashboard-content-wrapper">
+<div id="dashboard-content-wrapper" style="display: none;">
   <header class="dashboard-header">
     <h1>{{ page.title }}</h1>
+    <button id="btn-dashboard-logout" class="nav-link logout-btn">Logout</button>
   </header>
 
   <main class="dashboard-main-content">
-    <h2>Welcome!</h2>
-    <div id="dashboard-content">
-        <p>Loading your dashboard...</p>
+    <div id="dashboard-general-content">
+        <p>This content is visible to all logged-in users.</p>
     </div>
-    {{ content }}
+    <div id="dashboard-subscriber-content" style="display: none;">
+        <p style="color: green; font-weight: bold;">Welcome, Subscriber! Here's your exclusive content.</p>
+    </div>
   </main>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // Wait for the global auth system to be fully initialized
+    await new Promise(resolve => {
+        document.addEventListener('siteAuthReady', resolve, { once: true });
+    });
+
+    // NOW that auth is ready, we can safely check the status
+    if (window.siteAuth.isAuthenticated) {
+        // --- USER IS LOGGED IN: SHOW THE PAGE CONTENT ---
+        document.getElementById('dashboard-content-wrapper').style.display = 'block';
+
+        const generalDiv = document.getElementById('dashboard-general-content');
+        const subscriberDiv = document.getElementById('dashboard-subscriber-content');
+        
+        // Check for subscriber role and show content accordingly
+        const isSubscriber = await window.siteAuth.checkAccess('subscriber');
+        if (isSubscriber) {
+            subscriberDiv.style.display = 'block';
+        }
+
+        // Attach click handler to the local logout button
+        const logoutBtn = document.getElementById('btn-dashboard-logout');
+        if(logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                window.siteAuth.auth0Client.logout({
+                    logoutParams: { returnTo: window.location.origin }
+                });
+            });
+        }
+
+    } else {
+        // --- USER IS NOT LOGGED IN: REDIRECT TO LOGIN ---
+        console.log('[Dashboard] User is not authenticated. Redirecting to login.');
+        const loginUrl = window.siteAuth.siteBaseUrl ? `${window.siteAuth.siteBaseUrl}/login/` : '/login/';
+        window.location.href = loginUrl;
+    }
+});
+</script>

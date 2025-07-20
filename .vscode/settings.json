@@ -40,7 +40,14 @@
         "assets/fonts/": true,
         "assets/img/": true,
         "assets/js/auth0-spa-sdk-v2.0.js": true,
-        "assets/js/scale.fix.js": true
+        "assets/js/scale.fix.js": true,
+        "CLAUDE.md": true,
+        "index.md": true,
+        "about.md": true,
+        "_config.yml": true,
+        "dashboard.md": true,
+        "login.md": true,
+        "my-account.md": true
     },
     "jest.shell": {
         "path": "/bin/bash",
@@ -140,7 +147,14 @@
                     "assets/fonts/",
                     "assets/img/",
                     "assets/js/auth0-spa-sdk-v2.0.js",
-                    "assets/js/scale.fix.js"
+                    "assets/js/scale.fix.js",
+                    "CLAUDE.md",
+                    "index.md",
+                    "about.md",
+                    "_config.yml",
+                    "dashboard.md",
+                    "login.md",
+                    "my-account.md"
                 ]
             },
             {

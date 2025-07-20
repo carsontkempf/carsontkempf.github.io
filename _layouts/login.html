@@ -1,53 +1,12 @@
 ---
 layout: default
-title: Log In
-permalink: /login/
 ---
-
-<div class="login-card">
-    <h2>Login to Your Dashboard</h2>
-    <p>You will be redirected to our secure login page.</p>
-    
-    <button id="btn-actual-login" class="login-btn">Proceed to Login</button>
-    
-    <p id="login-message" style="display:none; color: var(--text-main); margin-top: 15px;">Initializing login...</p>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const actualLoginButton = document.getElementById('btn-actual-login');
-    const loginMessage = document.getElementById('login-message');
-    if (!actualLoginButton) return;
-
-    function waitForSiteAuth() {
-        return new Promise((resolve, reject) => {
-            const maxRetries = 50; // Wait up to 5 seconds
-            let retries = 0;
-            const interval = setInterval(() => {
-                if (window.siteAuth && window.siteAuth.login) {
-                    clearInterval(interval);
-                    resolve(window.siteAuth);
-                } else if (retries++ >= maxRetries) {
-                    clearInterval(interval);
-                    reject(new Error("Auth service did not initialize in time."));
-                }
-            }, 100);
-        });
-    }
-
-    actualLoginButton.addEventListener('click', async () => {
-        actualLoginButton.disabled = true;
-        loginMessage.style.display = 'block';
-        
-        try {
-            const siteAuth = await waitForSiteAuth();
-            // The login function is now on the global siteAuth object
-            siteAuth.login(); 
-        } catch (error) {
-            console.error(error);
-            loginMessage.textContent = "Error: Could not start login process. Please refresh the page.";
-            actualLoginButton.disabled = false;
-        }
-    });
-});
-</script>
+<body class="layout-login">
+  <div class="wrapper">
+    <section class="main-content">
+      {{ content }}
+    </section>
+    {% include widgets/footer/main.html %}
+  </div>
+  {% include components/ui/sidebar-toggle.html %}
+</body>
