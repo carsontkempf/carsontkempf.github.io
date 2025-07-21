@@ -14,13 +14,13 @@
   --grid-gap: 1.5rem;
 
   // Theme Colors
-  --bg-page: #F8FAFC;
+  --bg-page: #FAF3F0;
   --bg-tile: #F4E7E1;
   --text-main: #3D352E;
   --text-heading: #222;
-  --bg-accent: #c0a398;
-  --link-bg: #E6D7B6;
-  --bg-code-block: #FAF6E9; // New variable for code blocks
+  --bg-accent: #dac4bc;
+  --link-bg: #e6bab6;
+  --bg-code-block: #f3dfd2; // New variable for code blocks
 }
 
 [data-theme="dark"] {
@@ -157,12 +157,14 @@ header #auth-status {
 }
 
 .sidebar-content {
-  display: none;
+  opacity: 0; // Start fully transparent
+  visibility: hidden; // Hide from view and interaction
+  transition: opacity 0.1s ease-in-out, visibility 0.1s ease-in-out;
 }
 
 [data-sidebar="expanded"] .sidebar-content {
-  display: block;
-  
+  opacity: 1; // Fade in to be fully visible
+  visibility: visible;
 }
 
 .sidebar-toggle-btn {
@@ -228,6 +230,19 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
   border-radius: var(--border-radius);
   overflow-x: auto;
   background-color: var(--bg-code-block); // Applies the theme background
+  margin: calc(var(--base-padding) + 2rem) auto; 
+
+}
+
+
+// Styles for images within the main article content
+.main-content img {
+  display: block; // Allows the use of auto margins for centering
+  width: 66.67%; // Sets the image to 2/3 of its container's width
+  height: auto; // Maintains the correct aspect ratio
+  
+  // Sets top/bottom margin for spacing and auto left/right for centering
+  margin: calc(var(--base-padding) + 2rem) auto; 
 }
 // **********************************************************************************************
 // 6. Page-Specific Styles (Login, Dashboard)
