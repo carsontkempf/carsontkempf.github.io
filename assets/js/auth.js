@@ -7,7 +7,7 @@ window.authService = {
     logout: () => console.error("Login service not ready.")
 };
 
-// This is the main function that runs when the page loads
+/* ADD */
 document.addEventListener('DOMContentLoaded', async () => {
     const config = {
         domain: 'dev-l57dcpkhob0u7ykb.us.auth0.com',
@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             authorizationParams: {
                 redirect_uri: window.location.origin
             },
-            // These two lines enable the robust login flow
             useRefreshTokens: true,
             cacheLocation: 'localstorage'
         });
@@ -49,22 +48,45 @@ document.addEventListener('DOMContentLoaded', async () => {
             logoutParams: { returnTo: window.location.origin }
         });
 
-        // 5. Update the site-wide UI (the header buttons)
+        // 5. Get references to the UI buttons
         const loginBtn = document.getElementById('btn-login');
         const dashboardBtn = document.getElementById('btn-dashboard');
         const logoutBtn = document.getElementById('btn-logout');
 
+        // 6. Update button visibility based on auth state and page location
         if (isAuthenticated) {
             if (loginBtn) loginBtn.style.display = 'none';
-            if (dashboardBtn) dashboardBtn.style.display = 'inline-block';
-            if (logoutBtn) logoutBtn.style.display = 'inline-block';
+            
+            const isOnDashboard = window.location.pathname.startsWith('/dashboard');
+
+            if (isOnDashboard) {
+                if (dashboardBtn) dashboardBtn.style.display = 'none';
+                if (logoutBtn) logoutBtn.style.display = 'inline-block';
+            } else {
+                if (dashboardBtn) dashboardBtn.style.display = 'inline-block';
+                if (logoutBtn) logoutBtn.style.display = 'none';
+            }
         } else {
             if (loginBtn) loginBtn.style.display = 'inline-block';
             if (dashboardBtn) dashboardBtn.style.display = 'none';
             if (logoutBtn) logoutBtn.style.display = 'none';
         }
 
-        // 6. Fire the "ready" event for page-specific scripts
+        // 7. Wire up the buttons to the auth service methods
+        if (loginBtn) {
+            loginBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.authService.login();
+            });
+        }
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.authService.logout();
+            });
+        }
+
+        // 8. Fire the "ready" event for page-specific scripts
         document.dispatchEvent(new CustomEvent('authReady'));
 
     } catch (error) {

@@ -47,7 +47,13 @@
         "_config.yml": true,
         "dashboard.md": true,
         "login.md": true,
-        "my-account.md": true
+        "my-account.md": true,
+        "_layouts/page.html": true,
+        "_layouts/post.html": true,
+        "_includes/widgets/footer/": true,
+        "_includes/widgets/sidebar/": true,
+        "_includes/components/seo/": true,
+        "_includes/components/ui/": true
     },
     "jest.shell": {
         "path": "/bin/bash",
@@ -192,16 +198,32 @@
             },
             {
                 "hidden": [
-                    "$Default"
+                    "$Default",
+                    "_layouts/page.html",
+                    "_layouts/post.html",
+                    "_layouts/post.html",
+                    "_includes/widgets/footer/",
+                    "_includes/widgets/sidebar/",
+                    "_includes/components/seo/",
+                    "_includes/components/ui/"
                 ],
                 "name": "Less Strict",
+                "description": "",
+                "detail": "",
+                "peek": []
+            },
+            {
+                "hidden": [
+                    "$Less Strict"
+                ],
+                "name": "Login",
                 "description": "",
                 "detail": "",
                 "peek": []
             }
         ]
     },
-    "hidefiles.selectedProfile": "Default"
+    "hidefiles.selectedProfile": "Less Strict"
 }
 
 
