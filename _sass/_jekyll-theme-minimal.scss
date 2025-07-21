@@ -88,16 +88,6 @@ header .theme-switch {
   right: var(--base-padding);
 }
 
-// Positions the login button in the bottom right of the header
-header #auth-status {
-  position: absolute;
-  bottom: var(--base-padding);
-  right: var(--base-padding);
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
 .page-content {
   margin-left: calc(var(--sidebar-width-collapsed) + var(--sidebar-offset));
   transition: margin-left 0.3s ease-in-out;
@@ -201,7 +191,9 @@ header #auth-status {
   right: var(--base-padding);
 }
 
-#auth-status {
+/* ADD */
+// Positions the login button in the bottom right of the header
+header #auth-status, #auth-status {
   position: absolute;
   bottom: var(--base-padding);
   right: var(--base-padding);
@@ -210,7 +202,23 @@ header #auth-status {
   align-items: center;
 }
 
-// (Other minor styles like typography, login card, etc. would go here)
+/* Styles the actual login buttons for a rounded look */
+#auth-status a,
+#auth-status button {
+  background-color: var(--bg-code-block);
+  padding: 0.5rem 1rem;
+  border-radius: 50px; /* Creates a pill shape */
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+#auth-status a:hover,
+#auth-status button:hover {
+  transform: translateY(-2px);
+}
 
 // **********************************************************************************************
 // 5. General Typography & Content
