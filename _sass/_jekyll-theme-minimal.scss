@@ -202,9 +202,11 @@ header #auth-status, #auth-status {
   align-items: center;
 }
 
+/* ADD */
 /* Styles the actual login buttons for a rounded look */
 #auth-status a,
-#auth-status button {
+#auth-status button,
+.login-btn {
   background-color: var(--bg-code-block);
   padding: 0.5rem 1rem;
   border-radius: 50px; /* Creates a pill shape */
@@ -212,12 +214,15 @@ header #auth-status, #auth-status {
   font-size: 0.9rem;
   font-weight: 500;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease; /* Animate all property changes */
+  cursor: pointer;
 }
 
 #auth-status a:hover,
-#auth-status button:hover {
+#auth-status button:hover,
+.login-btn:hover {
   transform: translateY(-2px);
+  filter: brightness(0.9); /* This darkens the button */
 }
 
 // **********************************************************************************************
@@ -290,4 +295,32 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
     left: calc(100% - var(--button-size) - 1rem);
     bottom: 1rem;
   }
+}
+
+/* ADD to your stylesheet */
+
+/* 8. Page-Specific: Dashboard Header */
+/* ============================================================================= */
+.dashboard-header {
+  text-align: center;
+  padding: var(--base-padding) 0;
+  margin-bottom: var(--grid-gap);
+}
+
+.dashboard-header h1 {
+  margin-bottom: 0.5rem; /* Adds space below the "Dashboard" title */
+}
+
+.dashboard-header .welcome-message {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+.dashboard-header .login-status {
+  font-size: 1rem;
+  color: var(--text-main);
+  margin-top: 0.25rem;
+  opacity: 0.9;
 }
