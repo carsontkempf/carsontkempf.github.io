@@ -124,7 +124,7 @@ header #auth-status {
   left: var(--sidebar-offset);
   bottom: var(--sidebar-offset);
   width: var(--sidebar-width-collapsed);
-  height: calc(var(--button-size) + 53.25rem); // Corrected height
+  top: calc(var(--button-size) - 2rem); // Corrected height
   transition: all 0.3s ease-in-out;
   background-color: var(--bg-accent);
   padding: 1rem 0;
@@ -138,7 +138,7 @@ header #auth-status {
   position: fixed; // Re-asserts the position context
   bottom: var(--sidebar-offset);
   width: var(--sidebar-width-expanded);
-  height: calc(var(--button-size) + 53.25rem); // Corrected height
+  top: calc(var(--button-size) - 2rem); // Corrected height
   transition: all 0.3s ease-in-out;
   padding: 1rem;
   border-radius: calc(var(--sidebar-border-radius) - 3rem); 
