@@ -27,6 +27,8 @@ body {
   background-color: var(--bg-page);
   color: var(--text-main);
   margin: 0;
+  box-sizing: border-box; // Ensures padding is included correctly
+  padding-top: var(--base-padding); // Adds space at the top
 }
 
 [data-sidebar="expanded"] body {
@@ -48,6 +50,9 @@ body {
   @extend %tile;
   background-color: var(--bg-accent);
   position: static;
+  margin: 0 var(--grid-gap); // Adds left and right margin
+  border-radius: calc(var(--sidebar-border-radius) - 3rem); 
+
 }
 
 .page-content {
@@ -59,11 +64,6 @@ body {
   margin-left: calc(var(--sidebar-width-expanded) + var(--sidebar-offset));
 }
 
-.header {
-  @extend %tile;
-  background-color: var(--bg-accent);
-  position: static;
-}
 
 .wrapper {
   padding: var(--grid-gap);
@@ -93,12 +93,12 @@ body {
 
 [data-sidebar="expanded"] .sidebar {
   position: fixed; // Re-asserts the position context
-  width: var(--sidebar-width-expanded);
-  height: calc(100vh - (var(--sidebar-offset) * 2));
-  top: var(--sidebar-offset);
   bottom: var(--sidebar-offset);
+  width: var(--sidebar-width-expanded);
+  height: calc(var(--button-size) + 54rem); // Corrected height
+  transition: all 0.3s ease-in-out;
   padding: 1rem;
-  border-radius: calc(var(--sidebar-border-radius) - 35px); 
+  border-radius: calc(var(--sidebar-border-radius) - 3rem); 
   overflow-y: auto;
   overflow-x: hidden; // Add this to contain wide content
 
@@ -106,13 +106,11 @@ body {
 
 [data-sidebar="expanded"] .sidebar-toggle-btn {
   position: absolute;
-  right: calc(var(--sidebar-offset) - 1rem);
-  bottom: calc(var(--sidebar-offset) - 1rem);
-  z-index: 10; 
-
-  // Unset positioning from the collapsed state
-  left: auto;
+  bottom: calc(var(--sidebar-offset) + 0.25rem);
+  // This calculates the left position to place the button on the bottom-right
+  left: calc(var(--sidebar-width-expanded) - var(--button-size) - var(--sidebar-offset) + 1.5rem);
   transform: none;
+  z-index: 10;
 }
 
 .sidebar-content {
@@ -126,13 +124,13 @@ body {
 
 .sidebar-toggle-btn {
   position: absolute;
-  bottom: 3rem; // Increased from 1rem to move the button up
+  bottom: calc(var(--sidebar-offset) - 1rem);
   left: 50%;
-  // Below, calc() shifts the button right by 4px after centering it
-  transform: translateX(calc(-50% + 1.75rem)); 
+  transform: translateX(0%);
+  transition: all 0.3s ease-in-out; // Add this transition
   z-index: 10; 
   cursor: pointer;
-  background-color: var(--bg-page);
+  background-color: var(--bg-accent);
   color: var(--text-heading);
   border-radius: 50%;
   width: var(--button-size);
