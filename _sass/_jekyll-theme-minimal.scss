@@ -9,17 +9,38 @@
   --sidebar-width-collapsed: var(--button-size);
   --sidebar-width-expanded: 280px;
   --border-radius: 12px;
-  --sidebar-border-radius: 5rem; // New variable for the sidebar
+  --sidebar-border-radius: 5rem;
   --base-padding: 1.5rem;
   --grid-gap: 1.5rem;
 
   // Theme Colors
-  --bg-page: #EEE3CB;
-  --bg-tile: #D7C0AE;
+  --bg-page: #F8FAFC;
+  --bg-tile: #F4E7E1;
   --text-main: #3D352E;
   --text-heading: #222;
-  --bg-accent: #9BABB8;
+  --bg-accent: #a1887f;
   --link-bg: #E6D7B6;
+  --bg-code-block: #FAF6E9; // New variable for code blocks
+}
+
+[data-theme="dark"] {
+  --bg-page: #3b3a38;
+  --bg-tile: #222222;
+  --text-main: #ecf0f1;
+  --text-heading: #ffffff;
+  --bg-accent: #09122C;
+  --link-bg: #3b5269;
+  --bg-code-block: #1e242c; // Dark code background
+}
+
+[data-theme="lr"] {
+  --bg-page: #F8FAFC;
+  --bg-tile: #F4E7E1;
+  --text-main: #3D352E;
+  --text-heading: #222;
+  --bg-accent: #F3D0D7;
+  --link-bg: #E6D7B6;
+  --bg-code-block: #FFDFDF; // New variable for code blocks
 }
 
 body {
@@ -29,6 +50,8 @@ body {
   margin: 0;
   box-sizing: border-box; // Ensures padding is included correctly
   padding-top: var(--base-padding); // Adds space at the top
+  transition: all 0.3s ease-in-out;
+
 }
 
 [data-sidebar="expanded"] body {
@@ -43,16 +66,34 @@ body {
   padding: var(--base-padding);
   box-sizing: border-box;
   position: relative;
+  transition: all 0.3s ease-in-out;
+
 }
 
-.header {
-  grid-area: header;
-  @extend %tile;
+// Targets the <header> tag and makes it a positioning context
+header {
+  transition: all 0.3s ease-in-out;
+  @extend %tile; // This provides padding and border-radius
+  position: relative; // This is the crucial change
   background-color: var(--bg-accent);
-  position: static;
-  margin: 0 var(--grid-gap); // Adds left and right margin
-  border-radius: calc(var(--sidebar-border-radius) - 3rem); 
+  margin: 0 var(--grid-gap); 
+}
 
+// Positions the theme switch in the top right of the header
+header .theme-switch {
+  position: absolute;
+  top: var(--base-padding);
+  right: var(--base-padding);
+}
+
+// Positions the login button in the bottom right of the header
+header #auth-status {
+  position: absolute;
+  bottom: var(--base-padding);
+  right: var(--base-padding);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .page-content {
@@ -172,9 +213,20 @@ body {
 // **********************************************************************************************
 h1, h2, h3 { color: var(--text-heading); margin: 0 0 1rem 0; }
 a { color: inherit; text-decoration: none; }
-pre { padding: 1rem; border-radius: var(--border-radius); overflow-x: auto; }
+pre { 
+  padding: 1rem; 
+  border-radius: var(--border-radius); 
+  overflow-x: auto; 
+  background-color: var(--bg-code-block); // Use the new variable
+}
 img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
-
+// Targets the container Jekyll/Rouge uses for code blocks
+.highlight {
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  overflow-x: auto;
+  background-color: var(--bg-code-block); // Applies the theme background
+}
 // **********************************************************************************************
 // 6. Page-Specific Styles (Login, Dashboard)
 // **********************************************************************************************
