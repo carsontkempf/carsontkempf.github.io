@@ -380,6 +380,119 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
   opacity: 0.8;
 }
 
+.clickable-playlist {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clickable-playlist:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-left-color: var(--link-bg);
+}
+
+.click-hint {
+  color: var(--link-bg);
+  font-style: italic;
+  font-size: 0.8rem !important;
+}
+
+.playlist-tracks-header {
+  margin-bottom: 1.5rem;
+}
+
+.back-btn {
+  background: var(--bg-accent);
+  color: var(--text-main);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  background: var(--link-bg);
+}
+
+.tracks-list {
+  background: var(--bg-tile);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.track-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--bg-accent);
+  transition: background-color 0.2s ease;
+}
+
+.track-item:hover {
+  background: var(--bg-accent);
+}
+
+.track-item:last-child {
+  border-bottom: none;
+}
+
+.track-number {
+  min-width: 2rem;
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.6;
+  margin-right: 1rem;
+}
+
+.track-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.track-name {
+  font-weight: 600;
+  color: var(--text-heading);
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-artist {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-album {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-meta {
+  text-align: right;
+  min-width: 120px;
+}
+
+.track-duration {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.track-added {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
 .dashboard-btn.secondary {
   background: var(--bg-accent);
   color: var(--text-main);

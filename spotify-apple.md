@@ -280,6 +280,42 @@ window.spotifyService = {
         }
     },
     
+    // Get playlist tracks (all of them, with pagination)
+    getPlaylistTracks: async (playlistId) => {
+        try {
+            const allTracks = [];
+            let offset = 0;
+            const limit = 50; // Maximum allowed by Spotify API
+            let hasMore = true;
+            
+            while (hasMore) {
+                const response = await window.spotifyService.apiRequest(`/playlists/${playlistId}/tracks?limit=${limit}&offset=${offset}`);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    allTracks.push(...data.items);
+                    offset += limit;
+                    hasMore = data.next !== null; // Continue if there's a next page
+                } else {
+                    hasMore = false;
+                }
+            }
+            
+            return {
+                href: '',
+                items: allTracks,
+                limit: limit,
+                next: null,
+                offset: 0,
+                previous: null,
+                total: allTracks.length
+            };
+        } catch (error) {
+            console.error('Error fetching playlist tracks:', error);
+            throw error;
+        }
+    },
+    
     // Get user profile
     getUserProfile: async () => {
         try {
@@ -353,11 +389,12 @@ async function loadUserPlaylists() {
                 </div>
                 <div class="playlists-grid">
                     ${playlistsData.items.map(playlist => `
-                        <div class="playlist-item">
+                        <div class="playlist-item clickable-playlist" onclick="showPlaylistTracks('${playlist.id}', '${playlist.name.replace(/'/g, "\\'")}')">
                             <h4>${playlist.name}</h4>
                             <p>Tracks: ${playlist.tracks.total}</p>
                             <p>Owner: ${playlist.owner.display_name || playlist.owner.id}</p>
                             <p class="playlist-type">${playlist.public ? 'Public' : 'Private'} • ${playlist.collaborative ? 'Collaborative' : 'Solo'}</p>
+                            <p class="click-hint">Click to view tracks</p>
                         </div>
                     `).join('')}
                 </div>
@@ -371,6 +408,86 @@ async function loadUserPlaylists() {
         console.error('Error loading playlists:', error);
         playlistsContainer.innerHTML = '<p>Error loading playlists. Please try reconnecting to Spotify.</p>';
     }
+}
+
+// Show tracks for a specific playlist
+async function showPlaylistTracks(playlistId, playlistName) {
+    const playlistsContainer = document.getElementById('playlists-container');
+    playlistsContainer.innerHTML = `<p>Loading tracks from "${playlistName}"...</p>`;
+    
+    try {
+        const tracksData = await window.spotifyService.getPlaylistTracks(playlistId);
+        
+        if (tracksData.items && tracksData.items.length > 0) {
+            const tracksHtml = `
+                <div class="playlist-tracks-header">
+                    <button onclick="loadUserPlaylists()" class="back-btn">← Back to Playlists</button>
+                    <h3>${playlistName}</h3>
+                    <p>Found ${tracksData.total} tracks</p>
+                </div>
+                <div class="tracks-list">
+                    ${tracksData.items.map((item, index) => {
+                        const track = item.track;
+                        if (!track) return '';
+                        
+                        const artistNames = track.artists ? track.artists.map(artist => artist.name).join(', ') : 'Unknown Artist';
+                        const albumName = track.album ? track.album.name : 'Unknown Album';
+                        const duration = formatDuration(track.duration_ms);
+                        const addedDate = formatDate(item.added_at);
+                        
+                        return `
+                            <div class="track-item">
+                                <div class="track-number">${index + 1}</div>
+                                <div class="track-info">
+                                    <div class="track-name">${track.name}</div>
+                                    <div class="track-artist">${artistNames}</div>
+                                    <div class="track-album">${albumName}</div>
+                                </div>
+                                <div class="track-meta">
+                                    <div class="track-duration">${duration}</div>
+                                    <div class="track-added">Added: ${addedDate}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            
+            playlistsContainer.innerHTML = tracksHtml;
+        } else {
+            playlistsContainer.innerHTML = `
+                <div class="playlist-tracks-header">
+                    <button onclick="loadUserPlaylists()" class="back-btn">← Back to Playlists</button>
+                    <h3>${playlistName}</h3>
+                    <p>This playlist is empty.</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading playlist tracks:', error);
+        playlistsContainer.innerHTML = `
+            <div class="playlist-tracks-header">
+                <button onclick="loadUserPlaylists()" class="back-btn">← Back to Playlists</button>
+                <h3>${playlistName}</h3>
+                <p>Error loading tracks. Please try again.</p>
+            </div>
+        `;
+    }
+}
+
+// Format duration from milliseconds to mm:ss
+function formatDuration(durationMs) {
+    if (!durationMs) return '0:00';
+    const minutes = Math.floor(durationMs / 60000);
+    const seconds = Math.floor((durationMs % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Format date to readable format
+function formatDate(dateString) {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
 }
 
 // Main initialization
