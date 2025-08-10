@@ -244,11 +244,36 @@ window.spotifyService = {
         return response;
     },
     
-    // Get user's playlists
+    // Get user's playlists (all of them, including those in folders)
     getUserPlaylists: async () => {
         try {
-            const response = await window.spotifyService.apiRequest('/me/playlists?limit=20');
-            return await response.json();
+            const allPlaylists = [];
+            let offset = 0;
+            const limit = 50; // Maximum allowed by Spotify API
+            let hasMore = true;
+            
+            while (hasMore) {
+                const response = await window.spotifyService.apiRequest(`/me/playlists?limit=${limit}&offset=${offset}`);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    allPlaylists.push(...data.items);
+                    offset += limit;
+                    hasMore = data.next !== null; // Continue if there's a next page
+                } else {
+                    hasMore = false;
+                }
+            }
+            
+            return {
+                href: '',
+                items: allPlaylists,
+                limit: limit,
+                next: null,
+                offset: 0,
+                previous: null,
+                total: allPlaylists.length
+            };
         } catch (error) {
             console.error('Error fetching playlists:', error);
             throw error;
@@ -314,18 +339,29 @@ async function loadSpotifyUserInfo() {
 }
 
 async function loadUserPlaylists() {
+    const playlistsContainer = document.getElementById('playlists-container');
+    playlistsContainer.innerHTML = '<p>Loading all playlists (including those in folders)...</p>';
+    
     try {
         const playlistsData = await window.spotifyService.getUserPlaylists();
-        const playlistsContainer = document.getElementById('playlists-container');
         
         if (playlistsData.items && playlistsData.items.length > 0) {
-            const playlistsHtml = playlistsData.items.map(playlist => `
-                <div class="playlist-item">
-                    <h4>${playlist.name}</h4>
-                    <p>Tracks: ${playlist.tracks.total}</p>
-                    <p>Owner: ${playlist.owner.display_name}</p>
+            const playlistsHtml = `
+                <div class="playlists-summary">
+                    <h4>Found ${playlistsData.total} playlists</h4>
+                    <p>Showing all playlists including those in folders</p>
                 </div>
-            `).join('');
+                <div class="playlists-grid">
+                    ${playlistsData.items.map(playlist => `
+                        <div class="playlist-item">
+                            <h4>${playlist.name}</h4>
+                            <p>Tracks: ${playlist.tracks.total}</p>
+                            <p>Owner: ${playlist.owner.display_name || playlist.owner.id}</p>
+                            <p class="playlist-type">${playlist.public ? 'Public' : 'Private'} • ${playlist.collaborative ? 'Collaborative' : 'Solo'}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
             
             playlistsContainer.innerHTML = playlistsHtml;
         } else {
@@ -333,7 +369,7 @@ async function loadUserPlaylists() {
         }
     } catch (error) {
         console.error('Error loading playlists:', error);
-        document.getElementById('playlists-container').innerHTML = '<p>Error loading playlists.</p>';
+        playlistsContainer.innerHTML = '<p>Error loading playlists. Please try reconnecting to Spotify.</p>';
     }
 }
 

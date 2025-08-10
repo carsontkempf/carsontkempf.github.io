@@ -1,3 +1,5 @@
+---
+---
 // Create the global service object
 window.authService = {
     isAuthenticated: false,
@@ -10,8 +12,9 @@ window.authService = {
 /* ADD */
 document.addEventListener('DOMContentLoaded', async () => {
     const config = {
-        domain: 'dev-l57dcpkhob0u7ykb.us.auth0.com',
-        clientId: 'Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC'
+        domain: '{{ site.auth0.domain }}',
+        clientId: '{{ site.auth0.client_id }}',
+        audience: '{{ site.auth0.audience }}'
     };
 
     try {
@@ -20,7 +23,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             domain: config.domain,
             clientId: config.clientId,
             authorizationParams: {
-                redirect_uri: window.location.origin
+                redirect_uri: window.location.origin,
+                audience: config.audience
             },
             useRefreshTokens: true,
             cacheLocation: 'localstorage'

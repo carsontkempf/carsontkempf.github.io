@@ -11,7 +11,11 @@
   },
   "scripts": {
     "test": "jest",
-    "test:e2e": "jest --bail"
+    "test:e2e": "jest --bail",
+    "serve:dev": "JEKYLL_ENV=production bundle exec jekyll serve --config _config.yml,_config-dev.yml",
+    "serve:prod": "JEKYLL_ENV=production bundle exec jekyll serve --config _config.yml",
+    "build:dev": "JEKYLL_ENV=production bundle exec jekyll build --config _config.yml,_config-dev.yml",
+    "build:prod": "JEKYLL_ENV=production bundle exec jekyll build --config _config.yml"
   },
   "devDependencies": {
     "cross-spawn": "^7.0.3",

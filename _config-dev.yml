@@ -1,0 +1,12 @@
+# Development/Testing Configuration Override
+# Use this config for all non-gh-pages branches
+# Local development: jekyll serve --config _config.yml,_config-dev.yml
+
+# Auth0 Development Configuration (all branches except gh-pages)
+auth0:
+  domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
+  client_id: "ql8ttR4YSmZXZbGE30wP8foWCUuZs2jh"
+  audience: "https://carsontkempf.github.io/api/carsons-meditations"
+
+# Override base URL for local development
+url: "http://localhost:4000"

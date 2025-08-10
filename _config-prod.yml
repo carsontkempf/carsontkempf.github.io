@@ -1,0 +1,11 @@
+# Production Configuration Override
+# This file can be used to explicitly set production values
+
+# Auth0 Production Configuration (explicit)
+auth0:
+  domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
+  client_id: "Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC"
+  audience: "https://carsontkempf.github.io/api/carsons-meditations"
+
+# Production URL
+url: "https://carsontkempf.github.io"
