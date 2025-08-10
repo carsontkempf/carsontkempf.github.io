@@ -5,7 +5,7 @@ include:
   - README.md
 
 lsi: false
-safe: true
+safe: false
 incremental: false
 highlighter: rouge
 gist:
@@ -14,5 +14,28 @@ kramdown:
   math_engine: mathjax
   syntax_highlighter: rouge
 
-# Auth0 Production Configuration (loaded by custom plugin from system env vars)
-# Values will be set by _plugins/env_vars.rb
+show_downloads: false
+google_analytics: "G-DSMK52452T"
+theme: jekyll-theme-minimal
+sass:
+  sass_dir: _sass
+
+# Spotify API Configuration
+spotify:
+  client_id: "80826ef3daa547f49d843c254ad224b6"
+
+# Auth0 Configuration (production - gh-pages branch)
+auth0:
+  domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
+  client_id: "Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC"
+  audience: "https://carsontkempf.github.io/api/carsons-meditations"
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - backends/
+  - "backends/**"

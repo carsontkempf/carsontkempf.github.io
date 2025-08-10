@@ -1,0 +1,36 @@
+# Workflow for building different branches with appropriate Auth0 configs
+name: Branch-specific Jekyll Build
+
+on:
+  push:
+    branches-ignore: ["gh-pages"]  # Don't run on gh-pages (handled by separate workflow)
+  pull_request:
+    branches: ["main", "gh-pages"]
+
+jobs:
+  build-dev:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/gh-pages'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+          
+      - name: Install dependencies
+        run: bundle install
+        
+      - name: Build with development config
+        run: |
+          JEKYLL_ENV=production bundle exec jekyll build --config _config.yml,_config-dev.yml
+          
+      - name: Test build
+        run: |
+          # Add any tests you want to run on the built site
+          echo "Built site successfully with development Auth0 config"
+          ls -la _site/

@@ -19,8 +19,6 @@ theme: jekyll-theme-minimal
 sass:
   sass_dir: _sass
 
-# Custom plugin will handle environment variables
-
 # Process .liquid files as JavaScript
 defaults:
   - scope:
@@ -39,8 +37,6 @@ spotify:
 # Auth0 Development Configuration  
 auth0_domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
 auth0_client_id: "ql8ttR4YSmZXZbGE30wP8foWCUuZs2jh"
-
-
 
 # Exclude files from processing
 exclude:

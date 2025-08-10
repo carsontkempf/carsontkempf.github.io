@@ -1,4 +1,26 @@
 [build]
-  functions = "netlify/functions"
-  publish = "dist"
-  command = ""
+  command = "bundle install && JEKYLL_ENV=production bundle exec jekyll build"
+  publish = "_site"
+
+[functions]
+  directory = "netlify/functions"
+
+# Environment variables (identical for all contexts)
+# Only the client-side Auth0 application differs between branches
+[context.production.environment]
+  AUTH0_DOMAIN = "dev-l57dcpkhob0u7ykb.us.auth0.com"
+  AUTH0_AUDIENCE_SERVER = "https://carsontkempf.github.io/api/carsons-meditations"
+
+[context.branch-deploy]
+  command = "bundle install && JEKYLL_ENV=production bundle exec jekyll build --config _config.yml,_config-dev.yml"
+
+[context.branch-deploy.environment]
+  AUTH0_DOMAIN = "dev-l57dcpkhob0u7ykb.us.auth0.com"
+  AUTH0_AUDIENCE_SERVER = "https://carsontkempf.github.io/api/carsons-meditations"
+
+[context.deploy-preview]
+  command = "bundle install && JEKYLL_ENV=production bundle exec jekyll build --config _config.yml,_config-dev.yml"
+
+[context.deploy-preview.environment]
+  AUTH0_DOMAIN = "dev-l57dcpkhob0u7ykb.us.auth0.com"
+  AUTH0_AUDIENCE_SERVER = "https://carsontkempf.github.io/api/carsons-meditations"
