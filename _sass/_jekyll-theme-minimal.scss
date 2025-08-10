@@ -225,6 +225,36 @@ header #auth-status, #auth-status {
   filter: brightness(0.9); /* This darkens the button */
 }
 
+/* Dashboard button styles */
+.dashboard-buttons {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dashboard-btn {
+  background-color: var(--bg-code-block);
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius);
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: center;
+  display: block;
+  text-decoration: none;
+  color: var(--text-main);
+}
+
+.dashboard-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.9);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
 // **********************************************************************************************
 // 5. General Typography & Content
 // **********************************************************************************************
@@ -323,4 +353,49 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
   color: var(--text-main);
   margin-top: 0.25rem;
   opacity: 0.9;
+}
+
+/* 9. Spotify Integration Styles */
+/* ============================================================================= */
+#spotify-auth-section {
+  margin-bottom: var(--grid-gap);
+}
+
+.playlist-item {
+  background: var(--bg-tile);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--bg-accent);
+}
+
+.playlist-item h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-heading);
+}
+
+.playlist-item p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.dashboard-btn.secondary {
+  background: var(--bg-accent);
+  color: var(--text-main);
+}
+
+.dashboard-btn.secondary:hover {
+  opacity: 0.8;
+}
+
+#spotify-user-info {
+  background: var(--bg-tile);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1rem;
+}
+
+#spotify-user-info p {
+  margin: 0.5rem 0;
 }

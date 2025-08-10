@@ -34,3 +34,7 @@ google_analytics: "G-DSMK52452T"
 theme: jekyll-theme-minimal
 sass:
   sass_dir: _sass
+
+# Spotify API Configuration
+spotify:
+  client_id: "80826ef3daa547f49d843c254ad224b6"
