@@ -8,7 +8,7 @@ const http = require('http'); // For Jekyll readiness check
 const BASE_APP_DIRECTORY = path.resolve(__dirname, '..'); // Assumes test file is in Testing/
 const JEKYLL_PORT = 4000;
 const JEKYLL_SERVER_URL = `http://localhost:${JEKYLL_PORT}`;
-const LOGIN_PAGE_URL = `${JEKYLL_SERVER_URL}/login/`; // Used for Jekyll readiness
+const HOMEPAGE_URL = `${JEKYLL_SERVER_URL}/`; // Used for Jekyll readiness
 
 let jekyllProcess;
 let browser;
@@ -220,7 +220,7 @@ beforeAll(async () => {
                 }
                 return reject(new Error(errMsg));
             }
-            http.get(LOGIN_PAGE_URL, (res) => {
+            http.get(HOMEPAGE_URL, (res) => {
                 res.resume(); // Consume response data
                 if (res.statusCode === 200) {
                     console.log('--- [Setup] Jekyll Server is ready (HTTP check successful). ---');

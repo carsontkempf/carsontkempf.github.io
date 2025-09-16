@@ -1,5 +1,7 @@
 All of our styles are located in /_sass/_jekyll-theme-minimal.scss, it should be the only one that is edited for this program's development.
 
+Never, EVER, run our jekyll serve environment command in the claude chat.
+
 Here is spotify documentation for get playlist items:
 "
 Get Playlist Items

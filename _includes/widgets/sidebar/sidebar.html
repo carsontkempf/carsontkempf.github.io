@@ -1,12 +1,52 @@
 <div class="sidebar-content">
-  {% for category in site.categories %}
-    <h2>{{ category[0] }}</h2>
-    <ol>
-      <ul>
-        {% for post in category[1] %}
-          <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
-        {% endfor %}
-      </ul>
-    </ol>
-  {% endfor %}
+  <div class="navigation-section">
+    <h2>Navigation</h2>
+    <ul class="nav-list">
+      <li><a href="{{ '/' | relative_url }}">Home</a></li>
+      <li><a href="{{ '/essays/' | relative_url }}" class="essays-link">Essays</a></li>
+    </ul>
+  </div>
+  
+  {% comment %}
+  Check if we're on the essays page or viewing an essay post
+  {% endcomment %}
+  {% assign is_essays_page = false %}
+  {% if page.url == '/essays/' %}
+    {% assign is_essays_page = true %}
+  {% elsif page.categories contains 'Essays' %}
+    {% assign is_essays_page = true %}
+  {% endif %}
+  
+  {% if is_essays_page %}
+    {% comment %}
+    Show only Essays when on essays dashboard or viewing an essay
+    {% endcomment %}
+    {% assign essay_posts = site.categories.Essays %}
+    {% if essay_posts.size > 0 %}
+      <h2>Essays</h2>
+      <ol>
+        <ul>
+          {% for post in essay_posts %}
+            <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </ol>
+    {% endif %}
+  {% else %}
+    {% comment %}
+    Show all categories except Essays when not on essays pages
+    {% endcomment %}
+    {% for category in site.categories %}
+      {% unless category[0] == 'Essays' %}
+        <h2>{{ category[0] }}</h2>
+        <ol>
+          <ul>
+            {% for post in category[1] %}
+              <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
+            {% endfor %}
+          </ul>
+        </ol>
+      {% endunless %}
+    {% endfor %}
+  {% endif %}
 </div>

@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isAuthenticated) {
             if (loginBtn) loginBtn.style.display = 'none';
             
-            const isOnDashboard = window.location.pathname.startsWith('/dashboard');
             const isOnProtectedPage = window.location.pathname.startsWith('/dashboard') || window.location.pathname.startsWith('/spotify-apple');
 
             if (isOnProtectedPage) {
