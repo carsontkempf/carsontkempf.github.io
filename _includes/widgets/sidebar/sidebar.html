@@ -4,29 +4,52 @@
     <ul class="nav-list">
       <li><a href="{{ '/' | relative_url }}">Home</a></li>
       <li><a href="{{ '/essays/' | relative_url }}" class="essays-link">Essays</a></li>
+      <li><a href="{{ '/langchain/' | relative_url }}" class="langchain-link">LangChain</a></li>
+      <li><a href="{{ '/extensions/' | relative_url }}" class="extensions-link">Extensions</a></li>
+      <li><a href="{{ '/ai/' | relative_url }}" class="ai-link">AI & Algorithms</a></li>
+      <li><a href="{{ '/apps/' | relative_url }}" class="apps-link">Apps</a></li>
     </ul>
   </div>
   
   {% comment %}
-  Check if we're on the essays page or viewing an essay post
+  Determine which section we're currently viewing
   {% endcomment %}
-  {% assign is_essays_page = false %}
-  {% if page.url == '/essays/' %}
-    {% assign is_essays_page = true %}
-  {% elsif page.categories contains 'Essays' %}
-    {% assign is_essays_page = true %}
+  {% assign current_section = "none" %}
+  {% assign section_category = "" %}
+  {% assign section_title = "" %}
+  
+  {% if page.url == '/essays/' or page.categories contains 'Essays' %}
+    {% assign current_section = "essays" %}
+    {% assign section_category = "Essays" %}
+    {% assign section_title = "Essays" %}
+  {% elsif page.url == '/langchain/' or page.categories contains 'LangChain' %}
+    {% assign current_section = "langchain" %}
+    {% assign section_category = "LangChain" %}
+    {% assign section_title = "LangChain" %}
+  {% elsif page.url == '/extensions/' or page.categories contains 'Extensions' %}
+    {% assign current_section = "extensions" %}
+    {% assign section_category = "Extensions" %}
+    {% assign section_title = "Extensions" %}
+  {% elsif page.url == '/ai/' or page.categories contains 'AI' %}
+    {% assign current_section = "ai" %}
+    {% assign section_category = "AI" %}
+    {% assign section_title = "AI & Algorithms" %}
+  {% elsif page.url == '/apps/' or page.categories contains 'Apps' %}
+    {% assign current_section = "apps" %}
+    {% assign section_category = "Apps" %}
+    {% assign section_title = "Apps" %}
   {% endif %}
   
-  {% if is_essays_page %}
+  {% if current_section != "none" %}
     {% comment %}
-    Show only Essays when on essays dashboard or viewing an essay
+    Show only current section posts when on section dashboard or viewing a section post
     {% endcomment %}
-    {% assign essay_posts = site.categories.Essays %}
-    {% if essay_posts.size > 0 %}
-      <h2>Essays</h2>
+    {% assign section_posts = site.categories[section_category] %}
+    {% if section_posts.size > 0 %}
+      <h2>{{ section_title }}</h2>
       <ol>
         <ul>
-          {% for post in essay_posts %}
+          {% for post in section_posts %}
             <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
           {% endfor %}
         </ul>
@@ -34,10 +57,11 @@
     {% endif %}
   {% else %}
     {% comment %}
-    Show all categories except Essays when not on essays pages
+    Show all categories except dashboard categories when not on dashboard pages
     {% endcomment %}
+    {% assign dashboard_categories = "Essays,LangChain,Extensions,AI,Apps" | split: "," %}
     {% for category in site.categories %}
-      {% unless category[0] == 'Essays' %}
+      {% unless dashboard_categories contains category[0] %}
         <h2>{{ category[0] }}</h2>
         <ol>
           <ul>

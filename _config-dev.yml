@@ -1,12 +1,37 @@
-# Development/Testing Configuration Override
-# Use this config for all non-gh-pages branches
-# Local development: jekyll serve --config _config.yml,_config-dev.yml
+# Development Configuration
+# Complete standalone config for development
 
-# Auth0 Development Configuration (all branches except gh-pages)
+title: Carson's Meditations
+email: ctkfdp@umsystem.edu
+description: >- # this means to ignore newlines until "baseurl:"
+  My site for my reflections on all types of projects
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "http://localhost:4000" # Development URL
+repository: "carsontkempf/carsontkempf.github.io"
+github_username:  carsontkempf
+author: Carson Kempf
+
+safe: false
+show_downloads: false
+google_analytics: "G-DSMK52452T"
+theme: jekyll-theme-minimal
+sass:
+  sass_dir: _sass
+
+# Spotify API Configuration
+spotify:
+  client_id: "80826ef3daa547f49d843c254ad224b6"
+
+# Auth0 Development Configuration
 auth0:
   domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
   client_id: "ql8ttR4YSmZXZbGE30wP8foWCUuZs2jh"
   audience: "https://carsontkempf.github.io/api/carsons-meditations"
 
-# Override base URL for local development
-url: "http://localhost:4000"
+# Exclude files from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor

@@ -22,7 +22,8 @@ title: Hello! Happy you Made it!
 ### My Notes Over:
 * Assignments for School
 * Projects I'm Working On
-> Deepseek ChatBot -> Chatbot utilizing DeepSeek and Tavily APIs to replace my $20/month ChatGPT subscription. 
+> Deepseek ChatBot -> Chatbot utilizing DeepSeek and Tavily APIs to replace my $20/month ChatGPT subscription.
+> Notes Application ->  
 
 ### Some Research On:
 * Artificial Intelligence

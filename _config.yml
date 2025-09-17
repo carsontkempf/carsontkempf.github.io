@@ -44,3 +44,11 @@ auth0:
   domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
   client_id: "Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC"
   audience: "https://carsontkempf.github.io/api/carsons-meditations"
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor

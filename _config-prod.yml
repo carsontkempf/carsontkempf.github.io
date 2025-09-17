@@ -1,11 +1,37 @@
-# Production Configuration Override
-# This file can be used to explicitly set production values
+# Production Configuration
+# Complete standalone config for production
 
-# Auth0 Production Configuration (explicit)
+title: Carson's Meditations
+email: ctkfdp@umsystem.edu
+description: >- # this means to ignore newlines until "baseurl:"
+  My site for my reflections on all types of projects
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://carsontkempf.github.io" # Production URL
+repository: "carsontkempf/carsontkempf.github.io"
+github_username:  carsontkempf
+author: Carson Kempf
+
+safe: false
+show_downloads: false
+google_analytics: "G-DSMK52452T"
+theme: jekyll-theme-minimal
+sass:
+  sass_dir: _sass
+
+# Spotify API Configuration
+spotify:
+  client_id: "80826ef3daa547f49d843c254ad224b6"
+
+# Auth0 Production Configuration
 auth0:
   domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
   client_id: "Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC"
   audience: "https://carsontkempf.github.io/api/carsons-meditations"
 
-# Production URL
-url: "https://carsontkempf.github.io"
+# Exclude files from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
