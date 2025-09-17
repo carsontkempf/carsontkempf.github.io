@@ -58,3 +58,9 @@ This story illustrates a recurring tension in the development of human technolog
 ### Tools as Cognitive Extensions
 
 According to the 1995 "theory of extended mind" developed by Andy Clark and David Chalmers, tools don't just help us think; they become part of our cognitive model of ourselves. An experienced carpenter's hammer, for instance, becomes "an extension of her mind," and the brain "literally extends into our sense of self". John Dewey also argued that thinking is not confined to our skulls but involves our entire interaction with the environment. He viewed cognition as an "organism-environment coupling" rather than an internal mental process.
+
+---
+
+## Conclusion
+
+The same debate, spanning from Plato's time to today, is not about whether or not we should avoid using new tools, but how to use them maintaining the same intentions. One way to distinguish between technologies that simplify by removing features (simplificaiton) and technologies that successfully abstract by preserving essential functionality (abstraction). AI, like other tools, has become a cognitive extension. It strengthens our ability to interact with the environment and solve simple problems. The risk lies not in using AI, but in allowing ourselves to use AI to retain pseudo understanding of our real environment. The people who get the most out of AI will be the best at knowing what they know.
