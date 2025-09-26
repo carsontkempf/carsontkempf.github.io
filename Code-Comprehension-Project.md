@@ -270,20 +270,11 @@ permalink: /code-comprehension-project/
     <div class="pdf-header">
         <h1>Code Comprehension Project</h1>
         <p>Multi-Container PDF Memory System</p>
-        <div class="memory-indicator">
-            <span id="currentMemoryDisplay">Performance History - Memory[0]</span>
-        </div>
         
         <div style="margin-top: 20px; padding: 15px; background: rgba(52,152,219,0.1); border-radius: 8px; border-left: 4px solid #3498db;">
             <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.1rem;">📊 Test Results Dashboard Access</h3>
-            <p style="margin: 0 0 8px 0; color: #2c3e50; font-size: 0.95rem;">
-                I've created accounts for both of you to view comprehensive test results using your school emails.
-            </p>
-            <p style="margin: 0 0 10px 0; color: #2c3e50; font-size: 0.9rem;">
-                <strong>Password:</strong> <code style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 3px;">Welcome12345!</code>
-            </p>
             <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">
-                <strong>Dashboard:</strong> <a href="https://carsontkempf.github.io/dashboard/" target="_blank" style="color: #3498db; text-decoration: none; font-weight: 500;">https://carsontkempf.github.io/dashboard/</a>
+                <strong>Password:</strong> <code style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 3px;">Welcome12345!</code>
             </p>
         </div>
     </div>
@@ -292,11 +283,11 @@ permalink: /code-comprehension-project/
     <div class="pdf-viewer-container">
         <div class="viewer-header">
             <div class="viewer-title" id="viewerTitle">Performance History PDF Viewer</div>
-            <div class="viewer-subtitle" id="viewerSubtitle">Select a memory slot to view PDF</div>
+            <div class="viewer-subtitle" id="viewerSubtitle">Select a PDF slot to view document</div>
         </div>
         <div id="pdfViewer" class="loading">
-            <div>Click any memory slot to view PDF</div>
-            <div style="margin-top: 10px; font-size: 14px;">4 containers × 10 slots = 40 total memory positions</div>
+            <div>Click any PDF slot to view document</div>
+            <div style="margin-top: 10px; font-size: 14px;">4 containers × 10 slots = 40 total PDF positions</div>
         </div>
     </div>
 
@@ -312,7 +303,7 @@ permalink: /code-comprehension-project/
             </div>
             <div class="container-controls">
                 <button class="nav-button" id="performancePrev" disabled>← Prev</button>
-                <div class="memory-info" id="performanceInfo">Memory[0]</div>
+                <div class="memory-info" id="performanceInfo">PDF #1</div>
                 <button class="nav-button" id="performanceNext" disabled>Next →</button>
             </div>
         </div>
@@ -328,7 +319,7 @@ permalink: /code-comprehension-project/
             </div>
             <div class="container-controls">
                 <button class="nav-button" id="analysisPrev" disabled>← Prev</button>
-                <div class="memory-info" id="analysisInfo">Memory[0]</div>
+                <div class="memory-info" id="analysisInfo">PDF #1</div>
                 <button class="nav-button" id="analysisNext" disabled>Next →</button>
             </div>
         </div>
@@ -344,7 +335,7 @@ permalink: /code-comprehension-project/
             </div>
             <div class="container-controls">
                 <button class="nav-button" id="comparisonPrev" disabled>← Prev</button>
-                <div class="memory-info" id="comparisonInfo">Memory[0]</div>
+                <div class="memory-info" id="comparisonInfo">PDF #1</div>
                 <button class="nav-button" id="comparisonNext" disabled>Next →</button>
             </div>
         </div>
@@ -360,7 +351,7 @@ permalink: /code-comprehension-project/
             </div>
             <div class="container-controls">
                 <button class="nav-button" id="breakdownPrev" disabled>← Prev</button>
-                <div class="memory-info" id="breakdownInfo">Memory[0]</div>
+                <div class="memory-info" id="breakdownInfo">PDF #1</div>
                 <button class="nav-button" id="breakdownNext" disabled>Next →</button>
             </div>
         </div>
@@ -407,7 +398,6 @@ class MultiContainerPDFMemory {
         this.pdfViewer = document.getElementById('pdfViewer');
         this.viewerTitle = document.getElementById('viewerTitle');
         this.viewerSubtitle = document.getElementById('viewerSubtitle');
-        this.currentMemoryDisplay = document.getElementById('currentMemoryDisplay');
     }
 
     async loadAllMemoryStates() {
@@ -471,8 +461,8 @@ class MultiContainerPDFMemory {
             const memoryData = container.memorySlots[i];
             
             if (memoryData) {
-                slot.textContent = `${i}`;
-                slot.title = `${container.name} Memory[${i}] - PDF #${memoryData.pdfNumber}`;
+                slot.textContent = `${i + 1}`;
+                slot.title = `${container.name} PDF #${memoryData.pdfNumber}`;
                 
                 if (memoryData.type === 'milestone') {
                     slot.classList.add('milestone');
@@ -480,9 +470,9 @@ class MultiContainerPDFMemory {
                 
                 slot.addEventListener('click', () => this.selectMemorySlot(containerKey, i));
             } else {
-                slot.textContent = `${i}`;
+                slot.textContent = `${i + 1}`;
                 slot.classList.add('empty');
-                slot.title = `${container.name} Memory[${i}] - Empty`;
+                slot.title = `${container.name} PDF #${i + 1} - Empty`;
             }
             
             grid.appendChild(slot);
@@ -502,7 +492,6 @@ class MultiContainerPDFMemory {
         this.updateActiveSlot(containerKey, index);
         this.loadPDF(containerKey, memoryData);
         this.updateNavigationButtons(containerKey);
-        this.updateMemoryDisplay(containerKey, index);
         this.updateContainerInfo(containerKey, index, memoryData);
     }
 
@@ -569,17 +558,6 @@ class MultiContainerPDFMemory {
         nextBtn.disabled = nextIndex === -1;
     }
 
-    updateMemoryDisplay(containerKey, index) {
-        const container = this.containers[containerKey];
-        const memoryData = container.memorySlots[index];
-        
-        if (memoryData) {
-            const statusText = memoryData.status === 'newest' ? 'Most Recent' : 
-                             memoryData.status === 'oldest' ? 'About to be Removed' :
-                             memoryData.status === 'milestone' ? 'Milestone' : 'Active';
-            this.currentMemoryDisplay.textContent = `${container.name} - Memory[${index}] (${statusText})`;
-        }
-    }
 
     updateContainerInfo(containerKey, index, memoryData) {
         const infoElement = document.getElementById(`${containerKey}Info`);
@@ -590,7 +568,7 @@ class MultiContainerPDFMemory {
             'active': 'Active'
         };
         
-        infoElement.textContent = `Memory[${index}] - ${statusDescriptions[memoryData.status]}`;
+        infoElement.textContent = `PDF #${index + 1} - ${statusDescriptions[memoryData.status]}`;
     }
 
     navigateMemory(containerKey, direction) {
