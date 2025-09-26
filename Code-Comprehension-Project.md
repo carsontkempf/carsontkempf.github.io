@@ -225,19 +225,19 @@ permalink: /code-comprehension-project/
 }
 
 .performance-history {
-    background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
 }
 
 .error-analysis {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
 }
 
 .error-comparison {
-    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
 }
 
 .error-breakdown {
-    background: linear-gradient(135deg, #16a085 0%, #1abc9c 100%);
+    background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
 }
 
 @media (max-width: 1200px) {
@@ -272,6 +272,19 @@ permalink: /code-comprehension-project/
         <p>Multi-Container PDF Memory System</p>
         <div class="memory-indicator">
             <span id="currentMemoryDisplay">Performance History - Memory[0]</span>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: rgba(52,152,219,0.1); border-radius: 8px; border-left: 4px solid #3498db;">
+            <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.1rem;">📊 Test Results Dashboard Access</h3>
+            <p style="margin: 0 0 8px 0; color: #2c3e50; font-size: 0.95rem;">
+                I've created accounts for both of you to view comprehensive test results using your school emails.
+            </p>
+            <p style="margin: 0 0 10px 0; color: #2c3e50; font-size: 0.9rem;">
+                <strong>Password:</strong> <code style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 3px;">Welcome12345!</code>
+            </p>
+            <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">
+                <strong>Dashboard:</strong> <a href="https://carsontkempf.github.io/dashboard/" target="_blank" style="color: #3498db; text-decoration: none; font-weight: 500;">https://carsontkempf.github.io/dashboard/</a>
+            </p>
         </div>
     </div>
 
