@@ -8,7 +8,22 @@ permalink: /spotify-apple/
   
   <header class="dashboard-header">
     <h1>{{ page.title }}</h1>
-    <div id="user-profile-details"></div> 
+    <div id="user-profile-details"></div>
+    
+    <!-- Service Icons with Arrow -->
+    <div class="service-icons-container">
+      <div class="service-icon">
+        <img src="{{ '/assets/img/Spotify-Icon.png' | relative_url }}" alt="Spotify" class="service-logo spotify-logo">
+      </div>
+      <div class="transfer-arrow">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 12L20 12M20 12L14 6M20 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="service-icon">
+        <img src="{{ '/assets/img/Apple-Music-Icon.png' | relative_url }}" alt="Apple Music" class="service-logo apple-music-logo">
+      </div>
+    </div>
   </header>
 
   <main class="dashboard-main-content">

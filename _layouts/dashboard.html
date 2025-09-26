@@ -14,6 +14,9 @@ permalink: /dashboard/
   <main class="dashboard-main-content">
     <div class="dashboard-buttons">
       <a href="{{ '/spotify-apple/' | relative_url }}" class="dashboard-btn">Spotify Apple Integration</a>
+      <div id="auth-management-buttons">
+        <!-- Buttons will be dynamically loaded based on user permissions -->
+      </div>
     </div>
     </main>
 </div>
@@ -39,8 +42,48 @@ permalink: /dashboard/
                     <p class="login-status">Your login status is confirmed.</p>
                 `;
             }
+            
+            // Load appropriate buttons based on user permissions
+            loadDashboardButtons(user);
         } else {
             document.getElementById('dashboard-login-prompt').style.display = 'block';
         }
     });
+
+    function loadDashboardButtons(user) {
+        const authButtonsDiv = document.getElementById('auth-management-buttons');
+        
+        // Check user roles in multiple possible locations
+        const customRoles = user['https://carsontkempf.github.io/roles'] || [];
+        const auth0Roles = user['https://auth0.com/roles'] || [];
+        const appMetadataRoles = user.app_metadata?.roles || [];
+        const userMetadataRoles = user.user_metadata?.roles || [];
+        
+        // Combine all possible role sources
+        const allRoles = [...customRoles, ...auth0Roles, ...appMetadataRoles, ...userMetadataRoles];
+        
+        const hasAdminRole = allRoles.includes('admin');
+        const hasCodeComprehensionRole = allRoles.includes('Code-Comprehension-Project') || 
+                                        allRoles.includes('rol_XUUh9ZOhirY2yCQQ');
+        const isSiteOwner = user.email === 'ctkfdp@umsystem.edu';
+        
+        // Special case for the Google OAuth2 user we know should have access
+        const isKnownGoogleUser = user.sub === 'google-oauth2|105937728118922887478' || 
+                                 user.email === 'carsontkempf@gmail.com';
+        
+        
+        if (hasAdminRole || isSiteOwner) {
+            // Full admin access - show both buttons
+            authButtonsDiv.innerHTML = `
+                <a href="{{ '/auth0-users/' | relative_url }}" class="dashboard-btn">Auth0 User Management</a>
+                <a href="{{ '/code-comprehension-project/' | relative_url }}" class="dashboard-btn">Code Comprehension Project</a>
+            `;
+        } else if (hasCodeComprehensionRole || isKnownGoogleUser) {
+            // Limited access - only show Code Comprehension Project
+            authButtonsDiv.innerHTML = `
+                <a href="{{ '/code-comprehension-project/' | relative_url }}" class="dashboard-btn">Code Comprehension Project</a>
+            `;
+        }
+        // If user has no special roles, no additional buttons are shown
+    }
 </script>
