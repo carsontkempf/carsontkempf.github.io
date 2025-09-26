@@ -225,7 +225,7 @@ permalink: /code-comprehension-project/
 }
 
 .performance-history {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
 }
 
 .error-analysis {
@@ -233,11 +233,11 @@ permalink: /code-comprehension-project/
 }
 
 .error-comparison {
-    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
 }
 
 .error-breakdown {
-    background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
 }
 
 @media (max-width: 1200px) {
