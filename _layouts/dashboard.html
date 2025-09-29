@@ -67,18 +67,13 @@ permalink: /dashboard/
                                         allRoles.includes('rol_XUUh9ZOhirY2yCQQ');
         const isSiteOwner = user.email === 'ctkfdp@umsystem.edu';
         
-        // Special case for the Google OAuth2 user we know should have access
-        const isKnownGoogleUser = user.sub === 'google-oauth2|105937728118922887478' || 
-                                 user.email === 'carsontkempf@gmail.com';
-        
-        
         if (hasAdminRole || isSiteOwner) {
             // Full admin access - show both buttons
             authButtonsDiv.innerHTML = `
                 <a href="{{ '/auth0-users/' | relative_url }}" class="dashboard-btn">Auth0 User Management</a>
                 <a href="{{ '/code-comprehension-project/' | relative_url }}" class="dashboard-btn">Code Comprehension Project</a>
             `;
-        } else if (hasCodeComprehensionRole || isKnownGoogleUser) {
+        } else if (hasCodeComprehensionRole) {
             // Limited access - only show Code Comprehension Project
             authButtonsDiv.innerHTML = `
                 <a href="{{ '/code-comprehension-project/' | relative_url }}" class="dashboard-btn">Code Comprehension Project</a>
