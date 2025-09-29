@@ -6,3 +6,5 @@ vendor
 Gemfile.lock
 node_modules/*
 assets/js/auth.js
+.secret
+/.secret

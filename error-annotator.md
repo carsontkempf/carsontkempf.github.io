@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Code Comprehension Project
-permalink: /code-comprehension-project/
+title: Error Annotator
+permalink: /error-annotator/
 ---
 
 <div id="auth-check-wrapper" style="display: none;">
@@ -23,263 +23,72 @@ permalink: /code-comprehension-project/
     box-sizing: border-box;
 }
 
-#pdf-interface-container {
+#error-annotator-container {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     min-height: 100vh;
     padding: 20px 0;
 }
 
-.pdf-header {
+.annotator-header {
     text-align: center;
     margin-bottom: 30px;
     flex-shrink: 0;
 }
 
-.pdf-header h1 {
+.annotator-header h1 {
     font-size: 2.5rem;
     font-weight: 300;
     margin-bottom: 10px;
     color: #2c3e50;
 }
 
-.pdf-header p {
+.annotator-header p {
     font-size: 1.1rem;
     opacity: 0.8;
     margin-bottom: 20px;
     color: #7f8c8d;
 }
 
-.memory-indicator {
-    display: inline-flex;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 25px;
-    padding: 10px 20px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(102,126,234,0.3);
-    color: white;
-}
-
-.containers-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+.navigation-links {
+    text-align: center;
     margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(231,76,60,0.1);
+    border-radius: 8px;
+    border-left: 4px solid #e74c3c;
 }
 
-.pdf-container {
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-    overflow: hidden;
-    height: 250px;
-    backdrop-filter: blur(10px);
+.navigation-links h3 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
 }
 
-.container-header {
-    padding: 10px 15px;
-    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-    color: white;
-    text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.container-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 3px;
-}
-
-.container-subtitle {
-    font-size: 0.8rem;
-    opacity: 0.8;
-}
-
-.memory-grid {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 3px;
-    padding: 10px;
-    flex: 1;
-    background: #f8f9fa;
-}
-
-.memory-slot {
-    padding: 4px 2px;
-    border: 1px solid #e9ecef;
-    border-radius: 4px;
-    background: white;
-    cursor: pointer;
-    text-align: center;
-    font-size: 9px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 24px;
-}
-
-.memory-slot:hover {
-    background: #e3f2fd;
-    border-color: #2196f3;
-    transform: translateY(-1px);
-}
-
-.memory-slot.active {
+.nav-link-btn {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 10px 20px;
     background: #e74c3c;
-    border-color: #e74c3c;
     color: white;
-    box-shadow: 0 2px 8px rgba(231,76,60,0.4);
-}
-
-.memory-slot.milestone {
-    background: #f39c12;
-    border-color: #f39c12;
-    color: white;
-    box-shadow: 0 2px 8px rgba(243,156,18,0.4);
-}
-
-.memory-slot.empty {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-.container-controls {
-    padding: 8px 12px;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.nav-button {
-    padding: 6px 12px;
-    border: 1px solid #007bff;
-    border-radius: 4px;
-    background: #007bff;
-    color: white;
-    cursor: pointer;
-    font-size: 12px;
+    text-decoration: none;
+    border-radius: 6px;
     font-weight: 500;
     transition: all 0.3s ease;
 }
 
-.nav-button:hover:not(:disabled) {
-    background: #0056b3;
-    border-color: #0056b3;
-}
-
-.nav-button:disabled {
-    background: #6c757d;
-    border-color: #6c757d;
-    cursor: not-allowed;
-}
-
-.memory-info {
-    font-size: 11px;
-    color: #6c757d;
-    text-align: center;
-    max-width: 120px;
-    line-height: 1.2;
-}
-
-.pdf-viewer-container {
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-    overflow: hidden;
-    height: 70vh;
-    backdrop-filter: blur(10px);
-}
-
-.viewer-header {
-    padding: 15px 20px;
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+.nav-link-btn:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+    text-decoration: none;
     color: white;
-    text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-.viewer-title {
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin-bottom: 5px;
+.nav-link-btn.secondary {
+    background: #3498db;
 }
 
-.viewer-subtitle {
-    font-size: 1rem;
-    opacity: 0.9;
-}
-
-.pdf-viewer {
-    flex: 1;
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: white;
-}
-
-.loading {
-    text-align: center;
-    padding: 50px;
-    color: #7f8c8d;
-    font-size: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-}
-
-.performance-history {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.error-analysis {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.error-comparison {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.error-breakdown {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-@media (max-width: 1200px) {
-    .containers-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-    
-    .memory-grid {
-        grid-template-columns: repeat(10, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .memory-grid {
-        grid-template-columns: repeat(8, 1fr);
-        gap: 2px;
-        padding: 10px;
-    }
-    
-    .memory-slot {
-        font-size: 8px;
-        padding: 4px 2px;
-        min-height: 24px;
-    }
-}
-
-/* Error Annotator Styles */
-#error-annotator-container {
-    margin-top: 20px;
+.nav-link-btn.secondary:hover {
+    background: #2980b9;
 }
 
 /* Upload section */
@@ -303,8 +112,8 @@ permalink: /code-comprehension-project/
 }
 
 .upload-box:hover {
-    border-color: #3498db;
-    box-shadow: 0 6px 20px rgba(52,152,219,0.2);
+    border-color: #e74c3c;
+    box-shadow: 0 6px 20px rgba(231,76,60,0.2);
 }
 
 .upload-box h3 {
@@ -350,7 +159,7 @@ permalink: /code-comprehension-project/
 }
 
 .nav-btn {
-    background: #3498db;
+    background: #e74c3c;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -362,7 +171,7 @@ permalink: /code-comprehension-project/
 }
 
 .nav-btn:hover:not(:disabled) {
-    background: #2980b9;
+    background: #c0392b;
     transform: translateY(-1px);
 }
 
@@ -419,6 +228,50 @@ permalink: /code-comprehension-project/
     margin-bottom: 10px;
 }
 
+.category-section-header {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.category-tag {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.category-tag:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+.category-tag.shortcut {
+    position: relative;
+    padding-left: 24px;
+}
+
+.shortcut-key {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
 /* Main content grid */
 .main-content-grid {
     display: grid;
@@ -466,6 +319,16 @@ permalink: /code-comprehension-project/
     color: #2c3e50;
 }
 
+.code-content.code-success {
+    background: #d4edda;
+    border-left: 4px solid #27ae60;
+}
+
+.code-content.code-error {
+    background: #f8d7da;
+    border-left: 4px solid #e74c3c;
+}
+
 /* Right sidebar */
 .right-sidebar {
     display: flex;
@@ -487,7 +350,7 @@ permalink: /code-comprehension-project/
 .details-panel h3 {
     margin-bottom: 15px;
     color: #2c3e50;
-    border-bottom: 2px solid #3498db;
+    border-bottom: 2px solid #e74c3c;
     padding-bottom: 8px;
 }
 
@@ -513,6 +376,11 @@ permalink: /code-comprehension-project/
 
 .test-results > div {
     margin-bottom: 5px;
+}
+
+.test-error {
+    color: #e74c3c;
+    font-weight: 500;
 }
 
 /* Tagging panel */
@@ -555,7 +423,7 @@ permalink: /code-comprehension-project/
 
 .tag-input:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: #e74c3c;
 }
 
 .add-tag-btn {
@@ -586,7 +454,7 @@ permalink: /code-comprehension-project/
     justify-content: space-between;
     align-items: center;
     background: #e8f4fd;
-    border: 1px solid #3498db;
+    border: 1px solid #e74c3c;
     border-radius: 4px;
     padding: 8px 12px;
     margin-bottom: 5px;
@@ -622,7 +490,7 @@ permalink: /code-comprehension-project/
 }
 
 .action-btn {
-    background: #3498db;
+    background: #e74c3c;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -634,7 +502,7 @@ permalink: /code-comprehension-project/
 }
 
 .action-btn:hover {
-    background: #2980b9;
+    background: #c0392b;
     transform: translateY(-1px);
 }
 
@@ -710,11 +578,11 @@ permalink: /code-comprehension-project/
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid #e74c3c;
 }
 
 .import-section { border-left-color: #17a2b8; }
-.generation-section { border-left-color: #3498db; }
+.generation-section { border-left-color: #e74c3c; }
 .data-section { border-left-color: #27ae60; }
 .association-section { border-left-color: #f39c12; }
 .traditional-section { border-left-color: #6c757d; }
@@ -750,14 +618,14 @@ permalink: /code-comprehension-project/
 }
 
 .export-btn.primary {
-    background: #3498db;
-    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    background: #e74c3c;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
 }
 
 .export-btn.primary:hover {
-    background: #2980b9;
+    background: #c0392b;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
 }
 
 .export-btn.secondary {
@@ -887,7 +755,7 @@ permalink: /code-comprehension-project/
     border-radius: 6px;
     padding: 15px;
     margin-top: 15px;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid #e74c3c;
 }
 
 .output-section h5 {
@@ -908,6 +776,89 @@ permalink: /code-comprehension-project/
     white-space: pre-wrap;
     max-height: 300px;
     overflow-y: auto;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Association styles */
+.association-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-left: 4px solid #f39c12;
+}
+
+.association-file {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.association-date {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.association-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn-small {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-btn-small.view {
+    background: #3498db;
+    color: white;
+}
+
+.action-btn-small.view:hover {
+    background: #2980b9;
+}
+
+.action-btn-small.remove {
+    background: #e74c3c;
+    color: white;
+}
+
+.action-btn-small.remove:hover {
+    background: #c0392b;
 }
 
 /* Responsive design for error annotator */
@@ -953,72 +904,243 @@ permalink: /code-comprehension-project/
     .upload-box {
         padding: 30px 20px;
     }
+    
+    .category-section-container {
+        justify-content: center;
+    }
 }
 </style>
 
-<div id="pdf-interface-container">
-    <div class="pdf-header">
-        <h1>Code Comprehension Project</h1>
-        <p>Multi-Container PDF Memory System & Error Analysis Tools</p>
+<div id="error-annotator-container">
+    <div class="annotator-header">
+        <h1>🏷️ Error Annotation Tool</h1>
+        <p>Upload CSV files containing error data and annotate them with categories for analysis and model improvement.</p>
         
+        <div class="navigation-links">
+            <h3>🔗 Quick Navigation</h3>
+            <a href="/code-comprehension-project/" class="nav-link-btn secondary">← Back to Main Project</a>
+            <a href="/pdf-history-viewer/" class="nav-link-btn secondary">PDF History Viewer</a>
+        </div>
+    </div>
 
-        <!-- Project Tools Navigation -->
-        <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-            <div style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(39,174,96,0.3);">
-                <h3 style="color: white; margin: 0 0 15px 0; font-size: 1.3rem;">📈 PDF History Viewer</h3>
-                <p style="color: rgba(255,255,255,0.9); margin: 0 0 20px 0; font-size: 0.95rem;">
-                    View and navigate through multi-container PDF memory system with performance history, error analysis, comparison data, and breakdowns.
-                </p>
-                <a href="/pdf-history-viewer/" style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
-                    Open PDF Viewer →
-                </a>
-            </div>
-
-            <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(231,76,60,0.3);">
-                <h3 style="color: white; margin: 0 0 15px 0; font-size: 1.3rem;">🏷️ Error Annotator</h3>
-                <p style="color: rgba(255,255,255,0.9); margin: 0 0 20px 0; font-size: 0.95rem;">
-                    Upload CSV files containing error data and annotate them with categories for analysis and model improvement.
-                </p>
-                <a href="/error-annotator/" style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
-                    Open Annotator →
-                </a>
+    <!-- File upload section -->
+    <div id="uploadSection" class="upload-section">
+        <div class="upload-box">
+            <h3>Upload CSV File</h3>
+            <input type="file" id="csvFileInput" accept=".csv" class="file-input">
+            <div class="upload-instructions">
+                <p>Select your CSV file containing error data to begin annotation.</p>
+                <p>Expected format: task_id, original code, refactored_code, test results...</p>
             </div>
         </div>
+    </div>
 
-        <!-- Project Overview -->
-        <div style="margin-top: 30px; padding: 20px; background: rgba(52,152,219,0.05); border-radius: 8px; border-left: 4px solid #3498db;">
-            <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 1.2rem;">📋 Project Overview</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                <div>
-                    <h4 style="color: #27ae60; margin: 0 0 8px 0;">PDF Memory System</h4>
-                    <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">4 containers × 10 slots = 40 total PDF positions</p>
-                    <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.85rem;">Performance history, error analysis, comparisons, and breakdowns</p>
+    <!-- Navigation bar -->
+    <nav class="navigation" style="display: none;" id="annotationNavigation">
+        <div class="nav-controls">
+            <button id="prevBtn" class="nav-btn" title="Previous entry (← key)">← Previous</button>
+            <span id="entryInfo" class="entry-info">Entry 1 of 0</span>
+            <button id="nextBtn" class="nav-btn" title="Next entry (→ key)">Next →</button>
+            <div style="font-size: 11px; color: #666; margin-left: 20px;">
+                Use ← → arrow keys to navigate
+            </div>
+        </div>
+        <div class="nav-status">
+            <span id="loadStatus" class="load-status">Load CSV to start</span>
+        </div>
+    </nav>
+
+    <!-- Main annotation interface (hidden initially) -->
+    <div id="annotationInterface" class="annotation-interface" style="display: none;">
+        <!-- Error Categories - moved to top -->
+        <div class="top-error-categories">
+            <h4>Error Categories</h4>
+            <div class="instructions" style="font-size: 12px; color: #666; margin-bottom: 10px; font-style: italic;">
+                Use keyboard numbers 1-7 to quickly assign categories, or click the buttons below.
+            </div>
+            <div id="errorCategories" class="error-categories-top"></div>
+        </div>
+
+        <div class="main-content-grid">
+            <!-- Code comparison panel - left side, takes remaining space -->
+            <div class="code-panel">
+                <div class="code-section">
+                    <h4>Original Code</h4>
+                    <pre id="originalCode" class="code-content">Loading...</pre>
                 </div>
-                <div>
-                    <h4 style="color: #e74c3c; margin: 0 0 8px 0;">Error Analysis Tools</h4>
-                    <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">CSV upload, annotation, and export capabilities</p>
-                    <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.85rem;">Advanced prompt generation and data analysis</p>
+                <div class="code-section">
+                    <h4>Refactored Code</h4>
+                    <pre id="refactoredCode" class="code-content">Loading...</pre>
                 </div>
-                <div>
-                    <h4 style="color: #3498db; margin: 0 0 8px 0;">Role-Based Access</h4>
-                    <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">Secure access control with Auth0 integration</p>
-                    <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.85rem;">code-comprehension role required</p>
+            </div>
+
+            <!-- Right sidebar - entry details and tagging -->
+            <div class="right-sidebar">
+                <!-- Entry details panel -->
+                <div class="details-panel">
+                    <h3>Entry Details</h3>
+                    <div id="entryDetails" class="details-content">
+                        <div class="detail-item">
+                            <span class="detail-label">Task ID:</span>
+                            <span id="taskId">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Task Description:</span>
+                            <span id="taskDescription">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Primary Method:</span>
+                            <span id="primaryMethod">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Test Results:</span>
+                            <div id="testResults" class="test-results">
+                                <div id="originalResult">Original: -</div>
+                                <div id="refactoredResult">Refactored: -</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tagging panel -->
+                <div class="tagging-panel">
+                    <div class="tag-input-section">
+                        <h4>Add Custom Tag</h4>
+                        <div class="tag-input-controls">
+                            <input type="text" id="customTagInput" placeholder="Enter custom tag..." class="tag-input">
+                            <button id="addCustomTagBtn" class="add-tag-btn">Add Tag</button>
+                        </div>
+                    </div>
+
+                    <div class="current-tags-section">
+                        <h4>Current Entry Tags</h4>
+                        <div id="currentTags" class="current-tags">
+                            No tags assigned
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Action buttons -->
+    <div class="action-bar" style="display: none;" id="annotationActions">
+        <button id="statsBtn" class="action-btn">View Statistics</button>
+        <button id="exportBtn" class="action-btn">Export Data</button>
+        <button id="clearBtn" class="action-btn danger">Clear All Tags</button>
     </div>
 </div>
 
+<!-- Statistics modal -->
+<div id="statsModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Annotation Statistics</h3>
+            <span class="close" id="closeStatsModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="statsContent" class="stats-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Export modal -->
+<div id="exportModal" class="modal" style="display: none;">
+    <div class="modal-content export-modal-large">
+        <div class="modal-header">
+            <h3>📊 Advanced Export & Import</h3>
+            <span class="close" id="closeExportModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            
+            <!-- Import Section -->
+            <div class="export-section import-section">
+                <h4>📥 Import Existing Prompt</h4>
+                <div class="import-controls">
+                    <div class="import-method">
+                        <label for="promptFileInput">Import from File:</label>
+                        <input type="file" id="promptFileInput" accept=".txt,.md" class="file-input-small">
+                    </div>
+                    <div class="import-method">
+                        <label for="promptTextInput">Or paste prompt text:</label>
+                        <textarea id="promptTextInput" placeholder="Paste your existing prompt here..." rows="4" class="prompt-textarea"></textarea>
+                        <button id="importPromptBtn" class="import-btn">📥 Import Prompt</button>
+                    </div>
+                </div>
+                <div id="importedPromptInfo" class="imported-info" style="display: none;">
+                    <div class="info-badge">✅ Prompt imported successfully</div>
+                    <div class="prompt-preview" id="promptPreviewText"></div>
+                </div>
+            </div>
+
+            <!-- Enhanced Prompt Generation -->
+            <div class="export-section generation-section">
+                <h4>🚀 Generate Enhanced Prompt</h4>
+                <p class="section-description">Generate an improved prompt based on your annotation patterns and error analysis.</p>
+                <div class="export-controls">
+                    <button id="generatePromptBtn" class="export-btn primary">🚀 Generate Enhanced Prompt</button>
+                    <button id="copyPromptBtn" class="export-btn secondary" disabled>📋 Copy Prompt</button>
+                    <button id="downloadPromptBtn" class="export-btn secondary" disabled>💾 Download Prompt</button>
+                </div>
+                <div id="promptOutput" class="output-section" style="display: none;">
+                    <h5>Generated Enhanced Prompt:</h5>
+                    <div class="output-text" id="generatedPromptText"></div>
+                </div>
+            </div>
+
+            <!-- Data Export Section -->
+            <div class="export-section data-section">
+                <h4>📊 Export Analysis Data</h4>
+                <div class="export-controls">
+                    <button id="generateJsonBtn" class="export-btn tertiary">📈 Generate JSON Analysis</button>
+                    <button id="copyJsonBtn" class="export-btn secondary" disabled>📋 Copy JSON</button>
+                    <button id="downloadJsonBtn" class="export-btn secondary" disabled>💾 Download JSON</button>
+                </div>
+                <div id="jsonOutput" class="output-section" style="display: none;">
+                    <h5>Generated Analysis Data (JSON):</h5>
+                    <div class="output-text" id="generatedJsonText"></div>
+                </div>
+            </div>
+
+            <!-- CSV Association Section -->
+            <div class="export-section association-section">
+                <h4>🔗 Associate Current CSV with Prompt</h4>
+                <div class="csv-association-controls">
+                    <button id="associateCurrentBtn" class="export-btn secondary" disabled>🔗 Associate with Current Prompt</button>
+                    <button id="viewAssociationsBtn" class="export-btn secondary">👁️ View All Associations</button>
+                </div>
+                <div id="associationsDisplay" class="associations-display" style="display: none;"></div>
+            </div>
+
+            <!-- Traditional Export -->
+            <div class="export-section traditional-section">
+                <h4>📄 Traditional Export</h4>
+                <div class="export-controls">
+                    <button id="exportJsonBtn" class="export-btn">📄 Download Annotations JSON</button>
+                    <button id="exportCsvBtn" class="export-btn">📊 Download CSV Report</button>
+                </div>
+            </div>
+
+            <!-- Statistics Summary -->
+            <div class="export-section stats-section" id="exportStatsSection" style="display: none;">
+                <h4>📊 Analysis Summary</h4>
+                <div class="stats-grid" id="exportStatsGrid"></div>
+            </div>
+
+            <div id="exportPreview" class="export-preview"></div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ '/assets/js/error-annotator.js' | relative_url }}"></script>
 
 </div>
 
 <script>
-console.log('Code Comprehension Project - Script loaded');
+console.log('Error Annotator - Script loaded');
 
 document.addEventListener('authReady', () => {
-    console.log('Code Comprehension Project - authReady event fired');
+    console.log('Error Annotator - authReady event fired');
     if (window.authService.isAuthenticated) {
         const user = window.authService.user;
         
@@ -1038,7 +1160,7 @@ document.addEventListener('authReady', () => {
         const allRoles = [...customRoles, ...auth0Roles, ...appMetadataRoles, ...userMetadataRoles, ...rolesArray, ...authorizationRoles, ...orgRoles, ...realmRoles];
         
         // Debug: Log user info and roles for troubleshooting
-        console.log('Code Comprehension Project - User Debug Info:', {
+        console.log('Error Annotator - User Debug Info:', {
             user: user,
             userKeys: Object.keys(user),
             customRoles: customRoles,
@@ -1074,19 +1196,19 @@ document.addEventListener('authReady', () => {
             document.getElementById('auth-check-wrapper').style.display = 'block';
         }
     } else {
-        console.log('Code Comprehension Project - User not authenticated');
+        console.log('Error Annotator - User not authenticated');
         document.getElementById('auth-check-wrapper').style.display = 'block';
     }
 });
 
-console.log('Code Comprehension Project - Setting up timeout fallback');
+console.log('Error Annotator - Setting up timeout fallback');
 
 // If auth service isn't ready after 5 seconds, show access denied
 setTimeout(() => {
-    console.log('Code Comprehension Project - Timeout check - authService available:', !!window.authService);
-    console.log('Code Comprehension Project - Timeout check - isAuthenticated:', window.authService?.isAuthenticated);
+    console.log('Error Annotator - Timeout check - authService available:', !!window.authService);
+    console.log('Error Annotator - Timeout check - isAuthenticated:', window.authService?.isAuthenticated);
     if (!window.authService || !window.authService.isAuthenticated) {
-        console.log('Code Comprehension Project - Timeout triggered, showing access denied');
+        console.log('Error Annotator - Timeout triggered, showing access denied');
         document.getElementById('auth-check-wrapper').style.display = 'block';
     }
 }, 5000);
