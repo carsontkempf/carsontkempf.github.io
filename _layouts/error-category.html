@@ -308,12 +308,13 @@ layout: default
 
           .prompt-content {
               padding: 25px;
+              position: relative;
           }
 
           .prompt-textarea {
               width: 100%;
               min-height: 400px;
-              padding: 20px;
+              padding: 25px 50px 25px 25px; /* Top, Right (space for copy icon), Bottom, Left */
               border: 2px solid #bdc3c7;
               border-radius: 10px;
               font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
@@ -322,11 +323,43 @@ layout: default
               resize: vertical;
               background: white;
               color: #2c3e50;
+              box-sizing: border-box;
           }
 
           .prompt-textarea:focus {
               outline: none;
               border-color: #27ae60;
+          }
+
+          .copy-icon {
+              position: absolute;
+              top: 35px;
+              right: 35px;
+              width: 24px;
+              height: 24px;
+              background: #3498db;
+              color: white;
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 14px;
+              transition: all 0.3s ease;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+              z-index: 10;
+          }
+
+          .copy-icon:hover {
+              background: #2980b9;
+              transform: scale(1.1);
+          }
+
+          .copy-icon:disabled {
+              background: #bdc3c7;
+              cursor: not-allowed;
+              transform: none;
           }
 
           .prompt-actions {
@@ -336,7 +369,7 @@ layout: default
               flex-wrap: wrap;
           }
 
-          .generate-prompt-btn, .copy-prompt-btn, .download-prompt-btn {
+          .generate-prompt-btn, .download-prompt-btn {
               padding: 12px 24px;
               border: none;
               border-radius: 8px;
@@ -360,17 +393,17 @@ layout: default
               transform: translateY(-1px);
           }
 
-          .copy-prompt-btn, .download-prompt-btn {
+          .download-prompt-btn {
               background: #3498db;
               color: white;
           }
 
-          .copy-prompt-btn:hover, .download-prompt-btn:hover {
+          .download-prompt-btn:hover {
               background: #2980b9;
               transform: translateY(-1px);
           }
 
-          .copy-prompt-btn:disabled, .download-prompt-btn:disabled {
+          .download-prompt-btn:disabled {
               background: #bdc3c7;
               cursor: not-allowed;
               transform: none;
@@ -602,7 +635,10 @@ layout: default
                   <h1>{{ current_category.name }}</h1>
                   <p>{{ current_category.description }}</p>
                   <div style="margin-top: 25px;">
-                      <button id="backToAnalysisBtn" class="back-link" style="border: none; cursor: pointer;">← Back to Analysis</button>
+                      <a href="/finished-annotating/" id="backToAnalysisBtn" class="back-link" 
+                         style="background: {{ current_category.color }}; color: white; border: none; cursor: pointer; padding: 12px 24px; border-radius: 8px; font-weight: 500; transition: all 0.3s ease; text-decoration: none; display: inline-block;">
+                          ← Back to Analysis
+                      </a>
                   </div>
               </div>
 
@@ -644,9 +680,9 @@ layout: default
                           <textarea id="promptTextarea" class="prompt-textarea" placeholder="Analysis of selected errors will appear here...
 
 Select errors from the middle column to generate insights about error patterns and tendencies in this category."></textarea>
+                          <button id="copyPromptBtn" class="copy-icon" disabled title="Copy to clipboard">📋</button>
                           <div class="prompt-actions">
                               <button id="generatePromptBtn" class="generate-prompt-btn">🚀 Generate Enhanced Prompt</button>
-                              <button id="copyPromptBtn" class="copy-prompt-btn" disabled>📋 Copy Prompt</button>
                               <button id="downloadPromptBtn" class="download-prompt-btn" disabled>💾 Download Prompt</button>
                           </div>
                       </div>
@@ -666,6 +702,7 @@ Select errors from the middle column to generate insights about error patterns a
                   this.csvData = [];
                   this.categoryErrors = [];
                   this.selectedErrors = new Set();
+                  this.categoryMapping = null;
                   this.existingPrompt = `You are an assistant specialized in refactoring code using for novices. Your goal is to make code more **readable**, **understandable**, and **maintainable** for novices.
 
 # Refactoring Evaluation
@@ -724,21 +761,27 @@ Return in the following JSON format:
               
               async loadData() {
                   try {
-                      // Try to load from annotated-code.json file first
-                      await this.loadFromJsonFile();
+                      // Load category mapping from localStorage first (generated during CSV upload)
+                      this.loadCategoryMappingFromStorage();
                       
-                      // Fallback to localStorage if no file data
+                      // Prioritize localStorage data (actual user annotations)
+                      const storedAnnotations = localStorage.getItem('errorAnnotations');
+                      const storedCsvData = localStorage.getItem('csvData');
+                      
+                      if (storedAnnotations) {
+                          this.annotations = JSON.parse(storedAnnotations);
+                          console.log('Loaded user annotations from localStorage:', Object.keys(this.annotations).length, 'entries');
+                      }
+                      
+                      if (storedCsvData) {
+                          this.csvData = JSON.parse(storedCsvData);
+                          console.log('Loaded user CSV data from localStorage:', this.csvData.length, 'entries');
+                      }
+                      
+                      // Only use the sample JSON file if no user data exists (for demo purposes)
                       if (Object.keys(this.annotations).length === 0) {
-                          const storedAnnotations = localStorage.getItem('errorAnnotations');
-                          const storedCsvData = localStorage.getItem('csvData');
-                          
-                          if (storedAnnotations) {
-                              this.annotations = JSON.parse(storedAnnotations);
-                          }
-                          
-                          if (storedCsvData) {
-                              this.csvData = JSON.parse(storedCsvData);
-                          }
+                          console.log('No user annotations found, checking for sample data...');
+                          await this.loadFromJsonFile();
                       }
                       
                       this.displayErrors();
@@ -750,7 +793,7 @@ Return in the following JSON format:
 
               async loadFromJsonFile() {
                   try {
-                      // Try to fetch the annotated-code.json file
+                      // Try to load from annotated-code.json file first (fallback for demo purposes)
                       const response = await fetch('/annotated-code.json');
                       if (response.ok) {
                           const jsonData = await response.json();
@@ -779,34 +822,126 @@ Return in the following JSON format:
                       console.log('Could not load annotated-code.json:', error.message);
                   }
               }
+
+              /**
+               * Load category mapping from localStorage (generated during CSV upload)
+               */
+              loadCategoryMappingFromStorage() {
+                  try {
+                      const storedMapping = localStorage.getItem('errorCategoryMapping');
+                      if (storedMapping) {
+                          this.categoryMapping = JSON.parse(storedMapping);
+                          console.log('Loaded error category mapping from localStorage:', this.categoryMapping);
+                          console.log('CSV data mapping entries:', Object.keys(this.categoryMapping.csv_data_mapping || {}).length);
+                      } else {
+                          console.log('No error category mapping found in localStorage');
+                          // Create a basic fallback mapping
+                          this.createFallbackMapping();
+                      }
+                  } catch (error) {
+                      console.error('Error loading category mapping from localStorage:', error);
+                      this.createFallbackMapping();
+                  }
+              }
+
+              /**
+               * Create a fallback mapping if none exists
+               */
+              createFallbackMapping() {
+                  this.categoryMapping = {
+                      error_categories: {
+                          "1": "Incorrect Argument Count",
+                          "2": "Argument Unpacking Error", 
+                          "3": "Incorrect Formula Application",
+                          "4": "Off By One Error",
+                          "5": "Incorrect Output Format",
+                          "6": "Edge Case Handling Failure",
+                          "7": "Syntax Error"
+                      },
+                      category_details: {
+                          "Incorrect Argument Count": { "number": 1, "color": "#e74c3c" },
+                          "Argument Unpacking Error": { "number": 2, "color": "#3498db" },
+                          "Incorrect Formula Application": { "number": 3, "color": "#2ecc71" },
+                          "Off By One Error": { "number": 4, "color": "#f39c12" },
+                          "Incorrect Output Format": { "number": 5, "color": "#9b59b6" },
+                          "Edge Case Handling Failure": { "number": 6, "color": "#1abc9c" },
+                          "Syntax Error": { "number": 7, "color": "#34495e" }
+                      },
+                      csv_data_mapping: {},
+                      metadata: { "description": "Fallback mapping" }
+                  };
+                  console.log('Created fallback error category mapping');
+              }
               
               displayErrors() {
                   console.log('Displaying errors for category:', this.categoryName);
                   console.log('Available annotations:', Object.keys(this.annotations).length);
                   console.log('Available CSV data:', this.csvData.length);
+                  console.log('Category mapping available:', !!this.categoryMapping);
                   
                   // Find all errors in this category
                   this.categoryErrors = [];
+                  
+                  // Get current category info from mapping
+                  const currentCategoryInfo = this.getCategoryInfo(this.categoryName);
+                  console.log('Current category info from mapping:', currentCategoryInfo);
                   
                   Object.entries(this.annotations).forEach(([entryId, tags]) => {
                       // Handle both array and string tag formats
                       const tagArray = Array.isArray(tags) ? tags : [tags];
                       
-                      if (tagArray.includes(this.categoryName)) {
+                      // Check if any tag matches the current category name
+                      let matchesCategory = tagArray.includes(this.categoryName);
+                      
+                      if (!matchesCategory && currentCategoryInfo) {
+                          // Also try matching by category number
+                          matchesCategory = tagArray.includes(currentCategoryInfo.number.toString()) ||
+                                          tagArray.includes(`Category ${currentCategoryInfo.number}`) ||
+                                          tagArray.includes(`Error ${currentCategoryInfo.number}`);
+                      }
+                      
+                      if (matchesCategory) {
                           console.log('Found matching entry:', entryId, 'with tags:', tagArray);
                           
-                          // Find the corresponding CSV entry
-                          const csvEntry = this.csvData.find(entry => 
-                              (entry.task_id && entry.task_id === entryId) || 
-                              entryId.includes(entry.task_id) ||
-                              (entry.id && entry.id === entryId)
-                          );
+                          // Get the CSV error number from mapping if available
+                          let csvErrorNumber = null;
+                          let csvEntry = null;
+                          
+                          if (this.categoryMapping?.csv_data_mapping?.[entryId]) {
+                              csvErrorNumber = this.categoryMapping.csv_data_mapping[entryId].error_number;
+                              // Use the CSV data from the mapping for consistency
+                              const mappingEntry = this.categoryMapping.csv_data_mapping[entryId];
+                              csvEntry = {
+                                  task_id: mappingEntry.task_id,
+                                  text: mappingEntry.description,
+                                  'original code': mappingEntry.original_code,
+                                  refactored_code: mappingEntry.refactored_code,
+                                  original_test_result: mappingEntry.test_result
+                              };
+                          } else {
+                              // Fallback to finding in CSV data
+                              csvEntry = this.csvData.find(entry => 
+                                  (entry.task_id && entry.task_id === entryId) || 
+                                  entryId.includes(entry.task_id) ||
+                                  (entry.id && entry.id === entryId)
+                              );
+                              
+                              if (csvEntry) {
+                                  // Find the index in CSV data to get error number
+                                  csvErrorNumber = this.csvData.findIndex(entry => 
+                                      (entry.task_id && entry.task_id === entryId) || 
+                                      entryId.includes(entry.task_id) ||
+                                      (entry.id && entry.id === entryId)
+                                  ) + 1;
+                              }
+                          }
                           
                           if (csvEntry) {
                               this.categoryErrors.push({
                                   id: entryId,
                                   entry: csvEntry,
-                                  tags: tagArray
+                                  tags: tagArray,
+                                  csvErrorNumber: csvErrorNumber || 'Unknown'
                               });
                           } else {
                               console.log('No CSV entry found for:', entryId);
@@ -816,12 +951,20 @@ Return in the following JSON format:
                   
                   console.log('Category errors found:', this.categoryErrors.length);
                   
-                  // Update error count
-                  document.getElementById('errorCount').textContent = `${this.categoryErrors.length} errors found`;
+                  // Update error count with category number and CSV info
+                  const countText = currentCategoryInfo ? 
+                      `${this.categoryErrors.length} errors found (Category ${currentCategoryInfo.number})` :
+                      `${this.categoryErrors.length} errors found`;
+                  document.getElementById('errorCount').textContent = countText;
                   
                   // Display errors and checkboxes
                   if (this.categoryErrors.length === 0) {
-                      this.showNoErrors();
+                      // Check if we have any annotations at all
+                      if (Object.keys(this.annotations).length === 0) {
+                          this.showNoAnnotations();
+                      } else {
+                          this.showNoErrors();
+                      }
                       this.showNoCheckboxes();
                   } else {
                       this.showErrorList(this.categoryErrors);
@@ -848,7 +991,7 @@ Return in the following JSON format:
                       
                       html += `
                           <li class="error-item">
-                              <div class="error-id">Error #${index + 1}: ${error.entry.task_id || 'Unknown ID'}</div>
+                              <div class="error-id">CSV Error #${error.csvErrorNumber || (index + 1)}: ${error.entry.task_id || 'Unknown ID'}</div>
                               <div class="error-description">${description}</div>
                               
                               <div class="code-sections">
@@ -864,6 +1007,7 @@ Return in the following JSON format:
                               
                               <div class="error-meta">
                                   <span>📝 Task: ${error.entry.task_id || 'Unknown'}</span>
+                                  <span>🔢 CSV Position: ${error.csvErrorNumber || 'Unknown'}</span>
                                   <span>🐛 Error Type: ${this.categoryName}</span>
                                   <span>✅ Test Result: ${originalResult === 'TRUE' ? 'Pass' : 'Fail'}</span>
                               </div>
@@ -915,17 +1059,18 @@ Return in the following JSON format:
                   
                   let html = '';
                   errors.forEach((error, index) => {
-                      const errorNumber = index + 1;
+                      const displayNumber = index + 1; // For checkbox identification
+                      const csvErrorNumber = error.csvErrorNumber || displayNumber;
                       const description = error.entry.text || error.entry.task_description || error.entry.description || 'No description available';
                       // Truncate description for display
-                      const shortDescription = description.length > 40 ? description.substring(0, 40) + '...' : description;
+                      const shortDescription = description.length > 35 ? description.substring(0, 35) + '...' : description;
                       
                       html += `
                           <div class="checkbox-item">
-                              <input type="checkbox" id="error_${errorNumber}" value="${errorNumber}" 
-                                     onchange="errorCategoryViewer.onCheckboxChange(${errorNumber})">
-                              <label for="error_${errorNumber}" title="${description}">
-                                  Error #${errorNumber}: ${shortDescription}
+                              <input type="checkbox" id="error_${displayNumber}" value="${displayNumber}" 
+                                     onchange="errorCategoryViewer.onCheckboxChange(${displayNumber})">
+                              <label for="error_${displayNumber}" title="${description}">
+                                  CSV #${csvErrorNumber}: ${shortDescription}
                               </label>
                           </div>
                       `;
@@ -1205,78 +1350,111 @@ Remember: These ${totalAnnotated} errors were identified through careful analysi
                   const container = document.getElementById('errorListContent');
                   container.innerHTML = `
                       <div class="no-errors">
-                          <h3>🎉 No Errors Found!</h3>
-                          <p>There are no annotated errors in the "${this.categoryName}" category.</p>
-                          <p>This could mean either no errors of this type occurred in the dataset, or they haven't been annotated yet.</p>
+                          <h3>🎯 No "${this.categoryName}" Errors</h3>
+                          <p>There are no errors annotated with the "${this.categoryName}" category.</p>
+                          <p>This could mean:</p>
+                          <ul style="text-align: left; margin: 10px 0; padding-left: 20px;">
+                              <li>No errors of this type occurred in your CSV data</li>
+                              <li>Errors of this type haven't been annotated yet</li>
+                              <li>Errors were annotated with different category names</li>
+                          </ul>
                           <div style="margin-top: 15px;">
-                              <a href="/error-annotator/" style="color: {{ current_category.color }}; text-decoration: none; font-weight: 500;">← Return to Error Annotator</a>
+                              <a href="/error-annotator/" style="color: {{ current_category.color }}; text-decoration: none; font-weight: 500;">← Continue Annotating</a>
                           </div>
                       </div>
                   `;
               }
               
+              showNoAnnotations() {
+                  const container = document.getElementById('errorListContent');
+                  container.innerHTML = `
+                      <div class="no-errors">
+                          <h3>📝 No Annotations Yet</h3>
+                          <p>You haven't annotated any errors yet. Error category pages show only errors that have been categorized during the annotation process.</p>
+                          <p><strong>To get started:</strong></p>
+                          <ol style="text-align: left; margin: 15px 0; padding-left: 20px;">
+                              <li>Load a CSV file in the Error Annotator</li>
+                              <li>Annotate errors by assigning them to categories</li>
+                              <li>Return here to see categorized errors</li>
+                          </ol>
+                          <div style="margin-top: 20px;">
+                              <a href="/error-annotator/" style="color: {{ current_category.color }}; text-decoration: none; font-weight: 500; background: {{ current_category.color }}; color: white; padding: 10px 20px; border-radius: 6px;">← Start Annotating Errors</a>
+                          </div>
+                      </div>
+                  `;
+              }
+
               showNoData() {
                   const container = document.getElementById('errorListContent');
                   container.innerHTML = `
                       <div class="no-errors">
-                          <h3>❌ No Data Available</h3>
-                          <p>No annotation data found. Please return to the Error Annotator and load a CSV file first.</p>
+                          <h3>❌ No CSV Data Available</h3>
+                          <p>No CSV data found. Please return to the Error Annotator and load a CSV file first.</p>
                           <div style="margin-top: 15px;">
-                              <a href="/error-annotator/" style="color: {{ current_category.color }}; text-decoration: none; font-weight: 500;">← Return to Error Annotator</a>
+                              <a href="/error-annotator/" style="color: {{ current_category.color }}; text-decoration: none; font-weight: 500;">← Load CSV File</a>
                           </div>
                       </div>
                   `;
               }
 
               /**
+               * Get category information using the mapping JSON
+               */
+              getCategoryInfo(categoryNameOrNumber) {
+                  if (!this.categoryMapping) {
+                      return null;
+                  }
+                  
+                  // If it's a number, convert to category name first
+                  let categoryName = categoryNameOrNumber;
+                  if (typeof categoryNameOrNumber === 'number') {
+                      categoryName = this.categoryMapping.error_categories[categoryNameOrNumber.toString()];
+                  }
+                  
+                  // Return the category details
+                  return this.categoryMapping.category_details[categoryName] || null;
+              }
+
+              /**
+               * Get all categories from mapping
+               */
+              getAllCategories() {
+                  if (!this.categoryMapping) {
+                      return [];
+                  }
+                  
+                  return Object.entries(this.categoryMapping.error_categories).map(([number, name]) => ({
+                      number: parseInt(number),
+                      name: name,
+                      ...this.categoryMapping.category_details[name]
+                  }));
+              }
+
+              /**
                * Navigate back to analysis page with current data preserved
                */
               backToAnalysis() {
-                  console.log('🔄 backToAnalysis() method called');
+                  console.log('🔄 backToAnalysis() method called - attempting navigation');
                   
                   try {
-                      console.log('📊 Back to Analysis - checking data:', {
-                          hasCSVData: !!this.csvData,
-                          csvDataEntries: this.csvData ? this.csvData.length : 0,
-                          hasAnnotations: !!this.annotations,
-                          annotationEntries: this.annotations ? Object.keys(this.annotations).length : 0
-                      });
-                      
-                      // Store all current data in localStorage for the finished-annotating page
+                      // Store current data if available
                       if (this.csvData && this.csvData.length > 0) {
                           localStorage.setItem('csvData', JSON.stringify(this.csvData));
-                          console.log('✅ Stored CSV data:', this.csvData.length, 'entries');
-                      } else {
-                          console.warn('⚠️ No CSV data to store');
+                          console.log('✅ Stored CSV data');
                       }
                       
                       if (this.annotations && Object.keys(this.annotations).length > 0) {
                           localStorage.setItem('errorAnnotations', JSON.stringify(this.annotations));
-                          console.log('✅ Stored annotations:', Object.keys(this.annotations).length, 'entries');
-                      } else {
-                          console.warn('⚠️ No annotations to store');
+                          console.log('✅ Stored annotations');
                       }
                       
-                      // Also ensure we store any CSV file metadata we might have from the JSON file
-                      const csvFileInfo = {
-                          name: 'annotated-code.json', // Since we're loading from JSON file
-                          source: 'json_file',
-                          loadedAt: new Date().toISOString(),
-                          totalEntries: this.csvData ? this.csvData.length : 0
-                      };
-                      localStorage.setItem('currentCSVFile', JSON.stringify(csvFileInfo));
-                      console.log('✅ Stored CSV file info:', csvFileInfo);
-                      
-                      // Navigate to finished annotating page
-                      console.log('🚀 Navigating to finished-annotating page...');
-                      setTimeout(() => {
-                          window.location.href = '/finished-annotating/';
-                      }, 100); // Small delay to ensure storage completes
+                      // Simple direct navigation
+                      console.log('🚀 Navigating to /finished-annotating/');
+                      window.location.href = '/finished-annotating/';
                       
                   } catch (error) {
-                      console.error('❌ Error storing data for analysis page:', error);
-                      alert('Error saving data. Redirecting to analysis page anyway.');
-                      // Fallback to direct navigation
+                      console.error('❌ Error in backToAnalysis:', error);
+                      // Force navigation even if storage fails
                       window.location.href = '/finished-annotating/';
                   }
               }
@@ -1303,24 +1481,40 @@ Remember: These ${totalAnnotated} errors were identified through careful analysi
                   errorCategoryViewer.downloadPrompt();
               });
               
-              // Back to analysis
-              const backToAnalysisBtn = document.getElementById('backToAnalysisBtn');
-              if (backToAnalysisBtn) {
-                  backToAnalysisBtn.addEventListener('click', (e) => {
-                      console.log('Back to Analysis button clicked');
-                      e.preventDefault(); // Prevent any default behavior
-                      try {
-                          errorCategoryViewer.backToAnalysis();
-                      } catch (error) {
-                          console.error('Error in backToAnalysis:', error);
-                          // Fallback navigation
-                          window.location.href = '/finished-annotating/';
-                      }
-                  });
-                  console.log('Back to Analysis button event listener added');
-              } else {
-                  console.error('Back to Analysis button not found');
-              }
+              // Back to analysis - intercept link click to store data
+              setTimeout(() => {
+                  const backToAnalysisLink = document.getElementById('backToAnalysisBtn');
+                  if (backToAnalysisLink) {
+                      backToAnalysisLink.addEventListener('click', (e) => {
+                          console.log('🖱️ Back to Analysis link clicked - storing data before navigation');
+                          
+                          try {
+                              // Store current data before navigation
+                              if (errorCategoryViewer) {
+                                  if (errorCategoryViewer.csvData && errorCategoryViewer.csvData.length > 0) {
+                                      localStorage.setItem('csvData', JSON.stringify(errorCategoryViewer.csvData));
+                                      console.log('✅ Stored CSV data before navigation');
+                                  }
+                                  
+                                  if (errorCategoryViewer.annotations && Object.keys(errorCategoryViewer.annotations).length > 0) {
+                                      localStorage.setItem('errorAnnotations', JSON.stringify(errorCategoryViewer.annotations));
+                                      console.log('✅ Stored annotations before navigation');
+                                  }
+                              }
+                              
+                              // Allow the normal link navigation to proceed
+                              console.log('🚀 Allowing navigation to /finished-annotating/');
+                          } catch (error) {
+                              console.error('❌ Error storing data, but continuing navigation:', error);
+                              // Don't prevent navigation even if storage fails
+                          }
+                      });
+                      
+                      console.log('✅ Back to Analysis link event listener added successfully');
+                  } else {
+                      console.error('❌ Back to Analysis link not found');
+                  }
+              }, 500);
           });
           </script>
 

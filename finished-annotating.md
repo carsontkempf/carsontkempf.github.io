@@ -425,12 +425,12 @@ permalink: /finished-annotating/
         </div>
     </div>
 
-    <!-- No Data Message (shown when no annotation data is available) -->
+    <!-- No Data Message (shown when no CSV data is available) -->
     <div id="noDataMessage" class="no-data-message">
-        <h3>No Annotation Data Available</h3>
-        <p>Please return to the Error Annotator and load a CSV file with annotations before accessing this page.</p>
+        <h3>No CSV Data Available</h3>
+        <p>Please return to the Error Annotator and load a CSV file to begin analysis.</p>
         <div style="margin-top: 15px;">
-            <a href="/error-annotator/" class="nav-link-btn secondary">Return to Error Annotator</a>
+            <a href="/error-annotator/" class="nav-link-btn secondary">← Load CSV File</a>
         </div>
     </div>
 
@@ -453,11 +453,6 @@ permalink: /finished-annotating/
             <canvas id="errorChart" width="400" height="350"></canvas>
         </div>
         
-        <!-- Export Controls -->
-        <div class="export-controls">
-            <button id="generateChartsBtn" class="export-btn primary">💾 Save Analysis Charts to Drive</button>
-        </div>
-        
         <!-- Chart Status -->
         <div id="chartStatus" style="margin-top: 15px; padding: 10px; background: rgba(39,174,96,0.1); border-radius: 6px; display: none;">
             <div style="color: #27ae60; font-weight: 600;">Charts Generated Successfully!</div>
@@ -467,14 +462,17 @@ permalink: /finished-annotating/
                 • Prompt effectiveness analysis (PDF)
             </div>
         </div>
-    </div>
 
-
-    <!-- Save to Drive Export -->
-    <div class="export-section traditional-section" id="traditionalSection" style="display: none;">
-        <h4>💾 Save to Google Drive</h4>
-        <div class="export-controls">
-            <button id="exportJsonBtn" class="export-btn">💾 Save Annotations JSON to Drive</button>
+        <!-- Consolidated Save to Drive Section -->
+        <div style="margin-top: 30px; padding-top: 25px; border-top: 2px solid #ecf0f1;">
+            <div class="export-controls" style="text-align: center;">
+                <button id="saveAllToDriveBtn" class="export-btn primary" style="background: #4285f4; color: white; padding: 15px 30px; font-size: 16px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(66,133,244,0.3);">
+                    💾 Save All to Google Drive
+                </button>
+                <div style="margin-top: 10px; color: #7f8c8d; font-size: 14px;">
+                    Saves analysis charts, annotations, and error data
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -510,19 +508,16 @@ class FinishedAnnotatingManager {
         this.initializeEventListeners();
         
         // Add a small delay to ensure localStorage is fully available
-        setTimeout(() => {
-            this.loadAnnotationData();
+        setTimeout(async () => {
+            await this.loadAnnotationData();
         }, 100);
         
         this.initializeGoogleDriveStatus();
     }
 
     initializeEventListeners() {
-        // Chart functionality
-        document.getElementById('generateChartsBtn').addEventListener('click', () => this.generateChartsAndPDFs());
-        
-        // Traditional export
-        document.getElementById('exportJsonBtn').addEventListener('click', () => this.exportToJson());
+        // Consolidated Save to Drive functionality
+        document.getElementById('saveAllToDriveBtn').addEventListener('click', () => this.saveAllToGoogleDrive());
         
         // Google Drive sign-in
         document.getElementById('driveSignInBtn').addEventListener('click', () => this.signInToGoogleDrive());
@@ -531,7 +526,7 @@ class FinishedAnnotatingManager {
         document.getElementById('continueAnnotatingBtn').addEventListener('click', () => this.continueAnnotating());
     }
 
-    loadAnnotationData() {
+    async loadAnnotationData() {
         try {
             // Load data from localStorage (set by error annotator)
             const storedAnnotations = localStorage.getItem('errorAnnotations');
@@ -570,6 +565,12 @@ class FinishedAnnotatingManager {
             console.log('Final state - Annotations count:', Object.keys(this.annotations).length);
             console.log('Final state - CSV data count:', this.csvData.length);
 
+            // If no localStorage data, try to load from sample data for demo purposes
+            if (this.csvData.length === 0 && Object.keys(this.annotations).length === 0) {
+                console.log('No localStorage data found, attempting to load sample data...');
+                await this.loadSampleData();
+            }
+
             // Check if we have data to display - we need at least CSV data
             if (this.csvData.length > 0) {
                 console.log('✅ CSV data found - showing export sections');
@@ -587,20 +588,66 @@ class FinishedAnnotatingManager {
         }
     }
 
+    /**
+     * Load sample data for demo purposes when no user data is available
+     */
+    async loadSampleData() {
+        try {
+            console.log('Attempting to load sample data from annotated-code.json...');
+            const response = await fetch('/annotated-code.json');
+            if (response.ok) {
+                const jsonData = await response.json();
+                console.log('Loaded sample data:', jsonData);
+                
+                // Extract annotations and CSV data from the JSON structure
+                if (jsonData.annotations) {
+                    this.annotations = jsonData.annotations;
+                    console.log('Loaded sample annotations:', Object.keys(this.annotations).length, 'entries');
+                }
+                
+                if (jsonData.csvData) {
+                    this.csvData = jsonData.csvData;
+                    console.log('Loaded sample CSV data:', this.csvData.length, 'entries');
+                }
+                
+                // Set a sample CSV file info
+                this.currentCSVFile = {
+                    name: 'sample-data.csv',
+                    size: jsonData.csvData ? jsonData.csvData.length : 0,
+                    lastModified: new Date().toISOString()
+                };
+                
+                console.log('Sample data loaded successfully');
+            } else {
+                console.log('Sample data file not found');
+            }
+        } catch (error) {
+            console.log('Could not load sample data:', error.message);
+        }
+    }
+
     showNoDataMessage() {
-        document.getElementById('noDataMessage').style.display = 'block';
+        const noDataElement = document.getElementById('noDataMessage');
+        if (noDataElement) noDataElement.style.display = 'block';
+        
         // Hide all export sections
-        document.getElementById('statisticsSection').style.display = 'none';
-        document.getElementById('dataSection').style.display = 'none';
-        document.getElementById('traditionalSection').style.display = 'none';
+        const statsElement = document.getElementById('statisticsSection');
+        if (statsElement) statsElement.style.display = 'none';
+        
+        const dataElement = document.getElementById('dataSection');
+        if (dataElement) dataElement.style.display = 'none';
     }
 
     showExportSections() {
-        document.getElementById('noDataMessage').style.display = 'none';
+        const noDataElement = document.getElementById('noDataMessage');
+        if (noDataElement) noDataElement.style.display = 'none';
+        
         // Show all export sections
-        document.getElementById('statisticsSection').style.display = 'block';
-        document.getElementById('dataSection').style.display = 'block';
-        document.getElementById('traditionalSection').style.display = 'block';
+        const statsElement = document.getElementById('statisticsSection');
+        if (statsElement) statsElement.style.display = 'block';
+        
+        const dataElement = document.getElementById('dataSection');
+        if (dataElement) dataElement.style.display = 'block';
         
         // Create the interactive chart
         this.createErrorChart();
@@ -625,6 +672,11 @@ class FinishedAnnotatingManager {
 
         // Display main statistics
         const statsGrid = document.getElementById('statsDisplay');
+        if (!statsGrid) {
+            console.error('statsDisplay element not found');
+            return;
+        }
+        
         statsGrid.innerHTML = `
             <div class="stat-card">
                 <div class="stat-value">${totalEntries}</div>
@@ -1315,6 +1367,92 @@ Remember: These ${this.csvData.length} errors were identified through careful an
             driveBtn.innerHTML = '📁 Connect Drive';
             driveBtn.disabled = false;
             driveBtn.style.cursor = 'pointer';
+        }
+    }
+
+    /**
+     * Save all analysis data and charts to Google Drive (consolidated method)
+     */
+    async saveAllToGoogleDrive() {
+        const button = document.getElementById('saveAllToDriveBtn');
+        const originalText = button.innerHTML;
+        
+        try {
+            // Update button state
+            button.innerHTML = '⏳ Saving to Google Drive...';
+            button.disabled = true;
+            
+            // Show status
+            const statusDiv = document.getElementById('chartStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<div style="color: #f39c12; font-weight: 600;">⏳ Generating charts and saving all data to Google Drive...</div>';
+            
+            // Check Google Drive connection
+            if (!window.googleDriveService || !window.googleDriveService.isReady()) {
+                throw new Error('Please connect to Google Drive first using the button in the header.');
+            }
+            
+            // Generate and save charts/PDFs
+            this.generateAnalysisJSON();
+            const pdfData = this.createDetailedAnalysisPDFs();
+            await this.saveChartsToGoogleDrive(pdfData);
+            
+            // Generate and save JSON annotations
+            const jsonData = {
+                metadata: {
+                    total_entries: this.csvData.length,
+                    tagged_entries: Object.keys(this.annotations).length,
+                    export_date: new Date().toISOString(),
+                    tool: "Error Annotator Web",
+                    csv_file: this.currentCSVFile?.name || "unknown"
+                },
+                annotations: this.annotations,
+                csvData: this.csvData,
+                errorCategories: this.errorCategories,
+                categoryBreakdown: this.getCategoryBreakdown()
+            };
+            
+            await this.saveJSONToGoogleDrive(jsonData, 'error-annotations');
+            
+            // Show success status
+            statusDiv.innerHTML = `
+                <div style="color: #27ae60; font-weight: 600;">✅ All Data Saved to Google Drive Successfully!</div>
+                <div style="color: #2c3e50; font-size: 14px; margin-top: 5px;">
+                    • Error analysis charts and PDFs<br>
+                    • Complete annotation data (JSON)<br>
+                    • Error category breakdowns<br>
+                    • CSV data and metadata
+                </div>
+            `;
+            
+            // Update button to show success
+            button.innerHTML = '✅ Saved Successfully!';
+            button.style.background = '#27ae60';
+            
+            // Reset button after delay
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '#4285f4';
+                button.disabled = false;
+            }, 3000);
+            
+        } catch (error) {
+            console.error('Error saving to Google Drive:', error);
+            
+            // Show error status
+            const statusDiv = document.getElementById('chartStatus');
+            statusDiv.innerHTML = `
+                <div style="color: #e74c3c; font-weight: 600;">❌ Error saving to Google Drive</div>
+                <div style="color: #2c3e50; font-size: 14px; margin-top: 5px;">
+                    ${error.message}
+                </div>
+            `;
+            
+            // Reset button
+            button.innerHTML = originalText;
+            button.disabled = false;
+            
+            alert(`Failed to save to Google Drive: ${error.message}`);
         }
     }
 

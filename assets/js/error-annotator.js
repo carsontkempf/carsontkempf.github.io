@@ -701,8 +701,113 @@ class ErrorAnnotator {
             if (this.currentCSVFile) {
                 localStorage.setItem('currentCSVFile', JSON.stringify(this.currentCSVFile));
             }
+            
+            // Generate and store error category mapping based on CSV data
+            this.generateAndStoreErrorCategoryMapping();
+            
         } catch (error) {
             console.warn('Could not store data for finished annotating page:', error);
+        }
+    }
+
+    /**
+     * Generate error category mapping based on CSV data and store locally
+     */
+    generateAndStoreErrorCategoryMapping() {
+        try {
+            const errorCategoryMapping = {
+                error_categories: {
+                    "1": "Incorrect Argument Count",
+                    "2": "Argument Unpacking Error", 
+                    "3": "Incorrect Formula Application",
+                    "4": "Off By One Error",
+                    "5": "Incorrect Output Format",
+                    "6": "Edge Case Handling Failure",
+                    "7": "Syntax Error"
+                },
+                category_details: {
+                    "Incorrect Argument Count": {
+                        "number": 1,
+                        "slug": "incorrect-argument-count",
+                        "description": "Errors related to functions being called with the wrong number of arguments",
+                        "color": "#e74c3c",
+                        "color_secondary": "#c0392b"
+                    },
+                    "Argument Unpacking Error": {
+                        "number": 2,
+                        "slug": "argument-unpacking-error", 
+                        "description": "Errors related to incorrect unpacking of function arguments",
+                        "color": "#3498db",
+                        "color_secondary": "#2980b9"
+                    },
+                    "Incorrect Formula Application": {
+                        "number": 3,
+                        "slug": "incorrect-formula-application",
+                        "description": "Errors related to applying the wrong mathematical or logical formulas", 
+                        "color": "#2ecc71",
+                        "color_secondary": "#27ae60"
+                    },
+                    "Off By One Error": {
+                        "number": 4,
+                        "slug": "off-by-one-error",
+                        "description": "Errors related to indexing or counting that are off by one",
+                        "color": "#f39c12", 
+                        "color_secondary": "#e67e22"
+                    },
+                    "Incorrect Output Format": {
+                        "number": 5,
+                        "slug": "incorrect-output-format",
+                        "description": "Errors related to returning data in the wrong format",
+                        "color": "#9b59b6",
+                        "color_secondary": "#8e44ad"
+                    },
+                    "Edge Case Handling Failure": {
+                        "number": 6,
+                        "slug": "edge-case-handling-failure", 
+                        "description": "Errors related to failing to handle edge cases properly",
+                        "color": "#1abc9c",
+                        "color_secondary": "#16a085"
+                    },
+                    "Syntax Error": {
+                        "number": 7,
+                        "slug": "syntax-error",
+                        "description": "Errors related to Python syntax mistakes",
+                        "color": "#34495e",
+                        "color_secondary": "#2c3e50"
+                    }
+                },
+                csv_data_mapping: {},
+                metadata: {
+                    "total_categories": 7,
+                    "created_date": new Date().toISOString(),
+                    "description": "Error category mapping for current CSV session",
+                    "version": "1.0",
+                    "csv_file": this.currentCSVFile?.name || "unknown",
+                    "total_csv_entries": this.csvData.length
+                }
+            };
+
+            // Create mapping from CSV entries to their index (error number)
+            this.csvData.forEach((entry, index) => {
+                const errorNumber = index + 1;
+                const entryId = entry.task_id || entry.id || `entry_${errorNumber}`;
+                
+                errorCategoryMapping.csv_data_mapping[entryId] = {
+                    error_number: errorNumber,
+                    task_id: entryId,
+                    description: entry.text || entry.task_description || entry.description || "No description",
+                    original_code: entry['original code'] || entry.original_code || entry.code || "No code",
+                    refactored_code: entry.refactored_code || "No refactored code",
+                    test_result: entry.original_test_result || entry.test_result || "No result"
+                };
+            });
+
+            // Store the mapping in localStorage
+            localStorage.setItem('errorCategoryMapping', JSON.stringify(errorCategoryMapping));
+            console.log('Generated and stored error category mapping for', this.csvData.length, 'CSV entries');
+
+        } catch (error) {
+            console.error('Error generating category mapping:', error);
         }
     }
 
