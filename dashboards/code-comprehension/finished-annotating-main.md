@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Finished Annotating
-permalink: /finished-annotating/
+permalink: /code-comprehension/finished-annotating-main/
 ---
 
 <div id="auth-check-wrapper" style="display: none;">
@@ -430,7 +430,7 @@ permalink: /finished-annotating/
         <h3>No CSV Data Available</h3>
         <p>Please return to the Error Annotator and load a CSV file to begin analysis.</p>
         <div style="margin-top: 15px;">
-            <a href="/error-annotator/" class="nav-link-btn secondary">← Load CSV File</a>
+            <a href="/code-comprehension/error-annotator/" class="nav-link-btn secondary">← Load CSV File</a>
         </div>
     </div>
 
@@ -927,7 +927,7 @@ Remember: These ${this.csvData.length} errors were identified through careful an
                         const categorySlug = categorySlugMap[categoryName];
                         if (categorySlug) {
                             // Navigate to the category detail page
-                            window.location.href = `/finished-annotating/${categorySlug}/`;
+                            window.location.href = `/code-comprehension/finished-annotating/${categorySlug}/`;
                         }
                     }
                 },
@@ -1484,7 +1484,7 @@ Remember: These ${this.csvData.length} errors were identified through careful an
                 });
                 
                 // Navigate to error annotator
-                window.location.href = '/error-annotator/';
+                window.location.href = '/code-comprehension/error-annotator/';
             } else {
                 alert('No CSV data available to continue annotating. Please load a CSV file first.');
             }
@@ -1536,19 +1536,14 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- Google Identity Services (GIS) Library -->
 <script async defer src="https://accounts.google.com/gsi/client"></script>
 
-<!-- Google Drive Configuration -->
+<!-- Google Drive Configuration will be loaded securely by env-config.js -->
 <script>
-window.googleDriveConfig = {
-    client_id: '{{ site.google_drive.client_id }}',
-    api_key: '{{ site.google_drive.api_key }}',
-    discovery_docs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-    scopes: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
-};
-// Debug: Log the configuration
-console.log('Google Drive Config Debug:', window.googleDriveConfig);
-console.log('Client ID value:', '{{ site.google_drive.client_id }}');
-console.log('API Key value:', '{{ site.google_drive.api_key }}');
+// Configuration will be loaded securely by env-config.js
+console.log('Secure configuration will be loaded by env-config.js');
 </script>
+
+<!-- Environment Configuration (load first) -->
+<script src="{{ '/assets/js/env-config.js' | relative_url }}"></script>
 
 <!-- Google Drive Service -->
 <script src="{{ '/assets/js/google-drive-service.js' | relative_url }}"></script>

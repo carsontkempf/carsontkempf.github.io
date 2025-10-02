@@ -74,19 +74,31 @@ exports.handler = async (event, context) => {
     }
     // console.log('Authenticated user (from token sub):', authResult.user.payload.sub);
 
-    // Attempt to read the API key from environment variables
-    const apiKey = process.env.USER_API_KEY;
+    // Attempt to read the API keys from environment variables
+    const googleDriveClientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
+    const googleDriveApiKey = process.env.GOOGLE_DRIVE_API_KEY;
+    const auth0Domain = process.env.AUTH0_DOMAIN;
+    const auth0ClientId = process.env.AUTH0_CLIENT_ID;
+    const auth0Audience = process.env.AUTH0_AUDIENCE_SERVER;
+    const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
 
-    if (apiKey) {
+    if (googleDriveClientId && googleDriveApiKey && spotifyClientId) {
       return {
         statusCode: 200,
-        body: JSON.stringify({ apiKey: apiKey }),
+        body: JSON.stringify({ 
+          googleDriveClientId,
+          googleDriveApiKey,
+          auth0Domain,
+          auth0ClientId,
+          auth0Audience,
+          spotifyClientId
+        }),
       };
     } else {
-      console.error('CRITICAL: USER_API_KEY environment variable not found for the get-api-key function.');
+      console.error('CRITICAL: Required API credentials not found in environment variables.');
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: 'API key not configured on server' }),
+        body: JSON.stringify({ error: 'API credentials not configured on server' }),
       };
     }
   } catch (error) {

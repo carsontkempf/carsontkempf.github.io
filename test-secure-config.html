@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Configuration Test</title>
+</head>
+<body>
+    <h1>Secure Configuration Test</h1>
+    <div id="test-results"></div>
+    
+    <script src="/assets/js/env-config.js"></script>
+    <script>
+        async function testSecureConfig() {
+            const results = document.getElementById('test-results');
+            
+            try {
+                // Wait for configuration to load
+                await window.envConfig.initialize();
+                
+                results.innerHTML += '<p>✅ Environment configuration loaded successfully</p>';
+                
+                // Test Google Drive config
+                try {
+                    const driveConfig = window.envConfig.getGoogleDriveConfig();
+                    results.innerHTML += '<p>✅ Google Drive config loaded</p>';
+                    results.innerHTML += `<p>Client ID starts with: ${driveConfig.client_id.substring(0, 10)}...</p>`;
+                } catch (error) {
+                    results.innerHTML += `<p>❌ Google Drive config error: ${error.message}</p>`;
+                }
+                
+                // Test Auth0 config
+                try {
+                    const auth0Config = window.envConfig.getAuth0Config();
+                    results.innerHTML += '<p>✅ Auth0 config loaded</p>';
+                    results.innerHTML += `<p>Domain: ${auth0Config.domain}</p>`;
+                } catch (error) {
+                    results.innerHTML += `<p>❌ Auth0 config error: ${error.message}</p>`;
+                }
+                
+                // Test Spotify config
+                try {
+                    const spotifyConfig = window.envConfig.getSpotifyConfig();
+                    results.innerHTML += '<p>✅ Spotify config loaded</p>';
+                    results.innerHTML += `<p>Client ID starts with: ${spotifyConfig.client_id.substring(0, 8)}...</p>`;
+                } catch (error) {
+                    results.innerHTML += `<p>❌ Spotify config error: ${error.message}</p>`;
+                }
+                
+            } catch (error) {
+                results.innerHTML += `<p>❌ Configuration initialization failed: ${error.message}</p>`;
+            }
+        }
+        
+        // Test when page loads
+        document.addEventListener('DOMContentLoaded', testSecureConfig);
+    </script>
+</body>
+</html>

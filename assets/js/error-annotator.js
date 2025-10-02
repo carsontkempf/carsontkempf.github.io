@@ -836,7 +836,7 @@ class ErrorAnnotator {
         await this.saveFinishedAnnotationsToGoogleDrive();
         
         // Navigate to finished annotating page
-        window.location.href = '/finished-annotating/';
+        window.location.href = '/code-comprehension/finished-annotating-main/';
     }
 
     /**

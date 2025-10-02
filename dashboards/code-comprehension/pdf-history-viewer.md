@@ -1,7 +1,7 @@
 ---
 layout: page
 title: PDF History Viewer
-permalink: /pdf-history-viewer/
+permalink: /code-comprehension/pdf-history-viewer/
 ---
 
 <div id="auth-check-wrapper" style="display: none;">

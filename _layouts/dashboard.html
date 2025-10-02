@@ -71,12 +71,12 @@ permalink: /dashboard/
             // Full admin access - show both buttons
             authButtonsDiv.innerHTML = `
                 <a href="{{ '/auth0-users/' | relative_url }}" class="dashboard-btn">Auth0 User Management</a>
-                <a href="{{ '/code-comprehension-project/' | relative_url }}" class="dashboard-btn">Code Comprehension Project</a>
+                <a href="{{ '/code-comprehension/' | relative_url }}" class="dashboard-btn">Code Comprehension Project</a>
             `;
         } else if (hasCodeComprehensionRole) {
             // Limited access - only show Code Comprehension Project
             authButtonsDiv.innerHTML = `
-                <a href="{{ '/code-comprehension-project/' | relative_url }}" class="dashboard-btn">Code Comprehension Project</a>
+                <a href="{{ '/code-comprehension/' | relative_url }}" class="dashboard-btn">Code Comprehension Project</a>
             `;
         }
         // If user has no special roles, no additional buttons are shown

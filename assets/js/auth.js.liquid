@@ -61,12 +61,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isAuthenticated) {
             if (loginBtn) loginBtn.style.display = 'none';
             
-            const isOnProtectedPage = window.location.pathname.startsWith('/dashboard') || window.location.pathname.startsWith('/spotify-apple');
-
-            if (isOnProtectedPage) {
+            // Show logout button ONLY on exact /dashboard/ page
+            const isOnExactDashboard = window.location.pathname === '/dashboard/' || window.location.pathname === '/dashboard';
+            
+            if (isOnExactDashboard) {
                 if (dashboardBtn) dashboardBtn.style.display = 'none';
                 if (logoutBtn) logoutBtn.style.display = 'inline-block';
             } else {
+                // Show dashboard button on all other pages when authenticated
                 if (dashboardBtn) dashboardBtn.style.display = 'inline-block';
                 if (logoutBtn) logoutBtn.style.display = 'none';
             }

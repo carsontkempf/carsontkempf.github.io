@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Code Comprehension Project
-permalink: /code-comprehension-project/
+title: Error Annotator
+permalink: /code-comprehension/error-annotator/
 ---
 
 <div id="auth-check-wrapper" style="display: none;">
@@ -23,264 +23,74 @@ permalink: /code-comprehension-project/
     box-sizing: border-box;
 }
 
-#pdf-interface-container {
+#error-annotator-container {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     min-height: 100vh;
     padding: 20px 0;
 }
 
-.pdf-header {
+.annotator-header {
     text-align: center;
     margin-bottom: 30px;
     flex-shrink: 0;
 }
 
-.pdf-header h1 {
+.annotator-header h1 {
     font-size: 2.5rem;
     font-weight: 300;
     margin-bottom: 10px;
     color: #2c3e50;
 }
 
-.pdf-header p {
+.annotator-header p {
     font-size: 1.1rem;
     opacity: 0.8;
     margin-bottom: 20px;
     color: #7f8c8d;
 }
 
-.memory-indicator {
-    display: inline-flex;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 25px;
-    padding: 10px 20px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(102,126,234,0.3);
-    color: white;
-}
-
-.containers-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+.navigation-links {
+    text-align: center;
     margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(231,76,60,0.1);
+    border-radius: 8px;
+    border-left: 4px solid #e74c3c;
 }
 
-.pdf-container {
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-    overflow: hidden;
-    height: 250px;
-    backdrop-filter: blur(10px);
+.navigation-links h3 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
 }
 
-.container-header {
-    padding: 10px 15px;
-    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-    color: white;
-    text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.container-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 3px;
-}
-
-.container-subtitle {
-    font-size: 0.8rem;
-    opacity: 0.8;
-}
-
-.memory-grid {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 3px;
-    padding: 10px;
-    flex: 1;
-    background: #f8f9fa;
-}
-
-.memory-slot {
-    padding: 4px 2px;
-    border: 1px solid #e9ecef;
-    border-radius: 4px;
-    background: white;
-    cursor: pointer;
-    text-align: center;
-    font-size: 9px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 24px;
-}
-
-.memory-slot:hover {
-    background: #e3f2fd;
-    border-color: #2196f3;
-    transform: translateY(-1px);
-}
-
-.memory-slot.active {
+.nav-link-btn {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 10px 20px;
     background: #e74c3c;
-    border-color: #e74c3c;
     color: white;
-    box-shadow: 0 2px 8px rgba(231,76,60,0.4);
-}
-
-.memory-slot.milestone {
-    background: #f39c12;
-    border-color: #f39c12;
-    color: white;
-    box-shadow: 0 2px 8px rgba(243,156,18,0.4);
-}
-
-.memory-slot.empty {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-.container-controls {
-    padding: 8px 12px;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.nav-button {
-    padding: 6px 12px;
-    border: 1px solid #007bff;
-    border-radius: 4px;
-    background: #007bff;
-    color: white;
-    cursor: pointer;
-    font-size: 12px;
+    text-decoration: none;
+    border-radius: 6px;
     font-weight: 500;
     transition: all 0.3s ease;
 }
 
-.nav-button:hover:not(:disabled) {
-    background: #0056b3;
-    border-color: #0056b3;
-}
-
-.nav-button:disabled {
-    background: #6c757d;
-    border-color: #6c757d;
-    cursor: not-allowed;
-}
-
-.memory-info {
-    font-size: 11px;
-    color: #6c757d;
-    text-align: center;
-    max-width: 120px;
-    line-height: 1.2;
-}
-
-.pdf-viewer-container {
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-    overflow: hidden;
-    height: 70vh;
-    backdrop-filter: blur(10px);
-}
-
-.viewer-header {
-    padding: 15px 20px;
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+.nav-link-btn:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+    text-decoration: none;
     color: white;
-    text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-.viewer-title {
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin-bottom: 5px;
+.nav-link-btn.secondary {
+    background: #3498db;
 }
 
-.viewer-subtitle {
-    font-size: 1rem;
-    opacity: 0.9;
+.nav-link-btn.secondary:hover {
+    background: #2980b9;
 }
 
-.pdf-viewer {
-    flex: 1;
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: white;
-}
-
-.loading {
-    text-align: center;
-    padding: 50px;
-    color: #7f8c8d;
-    font-size: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-}
-
-.performance-history {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.error-analysis {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.error-comparison {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.error-breakdown {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-@media (max-width: 1200px) {
-    .containers-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-    
-    .memory-grid {
-        grid-template-columns: repeat(10, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .memory-grid {
-        grid-template-columns: repeat(8, 1fr);
-        gap: 2px;
-        padding: 10px;
-    }
-    
-    .memory-slot {
-        font-size: 8px;
-        padding: 4px 2px;
-        min-height: 24px;
-    }
-}
-
-/* Error Annotator Styles */
-#error-annotator-container {
-    margin-top: 20px;
-}
 
 /* Upload section */
 .upload-section {
@@ -303,8 +113,8 @@ permalink: /code-comprehension-project/
 }
 
 .upload-box:hover {
-    border-color: #3498db;
-    box-shadow: 0 6px 20px rgba(52,152,219,0.2);
+    border-color: #e74c3c;
+    box-shadow: 0 6px 20px rgba(231,76,60,0.2);
 }
 
 .upload-box h3 {
@@ -331,6 +141,7 @@ permalink: /code-comprehension-project/
     font-size: 14px;
 }
 
+
 /* Navigation */
 .navigation {
     display: flex;
@@ -350,7 +161,7 @@ permalink: /code-comprehension-project/
 }
 
 .nav-btn {
-    background: #3498db;
+    background: #e74c3c;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -362,7 +173,7 @@ permalink: /code-comprehension-project/
 }
 
 .nav-btn:hover:not(:disabled) {
-    background: #2980b9;
+    background: #c0392b;
     transform: translateY(-1px);
 }
 
@@ -387,52 +198,114 @@ permalink: /code-comprehension-project/
 .annotation-interface {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+/* Code sections at top - full width */
+.code-sections-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+/* Main content grid - below code sections */
+.main-content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+/* Error categories - left 2/3 */
+.error-categories-section {
+    background: white;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     margin-bottom: 20px;
 }
 
-/* Error categories at top */
-.top-error-categories {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.top-error-categories h4 {
-    margin: 0 0 15px 0;
+.error-categories-section h4 {
+    margin: 0 0 20px 0;
     color: #2c3e50;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
 }
 
 .error-categories-top {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
 }
 
 .category-section-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: flex-start;
 }
 
-/* Main content grid */
-.main-content-grid {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 20px;
-    align-items: start;
+.category-section-header {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 12px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-/* Code panel */
+.category-tag {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    box-sizing: border-box;
+}
+
+.category-tag:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+.category-tag.shortcut {
+    position: relative;
+    padding-left: 35px;
+}
+
+.shortcut-key {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+    padding: 3px 5px;
+    font-size: 11px;
+    font-weight: bold;
+    min-width: 12px;
+    text-align: center;
+    margin-right: 8px;
+}
+
+/* Code panel - full width, stacked vertically */
 .code-panel {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    flex: 1;
+    gap: 25px;
+    width: 100%;
 }
 
 .code-section {
@@ -440,7 +313,8 @@ permalink: /code-comprehension-project/
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    flex: 1;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .code-section h4 {
@@ -466,12 +340,22 @@ permalink: /code-comprehension-project/
     color: #2c3e50;
 }
 
-/* Right sidebar */
+.code-content.code-success {
+    background: #d4edda;
+    border-left: 4px solid #27ae60;
+}
+
+.code-content.code-error {
+    background: #f8d7da;
+    border-left: 4px solid #e74c3c;
+}
+
+/* Right sidebar - right 1/3 */
 .right-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    width: 350px;
+    gap: 25px;
+    width: 100%;
     flex-shrink: 0;
 }
 
@@ -479,15 +363,16 @@ permalink: /code-comprehension-project/
 .details-panel {
     background: white;
     border-radius: 8px;
-    padding: 20px;
+    padding: 25px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     height: fit-content;
+    margin-bottom: 20px;
 }
 
 .details-panel h3 {
     margin-bottom: 15px;
     color: #2c3e50;
-    border-bottom: 2px solid #3498db;
+    border-bottom: 2px solid #e74c3c;
     padding-bottom: 8px;
 }
 
@@ -515,13 +400,19 @@ permalink: /code-comprehension-project/
     margin-bottom: 5px;
 }
 
+.test-error {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
 /* Tagging panel */
 .tagging-panel {
     background: white;
     border-radius: 8px;
-    padding: 20px;
+    padding: 25px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     height: fit-content;
+    margin-bottom: 20px;
 }
 
 .tag-input-section,
@@ -555,7 +446,7 @@ permalink: /code-comprehension-project/
 
 .tag-input:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: #e74c3c;
 }
 
 .add-tag-btn {
@@ -586,7 +477,7 @@ permalink: /code-comprehension-project/
     justify-content: space-between;
     align-items: center;
     background: #e8f4fd;
-    border: 1px solid #3498db;
+    border: 1px solid #e74c3c;
     border-radius: 4px;
     padding: 8px 12px;
     margin-bottom: 5px;
@@ -622,7 +513,7 @@ permalink: /code-comprehension-project/
 }
 
 .action-btn {
-    background: #3498db;
+    background: #e74c3c;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -634,7 +525,7 @@ permalink: /code-comprehension-project/
 }
 
 .action-btn:hover {
-    background: #2980b9;
+    background: #c0392b;
     transform: translateY(-1px);
 }
 
@@ -710,11 +601,11 @@ permalink: /code-comprehension-project/
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid #e74c3c;
 }
 
 .import-section { border-left-color: #17a2b8; }
-.generation-section { border-left-color: #3498db; }
+.generation-section { border-left-color: #e74c3c; }
 .data-section { border-left-color: #27ae60; }
 .association-section { border-left-color: #f39c12; }
 .traditional-section { border-left-color: #6c757d; }
@@ -750,14 +641,14 @@ permalink: /code-comprehension-project/
 }
 
 .export-btn.primary {
-    background: #3498db;
-    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    background: #e74c3c;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
 }
 
 .export-btn.primary:hover {
-    background: #2980b9;
+    background: #c0392b;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
 }
 
 .export-btn.secondary {
@@ -887,7 +778,7 @@ permalink: /code-comprehension-project/
     border-radius: 6px;
     padding: 15px;
     margin-top: 15px;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid #e74c3c;
 }
 
 .output-section h5 {
@@ -910,11 +801,94 @@ permalink: /code-comprehension-project/
     overflow-y: auto;
 }
 
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Association styles */
+.association-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-left: 4px solid #f39c12;
+}
+
+.association-file {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.association-date {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.association-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn-small {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-btn-small.view {
+    background: #3498db;
+    color: white;
+}
+
+.action-btn-small.view:hover {
+    background: #2980b9;
+}
+
+.action-btn-small.remove {
+    background: #e74c3c;
+    color: white;
+}
+
+.action-btn-small.remove:hover {
+    background: #c0392b;
+}
+
 /* Responsive design for error annotator */
 @media (max-width: 1200px) {
     .main-content-grid {
         grid-template-columns: 1fr;
-        gap: 15px;
+        gap: 25px;
     }
     
     .right-sidebar {
@@ -922,16 +896,12 @@ permalink: /code-comprehension-project/
         order: -1;
     }
     
-    .code-panel {
-        flex-direction: row;
+    .annotation-interface {
+        gap: 25px;
     }
 }
 
 @media (max-width: 768px) {
-    .code-panel {
-        flex-direction: column;
-    }
-    
     .right-sidebar {
         width: 100%;
     }
@@ -953,81 +923,178 @@ permalink: /code-comprehension-project/
     .upload-box {
         padding: 30px 20px;
     }
+    
+    .category-section-container {
+        justify-content: center;
+    }
+    
+    .annotation-interface {
+        gap: 20px;
+    }
+    
+    .code-sections-container {
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .main-content-grid {
+        gap: 20px;
+    }
+    
+    .code-panel {
+        gap: 20px;
+    }
 }
 </style>
 
-<div id="pdf-interface-container">
-    <div class="pdf-header">
-        <h1>Code Comprehension Project</h1>
-        <p>Multi-Container PDF Memory System & Error Analysis Tools</p>
+<div id="error-annotator-container">
+    <div class="annotator-header">
+        <h1>🏷️ Error Annotation Tool</h1>
+        <p>Upload CSV files containing error data and annotate them with categories for analysis and model improvement.</p>
         
+    </div>
 
-        <!-- Performance History PDF Display -->
-        <div style="margin-top: 30px; width: 100%; max-width: 1200px; margin-left: auto; margin-right: auto;">
-            <div style="background: white; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); overflow: hidden;">
-                <div style="padding: 20px; background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; text-align: center;">
-                    <h3 style="margin: 0; font-size: 1.4rem; font-weight: 600;">📈 Performance History Report</h3>
-                    <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 1rem;">Latest milestone report from the PDF memory system</p>
+    <!-- File upload section -->
+    <div id="uploadSection" class="upload-section">
+        <div class="upload-box">
+            <h3>Upload CSV File</h3>
+            <input type="file" id="csvFileInput" accept=".csv" class="file-input">
+            <div class="upload-instructions">
+                <p>Select your CSV file containing error data to begin annotation.</p>
+                <p>Expected format: task_id, original code, refactored_code, test results...</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Navigation bar -->
+    <nav class="navigation" style="display: none;" id="annotationNavigation">
+        <div class="nav-controls">
+            <button id="prevBtn" class="nav-btn" title="Previous entry (← key)">← Previous</button>
+            <span id="entryInfo" class="entry-info">Entry 1 of 0</span>
+            <button id="nextBtn" class="nav-btn" title="Next entry (→ key)">Next →</button>
+            <div style="font-size: 11px; color: #666; margin-left: 20px;">
+                Use ← → arrow keys to navigate
+            </div>
+        </div>
+        <div class="nav-status">
+            <span id="loadStatus" class="load-status">Load CSV to start</span>
+        </div>
+    </nav>
+
+    <!-- Main annotation interface (hidden initially) -->
+    <div id="annotationInterface" class="annotation-interface" style="display: none;">
+        <!-- Code sections at top - full width -->
+        <div class="code-sections-container">
+            <div class="code-panel">
+                <div class="code-section">
+                    <h4>Original Code</h4>
+                    <pre id="originalCode" class="code-content">Loading...</pre>
                 </div>
-                <div style="position: relative; width: 100%; height: 70vh;">
-                    <embed 
-                        src="/assets/pdf-memory/milestones/milestone_0010.pdf" 
-                        type="application/pdf" 
-                        width="100%" 
-                        height="100%" 
-                        style="border: none; display: block;"
-                    />
+                <div class="code-section">
+                    <h4>Refactored Code</h4>
+                    <pre id="refactoredCode" class="code-content">Loading...</pre>
                 </div>
             </div>
         </div>
 
-        <!-- Error Annotator Tool -->
-        <div style="margin-top: 30px; display: flex; justify-content: center;">
-            <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(231,76,60,0.3); max-width: 500px;">
-                <h3 style="color: white; margin: 0 0 15px 0; font-size: 1.3rem;">🏷️ Error Annotator</h3>
-                <p style="color: rgba(255,255,255,0.9); margin: 0 0 20px 0; font-size: 0.95rem;">
-                    Upload CSV files containing error data and annotate them with categories for analysis and model improvement.
-                </p>
-                <a href="/error-annotator/" style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
-                    Open Annotator →
-                </a>
+        <div class="main-content-grid">
+            <!-- Left side - Error Categories (2/3 width) -->
+            <div class="error-categories-section">
+                <h4>Error Categories</h4>
+                <div class="instructions" style="font-size: 13px; color: #666; margin-bottom: 15px; font-style: italic;">
+                    Use keyboard numbers 1-7 to quickly assign categories, or click the buttons below.
+                </div>
+                <div id="errorCategories" class="error-categories-top"></div>
             </div>
-        </div>
 
-        <!-- Project Overview -->
-        <div style="margin-top: 30px; padding: 20px; background: rgba(52,152,219,0.05); border-radius: 8px; border-left: 4px solid #3498db;">
-            <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 1.2rem;">📋 Project Overview</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                <div>
-                    <h4 style="color: #27ae60; margin: 0 0 8px 0;">PDF Memory System</h4>
-                    <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">4 containers × 10 slots = 40 total PDF positions</p>
-                    <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.85rem;">Performance history, error analysis, comparisons, and breakdowns</p>
+            <!-- Right sidebar - entry details and tagging (1/3 width) -->
+            <div class="right-sidebar">
+                <!-- Entry details panel -->
+                <div class="details-panel">
+                    <h3>Entry Details</h3>
+                    <div id="entryDetails" class="details-content">
+                        <div class="detail-item">
+                            <span class="detail-label">Task ID:</span>
+                            <span id="taskId">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Task Description:</span>
+                            <span id="taskDescription">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Primary Method:</span>
+                            <span id="primaryMethod">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Test Results:</span>
+                            <div id="testResults" class="test-results">
+                                <div id="originalResult">Original: -</div>
+                                <div id="refactoredResult">Refactored: -</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h4 style="color: #e74c3c; margin: 0 0 8px 0;">Error Analysis Tools</h4>
-                    <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">CSV upload, annotation, and export capabilities</p>
-                    <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.85rem;">Advanced prompt generation and data analysis</p>
-                </div>
-                <div>
-                    <h4 style="color: #3498db; margin: 0 0 8px 0;">Role-Based Access</h4>
-                    <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">Secure access control with Auth0 integration</p>
-                    <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.85rem;">code-comprehension role required</p>
+
+                <!-- Tagging panel -->
+                <div class="tagging-panel">
+                    <div class="tag-input-section">
+                        <h4>Add Custom Tag</h4>
+                        <div class="tag-input-controls">
+                            <input type="text" id="customTagInput" placeholder="Enter custom tag..." class="tag-input">
+                            <button id="addCustomTagBtn" class="add-tag-btn">Add Tag</button>
+                        </div>
+                    </div>
+
+                    <div class="current-tags-section">
+                        <h4>Current Entry Tags</h4>
+                        <div id="currentTags" class="current-tags">
+                            No tags assigned
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Action buttons -->
+    <div class="action-bar" style="display: none;" id="annotationActions">
+        <button id="finishedBtn" class="action-btn">Finished Annotating</button>
+        <button id="clearBtn" class="action-btn danger">Clear All Tags</button>
     </div>
 </div>
 
+
+
+<!-- Google Drive API -->
+<!-- Google API Platform Script -->
+<script src="https://apis.google.com/js/api.js"></script>
+
+<!-- Google Identity Services (GIS) Library -->
+<script src="https://accounts.google.com/gsi/client"></script>
+
+<!-- Google Drive Configuration will be loaded securely by env-config.js -->
+<script>
+// Configuration will be loaded securely by env-config.js
+console.log('Secure configuration will be loaded by env-config.js');
+</script>
+
+<!-- Environment Configuration (load first) -->
+<script src="{{ '/assets/js/env-config.js' | relative_url }}"></script>
+
+<!-- Google Drive Service -->
+<script src="{{ '/assets/js/google-drive-service.js' | relative_url }}"></script>
+
+<!-- Error Annotator -->
+<script src="{{ '/assets/js/error-annotator.js' | relative_url }}"></script>
 
 </div>
 
 <script>
-console.log('Code Comprehension Project - Script loaded');
+console.log('Error Annotator - Script loaded');
 
 document.addEventListener('authReady', () => {
-    console.log('Code Comprehension Project - authReady event fired');
+    console.log('Error Annotator - authReady event fired');
     if (window.authService.isAuthenticated) {
         const user = window.authService.user;
         
@@ -1047,7 +1114,7 @@ document.addEventListener('authReady', () => {
         const allRoles = [...customRoles, ...auth0Roles, ...appMetadataRoles, ...userMetadataRoles, ...rolesArray, ...authorizationRoles, ...orgRoles, ...realmRoles];
         
         // Debug: Log user info and roles for troubleshooting
-        console.log('Code Comprehension Project - User Debug Info:', {
+        console.log('Error Annotator - User Debug Info:', {
             user: user,
             userKeys: Object.keys(user),
             customRoles: customRoles,
@@ -1083,20 +1150,21 @@ document.addEventListener('authReady', () => {
             document.getElementById('auth-check-wrapper').style.display = 'block';
         }
     } else {
-        console.log('Code Comprehension Project - User not authenticated');
+        console.log('Error Annotator - User not authenticated');
         document.getElementById('auth-check-wrapper').style.display = 'block';
     }
 });
 
-console.log('Code Comprehension Project - Setting up timeout fallback');
+console.log('Error Annotator - Setting up timeout fallback');
 
 // If auth service isn't ready after 5 seconds, show access denied
 setTimeout(() => {
-    console.log('Code Comprehension Project - Timeout check - authService available:', !!window.authService);
-    console.log('Code Comprehension Project - Timeout check - isAuthenticated:', window.authService?.isAuthenticated);
+    console.log('Error Annotator - Timeout check - authService available:', !!window.authService);
+    console.log('Error Annotator - Timeout check - isAuthenticated:', window.authService?.isAuthenticated);
     if (!window.authService || !window.authService.isAuthenticated) {
-        console.log('Code Comprehension Project - Timeout triggered, showing access denied');
+        console.log('Error Annotator - Timeout triggered, showing access denied');
         document.getElementById('auth-check-wrapper').style.display = 'block';
     }
 }, 5000);
+
 </script>

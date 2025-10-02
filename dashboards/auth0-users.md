@@ -106,7 +106,7 @@ permalink: /auth0-users/
             <button class="auth0-btn resource-btn" onclick="viewAuthorizedUsers()">View Authorized Users</button>
             <button class="auth0-btn resource-btn" onclick="addUserAccess()">Add User Access</button>
             <button class="auth0-btn resource-btn" onclick="revokeUserAccess()">Revoke Access</button>
-            <a href="{{ '/code-comprehension-project/' | relative_url }}" class="auth0-btn resource-btn">View Document</a>
+            <a href="{{ '/code-comprehension/' | relative_url }}" class="auth0-btn resource-btn">View Document</a>
           </div>
           <div id="authorized-users-list" class="authorized-users" style="display: none;">
             <!-- Dynamic content will be loaded here -->

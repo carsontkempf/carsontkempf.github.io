@@ -635,7 +635,7 @@ layout: default
                   <h1>{{ current_category.name }}</h1>
                   <p>{{ current_category.description }}</p>
                   <div style="margin-top: 25px;">
-                      <a href="/finished-annotating/" id="backToAnalysisBtn" class="back-link" 
+                      <a href="/code-comprehension/finished-annotating-main/" id="backToAnalysisBtn" class="back-link" 
                          style="background: {{ current_category.color }}; color: white; border: none; cursor: pointer; padding: 12px 24px; border-radius: 8px; font-weight: 500; transition: all 0.3s ease; text-decoration: none; display: inline-block;">
                           ← Back to Analysis
                       </a>
@@ -1449,13 +1449,13 @@ Remember: These ${totalAnnotated} errors were identified through careful analysi
                       }
                       
                       // Simple direct navigation
-                      console.log('🚀 Navigating to /finished-annotating/');
-                      window.location.href = '/finished-annotating/';
+                      console.log('🚀 Navigating to /code-comprehension/finished-annotating-main/');
+                      window.location.href = '/code-comprehension/finished-annotating-main/';
                       
                   } catch (error) {
                       console.error('❌ Error in backToAnalysis:', error);
                       // Force navigation even if storage fails
-                      window.location.href = '/finished-annotating/';
+                      window.location.href = '/code-comprehension/finished-annotating-main/';
                   }
               }
 
