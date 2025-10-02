@@ -414,20 +414,14 @@ permalink: /finished-annotating/
         <h1>🎉 Finished Annotating</h1>
         <p>Export your annotations and generate enhanced prompts based on your analysis</p>
         
-        <!-- Google Drive Status -->
-        <div id="driveStatus" class="drive-status" style="margin-top: 15px;">
-            <div id="driveConnected" style="display: none; color: #27ae60; font-weight: 600;">
-                ✅ Connected to Google Drive
-            </div>
-            <div id="driveDisconnected" style="display: none; color: #e74c3c; font-weight: 600;">
-                ❌ Not connected to Google Drive
-                <button id="driveSignInBtn" style="margin-left: 10px; padding: 8px 16px; background: #4285f4; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    Sign in to Google Drive
-                </button>
-            </div>
-            <div id="driveLoading" style="color: #f39c12; font-weight: 600;">
-                ⏳ Checking Google Drive connection...
-            </div>
+        <!-- Navigation Buttons -->
+        <div style="margin-top: 20px; display: flex; gap: 15px; align-items: center; justify-content: center;">
+            <button id="continueAnnotatingBtn" class="nav-link-btn" style="background: #3498db; color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                ← Continue Annotating
+            </button>
+            <button id="driveSignInBtn" class="nav-link-btn" style="background: #e74c3c; color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background-color 0.3s ease;">
+                📁 Google Drive
+            </button>
         </div>
     </div>
 
@@ -447,25 +441,6 @@ permalink: /finished-annotating/
         <div id="detailedStats" style="margin-top: 20px;"></div>
     </div>
 
-    <!-- Import Section -->
-    <div class="export-section import-section" id="importSection" style="display: none;">
-        <h4>📥 Import Existing Prompt</h4>
-        <div class="import-controls">
-            <div class="import-method">
-                <label for="promptFileInput">Import from File:</label>
-                <input type="file" id="promptFileInput" accept=".txt,.md" class="file-input-small">
-            </div>
-            <div class="import-method">
-                <label for="promptTextInput">Or paste prompt text:</label>
-                <textarea id="promptTextInput" placeholder="Paste your existing prompt here..." rows="4" class="prompt-textarea"></textarea>
-                <button id="importPromptBtn" class="import-btn">📥 Import Prompt</button>
-            </div>
-        </div>
-        <div id="importedPromptInfo" class="imported-info" style="display: none;">
-            <div class="info-badge">✅ Prompt imported successfully</div>
-            <div class="prompt-preview" id="promptPreviewText"></div>
-        </div>
-    </div>
 
 
     <!-- Interactive Error Analysis Chart -->
@@ -475,7 +450,7 @@ permalink: /finished-annotating/
         
         <!-- Chart Container -->
         <div style="background: white; border-radius: 8px; padding: 20px; margin: 15px 0;">
-            <canvas id="errorChart" width="400" height="200"></canvas>
+            <canvas id="errorChart" width="400" height="350"></canvas>
         </div>
         
         <!-- Export Controls -->
@@ -500,7 +475,6 @@ permalink: /finished-annotating/
         <h4>💾 Save to Google Drive</h4>
         <div class="export-controls">
             <button id="exportJsonBtn" class="export-btn">💾 Save Annotations JSON to Drive</button>
-            <button id="exportCsvBtn" class="export-btn">💾 Save CSV Report to Drive</button>
         </div>
     </div>
 </div>
@@ -518,7 +492,6 @@ class FinishedAnnotatingManager {
         this.csvData = [];
         this.currentCSVFile = null;
         this.csvAssociations = [];
-        this.importedPrompt = '';
         this.generatedPrompt = '';
         this.generatedJSON = '';
         this.errorChart = null;
@@ -535,25 +508,27 @@ class FinishedAnnotatingManager {
         ];
         
         this.initializeEventListeners();
-        this.loadAnnotationData();
+        
+        // Add a small delay to ensure localStorage is fully available
+        setTimeout(() => {
+            this.loadAnnotationData();
+        }, 100);
+        
         this.initializeGoogleDriveStatus();
     }
 
     initializeEventListeners() {
-        // Import functionality
-        document.getElementById('importPromptBtn').addEventListener('click', () => this.importPromptFromText());
-        document.getElementById('promptFileInput').addEventListener('change', (e) => this.importPromptFromFile(e));
-        
-        
         // Chart functionality
         document.getElementById('generateChartsBtn').addEventListener('click', () => this.generateChartsAndPDFs());
         
         // Traditional export
         document.getElementById('exportJsonBtn').addEventListener('click', () => this.exportToJson());
-        document.getElementById('exportCsvBtn').addEventListener('click', () => this.exportToCsv());
         
         // Google Drive sign-in
         document.getElementById('driveSignInBtn').addEventListener('click', () => this.signInToGoogleDrive());
+        
+        // Continue annotating
+        document.getElementById('continueAnnotatingBtn').addEventListener('click', () => this.continueAnnotating());
     }
 
     loadAnnotationData() {
@@ -563,28 +538,47 @@ class FinishedAnnotatingManager {
             const storedCsvData = localStorage.getItem('csvData');
             const storedCsvFile = localStorage.getItem('currentCSVFile');
             const storedAssociations = localStorage.getItem('csvAssociations');
+            
+            // Debug logging
+            console.log('=== Loading Annotation Data ===');
+            console.log('Stored annotations:', storedAnnotations ? 'Found' : 'Not found');
+            console.log('Stored CSV data:', storedCsvData ? 'Found' : 'Not found');
+            console.log('Stored CSV file info:', storedCsvFile ? 'Found' : 'Not found');
+            console.log('Stored associations:', storedAssociations ? 'Found' : 'Not found');
 
             if (storedAnnotations) {
                 this.annotations = JSON.parse(storedAnnotations);
+                console.log('Loaded annotations:', Object.keys(this.annotations).length, 'entries');
             }
             
             if (storedCsvData) {
                 this.csvData = JSON.parse(storedCsvData);
+                console.log('Loaded CSV data:', this.csvData.length, 'entries');
             }
             
             if (storedCsvFile) {
                 this.currentCSVFile = JSON.parse(storedCsvFile);
+                console.log('Loaded CSV file info:', this.currentCSVFile);
             }
             
             if (storedAssociations) {
                 this.csvAssociations = JSON.parse(storedAssociations);
+                console.log('Loaded associations:', this.csvAssociations.length, 'entries');
             }
+            
+            // Debug current state
+            console.log('Final state - Annotations count:', Object.keys(this.annotations).length);
+            console.log('Final state - CSV data count:', this.csvData.length);
 
-            // Check if we have data to display
-            if (Object.keys(this.annotations).length > 0 && this.csvData.length > 0) {
+            // Check if we have data to display - we need at least CSV data
+            if (this.csvData.length > 0) {
+                console.log('✅ CSV data found - showing export sections');
                 this.showExportSections();
                 this.displayStatistics();
             } else {
+                console.log('❌ No CSV data found - showing no data message');
+                console.log('Annotations count:', Object.keys(this.annotations).length);
+                console.log('CSV data empty:', this.csvData.length === 0);
                 this.showNoDataMessage();
             }
         } catch (error) {
@@ -597,9 +591,7 @@ class FinishedAnnotatingManager {
         document.getElementById('noDataMessage').style.display = 'block';
         // Hide all export sections
         document.getElementById('statisticsSection').style.display = 'none';
-        document.getElementById('importSection').style.display = 'none';
         document.getElementById('dataSection').style.display = 'none';
-        document.getElementById('associationSection').style.display = 'none';
         document.getElementById('traditionalSection').style.display = 'none';
     }
 
@@ -607,7 +599,6 @@ class FinishedAnnotatingManager {
         document.getElementById('noDataMessage').style.display = 'none';
         // Show all export sections
         document.getElementById('statisticsSection').style.display = 'block';
-        document.getElementById('importSection').style.display = 'block';
         document.getElementById('dataSection').style.display = 'block';
         document.getElementById('traditionalSection').style.display = 'block';
         
@@ -659,47 +650,6 @@ class FinishedAnnotatingManager {
 
     }
 
-    // Import functionality
-    importPromptFromText() {
-        const textarea = document.getElementById('promptTextInput');
-        const text = textarea.value.trim();
-        
-        if (!text) {
-            alert('Please paste some prompt text first!');
-            return;
-        }
-        
-        this.importedPrompt = text;
-        this.showImportedPrompt(this.importedPrompt);
-        textarea.value = '';
-        this.updateAssociationButtonState();
-    }
-
-    importPromptFromFile(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            this.importedPrompt = e.target.result;
-            this.showImportedPrompt(this.importedPrompt);
-            this.updateAssociationButtonState();
-        };
-        reader.readAsText(file);
-    }
-
-    showImportedPrompt(prompt) {
-        const preview = prompt.length > 200 ? prompt.substring(0, 200) + '...' : prompt;
-        document.getElementById('promptPreviewText').textContent = preview;
-        document.getElementById('importedPromptInfo').style.display = 'block';
-    }
-
-    updateAssociationButtonState() {
-        // Placeholder method for association button state management
-        // This can be implemented if association functionality is needed
-        console.debug('Association button state update called');
-    }
-
     // Generate enhanced prompt functionality
     generateEnhancedPrompt() {
         if (!this.csvData || this.csvData.length === 0) {
@@ -708,7 +658,7 @@ class FinishedAnnotatingManager {
         }
 
         const analysis = this.analyzeAnnotationPatterns();
-        const basePrompt = this.importedPrompt || `[Your existing prompt text should be placed here at the beginning]`;
+        const basePrompt = `[Your existing prompt text should be placed here at the beginning]`;
         
         const enhancedSection = `
 
@@ -876,6 +826,7 @@ Remember: These ${this.csvData.length} errors were identified through careful an
                 }]
             },
             options: {
+                indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
@@ -892,16 +843,16 @@ Remember: These ${this.csvData.length} errors were identified through careful an
                     }
                 },
                 scales: {
-                    y: {
+                    x: {
                         beginAtZero: true,
                         ticks: {
                             stepSize: 1
                         }
                     },
-                    x: {
+                    y: {
                         ticks: {
-                            maxRotation: 45,
-                            minRotation: 45
+                            maxRotation: 0,
+                            minRotation: 0
                         }
                     }
                 },
@@ -909,10 +860,23 @@ Remember: These ${this.csvData.length} errors were identified through careful an
                     if (elements.length > 0) {
                         const index = elements[0].index;
                         const categoryName = this.errorCategories[index];
-                        const categoryNumber = index + 1;
                         
-                        // Navigate to the category detail page
-                        window.location.href = `/finished-annotating/error-category/${categoryNumber}/`;
+                        // Map category names to slugs
+                        const categorySlugMap = {
+                            'Incorrect Argument Count': 'incorrect-argument-count',
+                            'Argument Unpacking Error': 'argument-unpacking-error',
+                            'Incorrect Formula Application': 'incorrect-formula-application',
+                            'Off By One Error': 'off-by-one-error',
+                            'Incorrect Output Format': 'incorrect-output-format',
+                            'Edge Case Handling Failure': 'edge-case-handling-failure',
+                            'Syntax Error': 'syntax-error'
+                        };
+                        
+                        const categorySlug = categorySlugMap[categoryName];
+                        if (categorySlug) {
+                            // Navigate to the category detail page
+                            window.location.href = `/finished-annotating/${categorySlug}/`;
+                        }
                     }
                 },
                 onHover: (event, elements) => {
@@ -1183,38 +1147,6 @@ Remember: These ${this.csvData.length} errors were identified through careful an
         }
     }
 
-    async exportToCsv() {
-        let csvContent = 'task_id,tags,tag_count,original_test_result,refactored_test_result,comparison\n';
-        
-        this.csvData.forEach((entry, index) => {
-            const entryId = entry.task_id || `entry_${index}`;
-            const tags = this.annotations[entryId] || [];
-            const tagString = tags.join('; ');
-            const tagCount = tags.length;
-            
-            const escapeCsv = (field) => {
-                if (!field) return '';
-                const str = String(field);
-                if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-                    return `"${str.replace(/"/g, '""')}"`;
-                }
-                return str;
-            };
-            
-            csvContent += `${escapeCsv(entryId)},${escapeCsv(tagString)},${tagCount},` +
-                         `${escapeCsv(entry.original_test_result)},${escapeCsv(entry.refactored_test_result)},` +
-                         `${escapeCsv(entry.comparison)}\n`;
-        });
-        
-        try {
-            const fileName = `error_annotation_report_${new Date().toISOString().split('T')[0]}`;
-            await this.saveCSVToGoogleDrive(csvContent, fileName);
-            alert('CSV report saved to Google Drive successfully!');
-        } catch (error) {
-            console.error('Failed to save CSV to Google Drive:', error);
-            alert('Failed to save CSV to Google Drive: ' + error.message);
-        }
-    }
 
     getAllUniqueTags() {
         const allTags = new Set();
@@ -1341,45 +1273,6 @@ Remember: These ${this.csvData.length} errors were identified through careful an
         }
     }
 
-    /**
-     * Save CSV data to Google Drive
-     */
-    async saveCSVToGoogleDrive(csvData, baseFileName) {
-        if (!window.googleDriveService) {
-            throw new Error('Google Drive service is not loaded. Please refresh the page and try again.');
-        }
-        
-        if (!window.googleDriveService.isReady()) {
-            // Try to authenticate first
-            try {
-                await window.googleDriveService.signIn();
-            } catch (authError) {
-                throw new Error('Please sign in to Google Drive first. Click the Google Drive sign-in button to authenticate.');
-            }
-        }
-
-        try {
-            // Ensure proper folder structure
-            const { annotationsFolderId } = await window.googleDriveService.ensureAppFolderStructure();
-            
-            // Generate timestamp for file naming
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-            const fileName = `${baseFileName}-${timestamp}.csv`;
-            
-            // Save to annotations folder
-            await window.googleDriveService.createFile(
-                fileName,
-                csvData,
-                'text/csv',
-                annotationsFolderId
-            );
-            
-            console.log('CSV data saved to Google Drive:', fileName);
-        } catch (error) {
-            console.error('Failed to save CSV to Google Drive:', error);
-            throw error;
-        }
-    }
 
     /**
      * Initialize Google Drive status monitoring
@@ -1404,28 +1297,62 @@ Remember: These ${this.csvData.length} errors were identified through careful an
      * Update Google Drive status display
      */
     updateGoogleDriveStatus() {
-        const connectedDiv = document.getElementById('driveConnected');
-        const disconnectedDiv = document.getElementById('driveDisconnected');
-        const loadingDiv = document.getElementById('driveLoading');
+        const driveBtn = document.getElementById('driveSignInBtn');
         
-        if (!window.googleDriveService) {
-            // Service not loaded yet
-            connectedDiv.style.display = 'none';
-            disconnectedDiv.style.display = 'none';
-            loadingDiv.style.display = 'block';
+        if (!window.googleDriveService || !driveBtn) {
             return;
         }
         
         if (window.googleDriveService.isReady()) {
-            // Connected
-            connectedDiv.style.display = 'block';
-            disconnectedDiv.style.display = 'none';
-            loadingDiv.style.display = 'none';
+            // Connected - green button
+            driveBtn.style.background = '#27ae60';
+            driveBtn.innerHTML = '✅ Drive Connected';
+            driveBtn.disabled = true;
+            driveBtn.style.cursor = 'default';
         } else {
-            // Not connected
-            connectedDiv.style.display = 'none';
-            disconnectedDiv.style.display = 'block';
-            loadingDiv.style.display = 'none';
+            // Not connected - red button
+            driveBtn.style.background = '#e74c3c';
+            driveBtn.innerHTML = '📁 Connect Drive';
+            driveBtn.disabled = false;
+            driveBtn.style.cursor = 'pointer';
+        }
+    }
+
+    /**
+     * Continue annotating with current CSV data
+     */
+    continueAnnotating() {
+        try {
+            // Ensure current data is stored in localStorage for the error annotator to pick up
+            if (this.csvData && this.csvData.length > 0) {
+                // Store the current CSV data
+                localStorage.setItem('csvData', JSON.stringify(this.csvData));
+                
+                // Store current annotations
+                localStorage.setItem('errorAnnotations', JSON.stringify(this.annotations));
+                
+                // Store current CSV file info if available
+                if (this.currentCSVFile) {
+                    localStorage.setItem('currentCSVFile', JSON.stringify(this.currentCSVFile));
+                }
+                
+                // Store a flag indicating this is a continuation session
+                localStorage.setItem('continuingAnnotation', 'true');
+                
+                console.log('Stored data for continuation:', {
+                    csvDataEntries: this.csvData.length,
+                    annotationEntries: Object.keys(this.annotations).length,
+                    csvFile: this.currentCSVFile?.name || 'Unknown'
+                });
+                
+                // Navigate to error annotator
+                window.location.href = '/error-annotator/';
+            } else {
+                alert('No CSV data available to continue annotating. Please load a CSV file first.');
+            }
+        } catch (error) {
+            console.error('Error preparing continuation data:', error);
+            alert('Error preparing data for continuation. Please try again.');
         }
     }
 
@@ -1465,6 +1392,28 @@ document.addEventListener('DOMContentLoaded', () => {
     finishedAnnotatingManager = new FinishedAnnotatingManager();
 });
 </script>
+
+<!-- Google API Library -->
+<script async defer src="https://apis.google.com/js/api.js"></script>
+<!-- Google Identity Services (GIS) Library -->
+<script async defer src="https://accounts.google.com/gsi/client"></script>
+
+<!-- Google Drive Configuration -->
+<script>
+window.googleDriveConfig = {
+    client_id: '{{ site.google_drive.client_id }}',
+    api_key: '{{ site.google_drive.api_key }}',
+    discovery_docs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+    scopes: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
+};
+// Debug: Log the configuration
+console.log('Google Drive Config Debug:', window.googleDriveConfig);
+console.log('Client ID value:', '{{ site.google_drive.client_id }}');
+console.log('API Key value:', '{{ site.google_drive.api_key }}');
+</script>
+
+<!-- Google Drive Service -->
+<script src="{{ '/assets/js/google-drive-service.js' | relative_url }}"></script>
 
 </div>
 

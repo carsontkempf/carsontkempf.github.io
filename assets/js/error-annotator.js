@@ -18,6 +18,7 @@ class ErrorAnnotator {
         
         this.initializeEventListeners();
         this.clearOldAnnotations();  // Clear any old annotations with different category system
+        this.checkForContinuationData();  // Check if we're continuing an annotation session
     }
 
     /**
@@ -737,6 +738,13 @@ class ErrorAnnotator {
      * Clear old annotations with different category system
      */
     clearOldAnnotations() {
+        // Only clear if not continuing an annotation session
+        const isContinuing = localStorage.getItem('continuingAnnotation');
+        if (isContinuing === 'true') {
+            console.log('Continuing annotation session - keeping existing annotations');
+            return;
+        }
+        
         // Clear localStorage to remove old category system annotations
         try {
             localStorage.removeItem('errorAnnotations');
@@ -745,6 +753,63 @@ class ErrorAnnotator {
             console.warn('Could not clear old annotations:', error);
         }
         this.annotations = {};
+    }
+
+    /**
+     * Check for continuation data and automatically load CSV if available
+     */
+    checkForContinuationData() {
+        try {
+            const isContinuing = localStorage.getItem('continuingAnnotation');
+            
+            if (isContinuing === 'true') {
+                console.log('Detected continuation session - loading existing data');
+                
+                // Load existing data
+                const storedCsvData = localStorage.getItem('csvData');
+                const storedAnnotations = localStorage.getItem('errorAnnotations');
+                const storedCsvFile = localStorage.getItem('currentCSVFile');
+                
+                if (storedCsvData) {
+                    this.csvData = JSON.parse(storedCsvData);
+                    console.log('Loaded CSV data:', this.csvData.length, 'entries');
+                }
+                
+                if (storedAnnotations) {
+                    this.annotations = JSON.parse(storedAnnotations);
+                    console.log('Loaded annotations:', Object.keys(this.annotations).length, 'entries');
+                }
+                
+                if (storedCsvFile) {
+                    this.currentCSVFile = JSON.parse(storedCsvFile);
+                    console.log('Loaded CSV file info:', this.currentCSVFile);
+                }
+                
+                // If we have CSV data, show the annotation interface
+                if (this.csvData && this.csvData.length > 0) {
+                    this.showAnnotationInterface();
+                    this.renderErrorCategories();
+                    this.updateUI();
+                    
+                    // Update status message
+                    const statusElement = document.getElementById('loadStatus');
+                    if (statusElement) {
+                        statusElement.textContent = `Continuing annotation session: ${this.csvData.length} entries with errors and refactored code`;
+                        statusElement.style.color = '#27ae60';
+                    }
+                    
+                    // Store data for finished annotating page
+                    this.storeDataForFinishedPage();
+                }
+                
+                // Clear the continuation flag
+                localStorage.removeItem('continuingAnnotation');
+            }
+        } catch (error) {
+            console.error('Error loading continuation data:', error);
+            // Clear the flag if there's an error
+            localStorage.removeItem('continuingAnnotation');
+        }
     }
 
     /**

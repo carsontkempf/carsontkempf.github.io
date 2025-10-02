@@ -1144,82 +1144,50 @@ class GoogleDriveService {
 
     /**
      * Ensure proper folder structure for the application
-     * Creates: Error-Annotator/
-     *   ├── inputs/
-     *   ├── annotations/
-     *   ├── prompts/
-     *   └── plots/
-     *       ├── errors-v-time/
-     *       └── prompt-length-performance-v-time/
+     * Creates folders directly in appDataFolder to avoid parent folder issues
      */
     async ensureAppFolderStructure() {
         try {
-            console.log('Creating Error-Annotator folder structure...');
+            console.log('Creating Error-Annotator folder structure in appDataFolder...');
             
-            // Create main Error-Annotator folder
-            let errorAnnotatorFolder = await this.findFileByName('Error-Annotator');
-            let errorAnnotatorFolderId;
-            
-            if (!errorAnnotatorFolder) {
-                const folder = await this.createFolder('Error-Annotator', true);
-                errorAnnotatorFolderId = folder.id;
-                console.log('Created Error-Annotator main folder');
-            } else {
-                errorAnnotatorFolderId = errorAnnotatorFolder.id;
-                console.log('Error-Annotator main folder already exists');
-            }
-
-            // Define the folder structure
-            const folderStructure = {
-                'inputs': { parent: errorAnnotatorFolderId },
-                'annotations': { parent: errorAnnotatorFolderId },
-                'prompts': { parent: errorAnnotatorFolderId },
-                'plots': { parent: errorAnnotatorFolderId, hasSubfolders: true }
-            };
-
-            // Create main subfolders
+            // Define folder names to create directly in appDataFolder
+            const folderNames = ['annotations', 'inputs', 'prompts', 'plots'];
             const folderIds = {};
             
-            for (const [folderName, config] of Object.entries(folderStructure)) {
-                let folder = await this.findFolderByNameInParent(folderName, config.parent);
-                
-                if (!folder) {
-                    const newFolder = await this.createFolderInParent(folderName, config.parent, true);
-                    folderIds[folderName] = newFolder.id;
-                    console.log(`Created ${folderName}/ folder`);
-                } else {
-                    folderIds[folderName] = folder.id;
-                    console.log(`${folderName}/ folder already exists`);
-                }
-            }
-
-            // Create plots subfolders
-            const plotsSubfolders = ['errors-v-time', 'prompt-length-performance-v-time'];
-            
-            for (const subfolderName of plotsSubfolders) {
-                let subfolder = await this.findFolderByNameInParent(subfolderName, folderIds.plots);
-                
-                if (!subfolder) {
-                    await this.createFolderInParent(subfolderName, folderIds.plots, true);
-                    console.log(`Created plots/${subfolderName}/ folder`);
-                } else {
-                    console.log(`plots/${subfolderName}/ folder already exists`);
+            // Create each folder directly in appDataFolder
+            for (const folderName of folderNames) {
+                try {
+                    // Check if folder already exists
+                    let folder = await this.findFileByName(folderName);
+                    
+                    if (!folder) {
+                        // Create new folder in appDataFolder
+                        const newFolder = await this.createFolder(folderName, false, 'appDataFolder');
+                        folderIds[folderName] = newFolder.id;
+                        console.log(`Created ${folderName}/ folder in appDataFolder`);
+                    } else {
+                        folderIds[folderName] = folder.id;
+                        console.log(`${folderName}/ folder already exists`);
+                    }
+                } catch (folderError) {
+                    console.warn(`Failed to create ${folderName} folder, using appDataFolder:`, folderError);
+                    folderIds[folderName] = 'appDataFolder';
                 }
             }
             
             console.log('Error-Annotator folder structure setup complete!');
             
             return {
-                errorAnnotatorFolderId,
-                inputsFolderId: folderIds.inputs,
-                annotationsFolderId: folderIds.annotations,
-                promptsFolderId: folderIds.prompts,
-                plotsFolderId: folderIds.plots
+                errorAnnotatorFolderId: 'appDataFolder',
+                inputsFolderId: folderIds.inputs || 'appDataFolder',
+                annotationsFolderId: folderIds.annotations || 'appDataFolder',
+                promptsFolderId: folderIds.prompts || 'appDataFolder',
+                plotsFolderId: folderIds.plots || 'appDataFolder'
             };
             
         } catch (error) {
             console.warn('Failed to ensure app folder structure:', error);
-            // Fallback to root appDataFolder
+            // Complete fallback to root appDataFolder
             return {
                 errorAnnotatorFolderId: 'appDataFolder',
                 inputsFolderId: 'appDataFolder',

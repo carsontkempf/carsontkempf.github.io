@@ -4,49 +4,56 @@
 categories:
   - number: 1
     name: "Incorrect Argument Count"
+    slug: "incorrect-argument-count"
     description: "Errors related to functions being called with the wrong number of arguments"
     color: "#e74c3c"
     color_secondary: "#c0392b"
-    permalink: "/finished-annotating/error-category/1/"
+    permalink: "/finished-annotating/incorrect-argument-count/"
     
   - number: 2
     name: "Argument Unpacking Error"
+    slug: "argument-unpacking-error"
     description: "Errors related to incorrect unpacking of function arguments"
     color: "#3498db"
     color_secondary: "#2980b9"
-    permalink: "/finished-annotating/error-category/2/"
+    permalink: "/finished-annotating/argument-unpacking-error/"
     
   - number: 3
     name: "Incorrect Formula Application"
+    slug: "incorrect-formula-application"
     description: "Errors related to applying the wrong mathematical or logical formulas"
     color: "#2ecc71"
     color_secondary: "#27ae60"
-    permalink: "/finished-annotating/error-category/3/"
+    permalink: "/finished-annotating/incorrect-formula-application/"
     
   - number: 4
     name: "Off By One Error"
+    slug: "off-by-one-error"
     description: "Errors related to indexing or counting that are off by one"
     color: "#f39c12"
     color_secondary: "#e67e22"
-    permalink: "/finished-annotating/error-category/4/"
+    permalink: "/finished-annotating/off-by-one-error/"
     
   - number: 5
     name: "Incorrect Output Format"
+    slug: "incorrect-output-format"
     description: "Errors related to returning data in the wrong format"
     color: "#9b59b6"
     color_secondary: "#8e44ad"
-    permalink: "/finished-annotating/error-category/5/"
+    permalink: "/finished-annotating/incorrect-output-format/"
     
   - number: 6
     name: "Edge Case Handling Failure"
+    slug: "edge-case-handling-failure"
     description: "Errors related to failing to handle edge cases properly"
     color: "#1abc9c"
     color_secondary: "#16a085"
-    permalink: "/finished-annotating/error-category/6/"
+    permalink: "/finished-annotating/edge-case-handling-failure/"
     
   - number: 7
     name: "Syntax Error"
+    slug: "syntax-error"
     description: "Errors related to Python syntax mistakes"
     color: "#34495e"
     color_secondary: "#2c3e50"
-    permalink: "/finished-annotating/error-category/7/"
+    permalink: "/finished-annotating/syntax-error/"
