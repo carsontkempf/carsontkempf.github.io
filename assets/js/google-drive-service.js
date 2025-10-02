@@ -150,14 +150,12 @@ class GoogleDriveService {
             await this.waitForGoogleLibraries();
             console.log('Google API and GIS loaded successfully');
             
-            // Wait for secure configuration to be loaded
-            await this.waitForSecureConfig();
-            
-            // Get configuration from secure environment config
-            const config = window.envConfig.getGoogleDriveConfig();
-            console.log('Using secure Google Drive configuration');
+            // Get configuration from global config object
+            const config = window.googleDriveConfig;
+            console.log('Config check - window.googleDriveConfig:', config);
             if (!config || !config.client_id) {
                 console.error('Google Drive configuration not found or missing client_id');
+                console.log('Config object:', config);
                 throw new Error('Google Drive configuration not found');
             }
             console.log('Using client_id:', config.client_id);
@@ -562,30 +560,6 @@ class GoogleDriveService {
     }
 
     /**
-     * Wait for secure configuration to be loaded
-     */
-    async waitForSecureConfig() {
-        const maxAttempts = 50;
-        let attempts = 0;
-        
-        return new Promise((resolve, reject) => {
-            const checkConfig = () => {
-                attempts++;
-                console.log(`Checking secure config attempt ${attempts}: envConfig=${!!window.envConfig}, ready=${window.envConfig?.isReady()}`);
-                
-                if (window.envConfig && window.envConfig.isReady()) {
-                    resolve();
-                } else if (attempts >= maxAttempts) {
-                    reject(new Error('Secure configuration failed to load'));
-                } else {
-                    setTimeout(checkConfig, 100);
-                }
-            };
-            checkConfig();
-        });
-    }
-
-    /**
      * Handle authentication errors
      */
     handleAuthError(error) {
@@ -808,16 +782,34 @@ class GoogleDriveService {
         return await this.retryOperation(async () => {
             const response = await gapi.client.drive.files.create({
                 requestBody: folderMetadata,
-                fields: 'id, name, mimeType, parents, capabilities'
+                fields: 'id, name, mimeType, parents, capabilities, webViewLink'
             });
 
-            console.log('Folder created successfully:', response.result);
-            return response.result;
+            const createdFolder = response.result;
+            console.log('Folder created successfully:', createdFolder);
+
+            // CRITICAL VALIDATION STEP
+            const validation = await this.validateCreatedFolder(createdFolder, folderName);
+            if (!validation.isValid) {
+                throw new Error(`Created folder validation failed for ${createdFolder.id}: ${validation.reason}`);
+            }
+
+            return createdFolder;
         }, 'Create main drive folder');
     }
 
     /**
-     * Create a file in the application data folder or specific folder
+     * Validates a newly created folder.
+     */
+    async validateCreatedFolder(folder, expectedName) {
+        if (!folder || !folder.id) return { isValid: false, reason: 'No folder object returned.' };
+        if (folder.mimeType !== 'application/vnd.google-apps.folder') return { isValid: false, reason: `Incorrect mimeType: ${folder.mimeType}` };
+        if (folder.name !== expectedName) return { isValid: false, reason: `Name mismatch: expected '${expectedName}', got '${folder.name}'` };
+        return { isValid: true };
+    }
+
+    /**
+     * Create a file in the application data folder or a specific folder
      */
     async createFile(fileName, content, mimeType = 'application/json', parentFolderId = 'appDataFolder') {
         await this.ensureAuth();

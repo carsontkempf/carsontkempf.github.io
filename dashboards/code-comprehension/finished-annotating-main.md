@@ -416,11 +416,8 @@ permalink: /code-comprehension/finished-annotating-main/
         
         <!-- Navigation Buttons -->
         <div style="margin-top: 20px; display: flex; gap: 15px; align-items: center; justify-content: center;">
-            <button id="continueAnnotatingBtn" class="nav-link-btn" style="background: #3498db; color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+            <button id="continueAnnotatingBtn" class="nav-link-btn" style="background: #3498db; color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 6px; font-size: 14px; transition: background-color 0.3s ease;">
                 ← Continue Annotating
-            </button>
-            <button id="driveSignInBtn" class="nav-link-btn" style="background: #e74c3c; color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background-color 0.3s ease;">
-                📁 Google Drive
             </button>
         </div>
     </div>
@@ -463,19 +460,41 @@ permalink: /code-comprehension/finished-annotating-main/
             </div>
         </div>
 
-        <!-- Consolidated Save to Drive Section -->
-        <div style="margin-top: 30px; padding-top: 25px; border-top: 2px solid #ecf0f1;">
-            <div class="export-controls" style="text-align: center;">
-                <button id="saveAllToDriveBtn" class="export-btn primary" style="background: #4285f4; color: white; padding: 15px 30px; font-size: 16px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(66,133,244,0.3);">
-                    💾 Save All to Google Drive
-                </button>
-                <div style="margin-top: 10px; color: #7f8c8d; font-size: 14px;">
-                    Saves analysis charts, annotations, and error data
-                </div>
-            </div>
-        </div>
     </div>
 </div>
+
+<!-- Save to Google Drive Section (Bottom of Page) -->
+<div style="width: 100%; text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-top: 1px solid #dee2e6; margin-top: 40px;">
+    <button id="saveAllToDriveBtn" class="export-btn primary" style="background: #4285f4; color: white; padding: 18px 40px; font-size: 18px; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 6px 20px rgba(66,133,244,0.3); transform: translateY(0); position: relative;">
+        📁 Save to Google Drive
+    </button>
+    <div style="margin-top: 15px; color: #6c757d; font-size: 16px; font-weight: 500;">
+        Select or create a folder in Google Drive to save your analysis data
+    </div>
+    <div style="margin-top: 8px; color: #868e96; font-size: 14px;">
+        Uses Google Picker • Safe and reliable folder selection
+    </div>
+</div>
+
+<style>
+#saveAllToDriveBtn:hover {
+    background: #3367d6 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(66,133,244,0.4) !important;
+}
+
+#saveAllToDriveBtn:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 4px 15px rgba(66,133,244,0.3) !important;
+}
+
+#saveAllToDriveBtn:disabled {
+    background: #94a3b8 !important;
+    cursor: not-allowed !important;
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 8px rgba(148,163,184,0.2) !important;
+}
+</style>
 
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -511,16 +530,11 @@ class FinishedAnnotatingManager {
         setTimeout(async () => {
             await this.loadAnnotationData();
         }, 100);
-        
-        this.initializeGoogleDriveStatus();
     }
 
     initializeEventListeners() {
         // Consolidated Save to Drive functionality
         document.getElementById('saveAllToDriveBtn').addEventListener('click', () => this.saveAllToGoogleDrive());
-        
-        // Google Drive sign-in
-        document.getElementById('driveSignInBtn').addEventListener('click', () => this.signInToGoogleDrive());
         
         // Continue annotating
         document.getElementById('continueAnnotatingBtn').addEventListener('click', () => this.continueAnnotating());
@@ -1226,14 +1240,8 @@ Remember: These ${this.csvData.length} errors were identified through careful an
             throw new Error('Google Drive service is not loaded. Please refresh the page and try again.');
         }
         
-        if (!window.googleDriveService.isReady()) {
-            // Try to authenticate first
-            try {
-                await window.googleDriveService.signIn();
-            } catch (authError) {
-                throw new Error('Please sign in to Google Drive first. Click the Google Drive sign-in button to authenticate.');
-            }
-        }
+        // Ensure authentication with automatic handling
+        await window.googleDriveService.ensureAuth();
 
         try {
             // Ensure proper folder structure
@@ -1293,14 +1301,8 @@ Remember: These ${this.csvData.length} errors were identified through careful an
             throw new Error('Google Drive service is not loaded. Please refresh the page and try again.');
         }
         
-        if (!window.googleDriveService.isReady()) {
-            // Try to authenticate first
-            try {
-                await window.googleDriveService.signIn();
-            } catch (authError) {
-                throw new Error('Please sign in to Google Drive first. Click the Google Drive sign-in button to authenticate.');
-            }
-        }
+        // Ensure authentication with automatic handling
+        await window.googleDriveService.ensureAuth();
 
         try {
             // Ensure proper folder structure
@@ -1326,52 +1328,9 @@ Remember: These ${this.csvData.length} errors were identified through careful an
     }
 
 
-    /**
-     * Initialize Google Drive status monitoring
-     */
-    initializeGoogleDriveStatus() {
-        // Check initial status
-        this.updateGoogleDriveStatus();
-        
-        // Listen for Google Drive auth changes
-        window.addEventListener('driveAuthChanged', (event) => {
-            console.log('Drive auth changed:', event.detail);
-            this.updateGoogleDriveStatus();
-        });
-        
-        // Check status periodically
-        setInterval(() => {
-            this.updateGoogleDriveStatus();
-        }, 5000); // Check every 5 seconds
-    }
 
     /**
-     * Update Google Drive status display
-     */
-    updateGoogleDriveStatus() {
-        const driveBtn = document.getElementById('driveSignInBtn');
-        
-        if (!window.googleDriveService || !driveBtn) {
-            return;
-        }
-        
-        if (window.googleDriveService.isReady()) {
-            // Connected - green button
-            driveBtn.style.background = '#27ae60';
-            driveBtn.innerHTML = '✅ Drive Connected';
-            driveBtn.disabled = true;
-            driveBtn.style.cursor = 'default';
-        } else {
-            // Not connected - red button
-            driveBtn.style.background = '#e74c3c';
-            driveBtn.innerHTML = '📁 Connect Drive';
-            driveBtn.disabled = false;
-            driveBtn.style.cursor = 'pointer';
-        }
-    }
-
-    /**
-     * Save all analysis data and charts to Google Drive (consolidated method)
+     * Save all analysis data using Google Picker (NEW RELIABLE METHOD)
      */
     async saveAllToGoogleDrive() {
         const button = document.getElementById('saveAllToDriveBtn');
@@ -1379,72 +1338,106 @@ Remember: These ${this.csvData.length} errors were identified through careful an
         
         try {
             // Update button state
-            button.innerHTML = '⏳ Saving to Google Drive...';
+            button.innerHTML = '📁 Select Google Drive Folder...';
             button.disabled = true;
             
             // Show status
             const statusDiv = document.getElementById('chartStatus');
             statusDiv.style.display = 'block';
-            statusDiv.innerHTML = '<div style="color: #f39c12; font-weight: 600;">⏳ Generating charts and saving all data to Google Drive...</div>';
+            statusDiv.innerHTML = '<div style="color: #3498db; font-weight: 600;">📁 Choose a folder in Google Drive to save your data...</div>';
             
-            // Check Google Drive connection
-            if (!window.googleDriveService || !window.googleDriveService.isReady()) {
-                throw new Error('Please connect to Google Drive first using the button in the header.');
+            // Check if picker service is available
+            if (!window.googlePickerService) {
+                throw new Error('Google Picker service is not available. Please refresh the page and try again.');
             }
             
-            // Generate and save charts/PDFs
+            // Generate all the data first
+            button.innerHTML = '⏳ Preparing data...';
+            statusDiv.innerHTML = '<div style="color: #f39c12; font-weight: 600;">⏳ Generating analysis data and charts...</div>';
+            
             this.generateAnalysisJSON();
             const pdfData = this.createDetailedAnalysisPDFs();
-            await this.saveChartsToGoogleDrive(pdfData);
             
-            // Generate and save JSON annotations
-            const jsonData = {
+            // Create comprehensive data package
+            const annotationData = {
                 metadata: {
+                    created: new Date().toISOString(),
                     total_entries: this.csvData.length,
                     tagged_entries: Object.keys(this.annotations).length,
                     export_date: new Date().toISOString(),
-                    tool: "Error Annotator Web",
-                    csv_file: this.currentCSVFile?.name || "unknown"
+                    tool: "Code Comprehension Error Annotator",
+                    csv_file: this.currentCSVFile?.name || "unknown",
+                    version: "2.0-picker"
                 },
                 annotations: this.annotations,
                 csvData: this.csvData,
                 errorCategories: this.errorCategories,
-                categoryBreakdown: this.getCategoryBreakdown()
+                categoryBreakdown: this.getCategoryBreakdown(),
+                generatedAnalysis: this.generatedJSON
             };
             
-            await this.saveJSONToGoogleDrive(jsonData, 'error-annotations');
+            // Use Google Picker to save data
+            button.innerHTML = '📁 Select Folder...';
+            statusDiv.innerHTML = '<div style="color: #3498db; font-weight: 600;">📁 Please select a folder in Google Drive...</div>';
             
-            // Show success status
-            statusDiv.innerHTML = `
-                <div style="color: #27ae60; font-weight: 600;">✅ All Data Saved to Google Drive Successfully!</div>
-                <div style="color: #2c3e50; font-size: 14px; margin-top: 5px;">
-                    • Error analysis charts and PDFs<br>
-                    • Complete annotation data (JSON)<br>
-                    • Error category breakdowns<br>
-                    • CSV data and metadata
-                </div>
-            `;
+            const result = await window.googlePickerService.saveAnnotationData(
+                annotationData, 
+                this.currentCSVFile
+            );
             
-            // Update button to show success
-            button.innerHTML = '✅ Saved Successfully!';
-            button.style.background = '#27ae60';
+            if (result.cancelled) {
+                statusDiv.innerHTML = '<div style="color: #666; font-weight: 600;">📁 Save cancelled by user</div>';
+                return;
+            }
             
-            // Reset button after delay
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.style.background = '#4285f4';
-                button.disabled = false;
-            }, 3000);
+            if (result.success) {
+                // Save additional PDF files
+                await this.savePDFFilesToFolder(result.folder.id, pdfData);
+                
+                // Update status to success
+                statusDiv.innerHTML = `
+                    <div style="color: #27ae60; font-weight: 600;">✅ All Data Saved Successfully!</div>
+                    <div style="margin-top: 10px; color: #2c3e50; font-size: 14px;">
+                        📁 <strong>Folder:</strong> ${result.folder.name}<br>
+                        📄 <strong>Main file:</strong> ${result.fileName}<br>
+                        📊 <strong>Charts:</strong> Error analysis PDFs<br>
+                        💾 <strong>Data:</strong> Complete annotation dataset
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <a href="${result.folder.url || 'https://drive.google.com'}" target="_blank" style="color: #3498db; text-decoration: none;">
+                            🔗 Open folder in Google Drive
+                        </a>
+                    </div>
+                `;
+                
+                // Update button to show success
+                button.innerHTML = '✅ Saved Successfully!';
+                button.style.background = '#27ae60';
+                
+                // Reset button after delay
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '#4285f4';
+                    button.disabled = false;
+                }, 4000);
+                
+                // Show success notification
+                alert(`✅ Successfully saved all data to Google Drive!\n\nFolder: ${result.folder.name}\nFile: ${result.fileName}\n\nClick the link below the save button to open the folder.`);
+            }
             
         } catch (error) {
             console.error('Error saving to Google Drive:', error);
             
             // Show error status
             const statusDiv = document.getElementById('chartStatus');
+            statusDiv.style.display = 'block';
             statusDiv.innerHTML = `
                 <div style="color: #e74c3c; font-weight: 600;">❌ Error saving to Google Drive</div>
                 <div style="color: #2c3e50; font-size: 14px; margin-top: 5px;">
                     ${error.message}
+                </div>
+                <div style="color: #7f8c8d; font-size: 12px; margin-top: 5px;">
+                    Try refreshing the page and signing in again.
                 </div>
             `;
             
@@ -1452,7 +1445,36 @@ Remember: These ${this.csvData.length} errors were identified through careful an
             button.innerHTML = originalText;
             button.disabled = false;
             
-            alert(`Failed to save to Google Drive: ${error.message}`);
+            alert(`Failed to save to Google Drive: ${error.message}\n\nTry refreshing the page and trying again.`);
+        }
+    }
+
+    /**
+     * Save PDF charts to the selected folder using Google Picker
+     */
+    async savePDFFilesToFolder(folderId, pdfData) {
+        try {
+            const pdfFiles = [
+                { name: 'error-distribution-chart.pdf', data: pdfData.errorDistribution },
+                { name: 'severity-analysis-chart.pdf', data: pdfData.severityAnalysis },
+                { name: 'temporal-analysis-chart.pdf', data: pdfData.temporalAnalysis },
+                { name: 'comprehensive-analysis-summary.pdf', data: pdfData.comprehensiveSummary }
+            ];
+
+            for (const pdfFile of pdfFiles) {
+                if (pdfFile.data) {
+                    await window.googlePickerService.uploadFileContent(
+                        pdfFile.name,
+                        pdfFile.data,
+                        'application/pdf',
+                        folderId
+                    );
+                }
+            }
+            
+            console.log('All PDF files saved successfully to folder:', folderId);
+        } catch (error) {
+            console.warn('Failed to save some PDF files:', error);
         }
     }
 
@@ -1494,32 +1516,6 @@ Remember: These ${this.csvData.length} errors were identified through careful an
         }
     }
 
-    /**
-     * Sign in to Google Drive
-     */
-    async signInToGoogleDrive() {
-        const signInBtn = document.getElementById('driveSignInBtn');
-        const originalText = signInBtn.textContent;
-        
-        try {
-            signInBtn.textContent = 'Signing in...';
-            signInBtn.disabled = true;
-            
-            if (!window.googleDriveService) {
-                throw new Error('Google Drive service is not loaded');
-            }
-            
-            await window.googleDriveService.signIn();
-            console.log('Successfully signed in to Google Drive');
-            
-        } catch (error) {
-            console.error('Failed to sign in to Google Drive:', error);
-            alert('Failed to sign in to Google Drive: ' + error.message);
-        } finally {
-            signInBtn.textContent = originalText;
-            signInBtn.disabled = false;
-        }
-    }
 }
 
 // Global variable for finished annotating manager

@@ -149,7 +149,7 @@ class EnvironmentConfig {
         return {
             client_id: config.client_id,
             api_key: config.api_key,
-            scopes: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email'
+            scopes: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email'
         };
     }
 
