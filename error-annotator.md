@@ -91,6 +91,7 @@ permalink: /error-annotator/
     background: #2980b9;
 }
 
+
 /* Upload section */
 .upload-section {
     display: flex;
@@ -139,6 +140,7 @@ permalink: /error-annotator/
     color: #7f8c8d;
     font-size: 14px;
 }
+
 
 /* Navigation */
 .navigation {
@@ -196,42 +198,61 @@ permalink: /error-annotator/
 .annotation-interface {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+/* Code sections at top - full width */
+.code-sections-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+/* Main content grid - below code sections */
+.main-content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+/* Error categories - left 2/3 */
+.error-categories-section {
+    background: white;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     margin-bottom: 20px;
 }
 
-/* Error categories at top */
-.top-error-categories {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.top-error-categories h4 {
-    margin: 0 0 15px 0;
+.error-categories-section h4 {
+    margin: 0 0 20px 0;
     color: #2c3e50;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
 }
 
 .error-categories-top {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
 }
 
 .category-section-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: flex-start;
 }
 
 .category-section-header {
     font-weight: 600;
     color: #2c3e50;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -241,13 +262,17 @@ permalink: /error-annotator/
     background: #e74c3c;
     color: white;
     border: none;
-    padding: 8px 12px;
+    padding: 10px 15px;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    box-sizing: border-box;
 }
 
 .category-tag:hover {
@@ -257,7 +282,7 @@ permalink: /error-annotator/
 
 .category-tag.shortcut {
     position: relative;
-    padding-left: 24px;
+    padding-left: 35px;
 }
 
 .shortcut-key {
@@ -267,25 +292,20 @@ permalink: /error-annotator/
     transform: translateY(-50%);
     background: rgba(255,255,255,0.3);
     border-radius: 3px;
-    padding: 2px 4px;
-    font-size: 10px;
+    padding: 3px 5px;
+    font-size: 11px;
     font-weight: bold;
+    min-width: 12px;
+    text-align: center;
+    margin-right: 8px;
 }
 
-/* Main content grid */
-.main-content-grid {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 20px;
-    align-items: start;
-}
-
-/* Code panel */
+/* Code panel - full width, stacked vertically */
 .code-panel {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    flex: 1;
+    gap: 25px;
+    width: 100%;
 }
 
 .code-section {
@@ -293,7 +313,8 @@ permalink: /error-annotator/
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    flex: 1;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .code-section h4 {
@@ -329,12 +350,12 @@ permalink: /error-annotator/
     border-left: 4px solid #e74c3c;
 }
 
-/* Right sidebar */
+/* Right sidebar - right 1/3 */
 .right-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    width: 350px;
+    gap: 25px;
+    width: 100%;
     flex-shrink: 0;
 }
 
@@ -342,9 +363,10 @@ permalink: /error-annotator/
 .details-panel {
     background: white;
     border-radius: 8px;
-    padding: 20px;
+    padding: 25px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     height: fit-content;
+    margin-bottom: 20px;
 }
 
 .details-panel h3 {
@@ -387,9 +409,10 @@ permalink: /error-annotator/
 .tagging-panel {
     background: white;
     border-radius: 8px;
-    padding: 20px;
+    padding: 25px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     height: fit-content;
+    margin-bottom: 20px;
 }
 
 .tag-input-section,
@@ -865,7 +888,7 @@ permalink: /error-annotator/
 @media (max-width: 1200px) {
     .main-content-grid {
         grid-template-columns: 1fr;
-        gap: 15px;
+        gap: 25px;
     }
     
     .right-sidebar {
@@ -873,16 +896,12 @@ permalink: /error-annotator/
         order: -1;
     }
     
-    .code-panel {
-        flex-direction: row;
+    .annotation-interface {
+        gap: 25px;
     }
 }
 
 @media (max-width: 768px) {
-    .code-panel {
-        flex-direction: column;
-    }
-    
     .right-sidebar {
         width: 100%;
     }
@@ -908,6 +927,23 @@ permalink: /error-annotator/
     .category-section-container {
         justify-content: center;
     }
+    
+    .annotation-interface {
+        gap: 20px;
+    }
+    
+    .code-sections-container {
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .main-content-grid {
+        gap: 20px;
+    }
+    
+    .code-panel {
+        gap: 20px;
+    }
 }
 </style>
 
@@ -916,11 +952,6 @@ permalink: /error-annotator/
         <h1>🏷️ Error Annotation Tool</h1>
         <p>Upload CSV files containing error data and annotate them with categories for analysis and model improvement.</p>
         
-        <div class="navigation-links">
-            <h3>🔗 Quick Navigation</h3>
-            <a href="/code-comprehension-project/" class="nav-link-btn secondary">← Back to Main Project</a>
-            <a href="/pdf-history-viewer/" class="nav-link-btn secondary">PDF History Viewer</a>
-        </div>
     </div>
 
     <!-- File upload section -->
@@ -934,6 +965,7 @@ permalink: /error-annotator/
             </div>
         </div>
     </div>
+
 
     <!-- Navigation bar -->
     <nav class="navigation" style="display: none;" id="annotationNavigation">
@@ -952,17 +984,8 @@ permalink: /error-annotator/
 
     <!-- Main annotation interface (hidden initially) -->
     <div id="annotationInterface" class="annotation-interface" style="display: none;">
-        <!-- Error Categories - moved to top -->
-        <div class="top-error-categories">
-            <h4>Error Categories</h4>
-            <div class="instructions" style="font-size: 12px; color: #666; margin-bottom: 10px; font-style: italic;">
-                Use keyboard numbers 1-7 to quickly assign categories, or click the buttons below.
-            </div>
-            <div id="errorCategories" class="error-categories-top"></div>
-        </div>
-
-        <div class="main-content-grid">
-            <!-- Code comparison panel - left side, takes remaining space -->
+        <!-- Code sections at top - full width -->
+        <div class="code-sections-container">
             <div class="code-panel">
                 <div class="code-section">
                     <h4>Original Code</h4>
@@ -973,8 +996,19 @@ permalink: /error-annotator/
                     <pre id="refactoredCode" class="code-content">Loading...</pre>
                 </div>
             </div>
+        </div>
 
-            <!-- Right sidebar - entry details and tagging -->
+        <div class="main-content-grid">
+            <!-- Left side - Error Categories (2/3 width) -->
+            <div class="error-categories-section">
+                <h4>Error Categories</h4>
+                <div class="instructions" style="font-size: 13px; color: #666; margin-bottom: 15px; font-style: italic;">
+                    Use keyboard numbers 1-7 to quickly assign categories, or click the buttons below.
+                </div>
+                <div id="errorCategories" class="error-categories-top"></div>
+            </div>
+
+            <!-- Right sidebar - entry details and tagging (1/3 width) -->
             <div class="right-sidebar">
                 <!-- Entry details panel -->
                 <div class="details-panel">
@@ -1025,113 +1059,39 @@ permalink: /error-annotator/
 
     <!-- Action buttons -->
     <div class="action-bar" style="display: none;" id="annotationActions">
-        <button id="statsBtn" class="action-btn">View Statistics</button>
-        <button id="exportBtn" class="action-btn">Export Data</button>
+        <button id="finishedBtn" class="action-btn">Finished Annotating</button>
         <button id="clearBtn" class="action-btn danger">Clear All Tags</button>
     </div>
 </div>
 
-<!-- Statistics modal -->
-<div id="statsModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Annotation Statistics</h3>
-            <span class="close" id="closeStatsModal">&times;</span>
-        </div>
-        <div class="modal-body">
-            <div id="statsContent" class="stats-content"></div>
-        </div>
-    </div>
-</div>
 
-<!-- Export modal -->
-<div id="exportModal" class="modal" style="display: none;">
-    <div class="modal-content export-modal-large">
-        <div class="modal-header">
-            <h3>📊 Advanced Export & Import</h3>
-            <span class="close" id="closeExportModal">&times;</span>
-        </div>
-        <div class="modal-body">
-            
-            <!-- Import Section -->
-            <div class="export-section import-section">
-                <h4>📥 Import Existing Prompt</h4>
-                <div class="import-controls">
-                    <div class="import-method">
-                        <label for="promptFileInput">Import from File:</label>
-                        <input type="file" id="promptFileInput" accept=".txt,.md" class="file-input-small">
-                    </div>
-                    <div class="import-method">
-                        <label for="promptTextInput">Or paste prompt text:</label>
-                        <textarea id="promptTextInput" placeholder="Paste your existing prompt here..." rows="4" class="prompt-textarea"></textarea>
-                        <button id="importPromptBtn" class="import-btn">📥 Import Prompt</button>
-                    </div>
-                </div>
-                <div id="importedPromptInfo" class="imported-info" style="display: none;">
-                    <div class="info-badge">✅ Prompt imported successfully</div>
-                    <div class="prompt-preview" id="promptPreviewText"></div>
-                </div>
-            </div>
 
-            <!-- Enhanced Prompt Generation -->
-            <div class="export-section generation-section">
-                <h4>🚀 Generate Enhanced Prompt</h4>
-                <p class="section-description">Generate an improved prompt based on your annotation patterns and error analysis.</p>
-                <div class="export-controls">
-                    <button id="generatePromptBtn" class="export-btn primary">🚀 Generate Enhanced Prompt</button>
-                    <button id="copyPromptBtn" class="export-btn secondary" disabled>📋 Copy Prompt</button>
-                    <button id="downloadPromptBtn" class="export-btn secondary" disabled>💾 Download Prompt</button>
-                </div>
-                <div id="promptOutput" class="output-section" style="display: none;">
-                    <h5>Generated Enhanced Prompt:</h5>
-                    <div class="output-text" id="generatedPromptText"></div>
-                </div>
-            </div>
+<!-- Google Drive API -->
+<!-- Google API Platform Script -->
+<script src="https://apis.google.com/js/api.js"></script>
 
-            <!-- Data Export Section -->
-            <div class="export-section data-section">
-                <h4>📊 Export Analysis Data</h4>
-                <div class="export-controls">
-                    <button id="generateJsonBtn" class="export-btn tertiary">📈 Generate JSON Analysis</button>
-                    <button id="copyJsonBtn" class="export-btn secondary" disabled>📋 Copy JSON</button>
-                    <button id="downloadJsonBtn" class="export-btn secondary" disabled>💾 Download JSON</button>
-                </div>
-                <div id="jsonOutput" class="output-section" style="display: none;">
-                    <h5>Generated Analysis Data (JSON):</h5>
-                    <div class="output-text" id="generatedJsonText"></div>
-                </div>
-            </div>
+<!-- Google Identity Services (GIS) Library -->
+<script src="https://accounts.google.com/gsi/client"></script>
 
-            <!-- CSV Association Section -->
-            <div class="export-section association-section">
-                <h4>🔗 Associate Current CSV with Prompt</h4>
-                <div class="csv-association-controls">
-                    <button id="associateCurrentBtn" class="export-btn secondary" disabled>🔗 Associate with Current Prompt</button>
-                    <button id="viewAssociationsBtn" class="export-btn secondary">👁️ View All Associations</button>
-                </div>
-                <div id="associationsDisplay" class="associations-display" style="display: none;"></div>
-            </div>
+<!-- Google Drive Configuration -->
+<script>
+window.googleDriveConfig = {
+    client_id: '{{ site.google_drive.client_id }}',
+    api_key: '{{ site.google_drive.api_key }}',
+    discovery_docs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+    scopes: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
+};
 
-            <!-- Traditional Export -->
-            <div class="export-section traditional-section">
-                <h4>📄 Traditional Export</h4>
-                <div class="export-controls">
-                    <button id="exportJsonBtn" class="export-btn">📄 Download Annotations JSON</button>
-                    <button id="exportCsvBtn" class="export-btn">📊 Download CSV Report</button>
-                </div>
-            </div>
+// Debug: Log the configuration
+console.log('Google Drive Config Debug:', window.googleDriveConfig);
+console.log('Client ID value:', '{{ site.google_drive.client_id }}');
+console.log('API Key value:', '{{ site.google_drive.api_key }}');
+</script>
 
-            <!-- Statistics Summary -->
-            <div class="export-section stats-section" id="exportStatsSection" style="display: none;">
-                <h4>📊 Analysis Summary</h4>
-                <div class="stats-grid" id="exportStatsGrid"></div>
-            </div>
+<!-- Google Drive Service -->
+<script src="{{ '/assets/js/google-drive-service.js' | relative_url }}"></script>
 
-            <div id="exportPreview" class="export-preview"></div>
-        </div>
-    </div>
-</div>
-
+<!-- Error Annotator -->
 <script src="{{ '/assets/js/error-annotator.js' | relative_url }}"></script>
 
 </div>
@@ -1212,4 +1172,5 @@ setTimeout(() => {
         document.getElementById('auth-check-wrapper').style.display = 'block';
     }
 }, 5000);
+
 </script>

@@ -78,6 +78,8 @@ header {
   background-color: var(--bg-accent);
   margin: 0 var(--grid-gap); 
   border-radius: 2rem;
+  min-height: calc(var(--base-padding) * 5); // Make header 1.25x taller
+  padding: calc(var(--base-padding) * 1.25); // Increase padding proportionally
 
 }
 
@@ -182,7 +184,7 @@ header .theme-switch {
 // 4. Header Content & Buttons
 // =============================================================================
 .header-content {
-  padding-right: 6rem;
+  padding-right: 6rem; /* Padding for theme switcher and dashboard button on right side */
 }
 
 .header .theme-switch {
@@ -200,6 +202,7 @@ header #auth-status, #auth-status {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  /* Removed margin-top since header is now taller */
 }
 
 /* ADD */

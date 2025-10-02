@@ -3,8 +3,6 @@
 
 title: Carson's Meditations
 email: ctkfdp@umsystem.edu
-description: >- # this means to ignore newlines until "baseurl:"
-  My site for my reflections on all types of projects
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://localhost:4000" # Development URL
 repository: "carsontkempf/carsontkempf.github.io"
@@ -27,6 +25,12 @@ auth0:
   domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
   client_id: "ql8ttR4YSmZXZbGE30wP8foWCUuZs2jh"
   audience: "https://carsontkempf.github.io/api/carsons-meditations"
+
+# Google Drive API Configuration (development)
+google_drive:
+  client_id: "53684428529-27609a7n7fd3rtov2a86vrq1gvffs62t.apps.googleusercontent.com"
+  api_key: "AIzaSyBOcXkX_2lnzW89KMmBquK2oP3erErLYbo"
+
 
 # Exclude files from processing
 exclude:

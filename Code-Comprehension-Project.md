@@ -962,19 +962,28 @@ permalink: /code-comprehension-project/
         <p>Multi-Container PDF Memory System & Error Analysis Tools</p>
         
 
-        <!-- Project Tools Navigation -->
-        <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-            <div style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(39,174,96,0.3);">
-                <h3 style="color: white; margin: 0 0 15px 0; font-size: 1.3rem;">📈 PDF History Viewer</h3>
-                <p style="color: rgba(255,255,255,0.9); margin: 0 0 20px 0; font-size: 0.95rem;">
-                    View and navigate through multi-container PDF memory system with performance history, error analysis, comparison data, and breakdowns.
-                </p>
-                <a href="/pdf-history-viewer/" style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
-                    Open PDF Viewer →
-                </a>
+        <!-- Performance History PDF Display -->
+        <div style="margin-top: 30px; width: 100%; max-width: 1200px; margin-left: auto; margin-right: auto;">
+            <div style="background: white; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); overflow: hidden;">
+                <div style="padding: 20px; background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; text-align: center;">
+                    <h3 style="margin: 0; font-size: 1.4rem; font-weight: 600;">📈 Performance History Report</h3>
+                    <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 1rem;">Latest milestone report from the PDF memory system</p>
+                </div>
+                <div style="position: relative; width: 100%; height: 70vh;">
+                    <embed 
+                        src="/assets/pdf-memory/milestones/milestone_0010.pdf" 
+                        type="application/pdf" 
+                        width="100%" 
+                        height="100%" 
+                        style="border: none; display: block;"
+                    />
+                </div>
             </div>
+        </div>
 
-            <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(231,76,60,0.3);">
+        <!-- Error Annotator Tool -->
+        <div style="margin-top: 30px; display: flex; justify-content: center;">
+            <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(231,76,60,0.3); max-width: 500px;">
                 <h3 style="color: white; margin: 0 0 15px 0; font-size: 1.3rem;">🏷️ Error Annotator</h3>
                 <p style="color: rgba(255,255,255,0.9); margin: 0 0 20px 0; font-size: 0.95rem;">
                     Upload CSV files containing error data and annotate them with categories for analysis and model improvement.

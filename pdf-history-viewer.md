@@ -317,18 +317,7 @@ permalink: /pdf-history-viewer/
         <h1>PDF History Viewer</h1>
         <p>Multi-Container PDF Memory System</p>
         
-        <div class="navigation-links">
-            <h3>🔗 Quick Navigation</h3>
-            <a href="/code-comprehension-project/" class="nav-link-btn">← Back to Main Project</a>
-            <a href="/error-annotator/" class="nav-link-btn">Error Annotator Tool →</a>
-        </div>
         
-        <div style="margin-top: 20px; padding: 15px; background: rgba(52,152,219,0.1); border-radius: 8px; border-left: 4px solid #3498db;">
-            <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.1rem;">📊 Test Results Dashboard Access</h3>
-            <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">
-                <strong>Password:</strong> <code style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 3px;">Welcome12345!</code>
-            </p>
-        </div>
     </div>
 
     <!-- PDF Viewer -->

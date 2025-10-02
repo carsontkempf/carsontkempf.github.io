@@ -70,39 +70,11 @@ class ErrorAnnotator {
             });
             
             // Action buttons
-            document.getElementById('statsBtn').addEventListener('click', () => this.showStatistics());
-            document.getElementById('exportBtn').addEventListener('click', () => this.showExportModal());
+            document.getElementById('finishedBtn').addEventListener('click', () => this.finishedAnnotating());
             document.getElementById('clearBtn').addEventListener('click', () => this.clearAllAnnotations());
-            
-            // Enhanced Export modal - new buttons
-            document.getElementById('importPromptBtn').addEventListener('click', () => this.importPromptFromText());
-            document.getElementById('promptFileInput').addEventListener('change', (e) => this.importPromptFromFile(e));
-            document.getElementById('generatePromptBtn').addEventListener('click', () => this.generateEnhancedPrompt());
-            document.getElementById('copyPromptBtn').addEventListener('click', () => this.copyPromptToClipboard());
-            document.getElementById('downloadPromptBtn').addEventListener('click', () => this.downloadPrompt());
-            document.getElementById('generateJsonBtn').addEventListener('click', () => this.generateAnalysisJSON());
-            document.getElementById('copyJsonBtn').addEventListener('click', () => this.copyJSONToClipboard());
-            document.getElementById('downloadJsonBtn').addEventListener('click', () => this.downloadJSON());
-            document.getElementById('associateCurrentBtn').addEventListener('click', () => this.associateCurrentCSVWithPrompt());
-            document.getElementById('viewAssociationsBtn').addEventListener('click', () => this.viewAssociations());
-            
-            // Traditional Export modal - existing buttons
-            document.getElementById('exportJsonBtn').addEventListener('click', () => this.exportToJson());
-            document.getElementById('exportCsvBtn').addEventListener('click', () => this.exportToCsv());
-            
-            // Modal close buttons
-            document.getElementById('closeStatsModal').addEventListener('click', () => this.closeModal('statsModal'));
-            document.getElementById('closeExportModal').addEventListener('click', () => this.closeModal('exportModal'));
             
             // Keyboard shortcuts
             document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
-            
-            // Click outside modal to close
-            window.addEventListener('click', (e) => {
-                if (e.target.classList.contains('modal')) {
-                    e.target.style.display = 'none';
-                }
-            });
         }, 100);
     }
 
@@ -114,7 +86,7 @@ class ErrorAnnotator {
         if (!file) return;
         
         try {
-            // Store current CSV file info for associations
+            // Store current CSV file info
             this.currentCSVFile = {
                 name: file.name,
                 size: file.size,
@@ -123,17 +95,18 @@ class ErrorAnnotator {
             };
             
             const text = await this.readFileAsText(file);
+            
             this.parseCsvData(text);
             this.showAnnotationInterface();
             this.renderErrorCategories();
             this.updateUI();
             
+            // Store data for finished annotating page
+            this.storeDataForFinishedPage();
+            
             document.getElementById('loadStatus').textContent = 
                 `Loaded ${this.csvData.length} entries with errors and refactored code`;
             document.getElementById('loadStatus').style.color = '#27ae60';
-            
-            // Enable CSV association if prompt exists
-            this.updateAssociationButtonState();
             
             // Log detailed info for debugging
             console.log(`Successfully loaded CSV with ${this.csvData.length} error entries`);
@@ -583,6 +556,7 @@ class ErrorAnnotator {
             this.annotations[entryId].push(tag);
             this.updateCurrentTagsDisplay();
             this.saveAnnotationsToStorage();
+            this.saveUserProgress();
         }
     }
 
@@ -601,6 +575,7 @@ class ErrorAnnotator {
         
         this.updateCurrentTagsDisplay();
         this.saveAnnotationsToStorage();
+        this.saveUserProgress();
     }
 
     /**
@@ -681,174 +656,7 @@ class ErrorAnnotator {
         }
     }
 
-    /**
-     * Show statistics modal
-     */
-    showStatistics() {
-        const modal = document.getElementById('statsModal');
-        const content = document.getElementById('statsContent');
-        
-        // Calculate statistics
-        const totalEntries = this.csvData.length;
-        const taggedEntries = Object.keys(this.annotations).length;
-        const allTags = [];
-        
-        Object.values(this.annotations).forEach(tags => {
-            allTags.push(...tags);
-        });
-        
-        const tagCounts = {};
-        allTags.forEach(tag => {
-            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-        });
-        
-        const uniqueTags = Object.keys(tagCounts).length;
-        const totalTagApplications = allTags.length;
-        
-        // Create statistics HTML
-        let statsHtml = `
-            <div class="stats-section">
-                <h4>Overall Statistics</h4>
-                <div>Total Entries: ${totalEntries}</div>
-                <div>Tagged Entries: ${taggedEntries}</div>
-                <div>Progress: ${((taggedEntries / totalEntries) * 100).toFixed(1)}%</div>
-                <div>Unique Tags: ${uniqueTags}</div>
-                <div>Total Tag Applications: ${totalTagApplications}</div>
-            </div>
-        `;
-        
-        if (uniqueTags > 0) {
-            statsHtml += `<div class="stats-section"><h4>Tag Usage</h4>`;
-            
-            // Sort tags by usage count
-            const sortedTags = Object.entries(tagCounts)
-                .sort(([,a], [,b]) => b - a)
-                .slice(0, 10); // Show top 10
-            
-            sortedTags.forEach(([tag, count]) => {
-                statsHtml += `<div>${tag}: ${count}</div>`;
-            });
-            
-            statsHtml += `</div>`;
-        }
-        
-        content.innerHTML = statsHtml;
-        modal.style.display = 'block';
-    }
 
-    /**
-     * Show export modal
-     */
-    showExportModal() {
-        const modal = document.getElementById('exportModal');
-        const preview = document.getElementById('exportPreview');
-        
-        // Show preview of annotations
-        const previewData = {
-            metadata: {
-                total_entries: this.csvData.length,
-                tagged_entries: Object.keys(this.annotations).length,
-                export_date: new Date().toISOString()
-            },
-            annotations: this.annotations
-        };
-        
-        preview.textContent = JSON.stringify(previewData, null, 2);
-        modal.style.display = 'block';
-    }
-
-    /**
-     * Export annotations to JSON
-     */
-    exportToJson() {
-        const data = {
-            metadata: {
-                total_entries: this.csvData.length,
-                tagged_entries: Object.keys(this.annotations).length,
-                export_date: new Date().toISOString(),
-                tool: 'Error Annotator Web'
-            },
-            all_tags: this.getAllUniqueTags(),
-            entry_tags: this.annotations,
-            tag_usage_count: this.getTagUsageCounts()
-        };
-        
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `error_annotations_${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        this.closeModal('exportModal');
-    }
-
-    /**
-     * Export to CSV report
-     */
-    exportToCsv() {
-        let csvContent = 'task_id,tags,tag_count,original_test_result,refactored_test_result,comparison\n';
-        
-        this.csvData.forEach((entry, index) => {
-            const entryId = entry.task_id || `entry_${index}`;
-            const tags = this.annotations[entryId] || [];
-            const tagString = tags.join('; ');
-            const tagCount = tags.length;
-            
-            // Escape CSV fields
-            const escapeCsv = (field) => {
-                if (!field) return '';
-                const str = String(field);
-                if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-                    return `"${str.replace(/"/g, '""')}"`;
-                }
-                return str;
-            };
-            
-            csvContent += `${escapeCsv(entryId)},${escapeCsv(tagString)},${tagCount},` +
-                         `${escapeCsv(entry.original_test_result)},${escapeCsv(entry.refactored_test_result)},` +
-                         `${escapeCsv(entry.comparison)}\n`;
-        });
-        
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `error_annotation_report_${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        this.closeModal('exportModal');
-    }
-
-    /**
-     * Get all unique tags
-     */
-    getAllUniqueTags() {
-        const allTags = new Set();
-        Object.values(this.annotations).forEach(tags => {
-            tags.forEach(tag => allTags.add(tag));
-        });
-        return Array.from(allTags);
-    }
-
-    /**
-     * Get tag usage counts
-     */
-    getTagUsageCounts() {
-        const counts = {};
-        Object.values(this.annotations).forEach(tags => {
-            tags.forEach(tag => {
-                counts[tag] = (counts[tag] || 0) + 1;
-            });
-        });
-        return counts;
-    }
 
     /**
      * Clear all annotations
@@ -861,22 +669,68 @@ class ErrorAnnotator {
         }
     }
 
-    /**
-     * Close modal
-     */
-    closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    }
 
     /**
      * Save annotations to local storage
      */
-    saveAnnotationsToStorage() {
+    async saveAnnotationsToStorage() {
         try {
+            // Save to localStorage
             localStorage.setItem('errorAnnotations', JSON.stringify(this.annotations));
+            
+            // Also update data for finished annotating page
+            this.storeDataForFinishedPage();
         } catch (error) {
-            console.warn('Could not save annotations to local storage:', error);
+            console.warn('Could not save annotations:', error);
         }
+    }
+
+    /**
+     * Store data for the finished annotating page
+     */
+    storeDataForFinishedPage() {
+        try {
+            // Store current annotations
+            localStorage.setItem('errorAnnotations', JSON.stringify(this.annotations));
+            
+            // Store CSV data
+            localStorage.setItem('csvData', JSON.stringify(this.csvData));
+            
+            // Store current CSV file info
+            if (this.currentCSVFile) {
+                localStorage.setItem('currentCSVFile', JSON.stringify(this.currentCSVFile));
+            }
+        } catch (error) {
+            console.warn('Could not store data for finished annotating page:', error);
+        }
+    }
+
+    /**
+     * Navigate to finished annotating page
+     */
+    async finishedAnnotating() {
+        // Store current data before navigating
+        this.storeDataForFinishedPage();
+        
+        // Check if we have any annotations
+        const hasAnnotations = Object.keys(this.annotations).length > 0;
+        const hasData = this.csvData.length > 0;
+        
+        if (!hasData) {
+            alert('Please load a CSV file before finishing annotation.');
+            return;
+        }
+        
+        if (!hasAnnotations) {
+            const confirm = window.confirm('You haven\'t made any annotations yet. Are you sure you want to continue to the finished page?');
+            if (!confirm) return;
+        }
+        
+        // Save to Google Drive if available
+        await this.saveFinishedAnnotationsToGoogleDrive();
+        
+        // Navigate to finished annotating page
+        window.location.href = '/finished-annotating/';
     }
 
     /**
@@ -893,414 +747,145 @@ class ErrorAnnotator {
         this.annotations = {};
     }
 
-    // Additional methods for advanced export functionality
-    importPromptFromText() {
-        const textarea = document.getElementById('promptTextInput');
-        const text = textarea.value.trim();
+    /**
+     * Generate unique ID for CSV file based on its properties
+     */
+    generateCSVFileId() {
+        if (!this.currentCSVFile) return `session_${Date.now()}`;
         
-        if (!text) {
-            alert('Please paste some prompt text first!');
-            return;
-        }
-        
-        this.importedPrompt = text;
-        this.showImportedPrompt(this.importedPrompt);
-        textarea.value = '';
-        this.updateAssociationButtonState();
+        const { name, size, lastModified } = this.currentCSVFile;
+        return `csv_${btoa(`${name}_${size}_${lastModified}`).replace(/[^a-zA-Z0-9]/g, '')}`;
     }
 
-    importPromptFromFile(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            this.importedPrompt = e.target.result;
-            this.showImportedPrompt(this.importedPrompt);
-            this.updateAssociationButtonState();
-        };
-        reader.readAsText(file);
-    }
 
-    showImportedPrompt(prompt) {
-        const preview = prompt.length > 200 ? prompt.substring(0, 200) + '...' : prompt;
-        document.getElementById('promptPreviewText').textContent = preview;
-        document.getElementById('importedPromptInfo').style.display = 'block';
-    }
-
-    generateEnhancedPrompt() {
-        if (!this.csvData || this.csvData.length === 0) {
-            alert('Please load CSV data first to generate enhanced prompts!');
-            return;
-        }
-
-        // Analyze annotation patterns
-        const analysis = this.analyzeAnnotationPatterns();
-        
-        // Create enhanced prompt
-        const basePrompt = this.importedPrompt || `[Your existing prompt text should be placed here at the beginning]`;
-        
-        const enhancedSection = `
-
-## CRITICAL ERROR PREVENTION ANALYSIS
-
-Based on analysis of ${this.csvData.length} annotated error cases, the following patterns have been identified to help prevent common LLM mistakes:
-
-### Error Patterns Identified from Annotations:
-
-${this.generateErrorPatternSections(analysis)}
-
-### MANDATORY REQUIREMENTS:
-1. **Function Signatures**: Always verify the exact number and names of parameters required
-2. **Variable Names**: Ensure all variables are properly defined before use  
-3. **Return Types**: Match expected return formats exactly
-4. **Test Compatibility**: Code must pass the provided test cases without modification
-5. **Syntax Validation**: Check for proper Python syntax, indentation, and brackets
-
-### QUALITY CHECKLIST:
-- [ ] Function signature matches test calls exactly
-- [ ] All variables are defined before use
-- [ ] Return format matches expected output
-- [ ] No syntax errors or typos
-- [ ] Logic handles edge cases properly
-
-Remember: These ${this.csvData.length} errors were identified through careful analysis. Focus on correctness over complexity.`;
-
-        this.generatedPrompt = basePrompt + enhancedSection;
-        
-        // Display the prompt
-        document.getElementById('generatedPromptText').textContent = this.generatedPrompt;
-        document.getElementById('promptOutput').style.display = 'block';
-        
-        // Show statistics
-        this.displayExportStats(analysis);
-        
-        // Enable copy/download buttons
-        document.getElementById('copyPromptBtn').disabled = false;
-        document.getElementById('downloadPromptBtn').disabled = false;
-        this.updateAssociationButtonState();
-    }
-
-    analyzeAnnotationPatterns() {
-        const tagCounts = this.getTagUsageCounts();
-        const totalAnnotated = Object.keys(this.annotations).length;
-        const totalEntries = this.csvData.length;
-        
-        // Categorize error types from annotations
-        const errorTypes = {};
-        Object.values(this.annotations).forEach(tags => {
-            tags.forEach(tag => {
-                // Map tags to error categories
-                if (tag.toLowerCase().includes('signature') || tag.toLowerCase().includes('argument')) {
-                    errorTypes['Function Signature Issues'] = (errorTypes['Function Signature Issues'] || 0) + 1;
-                } else if (tag.toLowerCase().includes('logical') || tag.toLowerCase().includes('algorithm')) {
-                    errorTypes['Logic/Algorithm Errors'] = (errorTypes['Logic/Algorithm Errors'] || 0) + 1;
-                } else if (tag.toLowerCase().includes('syntax') || tag.toLowerCase().includes('environment')) {
-                    errorTypes['Syntax/Environment Issues'] = (errorTypes['Syntax/Environment Issues'] || 0) + 1;
-                } else {
-                    errorTypes['Other Issues'] = (errorTypes['Other Issues'] || 0) + 1;
-                }
-            });
-        });
-        
-        return {
-            totalEntries,
-            totalAnnotated,
-            tagCounts,
-            errorTypes,
-            annotationRate: ((totalAnnotated / totalEntries) * 100).toFixed(1)
-        };
-    }
-
-    generateErrorPatternSections(analysis) {
-        let sections = '';
-        let count = 1;
-        
-        // Add insights based on tag analysis
-        Object.entries(analysis.errorTypes).forEach(([category, occurrences]) => {
-            sections += `\n${count}. **${category}** - ${this.getCategoryDescription(category)}
-   Frequency: ${occurrences} instances identified
-   Focus Area: ${this.getCategoryFocusArea(category)}\n`;
-            count++;
-        });
-        
-        // Add examples from high-frequency tags
-        const topTags = Object.entries(analysis.tagCounts)
-            .sort(([,a], [,b]) => b - a)
-            .slice(0, 5);
-            
-        if (topTags.length > 0) {
-            sections += `\n### Most Common Annotation Tags:`;
-            topTags.forEach(([tag, count]) => {
-                sections += `\n• ${tag}: ${count} occurrences`;
-            });
-        }
-        
-        return sections;
-    }
-
-    getCategoryDescription(category) {
-        const descriptions = {
-            'Function Signature Issues': 'Wrong number/type of function parameters',
-            'Logic/Algorithm Errors': 'Incorrect implementation of algorithm logic',
-            'Syntax/Environment Issues': 'Code syntax and environment setup problems',
-            'Other Issues': 'Various other coding problems identified'
-        };
-        return descriptions[category] || 'Code execution issues';
-    }
-
-    getCategoryFocusArea(category) {
-        const focusAreas = {
-            'Function Signature Issues': 'Parameter validation and function call matching',
-            'Logic/Algorithm Errors': 'Algorithm correctness and edge case handling',
-            'Syntax/Environment Issues': 'Python syntax rules and environment setup',
-            'Other Issues': 'General code quality and best practices'
-        };
-        return focusAreas[category] || 'Code quality improvement';
-    }
-
-    generateAnalysisJSON() {
-        const analysis = this.analyzeAnnotationPatterns();
-        
-        const analysisData = {
-            metadata: {
-                generatedAt: new Date().toISOString(),
-                csvFileName: this.currentCSVFile?.name || 'Unknown',
-                totalEntries: this.csvData.length,
-                annotatedEntries: Object.keys(this.annotations).length,
-                analysisType: 'error_annotation_analysis'
-            },
-            statistics: {
-                annotationRate: analysis.annotationRate + '%',
-                totalTags: Object.values(analysis.tagCounts).reduce((a, b) => a + b, 0),
-                uniqueTags: Object.keys(analysis.tagCounts).length,
-                errorTypeBreakdown: analysis.errorTypes
-            },
-            annotations: this.annotations,
-            tagFrequency: analysis.tagCounts,
-            csvData: this.csvData.map(entry => ({
-                task_id: entry.task_id,
-                description: entry.description || entry.task_description,
-                original_result: entry.original_test_result,
-                refactored_result: entry.refactored_test_result,
-                annotations: this.annotations[entry.task_id] || []
-            })),
-            associations: this.csvAssociations.filter(assoc => 
-                assoc.csvFile.name === this.currentCSVFile?.name
-            )
-        };
-        
-        this.generatedJSON = JSON.stringify(analysisData, null, 2);
-        
-        // Display the JSON
-        document.getElementById('generatedJsonText').textContent = this.generatedJSON;
-        document.getElementById('jsonOutput').style.display = 'block';
-        
-        // Enable JSON copy/download buttons
-        document.getElementById('copyJsonBtn').disabled = false;
-        document.getElementById('downloadJsonBtn').disabled = false;
-    }
-
-    displayExportStats(analysis) {
-        const statsHtml = `
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">${analysis.totalEntries}</div>
-                    <div class="stat-label">Total Entries</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${analysis.totalAnnotated}</div>
-                    <div class="stat-label">Annotated</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${analysis.annotationRate}%</div>
-                    <div class="stat-label">Coverage</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${Object.keys(analysis.tagCounts).length}</div>
-                    <div class="stat-label">Unique Tags</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${Object.keys(analysis.errorTypes).length}</div>
-                    <div class="stat-label">Error Types</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${this.generatedPrompt.length}</div>
-                    <div class="stat-label">Prompt Length</div>
-                </div>
-            </div>
-        `;
-        
-        document.getElementById('exportStatsGrid').innerHTML = statsHtml;
-        document.getElementById('exportStatsSection').style.display = 'block';
-    }
-
-    copyPromptToClipboard() {
-        if (!this.generatedPrompt) {
-            alert('Please generate the prompt first!');
-            return;
-        }
-        this.copyToClipboard(this.generatedPrompt, 'Prompt copied to clipboard!');
-    }
-
-    copyJSONToClipboard() {
-        if (!this.generatedJSON) {
-            alert('Please generate the JSON data first!');
-            return;
-        }
-        this.copyToClipboard(this.generatedJSON, 'JSON data copied to clipboard!');
-    }
-
-    copyToClipboard(text, successMessage) {
-        navigator.clipboard.writeText(text).then(() => {
-            alert(successMessage);
-        }, () => {
-            // Fallback for older browsers
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            
-            try {
-                document.execCommand('copy');
-                alert(successMessage);
-            } catch (err) {
-                alert('Could not copy to clipboard. Please select and copy manually.');
-            }
-            
-            document.body.removeChild(textArea);
-        });
-    }
-
-    downloadPrompt() {
-        if (!this.generatedPrompt) {
-            alert('Please generate the prompt first!');
-            return;
-        }
-        this.downloadFile(this.generatedPrompt, 'enhanced-prompt', 'txt', 'text/plain');
-    }
-
-    downloadJSON() {
-        if (!this.generatedJSON) {
-            alert('Please generate the JSON data first!');
-            return;
-        }
-        this.downloadFile(this.generatedJSON, 'error-analysis-data', 'json', 'application/json');
-    }
-
-    downloadFile(content, baseName, extension, mimeType) {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-        const filename = `${baseName}-${timestamp}.${extension}`;
-        
-        const blob = new Blob([content], { type: mimeType });
-        const url = window.URL.createObjectURL(blob);
-        
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-    }
-
-    associateCurrentCSVWithPrompt() {
-        if (!this.currentCSVFile) {
-            alert('Please load a CSV file first!');
-            return;
-        }
-        
-        if (!this.importedPrompt && !this.generatedPrompt) {
-            alert('Please import a prompt or generate an enhanced prompt first!');
-            return;
-        }
-        
-        const association = {
-            id: Date.now(),
-            csvFile: this.currentCSVFile,
-            prompt: this.importedPrompt || this.generatedPrompt,
-            associationDate: new Date().toISOString(),
-            promptType: this.importedPrompt ? 'imported' : 'generated',
-            annotationCount: Object.keys(this.annotations).length
-        };
-        
-        this.csvAssociations.push(association);
-        localStorage.setItem('csvAssociations', JSON.stringify(this.csvAssociations));
-        
-        alert('CSV file successfully associated with prompt!');
-        this.updateAssociationButtonState();
-    }
-
-    viewAssociations() {
-        const container = document.getElementById('associationsDisplay');
-        
-        if (this.csvAssociations.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">No CSV-prompt associations found.</p>';
-            container.style.display = 'block';
-            return;
-        }
-        
-        let html = '';
-        this.csvAssociations.forEach(assoc => {
-            const date = new Date(assoc.associationDate).toLocaleDateString();
-            
-            html += `
-                <div class="association-item">
-                    <div class="association-info">
-                        <div class="association-file">${assoc.csvFile.name}</div>
-                        <div class="association-date">Associated: ${date} (${assoc.promptType}, ${assoc.annotationCount || 0} annotations)</div>
-                    </div>
-                    <div class="association-actions">
-                        <button class="action-btn-small view" onclick="errorAnnotator.viewAssociation(${assoc.id})">View</button>
-                        <button class="action-btn-small remove" onclick="errorAnnotator.removeAssociation(${assoc.id})">Remove</button>
-                    </div>
-                </div>
+    /**
+     * Show notification to user
+     */
+    showNotification(message, type = 'info') {
+        // Create notification element if it doesn't exist
+        let notification = document.getElementById('csv-notification');
+        if (!notification) {
+            notification = document.createElement('div');
+            notification.id = 'csv-notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                transition: all 0.3s ease;
+                max-width: 400px;
             `;
-        });
+            document.body.appendChild(notification);
+        }
+
+        // Set message and styling based on type
+        notification.textContent = message;
         
-        container.innerHTML = html;
-        container.style.display = 'block';
+        const styles = {
+            'success': 'background-color: #27ae60;',
+            'error': 'background-color: #e74c3c;',
+            'warning': 'background-color: #f39c12;',
+            'info': 'background-color: #3498db;'
+        };
+        
+        notification.style.cssText += styles[type] || styles.info;
+        notification.style.display = 'block';
+        notification.style.opacity = '1';
+
+        // Auto-hide after 4 seconds
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 300);
+        }, 4000);
     }
 
-    viewAssociation(id) {
-        const assoc = this.csvAssociations.find(a => a.id === id);
-        if (!assoc) return;
-        
-        const newWindow = window.open('', '_blank');
-        newWindow.document.write(`
-            <html>
-            <head><title>Associated Prompt - ${assoc.csvFile.name}</title></head>
-            <body style="font-family: Arial, sans-serif; margin: 20px;">
-                <h2>Associated Prompt for: ${assoc.csvFile.name}</h2>
-                <p><strong>Association Date:</strong> ${new Date(assoc.associationDate).toLocaleString()}</p>
-                <p><strong>Prompt Type:</strong> ${assoc.promptType}</p>
-                <p><strong>Annotations:</strong> ${assoc.annotationCount || 0}</p>
-                <hr>
-                <pre style="white-space: pre-wrap; background: #f8f9fa; padding: 20px; border-radius: 5px;">${assoc.prompt}</pre>
-            </body>
-            </html>
-        `);
-    }
 
-    removeAssociation(id) {
-        if (!confirm('Are you sure you want to remove this association?')) return;
-        
-        this.csvAssociations = this.csvAssociations.filter(a => a.id !== id);
-        localStorage.setItem('csvAssociations', JSON.stringify(this.csvAssociations));
-        this.viewAssociations(); // Refresh the list
-    }
+    /**
+     * Save user progress locally
+     */
+    async saveUserProgress() {
+        try {
+            const progress = {
+                totalEntriesAnnotated: Object.keys(this.annotations).length,
+                totalDatasets: 1,
+                lastActive: new Date().toISOString(),
+                currentDataset: {
+                    fileName: this.currentCSVFile?.name,
+                    totalEntries: this.csvData.length,
+                    annotatedEntries: Object.keys(this.annotations).length,
+                    completionPercentage: (Object.keys(this.annotations).length / this.csvData.length) * 100
+                }
+            };
 
-    updateAssociationButtonState() {
-        const hasPrompt = !!(this.importedPrompt || this.generatedPrompt);
-        const hasCSV = !!this.currentCSVFile;
-        
-        const btn = document.getElementById('associateCurrentBtn');
-        if (btn) {
-            btn.disabled = !(hasPrompt && hasCSV);
+            // Save to localStorage
+            localStorage.setItem('userProgress', JSON.stringify(progress));
+        } catch (error) {
+            console.warn('Failed to save user progress:', error);
         }
     }
+
+    /**
+     * Save finished annotations to Google Drive JSON folder
+     */
+    async saveFinishedAnnotationsToGoogleDrive() {
+        // Only save if Google Drive service is ready
+        if (!window.googleDriveService || !window.googleDriveService.isReady()) {
+            console.log('Google Drive not ready, skipping annotation save');
+            return;
+        }
+
+        try {
+            console.log('Saving finished annotations to Google Drive...');
+            
+            // Ensure the backup folder structure exists
+            const folderStructure = await window.googleDriveService.ensureBackupFolderStructure();
+            
+            // Create the annotation data
+            const annotationData = {
+                metadata: {
+                    csvFileName: this.currentCSVFile?.name || 'unknown',
+                    totalEntries: this.csvData.length,
+                    annotatedEntries: Object.keys(this.annotations).length,
+                    completionPercentage: (Object.keys(this.annotations).length / this.csvData.length) * 100,
+                    exportDate: new Date().toISOString(),
+                    userEmail: window.authService?.user?.email || 'unknown',
+                    categories: this.errorCategories
+                },
+                annotations: this.annotations,
+                csvData: this.csvData
+            };
+            
+            // Generate filename with timestamp
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const baseName = this.currentCSVFile?.name?.replace('.csv', '') || 'annotations';
+            const fileName = `${baseName}_annotations_${timestamp}.json`;
+            
+            // Save to the JSON folder in main Drive
+            const result = await window.googleDriveService.createFile(
+                fileName,
+                JSON.stringify(annotationData, null, 2),
+                'application/json',
+                folderStructure.jsonFolderId
+            );
+            
+            console.log('✅ Finished annotations saved to Google Drive:', fileName);
+            this.showNotification('Annotations saved to Google Drive', 'success');
+            
+            return result;
+            
+        } catch (error) {
+            console.error('Failed to save annotations to Google Drive:', error);
+            this.showNotification('Failed to save annotations to Google Drive', 'warning');
+        }
+    }
+
 }
 
 // Global variable for error annotator instance
