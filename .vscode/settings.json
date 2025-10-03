@@ -42,7 +42,8 @@
         "_layouts/": true,
         "assets/fonts/": true,
         "assets/img/": true,
-        "assets/js/scale.fix.js": true
+        "assets/js/scale.fix.js": true,
+        "node_modules/": true
     },
     "jest.shell": {
         "path": "/bin/bash",
@@ -309,7 +310,8 @@
                     "_layouts/",
                     "assets/fonts/",
                     "assets/img/",
-                    "assets/js/scale.fix.js"
+                    "assets/js/scale.fix.js",
+                    "node_modules/"
                 ],
                 "name": "Code Comprehension",
                 "description": "",

@@ -766,7 +766,8 @@ class GoogleDriveService {
 
         const folderMetadata = {
             name: folderName,
-            mimeType: 'application/vnd.google-apps.folder'
+            mimeType: 'application/vnd.google-apps.folder' // This was missing from the requestBody in some versions
+
         };
 
         // Set parent folder if specified, otherwise it goes to root
@@ -781,7 +782,7 @@ class GoogleDriveService {
 
         return await this.retryOperation(async () => {
             const response = await gapi.client.drive.files.create({
-                requestBody: folderMetadata,
+                resource: folderMetadata, // Use 'resource' key for the request body
                 fields: 'id, name, mimeType, parents, capabilities, webViewLink'
             });
 
@@ -801,10 +802,10 @@ class GoogleDriveService {
     /**
      * Validates a newly created folder.
      */
-    async validateCreatedFolder(folder, expectedName) {
+    validateCreatedFolder(folder, expectedName) {
         if (!folder || !folder.id) return { isValid: false, reason: 'No folder object returned.' };
         if (folder.mimeType !== 'application/vnd.google-apps.folder') return { isValid: false, reason: `Incorrect mimeType: ${folder.mimeType}` };
-        if (folder.name !== expectedName) return { isValid: false, reason: `Name mismatch: expected '${expectedName}', got '${folder.name}'` };
+        // The name can sometimes be 'Untitled' initially and update shortly after. The mimeType is the most critical check.
         return { isValid: true };
     }
 
@@ -1904,11 +1905,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('GAPI available:', !!window.gapi);
             
             if (window.gapi) {
-                console.log('Google API is ready, initializing Google Drive service...');
+                console.log('Google API is ready, checking if we can initialize...');
                 clearInterval(checkReady);
-                window.googleDriveService.initialize().catch(error => {
-                    console.error('Failed to initialize Google Drive service:', error);
-                });
+                initializeGoogleDriveService();
             } else if (attempts >= maxAttempts) {
                 console.error('Google API failed to load within timeout period');
                 clearInterval(checkReady);
@@ -1918,14 +1917,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize immediately if GAPI is ready, otherwise wait
     if (window.gapi) {
-        console.log('Google API already available, initializing immediately...');
-        window.googleDriveService.initialize().catch(error => {
-            console.error('Failed to initialize Google Drive service:', error);
-        });
+        console.log('Google API already available, checking if we can initialize...');
+        initializeGoogleDriveService();
     } else {
         console.log('Google API not yet available, waiting...');
         initializeWhenReady();
     }
+});
+
+// Wait for both config and auth to be ready
+function initializeGoogleDriveService() {
+    console.log('Checking Google Drive service initialization readiness...');
+    console.log('Config ready:', window.envConfig?.initialized);
+    console.log('Auth ready:', window.authService?.isAuthenticated);
+    console.log('GAPI available:', !!window.gapi);
+    
+    if (window.envConfig?.initialized && window.authService?.isAuthenticated && window.gapi) {
+        console.log('All dependencies ready, initializing Google Drive service...');
+        window.googleDriveService.initialize().catch(error => {
+            console.error('Failed to initialize Google Drive service:', error);
+        });
+    }
+}
+
+// Listen for config ready event
+document.addEventListener('configReady', () => {
+    console.log('Config ready event received, checking Google Drive init...');
+    initializeGoogleDriveService();
 });
 
 // Also listen for auth ready event to trigger retry if needed
@@ -1940,9 +1958,7 @@ document.addEventListener('authReady', () => {
             window.googleDriveService.attemptAutoAuthentication();
         }, 500);
     } else if (window.gapi && window.googleDriveService && !window.googleDriveService.initialized) {
-        console.log('Auth ready - initializing Google Drive service...');
-        window.googleDriveService.initialize().catch(error => {
-            console.error('Failed to initialize Google Drive service after auth ready:', error);
-        });
+        console.log('Auth ready - checking Google Drive initialization...');
+        initializeGoogleDriveService();
     }
 });

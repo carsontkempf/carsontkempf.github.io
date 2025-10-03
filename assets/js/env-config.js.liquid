@@ -1,3 +1,5 @@
+---
+---
 /**
  * Environment Configuration Handler
  * Securely loads API credentials from environment variables or secure sources
@@ -12,20 +14,26 @@ class EnvironmentConfig {
      * Initialize configuration from various secure sources
      */
     async initialize() {
-        // Skip Netlify function for now since it's not deployed
-        // TODO: Re-enable this once Netlify function is deployed
-        const skipNetlifyFunction = true;
+        // Skip Netlify function for local development (Jekyll can't serve functions)
+        const isLocalDevelopment = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
         
-        if (!skipNetlifyFunction) {
+        console.log('🔧 Environment Config: Detecting environment...');
+        console.log(`   • Hostname: ${window.location.hostname}`);
+        console.log(`   • Is Local Development: ${isLocalDevelopment}`);
+        
+        if (!isLocalDevelopment) {
+            console.log('🌐 Production environment - trying Netlify function...');
             try {
                 // Method 1: Try to load from Netlify Functions (most secure for production)
                 await this.loadFromNetlifyFunction();
                 this.initialized = true;
-                console.log('Environment configuration initialized');
+                console.log('✅ Environment configuration initialized from Netlify function');
                 return;
             } catch (error) {
-                console.warn('Failed to load from Netlify function:', error.message);
+                console.warn('❌ Failed to load from Netlify function:', error.message);
             }
+        } else {
+            console.log('🏠 Local development detected - skipping Netlify function');
         }
         
         try {
@@ -76,6 +84,12 @@ class EnvironmentConfig {
                 },
                 spotify: {
                     client_id: data.spotifyClientId
+                },
+                appleMusic: {
+                    developer_token: data.appleMusicDeveloperToken,
+                    team_id: data.appleMusicTeamId || '5S855HB895',
+                    key_id: data.appleMusicKeyId || 'F9Q8YRKX3T',
+                    private_key: data.appleMusicPrivateKey
                 }
             };
             
@@ -103,10 +117,17 @@ class EnvironmentConfig {
             },
             spotify: {
                 client_id: '80826ef3daa547f49d843c254ad224b6'
+            },
+            appleMusic: {
+                developer_token: '{{ site.data.apple_music_token.developer_token | default: "" }}',
+                team_id: '5S855HB895',
+                key_id: 'F9Q8YRKX3T',
+                private_key: '{{ site.data.apple_music_token.private_key | default: "" }}'
             }
         };
         
-        console.log('Configuration loaded from site config (fallback)');
+        console.log('✅ Configuration loaded from Jekyll site config');
+        console.log('🎵 Apple Music token loaded:', !!this.config.appleMusic?.developer_token);
     }
 
     /**
@@ -127,6 +148,12 @@ class EnvironmentConfig {
             },
             spotify: {
                 client_id: process.env.SPOTIFY_CLIENT_ID || ''
+            },
+            appleMusic: {
+                developer_token: process.env.APPLE_MUSIC_DEVELOPER_TOKEN || '',
+                team_id: process.env.APPLE_TEAM_ID || '5S855HB895',
+                key_id: process.env.APPLE_KEY_ID || 'F9Q8YRKX3T',
+                private_key: process.env.APPLE_PRIVATE_KEY || ''
             }
         };
         
@@ -181,6 +208,26 @@ class EnvironmentConfig {
     }
 
     /**
+     * Get Apple Music configuration
+     */
+    getAppleMusicConfig() {
+        if (!this.initialized) {
+            throw new Error('Configuration not initialized. Call initialize() first.');
+        }
+        
+        const config = this.config.appleMusic;
+        
+        // Return full config including credentials for JWT generation
+        return {
+            developer_token: config.developer_token || null,
+            team_id: config.team_id || '5S855HB895',
+            key_id: config.key_id || 'F9Q8YRKX3T',
+            private_key: config.private_key || null,
+            canGenerateToken: !!(config.team_id && config.key_id && config.private_key)
+        };
+    }
+
+    /**
      * Check if configuration is ready
      */
     isReady() {
@@ -197,18 +244,26 @@ window.envConfig = new EnvironmentConfig();
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🔧 Environment Config: Starting initialization...');
     try {
         await window.envConfig.initialize();
         
         // Set global Google Drive config for compatibility
         window.googleDriveConfig = window.envConfig.getGoogleDriveConfig();
         
+        console.log('✅ Environment Config: Complete');
+        console.log('📊 Config loaded:', {
+            Apple: !!window.envConfig.config?.appleMusic?.developer_token,
+            Spotify: !!window.envConfig.config?.spotify?.client_id,
+            GoogleDrive: !!window.envConfig.config?.googleDrive?.client_id
+        });
+        
         // Dispatch event when config is ready
         window.dispatchEvent(new CustomEvent('configReady', {
             detail: { envConfig: window.envConfig }
         }));
     } catch (error) {
-        console.error('Failed to initialize environment configuration:', error);
+        console.error('❌ Failed to initialize environment configuration:', error);
         
         // Dispatch error event
         window.dispatchEvent(new CustomEvent('configError', {

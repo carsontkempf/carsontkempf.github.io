@@ -42,11 +42,51 @@ permalink: /spotify-apple/
       </div>
     </div>
 
+    <!-- Apple Music Authorization Section -->
+    <div id="apple-music-auth-section" style="display: none;">
+      <div id="apple-music-connect-wrapper" style="display: none;">
+        <h3>Connect Your Apple Music Account</h3>
+        <p>To create playlists in Apple Music, please authorize access.</p>
+        <button id="apple-music-connect-btn" class="dashboard-btn">Connect Apple Music</button>
+      </div>
+      
+      <div id="apple-music-connected-wrapper" style="display: none;">
+        <h3>Apple Music Connected</h3>
+        <div id="apple-music-user-info"></div>
+        <button id="apple-music-disconnect-btn" class="dashboard-btn secondary">Disconnect Apple Music</button>
+      </div>
+    </div>
+
     <!-- Spotify Data Section -->
     <div id="spotify-data-section" style="display: none;">
       <h3>Your Playlists</h3>
       <div id="playlists-container">
         <p>Loading playlists...</p>
+      </div>
+    </div>
+
+    <!-- Conversion Section -->
+    <div id="conversion-section" style="display: none;">
+      <h3>Convert to Apple Music</h3>
+      <div id="conversion-container">
+        <div id="conversion-progress" style="display: none;">
+          <h4>Converting Playlist...</h4>
+          <div class="progress-bar">
+            <div id="progress-fill"></div>
+          </div>
+          <div id="progress-text">Preparing conversion...</div>
+          <div id="conversion-details"></div>
+        </div>
+        
+        <div id="conversion-results" style="display: none;">
+          <h4>Conversion Complete!</h4>
+          <div id="results-summary"></div>
+          <div id="failed-tracks" style="display: none;">
+            <h5>Tracks that couldn't be converted:</h5>
+            <div id="failed-tracks-list"></div>
+          </div>
+          <button onclick="hideConversionResults()" class="dashboard-btn secondary">Close</button>
+        </div>
       </div>
     </div>
   </main>
@@ -404,12 +444,21 @@ async function loadUserPlaylists() {
                 </div>
                 <div class="playlists-grid">
                     ${playlistsData.items.map(playlist => `
-                        <div class="playlist-item clickable-playlist" onclick="showPlaylistTracks('${playlist.id}', '${playlist.name.replace(/'/g, "\\'")}')">
-                            <h4>${playlist.name}</h4>
-                            <p>Tracks: ${playlist.tracks.total}</p>
-                            <p>Owner: ${playlist.owner.display_name || playlist.owner.id}</p>
-                            <p class="playlist-type">${playlist.public ? 'Public' : 'Private'} • ${playlist.collaborative ? 'Collaborative' : 'Solo'}</p>
-                            <p class="click-hint">Click to view tracks</p>
+                        <div class="playlist-item clickable-playlist">
+                            <div onclick="showPlaylistTracks('${playlist.id}', '${playlist.name.replace(/'/g, "\\'")}')">
+                                <h4>${playlist.name}</h4>
+                                <p>Tracks: ${playlist.tracks.total}</p>
+                                <p>Owner: ${playlist.owner.display_name || playlist.owner.id}</p>
+                                <p class="playlist-type">${playlist.public ? 'Public' : 'Private'} • ${playlist.collaborative ? 'Collaborative' : 'Solo'}</p>
+                                <p class="click-hint">Click to view tracks</p>
+                            </div>
+                            <div class="playlist-actions">
+                                <button onclick="event.stopPropagation(); convertPlaylistToAppleMusic('${playlist.id}', '${playlist.name.replace(/'/g, "\\'")}', ${playlist.tracks.total})" 
+                                        class="convert-btn" 
+                                        ${!window.appleMusicService?.isAuthorized && !window.appleMusicService?.catalogOnlyMode ? 'disabled title="Connect Apple Music first"' : ''}>
+                                    🍎 Add to Apple Music
+                                </button>
+                            </div>
                         </div>
                     `).join('')}
                 </div>
@@ -454,7 +503,10 @@ async function showPlaylistTracks(playlistId, playlistName) {
                             <div class="track-item">
                                 <div class="track-number">${index + 1}</div>
                                 <div class="track-info">
-                                    <div class="track-name">${track.name}</div>
+                                    <div class="track-name">
+                                        ${track.name}
+                                        ${track.explicit ? '<span class="explicit-badge">E</span>' : ''}
+                                    </div>
                                     <div class="track-artist">${artistNames}</div>
                                     <div class="track-album">${albumName}</div>
                                 </div>
@@ -505,8 +557,239 @@ function formatDate(dateString) {
     return date.toLocaleDateString();
 }
 
+// Apple Music Integration Functions
+
+// Update Apple Music UI based on auth status
+function updateAppleMusicUI() {
+    const connectWrapper = document.getElementById('apple-music-connect-wrapper');
+    const connectedWrapper = document.getElementById('apple-music-connected-wrapper');
+    const authSection = document.getElementById('apple-music-auth-section');
+    
+    if (window.appleMusicService.isAuthorized) {
+        connectWrapper.style.display = 'none';
+        connectedWrapper.style.display = 'block';
+        
+        // Update user info
+        document.getElementById('apple-music-user-info').innerHTML = `
+            <p><strong>Apple Music:</strong> Connected and ready to create playlists</p>
+        `;
+        
+        // Show conversion section
+        document.getElementById('conversion-section').style.display = 'block';
+    } else {
+        connectWrapper.style.display = 'block';
+        connectedWrapper.style.display = 'none';
+        
+        // Hide conversion section
+        document.getElementById('conversion-section').style.display = 'none';
+    }
+    
+    authSection.style.display = 'block';
+    
+    // Update convert buttons in playlist grid
+    updateConvertButtons();
+}
+
+// Update convert button states
+function updateConvertButtons() {
+    const convertButtons = document.querySelectorAll('.convert-btn');
+    convertButtons.forEach(button => {
+        if (window.appleMusicService.isAuthorized || window.appleMusicService.catalogOnlyMode) {
+            button.disabled = false;
+            if (window.appleMusicService.catalogOnlyMode) {
+                button.setAttribute('title', 'Preview mode - will show matching songs without creating playlist');
+            } else {
+                button.removeAttribute('title');
+            }
+        } else {
+            button.disabled = true;
+            button.setAttribute('title', 'Connect Apple Music first');
+        }
+    });
+}
+
+// Convert playlist to Apple Music (preserves explicit content by default)
+async function convertPlaylistToAppleMusic(playlistId, playlistName, trackCount) {
+    if (!window.appleMusicService.isAuthorized && !window.appleMusicService.catalogOnlyMode) {
+        alert('Please connect to Apple Music first');
+        return;
+    }
+    
+    if (!window.spotifyService.isAuthorized) {
+        alert('Spotify connection lost. Please reconnect.');
+        return;
+    }
+    
+    try {
+        // Show progress
+        showConversionProgress();
+        updateProgressText(`Loading tracks from "${playlistName}"...`);
+        
+        // Get all tracks from Spotify playlist
+        const spotifyTracks = await window.spotifyService.getPlaylistTracks(playlistId);
+        
+        if (!spotifyTracks.items || spotifyTracks.items.length === 0) {
+            throw new Error('No tracks found in playlist');
+        }
+        
+        // Count explicit tracks for info
+        const explicitCount = spotifyTracks.items.filter(item => item.track && item.track.explicit).length;
+        console.log(`📊 Playlist contains ${explicitCount}/${spotifyTracks.items.length} explicit tracks`);
+        
+        // Get playlist details
+        const spotifyPlaylist = {
+            id: playlistId,
+            name: playlistName,
+            track_count: trackCount
+        };
+        
+        // Convert playlist with explicit preservation enabled by default
+        const result = await window.appleMusicService.convertSpotifyPlaylist(
+            spotifyPlaylist, 
+            spotifyTracks.items,
+            (progress) => {
+                updateConversionProgress(progress);
+            },
+            { maintainExplicit: true }
+        );
+        
+        // Show results
+        showConversionResults(result);
+        
+    } catch (error) {
+        console.error('Conversion failed:', error);
+        hideConversionProgress();
+        alert(`Conversion failed: ${error.message}`);
+    }
+}
+
+// Show conversion progress
+function showConversionProgress() {
+    document.getElementById('conversion-progress').style.display = 'block';
+    document.getElementById('conversion-results').style.display = 'none';
+    document.getElementById('progress-fill').style.width = '0%';
+}
+
+// Hide conversion progress
+function hideConversionProgress() {
+    document.getElementById('conversion-progress').style.display = 'none';
+}
+
+// Update progress text
+function updateProgressText(text) {
+    document.getElementById('progress-text').textContent = text;
+}
+
+// Update conversion progress with explicit tracking
+function updateConversionProgress(progress) {
+    const percentage = Math.round((progress.current / progress.total) * 100);
+    document.getElementById('progress-fill').style.width = `${percentage}%`;
+    
+    const explicitIndicator = progress.currentExplicit ? ' 🔞' : '';
+    updateProgressText(`Converting track ${progress.current} of ${progress.total}: ${progress.currentTrack}${explicitIndicator}`);
+    
+    const explicitMatchRate = progress.successful > 0 
+        ? Math.round((progress.explicitMatches / progress.successful) * 100) 
+        : 0;
+    
+    document.getElementById('conversion-details').innerHTML = `
+        <p>✅ Successfully converted: ${progress.successful}</p>
+        <p>❌ Failed to convert: ${progress.failed}</p>
+        <p>🎯 Explicit matches: ${progress.explicitMatches || 0}/${progress.successful || 0} (${explicitMatchRate}%)</p>
+        <p>⚠️ Explicit mismatches: ${progress.explicitMismatches || 0}</p>
+    `;
+}
+
+// Show conversion results
+function showConversionResults(result) {
+    hideConversionProgress();
+    
+    const resultsDiv = document.getElementById('conversion-results');
+    const summaryDiv = document.getElementById('results-summary');
+    const failedDiv = document.getElementById('failed-tracks');
+    const failedListDiv = document.getElementById('failed-tracks-list');
+    
+    const modeMessage = result.catalogOnlyMode 
+        ? `<div class="catalog-only-notice">📋 <strong>Preview Mode:</strong> ${result.message}</div>`
+        : `<p>The playlist has been added to your Apple Music library.</p>`;
+    
+    summaryDiv.innerHTML = `
+        <div class="conversion-summary">
+            <h5>🎉 Playlist "${result.appleMusicPlaylist.attributes.name}" ${result.catalogOnlyMode ? 'analyzed' : 'created'} successfully!</h5>
+            <div class="stats">
+                <p><strong>Original tracks:</strong> ${result.summary.originalTracks}</p>
+                <p><strong>Successfully converted:</strong> ${result.summary.convertedTracks}</p>
+                <p><strong>Success rate:</strong> ${result.summary.successRate}%</p>
+                <p><strong>Explicit matches:</strong> ${result.summary.explicitMatches || 0}/${result.summary.convertedTracks || 0} (${result.summary.explicitMatchRate || 0}%)</p>
+                <p><strong>Explicit mismatches:</strong> ${result.summary.explicitMismatches || 0}</p>
+            </div>
+            ${modeMessage}
+        </div>
+    `;
+    
+    if (result.conversionResults.failed.length > 0) {
+        failedDiv.style.display = 'block';
+        failedListDiv.innerHTML = result.conversionResults.failed.map(failed => `
+            <div class="failed-track">
+                <span class="track-name">
+                    ${failed.originalTrack?.name || 'Unknown'}
+                    ${failed.explicitInfo?.spotify ? '<span class="explicit-badge">E</span>' : ''}
+                </span>
+                <span class="track-artist">${failed.originalTrack?.artists?.[0]?.name || 'Unknown Artist'}</span>
+                <span class="error-reason">${failed.error}</span>
+            </div>
+        `).join('');
+    } else {
+        failedDiv.style.display = 'none';
+    }
+    
+    resultsDiv.style.display = 'block';
+}
+
+// Hide conversion results
+function hideConversionResults() {
+    document.getElementById('conversion-results').style.display = 'none';
+}
+
+// Wait for both auth and config to be ready
+function initializeServices() {
+    console.log('Checking service initialization readiness...');
+    console.log('Auth ready:', window.authService?.isAuthenticated);
+    console.log('Config ready:', window.envConfig?.initialized);
+    
+    if (window.authService?.isAuthenticated && window.envConfig?.initialized) {
+        console.log('Both auth and config ready, initializing services...');
+        initializeAppleMusicService();
+    }
+}
+
+// Initialize Apple Music service
+async function initializeAppleMusicService() {
+    try {
+        console.log('Starting Apple Music service initialization...');
+        const appleMusicConfig = window.envConfig.getAppleMusicConfig();
+        if (appleMusicConfig && appleMusicConfig.developer_token) {
+            await window.appleMusicService.initialize(appleMusicConfig.developer_token);
+            console.log('Apple Music service initialized successfully');
+            updateAppleMusicUI();
+        } else {
+            console.warn('Apple Music developer token not configured');
+        }
+    } catch (error) {
+        console.error('Failed to initialize Apple Music:', error);
+    }
+}
+
+// Listen for config ready event
+document.addEventListener('configReady', () => {
+    console.log('Config ready event received');
+    initializeServices();
+});
+
 // Main initialization
 document.addEventListener('authReady', async () => {
+    console.log('Auth ready event received');
+    
     if (window.authService.isAuthenticated) {
         document.getElementById('spotify-apple-content-wrapper').style.display = 'block';
         
@@ -520,16 +803,20 @@ document.addEventListener('authReady', async () => {
             `;
         }
         
+        // Check if we can initialize services now
+        initializeServices();
+        
         // Handle Spotify authorization callback
         await window.spotifyService.handleCallback();
         
         // Check existing Spotify authorization
         await window.spotifyService.checkTokenValidity();
         
-        // Update UI based on Spotify auth status
+        // Update UI based on auth status
         updateSpotifyUI();
+        updateAppleMusicUI();
         
-        // Set up event listeners
+        // Set up Spotify event listeners
         document.getElementById('spotify-connect-btn').addEventListener('click', (e) => {
             e.preventDefault();
             window.spotifyService.authorize();
@@ -538,6 +825,36 @@ document.addEventListener('authReady', async () => {
         document.getElementById('spotify-disconnect-btn').addEventListener('click', (e) => {
             e.preventDefault();
             window.spotifyService.disconnect();
+        });
+        
+        // Set up Apple Music event listeners
+        document.getElementById('apple-music-connect-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                if (!window.appleMusicService.isInitialized) {
+                    console.log('Apple Music service not initialized, trying to initialize...');
+                    await initializeAppleMusicService();
+                }
+                await window.appleMusicService.authorize();
+            } catch (error) {
+                console.error('Apple Music authorization failed:', error);
+                alert('Apple Music authorization failed. Please try again.');
+            }
+        });
+        
+        document.getElementById('apple-music-disconnect-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await window.appleMusicService.disconnect();
+            } catch (error) {
+                console.error('Apple Music disconnect failed:', error);
+            }
+        });
+        
+        // Listen for Apple Music auth changes
+        window.addEventListener('appleMusicAuthChanged', (event) => {
+            console.log('🍎 Apple Music auth changed event:', event.detail);
+            updateAppleMusicUI();
         });
         
     } else {

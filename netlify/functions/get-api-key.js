@@ -81,6 +81,7 @@ exports.handler = async (event, context) => {
     const auth0ClientId = process.env.AUTH0_CLIENT_ID;
     const auth0Audience = process.env.AUTH0_AUDIENCE_SERVER;
     const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
+    const appleMusicDeveloperToken = process.env.APPLE_MUSIC_DEVELOPER_TOKEN;
 
     if (googleDriveClientId && googleDriveApiKey && spotifyClientId) {
       return {
@@ -91,7 +92,8 @@ exports.handler = async (event, context) => {
           auth0Domain,
           auth0ClientId,
           auth0Audience,
-          spotifyClientId
+          spotifyClientId,
+          appleMusicDeveloperToken
         }),
       };
     } else {
