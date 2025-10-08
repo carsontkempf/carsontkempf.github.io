@@ -7,6 +7,7 @@
 class GoogleDriveService {
     constructor() {
         this.initialized = false;
+        this.initializationInProgress = false;
         this.gapi = null;
         this.tokenClient = null;
         this.accessToken = null;
@@ -219,12 +220,13 @@ class GoogleDriveService {
                         
             this.gapi = gapi;
             this.initialized = true;
-            console.log('Google Drive service initialized successfully');
+            this.initializationInProgress = false;
+            console.log('Google Drive service initialized successfully - ready for manual authentication');
             
-            // Wait a bit for Auth0 to be ready, then auto-authenticate
-            setTimeout(async () => {
-                console.log('Attempting auto-authentication...');
-                await this.attemptAutoAuthentication();
+            // Check authorization status without attempting auto-authentication
+            setTimeout(() => {
+                console.log('Checking authorization status...');
+                this.checkAuthorizationStatus();
             }, 1000);
             
         } catch (error) {
@@ -235,6 +237,55 @@ class GoogleDriveService {
             });
             throw error;
         }
+    }
+
+    /**
+     * Check authorization status without attempting automatic login
+     */
+    checkAuthorizationStatus() {
+        console.log('=== Checking Authorization Status ===');
+        
+        const hasRole = this.hasAuthorizedRole();
+        console.log('User has required role:', hasRole);
+        
+        // Check if already signed in
+        if (this.isSignedIn && this.accessToken) {
+            console.log('User already signed in to Google Drive');
+            window.dispatchEvent(new CustomEvent('driveAuthChanged', { 
+                detail: { signedIn: true, hasRole: hasRole }
+            }));
+            return;
+        }
+        
+        // Check for existing token without auto-authenticating
+        if (gapi.client.getToken()) {
+            console.log('Found existing token, validating...');
+            this.accessToken = gapi.client.getToken().access_token;
+            this.isSignedIn = true;
+            
+            // Validate the token works
+            this.validateUserIdentity().then(isValid => {
+                if (isValid) {
+                    console.log('Existing token validated successfully');
+                    window.dispatchEvent(new CustomEvent('driveAuthChanged', { 
+                        detail: { signedIn: true, hasRole: hasRole }
+                    }));
+                } else {
+                    console.log('Existing token validation failed');
+                    this.isSignedIn = false;
+                    this.accessToken = null;
+                    window.dispatchEvent(new CustomEvent('driveAuthChanged', { 
+                        detail: { signedIn: false, hasRole: hasRole }
+                    }));
+                }
+            });
+            return;
+        }
+        
+        // Dispatch status - not signed in, but don't automatically attempt login
+        window.dispatchEvent(new CustomEvent('driveAuthChanged', { 
+            detail: { signedIn: false, hasRole: hasRole }
+        }));
     }
 
     /**
@@ -263,11 +314,6 @@ class GoogleDriveService {
         
         if (!window.authService || !window.authService.isAuthenticated) {
             console.warn('Auth service not properly authenticated, skipping auto-authentication');
-            // Try again in a few seconds
-            setTimeout(() => {
-                console.log('Retrying auto-authentication after Auth0 delay...');
-                this.attemptAutoAuthentication();
-            }, 2000);
             return false;
         }
 
@@ -673,16 +719,12 @@ class GoogleDriveService {
                 }
                 if (!this.isSignedIn) {
                     this.logSecurityEvent('auth_attempt', {
-                        method: 'auto_then_manual',
+                        method: 'manual_required',
                         userEmail: window.authService?.user?.email
                     });
                     
-                    // Try auto-authentication first
-                    const autoAuthSuccess = await this.attemptAutoAuthentication();
-                    if (!autoAuthSuccess) {
-                        // Fall back to manual sign-in
-                        await this.signIn();
-                    }
+                    // Require explicit user action - no automatic authentication
+                    throw new Error('Google Drive authentication required. Please click "Sign In with Google Drive" button.');
                 }
             }
             
@@ -1927,6 +1969,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Wait for both config and auth to be ready
 function initializeGoogleDriveService() {
+    // Prevent duplicate initialization attempts
+    if (window.googleDriveService?.initialized || window.googleDriveService?.initializationInProgress) {
+        console.log('Google Drive service already initialized or in progress');
+        return;
+    }
+    
     console.log('Checking Google Drive service initialization readiness...');
     console.log('Config ready:', window.envConfig?.initialized);
     console.log('Auth ready:', window.authService?.isAuthenticated);
@@ -1934,8 +1982,10 @@ function initializeGoogleDriveService() {
     
     if (window.envConfig?.initialized && window.authService?.isAuthenticated && window.gapi) {
         console.log('All dependencies ready, initializing Google Drive service...');
+        window.googleDriveService.initializationInProgress = true;
         window.googleDriveService.initialize().catch(error => {
             console.error('Failed to initialize Google Drive service:', error);
+            window.googleDriveService.initializationInProgress = false;
         });
     }
 }
@@ -1952,10 +2002,10 @@ document.addEventListener('authReady', () => {
     console.log('Google Drive service initialized:', window.googleDriveService?.initialized);
     
     if (window.gapi && window.googleDriveService && window.googleDriveService.initialized) {
-        console.log('Auth ready - attempting auto-authentication retry...');
-        // Retry auto-authentication since auth is now ready
+        console.log('Auth ready - checking authorization status only...');
+        // Check authorization status without auto-authentication
         setTimeout(() => {
-            window.googleDriveService.attemptAutoAuthentication();
+            window.googleDriveService.checkAuthorizationStatus();
         }, 500);
     } else if (window.gapi && window.googleDriveService && !window.googleDriveService.initialized) {
         console.log('Auth ready - checking Google Drive initialization...');

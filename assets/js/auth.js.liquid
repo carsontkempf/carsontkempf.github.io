@@ -1,4 +1,5 @@
 ---
+permalink: /assets/js/auth.js
 ---
 // Create the global service object
 window.authService = {
@@ -19,11 +20,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         // 1. Create the Auth0 client with REFRESH TOKEN support
+        const redirectUri = window.location.origin;
+        console.log('Auth0 Configuration:', {
+            domain: config.domain,
+            clientId: config.clientId,
+            audience: config.audience,
+            redirectUri: redirectUri,
+            currentUrl: window.location.href
+        });
+        
         const auth0Client = await window.auth0.createAuth0Client({
             domain: config.domain,
             clientId: config.clientId,
             authorizationParams: {
-                redirect_uri: window.location.origin,
+                redirect_uri: redirectUri,
                 audience: config.audience
             },
             useRefreshTokens: true,

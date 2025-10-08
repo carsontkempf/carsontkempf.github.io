@@ -1,4 +1,5 @@
 ---
+permalink: /assets/js/env-config.js
 ---
 /**
  * Environment Configuration Handler
@@ -17,23 +18,17 @@ class EnvironmentConfig {
         // Skip Netlify function for local development (Jekyll can't serve functions)
         const isLocalDevelopment = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
         
-        console.log('🔧 Environment Config: Detecting environment...');
-        console.log(`   • Hostname: ${window.location.hostname}`);
-        console.log(`   • Is Local Development: ${isLocalDevelopment}`);
+        // Environment detection (silent unless error)
         
         if (!isLocalDevelopment) {
-            console.log('🌐 Production environment - trying Netlify function...');
             try {
                 // Method 1: Try to load from Netlify Functions (most secure for production)
                 await this.loadFromNetlifyFunction();
                 this.initialized = true;
-                console.log('✅ Environment configuration initialized from Netlify function');
                 return;
             } catch (error) {
                 console.warn('❌ Failed to load from Netlify function:', error.message);
             }
-        } else {
-            console.log('🏠 Local development detected - skipping Netlify function');
         }
         
         try {
@@ -47,7 +42,6 @@ class EnvironmentConfig {
         }
         
         this.initialized = true;
-        console.log('Environment configuration initialized');
     }
 
     /**
@@ -90,10 +84,16 @@ class EnvironmentConfig {
                     team_id: data.appleMusicTeamId || '5S855HB895',
                     key_id: data.appleMusicKeyId || 'F9Q8YRKX3T',
                     private_key: data.appleMusicPrivateKey
+                },
+                ssh: {
+                    host: data.sshHost,
+                    username: data.sshUsername,
+                    port: data.sshPort || '22',
+                    private_key: data.sshPrivateKey
                 }
             };
             
-            console.log('Configuration loaded from Netlify function');
+            // Configuration loaded successfully
         } catch (error) {
             throw new Error(`Failed to load from Netlify function: ${error.message}`);
         }
@@ -123,11 +123,16 @@ class EnvironmentConfig {
                 team_id: '5S855HB895',
                 key_id: 'F9Q8YRKX3T',
                 private_key: '{{ site.data.apple_music_token.private_key | default: "" }}'
+            },
+            ssh: {
+                host: 'rs8sgz564',
+                username: 'ctkfdp',
+                port: '22',
+                private_key: ''
             }
         };
         
-        console.log('✅ Configuration loaded from Jekyll site config');
-        console.log('🎵 Apple Music token loaded:', !!this.config.appleMusic?.developer_token);
+        // Configuration loaded from Jekyll site config
     }
 
     /**
@@ -154,10 +159,16 @@ class EnvironmentConfig {
                 team_id: process.env.APPLE_TEAM_ID || '5S855HB895',
                 key_id: process.env.APPLE_KEY_ID || 'F9Q8YRKX3T',
                 private_key: process.env.APPLE_PRIVATE_KEY || ''
+            },
+            ssh: {
+                host: process.env.SSH_HOST || '',
+                username: process.env.SSH_USERNAME || '',
+                port: process.env.SSH_PORT || '22',
+                private_key: process.env.SSH_PRIVATE_KEY || ''
             }
         };
         
-        console.log('Configuration loaded from environment variables');
+        // Configuration loaded from environment variables
     }
 
     /**
@@ -228,6 +239,17 @@ class EnvironmentConfig {
     }
 
     /**
+     * Get SSH configuration
+     */
+    getSSHConfig() {
+        if (!this.initialized) {
+            throw new Error('Configuration not initialized. Call initialize() first.');
+        }
+        
+        return this.config.ssh;
+    }
+
+    /**
      * Check if configuration is ready
      */
     isReady() {
@@ -244,19 +266,11 @@ window.envConfig = new EnvironmentConfig();
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🔧 Environment Config: Starting initialization...');
     try {
         await window.envConfig.initialize();
         
         // Set global Google Drive config for compatibility
         window.googleDriveConfig = window.envConfig.getGoogleDriveConfig();
-        
-        console.log('✅ Environment Config: Complete');
-        console.log('📊 Config loaded:', {
-            Apple: !!window.envConfig.config?.appleMusic?.developer_token,
-            Spotify: !!window.envConfig.config?.spotify?.client_id,
-            GoogleDrive: !!window.envConfig.config?.googleDrive?.client_id
-        });
         
         // Dispatch event when config is ready
         window.dispatchEvent(new CustomEvent('configReady', {

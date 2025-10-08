@@ -82,6 +82,10 @@ exports.handler = async (event, context) => {
     const auth0Audience = process.env.AUTH0_AUDIENCE_SERVER;
     const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
     const appleMusicDeveloperToken = process.env.APPLE_MUSIC_DEVELOPER_TOKEN;
+    const sshHost = process.env.SSH_HOST;
+    const sshUsername = process.env.SSH_USERNAME;
+    const sshPort = process.env.SSH_PORT;
+    const sshPrivateKey = process.env.SSH_PRIVATE_KEY;
 
     if (googleDriveClientId && googleDriveApiKey && spotifyClientId) {
       return {
@@ -93,7 +97,11 @@ exports.handler = async (event, context) => {
           auth0ClientId,
           auth0Audience,
           spotifyClientId,
-          appleMusicDeveloperToken
+          appleMusicDeveloperToken,
+          sshHost,
+          sshUsername,
+          sshPort,
+          sshPrivateKey
         }),
       };
     } else {

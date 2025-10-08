@@ -981,15 +981,29 @@ permalink: /code-comprehension/
             </div>
         </div>
 
-        <!-- Error Annotator Tool -->
-        <div style="margin-top: 30px; display: flex; justify-content: center;">
-            <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(231,76,60,0.3); max-width: 500px;">
-                <h3 style="color: white; margin: 0 0 15px 0; font-size: 1.3rem;">🏷️ Error Annotator</h3>
-                <p style="color: rgba(255,255,255,0.9); margin: 0 0 20px 0; font-size: 0.95rem;">
-                    Upload CSV files containing error data and annotate them with categories for analysis and model improvement.
-                </p>
+        <!-- Tool Buttons -->
+        <div style="margin-top: 30px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <!-- Error Annotator Tool -->
+            <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(231,76,60,0.3); max-width: 400px; flex: 1; min-width: 300px;">
+                <h3 style="color: white; margin: 0 0 20px 0; font-size: 1.3rem;">Error Annotator</h3>
                 <a href="/code-comprehension/error-annotator/" style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
-                    Open Annotator →
+                    Open Error Annotator →
+                </a>
+            </div>
+
+            <!-- Tree Visualizer Tool -->
+            <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(231,76,60,0.3); max-width: 400px; flex: 1; min-width: 300px;">
+                <h3 style="color: white; margin: 0 0 20px 0; font-size: 1.3rem;">Tree Visualizer</h3>
+                <a href="/code-comprehension/tree-visualizer/" style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
+                    Open Tree Visualizer →
+                </a>
+            </div>
+
+            <!-- Browser Terminal Tool -->
+            <div style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(46,204,113,0.3); max-width: 400px; flex: 1; min-width: 300px;">
+                <h3 style="color: white; margin: 0 0 20px 0; font-size: 1.3rem;">Browser Terminal</h3>
+                <a href="/code-comprehension/browser-terminal/" style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
+                    Open Browser Terminal →
                 </a>
             </div>
         </div>

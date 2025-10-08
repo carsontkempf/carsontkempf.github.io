@@ -34,6 +34,17 @@ theme: jekyll-theme-minimal
 sass:
   sass_dir: _sass
 
+# Process .liquid files as JavaScript
+defaults:
+  - scope:
+      path: "assets/js"
+    values:
+      layout: null
+
+# Include .liquid files in processing
+include:
+  - assets/js/*.liquid
+
 # Spotify API Configuration
 spotify:
   client_id: "80826ef3daa547f49d843c254ad224b6"

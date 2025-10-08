@@ -29,10 +29,12 @@ permalink: /spotify-apple/
   <main class="dashboard-main-content">
     <!-- Spotify Authorization Section -->
     <div id="spotify-auth-section">
-      <div id="spotify-connect-wrapper" style="display: none;">
+      <div id="spotify-connect-wrapper" style="display: none; text-align: center;">
         <h3>Connect Your Spotify Account</h3>
         <p>To access your playlists and music data, please authorize Spotify access.</p>
-        <button id="spotify-connect-btn" class="dashboard-btn">Connect Spotify</button>
+        <div style="display: flex; justify-content: center;">
+          <button id="spotify-connect-btn" class="dashboard-btn">Connect Spotify</button>
+        </div>
       </div>
       
       <div id="spotify-connected-wrapper" style="display: none;">
@@ -44,10 +46,12 @@ permalink: /spotify-apple/
 
     <!-- Apple Music Authorization Section -->
     <div id="apple-music-auth-section" style="display: none;">
-      <div id="apple-music-connect-wrapper" style="display: none;">
+      <div id="apple-music-connect-wrapper" style="display: none; text-align: center;">
         <h3>Connect Your Apple Music Account</h3>
         <p>To create playlists in Apple Music, please authorize access.</p>
-        <button id="apple-music-connect-btn" class="dashboard-btn">Connect Apple Music</button>
+        <div style="display: flex; justify-content: center;">
+          <button id="apple-music-connect-btn" class="dashboard-btn">Connect Apple Music</button>
+        </div>
       </div>
       
       <div id="apple-music-connected-wrapper" style="display: none;">

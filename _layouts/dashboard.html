@@ -68,8 +68,9 @@ permalink: /dashboard/
         const isSiteOwner = user.email === 'ctkfdp@umsystem.edu';
         
         if (hasAdminRole || isSiteOwner) {
-            // Full admin access - show both buttons
+            // Full admin access - show all buttons
             authButtonsDiv.innerHTML = `
+                <a href="{{ '/controls/' | relative_url }}" class="dashboard-btn">🔧 Server Controls</a>
                 <a href="{{ '/auth0-users/' | relative_url }}" class="dashboard-btn">Auth0 User Management</a>
                 <a href="{{ '/code-comprehension/' | relative_url }}" class="dashboard-btn">Code Comprehension Project</a>
             `;

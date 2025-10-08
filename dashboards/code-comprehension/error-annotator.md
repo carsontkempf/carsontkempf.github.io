@@ -949,8 +949,7 @@ permalink: /code-comprehension/error-annotator/
 
 <div id="error-annotator-container">
     <div class="annotator-header">
-        <h1>🏷️ Error Annotation Tool</h1>
-        <p>Upload CSV files containing error data and annotate them with categories for analysis and model improvement.</p>
+        <h1>Error Annotation Tool</h1>
         
     </div>
 
