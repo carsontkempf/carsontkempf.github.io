@@ -85,8 +85,8 @@ layout: post
         <a href="/spotify-apple/" class="project-btn spotify-btn" id="spotify-btn">
             🎵 Spotify → Apple Music
         </a>
-        <a href="/code-comprehension/error-annotator/" class="project-btn error-annotator-btn" id="error-annotator-btn">
-            🔍 Code Comprehension Tool
+        <a href="/code-comprehension/" class="project-btn error-annotator-btn" id="error-annotator-btn">
+            Code Comprehension Tool
         </a>
     </div>
 </div>
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     document.getElementById('error-annotator-btn').addEventListener('click', function(event) {
-        handleProjectClick(event, '/code-comprehension/error-annotator/');
+        handleProjectClick(event, '/code-comprehension/');
     });
     
     // Check for intended destination after login

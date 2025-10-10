@@ -56,31 +56,30 @@ permalink: /code-comprehension/tree-visualizer/
 }
 
 
-.nav-link-btn {
+/* Standardized back button styles */
+.back-button-container {
+    text-align: center;
+    margin: 20px 0 30px 0;
+}
+
+.standard-back-btn {
     display: inline-block;
-    margin: 0 10px;
-    padding: 10px 20px;
-    background: #e74c3c;
+    padding: 12px 24px;
+    background: #3498db;
     color: white;
     text-decoration: none;
     border-radius: 6px;
     font-weight: 500;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 
-.nav-link-btn:hover {
-    background: #c0392b;
+.standard-back-btn:hover {
+    background: #2980b9;
     transform: translateY(-1px);
     text-decoration: none;
     color: white;
-}
-
-.nav-link-btn.secondary {
-    background: #3498db;
-}
-
-.nav-link-btn.secondary:hover {
-    background: #2980b9;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
 }
 
 /* Toolbar */
@@ -275,8 +274,114 @@ permalink: /code-comprehension/tree-visualizer/
     padding: 0;
     border-radius: 12px;
     width: 80%;
-    max-width: 500px;
+    max-width: 800px;
+    max-height: 85vh;
+    overflow-y: auto;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* Prompt modal specific styles */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #bdc3c7;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.close {
+    color: rgba(255,255,255,0.8);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: white;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.prompt-metadata {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-left: 4px solid #3498db;
+}
+
+.metadata-item {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.metadata-item:last-child {
+    margin-bottom: 0;
+}
+
+.prompt-content h4 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 8px;
+}
+
+.markdown-content {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #2c3e50;
+    border: 1px solid #e9ecef;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+    color: #2c3e50;
+    margin: 15px 0 10px 0;
+}
+
+.markdown-content code {
+    background: #e8f4fd;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #2980b9;
+}
+
+.markdown-content strong {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px 25px;
+    border-top: 1px solid #e9ecef;
+    background: #f8f9fa;
+    border-radius: 0 0 12px 12px;
 }
 
 .dialog-content {
@@ -408,13 +513,25 @@ input[type="file"]:hover {
         <p>Create, edit, and visualize tree structures for code comprehension analysis</p>
     </div>
 
-    <!-- Back Button -->
-    <div style="text-align: left; margin-bottom: 30px; padding: 0 20px;">
-        <a href="/code-comprehension/" class="nav-link-btn secondary">← Back to Code Comprehension</a>
-    </div>
+<!-- Standardized Back Button -->
+<div class="back-button-container">
+    <a href="/code-comprehension/" class="standard-back-btn">← Back to Code Comprehension</a>
+</div>
 
     <!-- Message Display -->
     <div id="tree-message" class="message"></div>
+
+    <!-- Instructions -->
+    <div class="tree-toolbar" style="background: linear-gradient(135deg, #e8f4fd 0%, #f0f8ff 100%); border-left: 4px solid #3498db;">
+        <div style="width: 100%;">
+            <h4 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 16px;">📊 Automatic Data Loading</h4>
+            <p style="margin: 0; font-size: 14px; color: #666;">
+                This tree visualizer automatically loads JSON data from your server. 
+                When you have prompt association data (prompts linked to error counts), the tree will build automatically.
+                <strong>Click any node to request and view the full prompt from your server.</strong>
+            </p>
+        </div>
+    </div>
 
     <!-- Toolbar -->
     <div class="tree-toolbar">
@@ -428,6 +545,7 @@ input[type="file"]:hover {
             <button id="add-node-btn" class="toolbar-btn success">Add Node</button>
             <button id="export-tree-btn" class="toolbar-btn">Export JSON</button>
             <button id="import-tree-btn" class="toolbar-btn">Import JSON</button>
+            <button onclick="TreeVisualizer.loadTestData()" class="toolbar-btn" style="background: #f39c12;">Load Test Data</button>
         </div>
 
         <div id="tree-info" class="tree-info-section">

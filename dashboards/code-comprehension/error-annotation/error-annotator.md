@@ -64,31 +64,30 @@ permalink: /code-comprehension/error-annotator/
     font-size: 1.1rem;
 }
 
-.nav-link-btn {
+/* Standardized back button styles */
+.back-button-container {
+    text-align: center;
+    margin: 20px 0 30px 0;
+}
+
+.standard-back-btn {
     display: inline-block;
-    margin: 0 10px;
-    padding: 10px 20px;
-    background: #e74c3c;
+    padding: 12px 24px;
+    background: #3498db;
     color: white;
     text-decoration: none;
     border-radius: 6px;
     font-weight: 500;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 
-.nav-link-btn:hover {
-    background: #c0392b;
+.standard-back-btn:hover {
+    background: #2980b9;
     transform: translateY(-1px);
     text-decoration: none;
     color: white;
-}
-
-.nav-link-btn.secondary {
-    background: #3498db;
-}
-
-.nav-link-btn.secondary:hover {
-    background: #2980b9;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
 }
 
 
@@ -951,6 +950,11 @@ permalink: /code-comprehension/error-annotator/
     <div class="annotator-header">
         <h1>Error Annotation Tool</h1>
         
+    </div>
+
+    <!-- Standardized Back Button -->
+    <div class="back-button-container">
+        <a href="/code-comprehension/" class="standard-back-btn">← Back to Code Comprehension</a>
     </div>
 
     <!-- File upload section -->

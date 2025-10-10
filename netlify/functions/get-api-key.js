@@ -75,8 +75,6 @@ exports.handler = async (event, context) => {
     // console.log('Authenticated user (from token sub):', authResult.user.payload.sub);
 
     // Attempt to read the API keys from environment variables
-    const googleDriveClientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
-    const googleDriveApiKey = process.env.GOOGLE_DRIVE_API_KEY;
     const auth0Domain = process.env.AUTH0_DOMAIN;
     const auth0ClientId = process.env.AUTH0_CLIENT_ID;
     const auth0Audience = process.env.AUTH0_AUDIENCE_SERVER;
@@ -87,12 +85,10 @@ exports.handler = async (event, context) => {
     const sshPort = process.env.SSH_PORT;
     const sshPrivateKey = process.env.SSH_PRIVATE_KEY;
 
-    if (googleDriveClientId && googleDriveApiKey && spotifyClientId) {
+    if (spotifyClientId) {
       return {
         statusCode: 200,
         body: JSON.stringify({ 
-          googleDriveClientId,
-          googleDriveApiKey,
           auth0Domain,
           auth0ClientId,
           auth0Audience,

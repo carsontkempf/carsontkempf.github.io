@@ -67,10 +67,6 @@ class EnvironmentConfig {
             
             const data = await response.json();
             this.config = {
-                googleDrive: {
-                    client_id: data.googleDriveClientId,
-                    api_key: data.googleDriveApiKey
-                },
                 auth0: {
                     domain: data.auth0Domain,
                     client_id: data.auth0ClientId,
@@ -106,10 +102,6 @@ class EnvironmentConfig {
         // This uses hardcoded values as a temporary fallback
         // In production, this should be replaced with environment variables
         this.config = {
-            googleDrive: {
-                client_id: '53684428529-27609a7n7fd3rtov2a86vrq1gvffs62t.apps.googleusercontent.com',
-                api_key: 'AIzaSyBeYgUCi017eGe7Gt1_aSbNXn96LgcE18o'
-            },
             auth0: {
                 domain: 'dev-l57dcpkhob0u7ykb.us.auth0.com',
                 client_id: 'ql8ttR4YSmZXZbGE30wP8foWCUuZs2jh',
@@ -142,10 +134,6 @@ class EnvironmentConfig {
         // For Jekyll sites, environment variables need to be passed differently
         // This is a fallback method for local development
         this.config = {
-            googleDrive: {
-                client_id: process.env.GOOGLE_DRIVE_CLIENT_ID || '',
-                api_key: process.env.GOOGLE_DRIVE_API_KEY || ''
-            },
             auth0: {
                 domain: process.env.AUTH0_DOMAIN || '',
                 client_id: process.env.AUTH0_CLIENT_ID || '',
@@ -171,25 +159,6 @@ class EnvironmentConfig {
         // Configuration loaded from environment variables
     }
 
-    /**
-     * Get Google Drive configuration
-     */
-    getGoogleDriveConfig() {
-        if (!this.initialized) {
-            throw new Error('Configuration not initialized. Call initialize() first.');
-        }
-        
-        const config = this.config.googleDrive;
-        if (!config.client_id || !config.api_key) {
-            throw new Error('Google Drive API credentials not found in configuration');
-        }
-        
-        return {
-            client_id: config.client_id,
-            api_key: config.api_key,
-            scopes: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email'
-        };
-    }
 
     /**
      * Get Auth0 configuration
@@ -254,8 +223,6 @@ class EnvironmentConfig {
      */
     isReady() {
         return this.initialized && 
-               this.config.googleDrive?.client_id && 
-               this.config.googleDrive?.api_key &&
                this.config.auth0?.client_id &&
                this.config.spotify?.client_id;
     }
@@ -269,8 +236,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         await window.envConfig.initialize();
         
-        // Set global Google Drive config for compatibility
-        window.googleDriveConfig = window.envConfig.getGoogleDriveConfig();
         
         // Dispatch event when config is ready
         window.dispatchEvent(new CustomEvent('configReady', {

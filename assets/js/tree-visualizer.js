@@ -5,6 +5,8 @@ window.TreeVisualizer = {
     currentTree: null,
     treeInstance: null,
     isInitialized: false,
+    promptData: null, // Store JSON data with prompt associations
+    serverUrl: 'http://localhost:8888', // Server URL via SSH tunnel
 
     // Initialize the tree visualizer
     init: function() {
@@ -15,6 +17,7 @@ window.TreeVisualizer = {
 
         console.log('Initializing tree visualizer...');
         this.setupEventListeners();
+        this.checkForData();
         this.loadDefaultTree();
         this.isInitialized = true;
         console.log('Tree visualizer initialized');
@@ -65,8 +68,132 @@ window.TreeVisualizer = {
         }
     },
 
+    // Check for data and build tree from it
+    checkForData: function() {
+        // Check if there's JSON data in localStorage or sessionStorage
+        const promptData = localStorage.getItem('prompt_data') || sessionStorage.getItem('prompt_data');
+        
+        if (promptData) {
+            try {
+                this.promptData = JSON.parse(promptData);
+                console.log('Found prompt data:', this.promptData);
+                this.buildTreeFromPromptData();
+                return true;
+            } catch (error) {
+                console.error('Error parsing data:', error);
+            }
+        }
+        
+        // Check for file drop or upload area
+        this.setupDataHandler();
+        return false;
+    },
+
+    // Setup handler for receiving JSON data
+    setupDataHandler: function() {
+        // Listen for custom events from data transfers
+        document.addEventListener('data-received', (event) => {
+            if (event.detail && event.detail.type === 'prompt-associations') {
+                this.promptData = event.detail.data;
+                this.buildTreeFromPromptData();
+            }
+        });
+
+        // Also check periodically for new data
+        setInterval(() => {
+            this.checkForData();
+        }, 5000);
+    },
+
+    // Build tree structure from prompt association data
+    buildTreeFromPromptData: function() {
+        if (!this.promptData || !Array.isArray(this.promptData)) {
+            console.log('No valid prompt data found');
+            return;
+        }
+
+        // Create tree structure based on error counts and prompt relationships
+        const treeData = this.createTreeFromPrompts(this.promptData);
+        this.loadTree(treeData);
+    },
+
+    // Create tree structure from prompt data
+    createTreeFromPrompts: function(prompts) {
+        // Sort prompts by error count for better visualization
+        const sortedPrompts = [...prompts].sort((a, b) => a.errorCount - b.errorCount);
+
+        // Create root node for best performing prompt
+        const rootPrompt = sortedPrompts[0];
+        const treeData = {
+            chart: {
+                container: "#tree-container",
+                rootOrientation: "NORTH",
+                nodeAlign: "CENTER",
+                levelSeparation: 50,
+                siblingSeparation: 40,
+                subTeeSeparation: 40,
+                scrollbar: "native",
+                padding: 20,
+                connectors: {
+                    type: "curve",
+                    style: {
+                        "stroke-width": 2,
+                        "stroke": "#2c3e50"
+                    }
+                },
+                node: {
+                    HTMLclass: "tree-node",
+                    collapsable: true
+                }
+            },
+            nodeStructure: this.createNodeStructure(rootPrompt, sortedPrompts.slice(1))
+        };
+
+        return treeData;
+    },
+
+    // Create node structure for a prompt
+    createNodeStructure: function(prompt, remainingPrompts) {
+        const nodeClass = this.getNodeClass(prompt.errorCount);
+        const node = {
+            text: { 
+                name: `${prompt.promptId || prompt.filename || 'Unknown'}<br/>Errors: ${prompt.errorCount}` 
+            },
+            HTMLclass: nodeClass,
+            promptData: prompt, // Store prompt data for click handling
+            children: []
+        };
+
+        // Group remaining prompts by similarity or error range
+        if (remainingPrompts.length > 0) {
+            const children = this.groupPromptsForChildren(remainingPrompts);
+            node.children = children.map(child => this.createNodeStructure(child, []));
+        }
+
+        return node;
+    },
+
+    // Group prompts into children nodes
+    groupPromptsForChildren: function(prompts) {
+        // Simple grouping - take up to 5 prompts for children
+        return prompts.slice(0, 5);
+    },
+
+    // Get appropriate CSS class based on error count
+    getNodeClass: function(errorCount) {
+        if (errorCount === 0) return 'root-node'; // Best performance
+        if (errorCount <= 2) return 'child-node'; // Good performance
+        return 'leaf-node'; // Needs improvement
+    },
+
     // Load default tree
     loadDefaultTree: function() {
+        if (this.promptData) {
+            // If we have prompt data, use it instead of default
+            this.buildTreeFromPromptData();
+            return;
+        }
+        
         if (window.TreeConfig && window.TreeConfig.defaultTree) {
             this.loadTree(window.TreeConfig.defaultTree);
         } else {
@@ -90,6 +217,11 @@ window.TreeVisualizer = {
             this.currentTree = treeData;
             this.treeInstance = new Treant(treeData);
             
+            // Setup node click handlers after tree is created
+            setTimeout(() => {
+                this.setupNodeClickHandlers();
+            }, 500);
+            
             this.updateTreeInfo();
             this.showMessage('Tree loaded successfully', 'success');
             return true;
@@ -97,6 +229,156 @@ window.TreeVisualizer = {
             console.error('Error loading tree:', error);
             this.showMessage('Error loading tree: ' + error.message, 'error');
             return false;
+        }
+    },
+
+    // Setup click handlers for tree nodes
+    setupNodeClickHandlers: function() {
+        const nodes = document.querySelectorAll('.tree-node');
+        nodes.forEach(node => {
+            node.addEventListener('click', (event) => {
+                this.handleNodeClick(event);
+            });
+            // Add visual indicator that nodes are clickable
+            node.style.cursor = 'pointer';
+            node.title = 'Click to view prompt details';
+        });
+    },
+
+    // Handle node click to fetch and display prompt
+    handleNodeClick: function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Find the node data from the tree structure
+        const nodeElement = event.currentTarget;
+        const nodeData = this.findNodeDataForElement(nodeElement);
+        
+        if (nodeData && nodeData.promptData) {
+            this.fetchAndDisplayPrompt(nodeData.promptData);
+        } else {
+            this.showMessage('No prompt data available for this node', 'error');
+        }
+    },
+
+    // Find node data for a DOM element
+    findNodeDataForElement: function(element) {
+        // This is a simplified approach - in practice you might need more sophisticated tracking
+        const nodeText = element.textContent;
+        return this.findNodeDataByText(this.currentTree.nodeStructure, nodeText);
+    },
+
+    // Recursively find node data by text content
+    findNodeDataByText: function(node, targetText) {
+        if (node.text && node.text.name && targetText.includes(node.text.name.split('<br/>')[0])) {
+            return node;
+        }
+        
+        if (node.children) {
+            for (const child of node.children) {
+                const result = this.findNodeDataByText(child, targetText);
+                if (result) return result;
+            }
+        }
+        
+        return null;
+    },
+
+    // Fetch prompt from server and display
+    fetchAndDisplayPrompt: function(promptData) {
+        const promptId = promptData.promptId || promptData.filename;
+        if (!promptId) {
+            this.showMessage('No prompt ID available', 'error');
+            return;
+        }
+
+        this.showMessage('Fetching prompt...', 'info');
+
+        // Request prompt from server
+        fetch(`${this.serverUrl}/api/prompt/${promptId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.text();
+            })
+            .then(promptContent => {
+                this.displayPromptModal(promptId, promptContent, promptData);
+            })
+            .catch(error => {
+                console.error('Error fetching prompt:', error);
+                this.showMessage(`Error fetching prompt: ${error.message}`, 'error');
+            });
+    },
+
+    // Display prompt in a modal with markdown rendering
+    displayPromptModal: function(promptId, promptContent, promptData) {
+        const modalContent = `
+            <div class="dialog-content">
+                <div class="modal-header">
+                    <h3>Prompt: ${promptId}</h3>
+                    <span class="close" onclick="TreeVisualizer.closeDialog()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="prompt-metadata">
+                        <div class="metadata-item">
+                            <strong>Error Count:</strong> ${promptData.errorCount || 'N/A'}
+                        </div>
+                        <div class="metadata-item">
+                            <strong>Created:</strong> ${promptData.timestamp || 'N/A'}
+                        </div>
+                    </div>
+                    <div class="prompt-content">
+                        <h4>Prompt Content:</h4>
+                        <div class="markdown-content" id="prompt-markdown">
+                            ${this.renderMarkdown(promptContent)}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="TreeVisualizer.closeDialog()" class="btn-secondary">Close</button>
+                    <button onclick="TreeVisualizer.downloadPrompt('${promptId}', '${encodeURIComponent(promptContent)}')" class="btn-primary">Download</button>
+                </div>
+            </div>
+        `;
+
+        this.showDialog(modalContent);
+    },
+
+    // Simple markdown rendering (basic implementation)
+    renderMarkdown: function(content) {
+        if (!content) return 'No content available';
+        
+        // Basic markdown rendering
+        return content
+            .replace(/\n/g, '<br/>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    },
+
+    // Download prompt as markdown file
+    downloadPrompt: function(promptId, encodedContent) {
+        try {
+            const content = decodeURIComponent(encodedContent);
+            const blob = new Blob([content], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${promptId}.md`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            URL.revokeObjectURL(url);
+            this.showMessage('Prompt downloaded successfully', 'success');
+        } catch (error) {
+            console.error('Error downloading prompt:', error);
+            this.showMessage('Error downloading prompt', 'error');
         }
     },
 
@@ -375,6 +657,42 @@ window.TreeVisualizer = {
                 messageElement.style.display = 'none';
             }, 3000);
         }
+    },
+
+    // Test function to simulate data data (for development/testing)
+    loadTestData: function() {
+        const testData = [
+            {
+                promptId: "prompt_2023_12_01_14_30",
+                filename: "prompt_2023_12_01_14_30.md",
+                errorCount: 0,
+                timestamp: "2023-12-01T14:30:00Z"
+            },
+            {
+                promptId: "prompt_2023_12_01_15_45", 
+                filename: "prompt_2023_12_01_15_45.md",
+                errorCount: 2,
+                timestamp: "2023-12-01T15:45:00Z"
+            },
+            {
+                promptId: "prompt_2023_12_01_16_20",
+                filename: "prompt_2023_12_01_16_20.md", 
+                errorCount: 5,
+                timestamp: "2023-12-01T16:20:00Z"
+            },
+            {
+                promptId: "prompt_2023_12_01_17_10",
+                filename: "prompt_2023_12_01_17_10.md",
+                errorCount: 1,
+                timestamp: "2023-12-01T17:10:00Z"
+            }
+        ];
+
+        // Store test data as if it came from data
+        localStorage.setItem('prompt_data', JSON.stringify(testData));
+        this.promptData = testData;
+        this.buildTreeFromPromptData();
+        this.showMessage('Test data loaded successfully', 'success');
     }
 };
 

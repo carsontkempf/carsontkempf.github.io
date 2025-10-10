@@ -1,22 +1,7 @@
 {
-  "promptqueue": {
-    "42": {
-      "id": 42,
-      "key": "prompt",
-      "value": "let's change the button iin our index.md button so that the code comprehension project takes us to the page with the tree visualizer, error annotater, and the web terminal buttons exist (currently redirects us to the error annotater). let's also remove the emoji from the button in our index page",
-      "positionInQueue": 1,
-      "sectionId": "section-3"
-    }
-  },
-  "sections": {
-    "section-3": {
-      "id": "section-3",
-      "name": "Default",
-      "isLocked": false,
-      "positionInQueue": 3
-    }
-  },
+  "promptqueue": {},
+  "sections": {},
   "isLocked": false,
-  "nextId": 43,
-  "nextSectionId": 6
+  "nextId": 80,
+  "nextSectionId": 11
 }

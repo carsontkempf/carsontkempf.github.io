@@ -999,36 +999,16 @@ permalink: /code-comprehension/
                 </a>
             </div>
 
-            <!-- Browser Terminal Tool -->
-            <div style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(46,204,113,0.3); max-width: 400px; flex: 1; min-width: 300px;">
-                <h3 style="color: white; margin: 0 0 20px 0; font-size: 1.3rem;">Browser Terminal</h3>
-                <a href="/code-comprehension/browser-terminal/" style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
-                    Open Browser Terminal →
+            <!-- API Endpoints Tool -->
+            <div style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(155,89,182,0.3); max-width: 400px; flex: 1; min-width: 300px;">
+                <h3 style="color: white; margin: 0 0 20px 0; font-size: 1.3rem;">Flask API Endpoints</h3>
+                <a href="/code-comprehension/api-endpoints/" style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 2px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
+                    View API Docs →
                 </a>
             </div>
+
         </div>
 
-        <!-- Project Overview -->
-        <div style="margin-top: 30px; padding: 20px; background: rgba(52,152,219,0.05); border-radius: 8px; border-left: 4px solid #3498db;">
-            <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 1.2rem;">📋 Project Overview</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                <div>
-                    <h4 style="color: #27ae60; margin: 0 0 8px 0;">PDF Memory System</h4>
-                    <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">4 containers × 10 slots = 40 total PDF positions</p>
-                    <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.85rem;">Performance history, error analysis, comparisons, and breakdowns</p>
-                </div>
-                <div>
-                    <h4 style="color: #e74c3c; margin: 0 0 8px 0;">Error Analysis Tools</h4>
-                    <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">CSV upload, annotation, and export capabilities</p>
-                    <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.85rem;">Advanced prompt generation and data analysis</p>
-                </div>
-                <div>
-                    <h4 style="color: #3498db; margin: 0 0 8px 0;">Role-Based Access</h4>
-                    <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">Secure access control with Auth0 integration</p>
-                    <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.85rem;">code-comprehension role required</p>
-                </div>
-            </div>
-        </div>
     </div>
 
     </div>
@@ -1036,6 +1016,7 @@ permalink: /code-comprehension/
 
 
 </div>
+
 
 <script>
 console.log('Code Comprehension Project - Script loaded');

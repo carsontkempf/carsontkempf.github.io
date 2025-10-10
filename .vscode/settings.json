@@ -45,7 +45,13 @@
         "assets/js/scale.fix.js": true,
         "node_modules/": true,
         "terminal-proxy-env/": true,
-        ".jekyll-metadata": true
+        ".jekyll-metadata": true,
+        "_data/": true,
+        "resume.md": true,
+        "dashboard.md": true,
+        "index.md": true,
+        "my-account.md": true,
+        "assets/css/": true
     },
     "jest.shell": {
         "path": "/bin/bash",
@@ -315,7 +321,13 @@
                     "assets/js/scale.fix.js",
                     "node_modules/",
                     "terminal-proxy-env/",
-                    ".jekyll-metadata"
+                    ".jekyll-metadata",
+                    "_data/",
+                    "resume.md",
+                    "dashboard.md",
+                    "index.md",
+                    "my-account.md",
+                    "assets/css/"
                 ],
                 "name": "Code Comprehension",
                 "description": "",

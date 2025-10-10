@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Annotation Uploader
-permalink: /annotation-uploader/
+permalink: /code-comprehension/annotation-uploader/
 ---
 
 <div id="annotation-uploader-dashboard">
