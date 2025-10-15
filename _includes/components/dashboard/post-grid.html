@@ -1,0 +1,15 @@
+<main class="section-main-content">
+  <div class="posts-grid">
+    {% assign category_posts = site.categories[include.category] %}
+    {% for post in category_posts %}
+      {% include components/dashboard/post-card.html post=post %}
+    {% endfor %}
+    
+    {% if category_posts.size == 0 %}
+      <div class="no-posts-message">
+        <h3>{{ include.no_posts_title | default: 'No posts yet' }}</h3>
+        <p>{{ include.no_posts_message | default: 'Posts will appear here as they are added.' }}</p>
+      </div>
+    {% endif %}
+  </div>
+</main>

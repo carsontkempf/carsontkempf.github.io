@@ -26,11 +26,6 @@ auth0:
   client_id: "ql8ttR4YSmZXZbGE30wP8foWCUuZs2jh"
   audience: "https://carsontkempf.github.io/api/carsons-meditations"
 
-# Google Drive API Configuration (development)
-google_drive:
-  client_id: "53684428529-27609a7n7fd3rtov2a86vrq1gvffs62t.apps.googleusercontent.com"
-  api_key: "AIzaSyBeYgUCi017eGe7Gt1_aSbNXn96LgcE18o"
-
 
 
 # Exclude files from processing

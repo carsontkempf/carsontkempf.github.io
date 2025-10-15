@@ -1,0 +1,24 @@
+---
+layout: default
+---
+
+{% assign dashboard_data = site.data.dashboards[page.dashboard_id] %}
+{% include components/dashboard/header.html 
+   title=dashboard_data.title 
+   description=dashboard_data.description 
+%}
+
+<div id="{{ page.dashboard_id | default: 'category-dashboard' }}" class="dashboard-container">
+  {% assign dashboard_data = site.data.dashboards[page.dashboard_id] %}
+  {% include components/dashboard/post-grid.html 
+     category=dashboard_data.category 
+     no_posts_title=dashboard_data.no_posts_title 
+     no_posts_message=dashboard_data.no_posts_message 
+  %}
+</div>
+
+{% include components/dashboard/styles.html %}
+
+{% if page.custom_js %}
+  <script src="{{ page.custom_js | relative_url }}"></script>
+{% endif %}

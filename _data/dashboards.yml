@@ -1,0 +1,87 @@
+ai:
+  title: "AI & Algorithms"
+  description: "Artificial intelligence projects, algorithm implementations, and academic assignments in computer science."
+  category: "AI"
+  type: "category"
+  no_posts_title: "No AI projects yet"
+  no_posts_message: "AI and algorithm projects will appear here."
+
+apps:
+  title: "Apps"
+  description: "Applications, web tools, and software projects I've built."
+  category: "Apps"
+  type: "category"
+  no_posts_title: "No apps yet"
+  no_posts_message: "Application projects will appear here as they are added."
+  children:
+    - spotify-apple
+    - payment
+
+essays:
+  title: "Essays"
+  description: "Personal essays, thoughts, and reflections on technology and life."
+  category: "Essays"
+  type: "category"
+  no_posts_title: "No essays yet"
+  no_posts_message: "Essays and thoughts will appear here."
+
+extensions:
+  title: "Extensions"
+  description: "Browser extensions, VSCode plugins, and development tools."
+  category: "Extensions"
+  type: "category"
+  no_posts_title: "No extensions yet"
+  no_posts_message: "Extension projects will appear here."
+
+langchain:
+  title: "LangChain"
+  description: "LangChain projects, tutorials, and implementations using AI frameworks."
+  category: "LangChain"
+  type: "category"
+  no_posts_title: "No LangChain projects yet"
+  no_posts_message: "LangChain projects will appear here."
+
+controls:
+  title: "Controls"
+  description: "System controls and administrative tools."
+  type: "tool"
+  auth_required: false
+
+auth0-users:
+  title: "Auth0 User Management"
+  description: "Manage Auth0 user identities, including creating and provisioning users, resetting passwords, blocking access, and deleting accounts."
+  type: "tool"
+  auth_required: true
+  custom_js: "/assets/js/auth0-management.js"
+
+code-comprehension:
+  title: "Code Comprehension Project"
+  description: "AI-powered code refactoring and analysis system"
+  type: "project"
+  auth_required: true
+  children:
+    - api-endpoints
+    - tree-visualizer
+    - pdf-history-viewer
+    - simulation
+    - error-annotation
+
+spotify-apple:
+  title: "Spotify Apple Integration"
+  description: "Transfer your Spotify playlists to Apple Music with intelligent matching"
+  type: "tool"
+  parent: "apps"
+  auth_required: true
+
+payment:
+  title: "Payment"
+  description: "Secure payment processing"
+  type: "tool"
+  parent: "apps"
+  auth_required: false
+
+latest-posts:
+  title: "Latest Posts"
+  description: "Recent blog posts and updates"
+  type: "category"
+  special: true

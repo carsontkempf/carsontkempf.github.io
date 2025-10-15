@@ -1,0 +1,39 @@
+---
+layout: default
+---
+
+{% if page.back_button %}
+  {% include widgets/navigation/back-button.html %}
+{% endif %}
+
+{% if page.auth_required %}
+  {% include code-comprehension/auth-wrapper.html %}
+{% endif %}
+
+{% if page.custom_styles %}
+  {% for style in page.custom_styles %}
+    {% include {{ style }} %}
+  {% endfor %}
+{% endif %}
+
+<div id="{{ page.dashboard_id | default: 'project-dashboard' }}" class="dashboard-container">
+  {% if page.auth_required %}
+    <div id="project-content-wrapper" style="display: none;">
+  {% endif %}
+  
+  {{ content }}
+  
+  {% if page.auth_required %}
+    </div>
+  {% endif %}
+</div>
+
+{% if page.auth_required %}
+  <script src="{{ '/assets/js/code-comprehension-auth.js' | relative_url }}"></script>
+{% endif %}
+
+{% if page.custom_js %}
+  {% for script in page.custom_js %}
+    <script src="{{ script | relative_url }}"></script>
+  {% endfor %}
+{% endif %}

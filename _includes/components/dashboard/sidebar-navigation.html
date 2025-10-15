@@ -1,0 +1,60 @@
+{% assign current_dashboard_id = page.dashboard_id | default: page.parent_dashboard %}
+{% assign current_dashboard = site.data.dashboards[current_dashboard_id] %}
+
+<nav class="dashboard-sidebar">
+  {% if current_dashboard %}
+    <div class="dashboard-title">
+      <h3>{{ current_dashboard.title }}</h3>
+      {% if current_dashboard.description %}
+        <p class="dashboard-description">{{ current_dashboard.description }}</p>
+      {% endif %}
+    </div>
+    
+    <div class="dashboard-sections">
+      {% if current_dashboard.children %}
+        {% for child_id in current_dashboard.children %}
+          {% assign child_dashboard = site.data.dashboards[child_id] %}
+          {% if child_dashboard %}
+            {% assign child_url = "/" | append: child_id | append: "/" %}
+            <a href="{{ child_url }}" class="sidebar-item {% if page.url == child_url %}current{% endif %}">
+              <span class="item-title">{{ child_dashboard.title }}</span>
+              {% if child_dashboard.description %}
+                <span class="item-description">{{ child_dashboard.description }}</span>
+              {% endif %}
+            </a>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+      
+      <!-- Find pages that belong to this dashboard -->
+      {% for page_item in site.pages %}
+        {% if page_item.parent_dashboard == current_dashboard_id or page_item.dashboard_id == current_dashboard_id %}
+          {% unless page_item.url == page.url %}
+            <a href="{{ page_item.url }}" class="sidebar-item">
+              <span class="item-title">{{ page_item.title }}</span>
+              {% if page_item.description %}
+                <span class="item-description">{{ page_item.description }}</span>
+              {% endif %}
+            </a>
+          {% endunless %}
+        {% endif %}
+      {% endfor %}
+      
+      <!-- Show posts in this category -->
+      {% if current_dashboard.category %}
+        {% assign category_posts = site.posts | where: "categories", current_dashboard.category %}
+        {% if category_posts.size > 0 %}
+          <div class="posts-section">
+            <h4>Posts</h4>
+            {% for post in category_posts limit: 10 %}
+              <a href="{{ post.url }}" class="sidebar-item post-item">
+                <span class="item-title">{{ post.title }}</span>
+                <span class="item-date">{{ post.date | date: "%b %d, %Y" }}</span>
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+  {% endif %}
+</nav>

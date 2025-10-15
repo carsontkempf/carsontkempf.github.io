@@ -1,0 +1,87 @@
+# Posts metadata for tracking and display
+# This file tracks all posts with their metadata for display purposes
+
+posts:
+  - title: "Interest Intersection"
+    date: "2025-09-16"
+    excerpt: "Simplifying complex systems can present risks, particularly when the distinction between abstraction and simplification is not clear."
+    category: "Essays"
+    permalink: "/Interest-Intersection/"
+    
+  - title: "LangGraph-ChatBot"
+    date: "2025-05-15"
+    excerpt: "A tool-augmented chatbot system overview built using Streamlit with LangGraph integration."
+    category: "Apps"
+    permalink: "/LangGraph-ChatBot/"
+    
+  - title: "Chrome Extension"
+    date: "2025-05-24"
+    excerpt: "Development of a Chrome extension for enhanced web browsing functionality."
+    category: "Published"
+    permalink: "/Chrome-Extension/"
+    
+  - title: "VSCode Extension"
+    date: "2025-05-24"
+    excerpt: "Creating a Visual Studio Code extension to improve developer productivity."
+    category: "Published"
+    permalink: "/VSCode-Extension/"
+    
+  - title: "Computer Chess Program"
+    date: "2025-05-05"
+    excerpt: "Implementation of a computer chess program with advanced algorithms."
+    category: "School"
+    permalink: "/Computer-Chess-Program/"
+    
+  - title: "Chess Program"
+    date: "2025-04-25"
+    excerpt: "Building a chess program with strategic gameplay mechanics."
+    category: "School"
+    permalink: "/Chess-Program/"
+    
+  - title: "Chess Program Requirements"
+    date: "2025-04-25"
+    excerpt: "Requirements analysis and specification for chess program development."
+    category: "School"
+    permalink: "/Chess-Program-Requirements/"
+    
+  - title: "To-Do App"
+    date: "2025-04-23"
+    excerpt: "Development of a task management application with modern features."
+    category: "School"
+    permalink: "/To-Do-App/"
+    
+  - title: "River Toad Game"
+    date: "2025-04-16"
+    excerpt: "Game development project featuring river toad mechanics and gameplay."
+    category: "School"
+    permalink: "/River-Toad-Game/"
+    
+  - title: "LangChain With Search"
+    date: "2025-04-16"
+    excerpt: "Integrating search capabilities with LangChain for enhanced AI functionality."
+    category: "LangChain"
+    permalink: "/LangChain-With-Search/"
+    
+  - title: "A-Star Search Assignment"
+    date: "2025-04-15"
+    excerpt: "Implementation of the A* search algorithm for pathfinding applications."
+    category: "School"
+    permalink: "/A-Star-Search-Assignment/"
+    
+  - title: "LangChain Tools"
+    date: "2025-04-15"
+    excerpt: "Comprehensive guide to using tools within the LangChain framework."
+    category: "LangChain"
+    permalink: "/LangChain-Tools/"
+    
+  - title: "LangChain Overview"
+    date: "2025-04-14"
+    excerpt: "Introduction and overview of the LangChain framework for AI applications."
+    category: "LangChain"
+    permalink: "/LangChain-Overview/"
+    
+  - title: "LangChain Conceptual Guide"
+    date: "2025-04-14"
+    excerpt: "Conceptual understanding of LangChain architecture and components."
+    category: "LangChain"
+    permalink: "/LangChain-Conceptual-Guide/"

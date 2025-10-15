@@ -1,0 +1,33 @@
+---
+layout: default
+---
+
+{% include components/dashboard/header.html 
+   title=page.title 
+   description=page.description 
+%}
+
+<div id="{{ page.dashboard_id | default: 'tool-dashboard' }}" class="dashboard-container">
+  <main class="section-main-content">
+    {% if page.auth_required %}
+      {% include components/auth/wrapper.html %}
+      <div id="tool-content-wrapper" style="display: none;">
+    {% endif %}
+    
+    {{ content }}
+    
+    {% if page.auth_required %}
+      </div>
+    {% endif %}
+  </main>
+</div>
+
+{% include components/dashboard/styles.html %}
+
+{% if page.auth_required %}
+  <script src="{{ '/assets/js/auth-handler.js' | relative_url }}"></script>
+{% endif %}
+
+{% if page.custom_js %}
+  <script src="{{ page.custom_js | relative_url }}"></script>
+{% endif %}

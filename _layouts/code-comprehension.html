@@ -1,0 +1,90 @@
+---
+layout: default
+---
+
+{% include components/code-comprehension/auth/auth-check.html %}
+
+<div id="{{ page.content_wrapper_id | default: 'project-content-wrapper' }}" style="display: none;">
+
+  {% if page.external_dependencies %}
+    {% for dependency in page.external_dependencies %}
+      {% if dependency.type == 'script' %}
+        <script src="{{ dependency.src }}"></script>
+      {% elsif dependency.type == 'style' %}
+        <link rel="stylesheet" href="{{ dependency.href }}">
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  {% if page.styles %}
+    {% for style in page.styles %}
+      {% include {{ style }} %}
+    {% endfor %}
+  {% endif %}
+
+  {% if page.content_includes %}
+    {% for content in page.content_includes %}
+      {% include {{ content }} %}
+    {% endfor %}
+  {% endif %}
+
+  {{ content }}
+
+</div>
+
+<script src="{{ '/assets/js/code-comprehension-auth.js' | relative_url }}"></script>
+
+{% if page.auth_success_callback %}
+  <script>
+    // Override the auth success callback to initialize page-specific functionality
+    document.addEventListener('authReady', () => {
+      if (window.authService.isAuthenticated) {
+        const user = window.authService.user;
+        
+        // Check user roles (same logic as main page)
+        const customRoles = user['https://carsontkempf.github.io/roles'] || [];
+        const auth0Roles = user['https://auth0.com/roles'] || [];
+        const appMetadataRoles = user.app_metadata?.roles || [];
+        const userMetadataRoles = user.user_metadata?.roles || [];
+        const rolesArray = user.roles || [];
+        const authorizationRoles = user.authorization?.roles || [];
+        const orgRoles = user['org_roles'] || [];
+        const realmRoles = user['realm_roles'] || [];
+        
+        const allRoles = [...customRoles, ...auth0Roles, ...appMetadataRoles, ...userMetadataRoles, ...rolesArray, ...authorizationRoles, ...orgRoles, ...realmRoles];
+        
+        const hasAdminRole = allRoles.includes('admin');
+        const hasCodeComprehensionRole = allRoles.includes('code-comprehension') || 
+                                        allRoles.includes('Code-Comprehension-Project') || 
+                                        allRoles.includes('rol_XUUh9ZOhirY2yCQQ');
+        const isSiteOwner = user.email === 'ctkfdp@umsystem.edu';
+        
+        if (hasAdminRole || hasCodeComprehensionRole || isSiteOwner) {
+          document.getElementById('{{ page.content_wrapper_id | default: "project-content-wrapper" }}').style.display = 'block';
+          
+          // Call page-specific initialization function if specified
+          if (typeof {{ page.auth_success_callback }} === 'function') {
+            {{ page.auth_success_callback }}();
+          }
+        } else {
+          document.getElementById('auth-check-wrapper').style.display = 'block';
+        }
+      } else {
+        document.getElementById('auth-check-wrapper').style.display = 'block';
+      }
+    });
+
+    // Fallback timeout
+    setTimeout(() => {
+      if (!window.authService || !window.authService.isAuthenticated) {
+        document.getElementById('auth-check-wrapper').style.display = 'block';
+      }
+    }, 5000);
+  </script>
+{% endif %}
+
+{% if page.custom_js %}
+  {% for script in page.custom_js %}
+    <script src="{{ script | relative_url }}"></script>
+  {% endfor %}
+{% endif %}

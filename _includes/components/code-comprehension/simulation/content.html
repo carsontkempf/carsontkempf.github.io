@@ -1,0 +1,111 @@
+<div class="simulation-container">
+    <div class="simulation-header">
+        <h1>🔬 Refactoring Simulation</h1>
+        <p>Run direct simulations with JSON prompts or select from existing prompt catalog</p>
+    </div>
+
+    <div class="main-grid">
+        <!-- Input Section -->
+        <div class="input-section">
+            <h2 class="section-title">📥 Input Methods</h2>
+            
+            <div class="input-methods">
+                <!-- File Upload Method -->
+                <div class="method-container">
+                    <h3 class="method-title">
+                        <span class="method-icon">📁</span>
+                        Upload JSON File
+                    </h3>
+                    <div class="file-upload-area" onclick="document.getElementById('jsonFileInput').click()">
+                        <div class="upload-icon">📤</div>
+                        <div class="upload-text">Click to select or drag and drop your JSON file here</div>
+                        <small style="color: #95a5a6;">Supports .json files up to 10MB</small>
+                    </div>
+                    <input type="file" id="jsonFileInput" class="file-input" accept=".json" />
+                    
+                    <div id="fileInfo" class="file-info">
+                        <div class="file-name"></div>
+                        <div class="file-preview"></div>
+                    </div>
+                </div>
+
+                <!-- Prompt Selection Method -->
+                <div class="method-container">
+                    <h3 class="method-title">
+                        <span class="method-icon">📋</span>
+                        Select from Prompt Catalog
+                    </h3>
+                    <div class="prompt-selector">
+                        <select id="promptDropdown" class="prompt-dropdown">
+                            <option value="">Loading prompts...</option>
+                        </select>
+                    </div>
+                    
+                    <div id="selectedPromptInfo" class="selected-prompt-info">
+                        <div class="prompt-metadata">
+                            <div class="metadata-item">
+                                <span class="metadata-label">ID:</span> <span id="promptId">-</span>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">Created:</span> <span id="promptCreated">-</span>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">Type:</span> <span id="promptType">-</span>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">Errors:</span> <span id="promptErrors">-</span>
+                            </div>
+                        </div>
+                        <div class="prompt-content-preview" id="promptPreview"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Panel -->
+        <div class="simulation-panel">
+            <h2 class="section-title">⚙️ Simulation Controls</h2>
+            
+            <div class="simulation-controls">
+                <div class="control-group">
+                    <label class="control-label" for="threadId">Thread ID</label>
+                    <input type="text" id="threadId" class="control-input" placeholder="Auto-generated if empty" />
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label" for="simulationType">Simulation Type</label>
+                    <select id="simulationType" class="control-input">
+                        <option value="standard">Standard Refactoring</option>
+                        <option value="deep">Deep Analysis</option>
+                        <option value="experimental">Experimental Mode</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label" for="maxIterations">Max Iterations</label>
+                    <input type="number" id="maxIterations" class="control-input" value="5" min="1" max="20" />
+                </div>
+                
+                <button id="runSimulationBtn" class="run-simulation-btn" disabled>
+                    🚀 Run Simulation
+                </button>
+            </div>
+            
+            <!-- Results Section -->
+            <div id="resultsSection" class="results-section">
+                <h3 class="results-title">
+                    📊 Simulation Results
+                </h3>
+                
+                <div id="statusIndicator" class="status-indicator status-running">
+                    <div class="loading-spinner"></div>
+                    <span>Running simulation...</span>
+                </div>
+                
+                <div class="results-content" id="resultsContent">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

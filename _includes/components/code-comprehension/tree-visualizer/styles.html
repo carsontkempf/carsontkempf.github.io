@@ -1,0 +1,173 @@
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#tree-visualizer-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    min-height: 100vh;
+    padding: 20px 0;
+    background: #f8f9fa;
+}
+
+.visualizer-header {
+    text-align: center;
+    margin-bottom: 30px;
+    flex-shrink: 0;
+}
+
+.visualizer-header h1 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.visualizer-header p {
+    font-size: 1.1rem;
+    opacity: 0.8;
+    margin-bottom: 20px;
+    color: #7f8c8d;
+}
+
+/* Toolbar */
+.tree-toolbar {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.toolbar-section {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.toolbar-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.toolbar-btn:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+.toolbar-btn.primary {
+    background: #3498db;
+}
+
+.toolbar-btn.primary:hover {
+    background: #2980b9;
+}
+
+.toolbar-btn.success {
+    background: #27ae60;
+}
+
+.toolbar-btn.success:hover {
+    background: #219a52;
+}
+
+/* Tree container */
+.tree-container {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    min-height: 500px;
+    position: relative;
+    overflow: auto;
+}
+
+.tree-canvas {
+    width: 100%;
+    min-height: 500px;
+}
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #7f8c8d;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #ecf0f1;
+    border-left: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Node styles */
+.tree-node {
+    background: #3498db;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    min-width: 120px;
+    text-align: center;
+}
+
+.tree-node.error {
+    background: #e74c3c;
+}
+
+.tree-node.success {
+    background: #27ae60;
+}
+
+.tree-node.warning {
+    background: #f39c12;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .tree-toolbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .toolbar-section {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .tree-container {
+        padding: 20px;
+        margin: 0 10px;
+    }
+    
+    .visualizer-header h1 {
+        font-size: 2rem;
+    }
+}
+</style>
