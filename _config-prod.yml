@@ -26,11 +26,6 @@ auth0:
   client_id: "${AUTH0_CLIENT_ID}"
   audience: "${AUTH0_AUDIENCE_SERVER}"
 
-# Google Drive API Configuration (production)
-# Credentials loaded from environment variables for security
-google_drive:
-  client_id: "${GOOGLE_DRIVE_CLIENT_ID}"
-  api_key: "${GOOGLE_DRIVE_API_KEY}"
 
 
 # Exclude files from processing
@@ -40,3 +35,5 @@ exclude:
   - Gemfile.lock
   - node_modules
   - vendor
+  - backends/
+  - "backends/**"

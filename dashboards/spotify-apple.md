@@ -5,7 +5,11 @@ permalink: /spotify-apple/
 dashboard_id: spotify-apple
 parent_dashboard: apps
 auth_required: true
+back_url: /dashboard/
+back_text: Dashboard
 ---
+
+{% include widgets/navigation/back-button.html back_url=page.back_url back_text=page.back_text %}
 
 {% include code-comprehension/auth-wrapper.html %}
 

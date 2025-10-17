@@ -2,7 +2,11 @@
 layout: page
 title: Auth0 User Management
 permalink: /auth0-users/
+back_url: /dashboard/
+back_text: Dashboard
 ---
+
+{% include widgets/navigation/back-button.html back_url=page.back_url back_text=page.back_text %}
 
 <div id="auth0-dashboard">
   <header class="section-header">

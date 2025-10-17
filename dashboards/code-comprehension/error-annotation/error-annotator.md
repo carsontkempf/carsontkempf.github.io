@@ -2,6 +2,8 @@
 layout: page
 title: Error Annotator
 permalink: /code-comprehension/error-annotator/
+back_url: /code-comprehension/
+back_text: Code Comprehension
 ---
 
 <div id="auth-check-wrapper" style="display: none;">
@@ -952,10 +954,7 @@ permalink: /code-comprehension/error-annotator/
         
     </div>
 
-    <!-- Standardized Back Button -->
-    <div class="back-button-container">
-        <a href="/code-comprehension/" class="standard-back-btn">← Back to Code Comprehension</a>
-    </div>
+    {% include widgets/navigation/back-button.html back_url=page.back_url back_text=page.back_text %}
 
     <!-- File upload section -->
     <div id="uploadSection" class="upload-section">
@@ -1085,8 +1084,6 @@ console.log('Secure configuration will be loaded by env-config.js');
 <!-- Environment Configuration (load first) -->
 <script src="{{ '/assets/js/env-config.js' | relative_url }}"></script>
 
-<!-- Google Drive Service -->
-<script src="{{ '/assets/js/google-drive-service.js' | relative_url }}"></script>
 
 <!-- Error Annotator -->
 <script src="{{ '/assets/js/error-annotator.js' | relative_url }}"></script>

@@ -1,19 +1,28 @@
-<div class="back-button-widget">
-    <a href="/code-comprehension/" class="back-btn">
-        ← Back to Code Comprehension
-    </a>
+<div class="back-button-container">
+    <div class="back-button-widget">
+        <a href="{{ include.back_url | default: '/code-comprehension/' }}" class="back-btn">
+            ← Back to {{ include.back_text | default: 'Code Comprehension' }}
+        </a>
+    </div>
 </div>
 
 <style>
+.back-button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
 .back-button-widget {
-    margin-bottom: 20px;
-    padding: 15px 0;
+    display: flex;
+    justify-content: center;
 }
 
 .back-btn {
     display: inline-flex;
     align-items: center;
-    padding: 10px 20px;
+    padding: 12px 24px;
     background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
     text-decoration: none;
@@ -22,6 +31,7 @@
     font-size: 14px;
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(52,152,219,0.3);
+    cursor: pointer;
 }
 
 .back-btn:hover {
@@ -34,5 +44,10 @@
 
 .back-btn:active {
     transform: translateY(0);
+}
+
+.back-btn:focus {
+    outline: 2px solid #74b9ff;
+    outline-offset: 2px;
 }
 </style>

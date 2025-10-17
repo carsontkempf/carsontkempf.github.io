@@ -2,7 +2,11 @@
 layout: page
 title: Server Controls
 permalink: /controls/
+back_url: /dashboard/
+back_text: Dashboard
 ---
+
+{% include widgets/navigation/back-button.html back_url=page.back_url back_text=page.back_text %}
 
 <div id="controls-access-denied" style="display: none;">
     <h2>Access Denied</h2>

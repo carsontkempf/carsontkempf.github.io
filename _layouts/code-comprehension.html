@@ -6,6 +6,10 @@ layout: default
 
 <div id="{{ page.content_wrapper_id | default: 'project-content-wrapper' }}" style="display: none;">
 
+  {% if page.back_url and page.back_text %}
+    {% include widgets/navigation/back-button.html back_url=page.back_url back_text=page.back_text %}
+  {% endif %}
+
   {% if page.external_dependencies %}
     {% for dependency in page.external_dependencies %}
       {% if dependency.type == 'script' %}

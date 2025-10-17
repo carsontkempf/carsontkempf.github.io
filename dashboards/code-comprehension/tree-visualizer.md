@@ -3,6 +3,8 @@ layout: code-comprehension
 title: Tree Visualizer
 permalink: /code-comprehension/tree-visualizer/
 auth_success_callback: initializeTreeVisualizerPage
+back_url: /code-comprehension/
+back_text: Code Comprehension
 external_dependencies:
   - type: script
     src: https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js

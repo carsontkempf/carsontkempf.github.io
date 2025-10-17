@@ -65,3 +65,5 @@ exclude:
   - Gemfile.lock
   - node_modules
   - vendor
+  - backends/
+  - "backends/**"

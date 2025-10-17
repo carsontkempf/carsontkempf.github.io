@@ -2,9 +2,11 @@
 layout: page
 title: Annotation Uploader
 permalink: /code-comprehension/annotation-uploader/
+back_url: /code-comprehension/
+back_text: Code Comprehension
 ---
 
-{% include widgets/navigation/back-button.html %}
+{% include widgets/navigation/back-button.html back_url=page.back_url back_text=page.back_text %}
 
 <div id="annotation-uploader-dashboard">
   <header class="section-header">

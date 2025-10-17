@@ -2,6 +2,8 @@
 layout: page
 title: PDF History Viewer
 permalink: /code-comprehension/pdf-history-viewer/
+back_url: /code-comprehension/
+back_text: Code Comprehension
 ---
 
 <div id="auth-check-wrapper" style="display: none;">
@@ -453,7 +455,6 @@ class MultiContainerPDFMemory {
             { id: 6, pdfNumber: 4, type: 'queue', path: '/assets/pdf-memory/queue/queue_0004.pdf', status: 'active' },
             { id: 7, pdfNumber: 3, type: 'queue', path: '/assets/pdf-memory/queue/queue_0003.pdf', status: 'active' },
             { id: 8, pdfNumber: 2, type: 'queue', path: '/assets/pdf-memory/queue/queue_0002.pdf', status: 'oldest' },
-            { id: 9, pdfNumber: 10, type: 'milestone', path: '/assets/pdf-memory/milestones/milestone_0010.pdf', status: 'milestone' }
         ];
 
         // Error Analysis Memory - using existing PDFs

@@ -2,8 +2,8 @@
 layout: default
 ---
 
-{% if page.back_button %}
-  {% include widgets/navigation/back-button.html %}
+{% if page.back_url and page.back_text %}
+  {% include widgets/navigation/back-button.html back_url=page.back_url back_text=page.back_text %}
 {% endif %}
 
 {% if page.auth_required %}

@@ -1541,8 +1541,6 @@ console.log('Secure configuration will be loaded by env-config.js');
 <!-- Environment Configuration (load first) -->
 <script src="{{ '/assets/js/env-config.js' | relative_url }}"></script>
 
-<!-- Google Drive Service -->
-<script src="{{ '/assets/js/google-drive-service.js' | relative_url }}"></script>
 
 </div>
 

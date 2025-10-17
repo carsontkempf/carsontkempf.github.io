@@ -2,6 +2,8 @@
 layout: page
 title: Finished Annotating
 permalink: /code-comprehension/finished-annotating-main/
+back_url: /code-comprehension/
+back_text: Code Comprehension
 ---
 
 <div id="auth-check-wrapper" style="display: none;">
@@ -10,7 +12,7 @@ permalink: /code-comprehension/finished-annotating-main/
     <p>You need the "code-comprehension" role to view this page.</p>
     <button onclick="authService.login()" class="login-btn">Log In</button>
     <br><br>
-    {% include widgets/navigation/back-button.html %}
+    {% include widgets/navigation/back-button.html back_url=page.back_url back_text=page.back_text %}
   </div>
 </div>
 
@@ -1541,8 +1543,6 @@ console.log('Secure configuration will be loaded by env-config.js');
 <!-- Environment Configuration (load first) -->
 <script src="{{ '/assets/js/env-config.js' | relative_url }}"></script>
 
-<!-- Google Drive Service -->
-<script src="{{ '/assets/js/google-drive-service.js' | relative_url }}"></script>
 
 </div>
 
