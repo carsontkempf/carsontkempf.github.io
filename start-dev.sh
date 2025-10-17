@@ -3,6 +3,7 @@
 # Kill processes on ports 4000 and 5000 (local)
 lsof -ti:4000 | xargs kill -9 2>/dev/null
 lsof -ti:5000 | xargs kill -9 2>/dev/null
+lsof -ti:22 | xargs kill -9 2>/dev/null
 
 # Load .env to get remote server info
 if [ -f ".env" ]; then

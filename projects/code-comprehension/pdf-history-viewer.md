@@ -2,6 +2,8 @@
 layout: page
 title: PDF History Viewer
 permalink: /code-comprehension/pdf-history-viewer/
+back_url: /code-comprehension/
+back_text: Code Comprehension
 ---
 
 <div id="auth-check-wrapper" style="display: none;">
@@ -310,14 +312,347 @@ permalink: /code-comprehension/pdf-history-viewer/
     text-decoration: none;
     color: white;
 }
+
+/* Circular Node System Styles */
+.node-system-container {
+    margin-bottom: 40px;
+    padding: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.node-system-header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+}
+
+.node-system-header h2 {
+    font-size: 1.8rem;
+    font-weight: 300;
+    margin-bottom: 8px;
+}
+
+.node-system-header p {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.circular-node-layout {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    margin: 0 auto 30px;
+}
+
+.node-circle {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+}
+
+.node-circle[data-node="1"] {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.node-circle[data-node="2"] {
+    top: 80px;
+    right: 40px;
+}
+
+.node-circle[data-node="3"] {
+    bottom: 80px;
+    right: 40px;
+}
+
+.node-circle[data-node="4"] {
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.node-circle[data-node="5"] {
+    top: 80px;
+    left: 40px;
+}
+
+.node-button {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 3px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.node-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+    border-color: #3498db;
+}
+
+.node-button.active {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    border-color: #2980b9;
+}
+
+.node-button.completed {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    color: white;
+    border-color: #27ae60;
+}
+
+.node-button.error {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+    border-color: #e74c3c;
+}
+
+.node-number {
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.node-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.1;
+    margin-top: 2px;
+}
+
+.node-status {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.node-status.pending {
+    background: rgba(149,165,166,0.9);
+}
+
+.node-status.processing {
+    background: rgba(243,156,18,0.9);
+}
+
+.node-status.completed {
+    background: rgba(39,174,96,0.9);
+}
+
+.node-status.error {
+    background: rgba(231,76,60,0.9);
+}
+
+/* Circular Flow Arrows */
+.flow-arrow {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.flow-arrow::before {
+    content: '→';
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.flow-arrow:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.arrow-1-2 {
+    top: 60px;
+    right: 100px;
+    transform: rotate(35deg);
+}
+
+.arrow-2-3 {
+    bottom: 140px;
+    right: 70px;
+    transform: rotate(105deg);
+}
+
+.arrow-3-4 {
+    bottom: 60px;
+    right: 100px;
+    transform: rotate(215deg);
+}
+
+.arrow-4-5 {
+    bottom: 140px;
+    left: 70px;
+    transform: rotate(285deg);
+}
+
+.arrow-5-1 {
+    top: 60px;
+    left: 100px;
+    transform: rotate(325deg);
+}
+
+.node-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    padding: 10px 20px;
+    border: 2px solid white;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.control-btn:hover {
+    background: white;
+    color: #667eea;
+    transform: translateY(-2px);
+}
+
+.system-status {
+    color: white;
+    font-weight: 600;
+    background: rgba(255,255,255,0.1);
+    padding: 8px 16px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+@media (max-width: 768px) {
+    .circular-node-layout {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .node-circle {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .node-button {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .node-number {
+        font-size: 1.1rem;
+    }
+    
+    .node-label {
+        font-size: 0.6rem;
+    }
+    
+    .flow-arrow {
+        width: 25px;
+        height: 25px;
+    }
+}
 </style>
 
 <div id="pdf-interface-container">
     <div class="pdf-header">
         <h1>PDF History Viewer</h1>
         <p>Multi-Container PDF Memory System</p>
+    </div>
+
+    <!-- Circular Node System -->
+    <div class="node-system-container">
+        <div class="node-system-header">
+            <h2>5-Node Processing System</h2>
+            <p>Circular data flow for code comprehension analysis</p>
+        </div>
         
+        <div class="circular-node-layout">
+            <div class="node-circle" data-node="1">
+                <div class="node-button" id="node-1">
+                    <span class="node-number">1</span>
+                    <span class="node-label">Baseline Ingestion</span>
+                </div>
+                <div class="node-status" id="status-1">pending</div>
+            </div>
+            
+            <div class="node-circle" data-node="2">
+                <div class="node-button" id="node-2">
+                    <span class="node-number">2</span>
+                    <span class="node-label">Model Router</span>
+                </div>
+                <div class="node-status" id="status-2">pending</div>
+            </div>
+            
+            <div class="node-circle" data-node="3">
+                <div class="node-button" id="node-3">
+                    <span class="node-number">3</span>
+                    <span class="node-label">Strategy Prediction</span>
+                </div>
+                <div class="node-status" id="status-3">pending</div>
+            </div>
+            
+            <div class="node-circle" data-node="4">
+                <div class="node-button" id="node-4">
+                    <span class="node-number">4</span>
+                    <span class="node-label">Targeted Execution</span>
+                </div>
+                <div class="node-status" id="status-4">pending</div>
+            </div>
+            
+            <div class="node-circle" data-node="5">
+                <div class="node-button" id="node-5">
+                    <span class="node-number">5</span>
+                    <span class="node-label">Measurement Learning</span>
+                </div>
+                <div class="node-status" id="status-5">pending</div>
+            </div>
+            
+            <!-- Circular Arrows -->
+            <div class="flow-arrow arrow-1-2"></div>
+            <div class="flow-arrow arrow-2-3"></div>
+            <div class="flow-arrow arrow-3-4"></div>
+            <div class="flow-arrow arrow-4-5"></div>
+            <div class="flow-arrow arrow-5-1"></div>
+        </div>
         
+        <div class="node-controls">
+            <button class="control-btn" id="refresh-nodes">Refresh Status</button>
+            <button class="control-btn" id="reset-nodes">Reset System</button>
+            <div class="system-status" id="system-status">System: Operational</div>
+        </div>
     </div>
 
     <!-- PDF Viewer -->
@@ -400,6 +735,198 @@ permalink: /code-comprehension/pdf-history-viewer/
 </div>
 
 <script>
+class CircularNodeSystem {
+    constructor() {
+        this.API_BASE_URL = 'http://131.151.90.18:5001';
+        this.nodes = {
+            1: { name: 'Baseline Ingestion', status: 'pending' },
+            2: { name: 'Model Router', status: 'pending' },
+            3: { name: 'Strategy Prediction', status: 'pending' },
+            4: { name: 'Targeted Execution', status: 'pending' },
+            5: { name: 'Measurement Learning', status: 'pending' }
+        };
+        this.initializeNodeSystem();
+        this.refreshNodeStatus();
+    }
+
+    initializeNodeSystem() {
+        // Setup node button event listeners
+        for (let i = 1; i <= 5; i++) {
+            const nodeButton = document.getElementById(`node-${i}`);
+            if (nodeButton) {
+                nodeButton.addEventListener('click', () => this.selectNode(i));
+            }
+        }
+
+        // Setup control buttons
+        const refreshBtn = document.getElementById('refresh-nodes');
+        const resetBtn = document.getElementById('reset-nodes');
+        
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => this.refreshNodeStatus());
+        }
+        
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetNodeSystem());
+        }
+
+        // Setup flow arrows
+        document.querySelectorAll('.flow-arrow').forEach(arrow => {
+            arrow.addEventListener('click', (e) => {
+                this.animateDataFlow(e.target);
+            });
+        });
+    }
+
+    async refreshNodeStatus() {
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/api/v1/node/status`);
+            const data = await response.json();
+            
+            if (data.nodes) {
+                Object.keys(data.nodes).forEach(nodeKey => {
+                    const nodeNum = nodeKey.replace('node_', '');
+                    const nodeData = data.nodes[nodeKey];
+                    this.updateNodeStatus(nodeNum, nodeData.status, nodeData);
+                });
+            }
+
+            // Update system status
+            const systemStatus = document.getElementById('system-status');
+            if (systemStatus) {
+                systemStatus.textContent = `System: ${data.system_status || 'Unknown'}`;
+            }
+
+        } catch (error) {
+            console.error('Error refreshing node status:', error);
+            this.updateSystemStatus('Connection Error');
+        }
+    }
+
+    updateNodeStatus(nodeNumber, status, nodeData) {
+        const nodeButton = document.getElementById(`node-${nodeNumber}`);
+        const statusElement = document.getElementById(`status-${nodeNumber}`);
+        
+        if (nodeButton && statusElement) {
+            // Remove existing status classes
+            nodeButton.classList.remove('pending', 'processing', 'completed', 'error');
+            statusElement.classList.remove('pending', 'processing', 'completed', 'error');
+            
+            // Determine status based on node data
+            let displayStatus = status;
+            let statusClass = status;
+            
+            if (nodeData) {
+                if (nodeData.has_input && nodeData.has_output) {
+                    displayStatus = 'completed';
+                    statusClass = 'completed';
+                } else if (nodeData.has_input) {
+                    displayStatus = 'processing';
+                    statusClass = 'processing';
+                } else {
+                    displayStatus = 'pending';
+                    statusClass = 'pending';
+                }
+            }
+            
+            // Apply new status
+            nodeButton.classList.add(statusClass);
+            statusElement.classList.add(statusClass);
+            statusElement.textContent = displayStatus;
+            
+            // Update internal state
+            this.nodes[nodeNumber].status = displayStatus;
+        }
+    }
+
+    async selectNode(nodeNumber) {
+        try {
+            // Clear previous active states
+            document.querySelectorAll('.node-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Set active state
+            const nodeButton = document.getElementById(`node-${nodeNumber}`);
+            if (nodeButton) {
+                nodeButton.classList.add('active');
+            }
+
+            // Fetch node output data
+            const response = await fetch(`${this.API_BASE_URL}/api/v1/node/${nodeNumber}/output`);
+            const nodeData = await response.json();
+            
+            console.log(`Node ${nodeNumber} data:`, nodeData);
+            
+            // Show node details (you can expand this to show in a modal or sidebar)
+            this.showNodeDetails(nodeNumber, nodeData);
+            
+        } catch (error) {
+            console.error(`Error selecting node ${nodeNumber}:`, error);
+        }
+    }
+
+    showNodeDetails(nodeNumber, nodeData) {
+        // Create a simple alert for now - could be expanded to a modal
+        const nodeName = this.nodes[nodeNumber].name;
+        const details = `Node ${nodeNumber}: ${nodeName}\nStatus: ${nodeData.status}\nTimestamp: ${nodeData.timestamp}`;
+        
+        // You could replace this with a proper modal or details panel
+        console.log('Node Details:', details);
+        
+        // Update page title to show selected node
+        const viewerTitle = document.getElementById('viewerTitle');
+        if (viewerTitle) {
+            viewerTitle.textContent = `${nodeName} - Details`;
+        }
+    }
+
+    async resetNodeSystem() {
+        if (confirm('Are you sure you want to reset the entire node system? This will clear all data.')) {
+            try {
+                const response = await fetch(`${this.API_BASE_URL}/api/v1/node/reset`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (result.status === 'reset_complete') {
+                    // Reset UI to initial state
+                    for (let i = 1; i <= 5; i++) {
+                        this.updateNodeStatus(i, 'pending', null);
+                    }
+                    
+                    this.updateSystemStatus('Reset Complete');
+                    console.log('Node system reset successfully');
+                } else {
+                    throw new Error('Reset failed');
+                }
+                
+            } catch (error) {
+                console.error('Error resetting node system:', error);
+                this.updateSystemStatus('Reset Failed');
+            }
+        }
+    }
+
+    animateDataFlow(arrowElement) {
+        // Add animation class
+        arrowElement.style.transform += ' scale(1.5)';
+        arrowElement.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+        
+        setTimeout(() => {
+            arrowElement.style.transform = arrowElement.style.transform.replace(' scale(1.5)', '');
+            arrowElement.style.background = 'linear-gradient(135deg, #f39c12 0%, #e67e22 100%)';
+        }, 300);
+    }
+
+    updateSystemStatus(status) {
+        const systemStatus = document.getElementById('system-status');
+        if (systemStatus) {
+            systemStatus.textContent = `System: ${status}`;
+        }
+    }
+}
+
 class MultiContainerPDFMemory {
     constructor() {
         this.containers = {
@@ -670,8 +1197,9 @@ class MultiContainerPDFMemory {
     }
 }
 
-// Initialize the multi-container PDF memory interface when the page loads
+// Initialize both systems when the page loads
 document.addEventListener('DOMContentLoaded', () => {
+    new CircularNodeSystem();
     new MultiContainerPDFMemory();
 });
 </script>
