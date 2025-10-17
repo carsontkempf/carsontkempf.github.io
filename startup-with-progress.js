@@ -57,22 +57,7 @@ async function startBackend() {
   backendBar.update(5, { status: "Connecting to remote server..." });
   await delay(300);
 
-  // Sync submodule to remote server
-  backendBar.update(15, { status: "Syncing Error-Annotater submodule..." });
-  const syncSubmodule = spawn(
-    "ssh",
-    [
-      `${SERVER_USER}@${SERVER_IP}`,
-      `cd Error-Annotater && git fetch origin && git checkout ${SUBMODULE_BRANCH} && git reset --hard origin/${SUBMODULE_BRANCH}`,
-    ],
-    {
-      stdio: "pipe",
-    }
-  );
-
-  await new Promise((resolve) => {
-    syncSubmodule.on("close", resolve);
-  });
+  // Skip git sync - using new deployment solution
 
   // Stop any existing backend processes
   backendBar.update(35, { status: "Stopping existing backend processes..." });
@@ -80,7 +65,7 @@ async function startBackend() {
     "ssh",
     [
       `${SERVER_USER}@${SERVER_IP}`,
-      'pkill -f run-backend.sh || true; pkill -f "python.*run.py" || true; lsof -ti:5000 | xargs kill -9 2>/dev/null || true',
+      'pkill -f remote-run-backend.sh || true; pkill -f "python.*run.py" || true; lsof -ti:5000 | xargs kill -9 2>/dev/null || true',
     ],
     {
       stdio: "pipe",
@@ -94,14 +79,14 @@ async function startBackend() {
   backendBar.update(60, { status: "Starting remote backend server..." });
   await delay(300);
 
-  // Start backend on remote server with nohup
+  // Start backend on remote server with proper backgrounding and SSH disconnect
   const startRemoteBackend = spawn(
     "ssh",
     [
       `${SERVER_USER}@${SERVER_IP}`,
-      `cd Error-Annotater && chmod +x remote-run-backend.sh && nohup ./remote-run-backend.sh > backend.log 2>&1 &`,
+      `cd Error-Annotater && chmod +x remote-run-backend.sh && nohup bash -c 'source .venv/bin/activate && ./remote-run-backend.sh' > backend.log 2>&1 < /dev/null & disown`,
     ],
-    { stdio: "pipe" }
+    { stdio: "pipe", detached: true }
   );
 
   backendBar.update(85, { status: "Backend starting on server..." });
@@ -119,8 +104,10 @@ async function startBackend() {
     startRemoteBackend.on("error", reject);
   });
 
-  // Give the backend a moment to start
-  await delay(2000);
+  backendBar.update(95, { status: "SSH disconnected, backend running remotely..." });
+  
+  // Give the backend a moment to fully initialize
+  await delay(3000);
 
   backendBar.update(100, { status: "Remote backend startup complete!" });
   await delay(500);

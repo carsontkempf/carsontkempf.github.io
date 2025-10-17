@@ -305,3 +305,65 @@ This final node is the judge and archivist. It measures the outcome of the exper
     "final_verdict": "IMPROVEMENT"
   }
   ```
+
+Data
+
+Create
+
+    /api/data/node 1/input
+
+    /api/data/node 2/input
+
+    /api/data/node 3/input
+
+    /api/data/node 4/input
+
+    /api/data/node 5/input
+
+Read
+
+    /api/data/node 1/output
+
+    /api/data/node 2/output
+
+    /api/data/node 3/output
+
+    /api/data/node 4/output
+
+    /api/data/node 5/output
+
+Update
+
+    /api/data/node 1/input
+
+    /api/data/node 2/input
+
+    /api/data/node 3/input
+
+    /api/data/node 4/input
+
+    /api/data/node 5/input
+
+Delete
+
+    /api/data/node 1/output
+
+    /api/data/node 2/output
+
+    /api/data/node 3/output
+
+    /api/data/node 4/output
+
+    /api/data/node 5/output
+
+
+
+    /api/data/node 1/input
+
+    /api/data/node 2/input
+
+    /api/data/node 3/input
+
+    /api/data/node 4/input
+
+    /api/data/node 5/input

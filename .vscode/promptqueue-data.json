@@ -1,7 +1,49 @@
 {
-  "promptqueue": {},
-  "sections": {},
+  "promptqueue": {
+    "118": {
+      "id": 118,
+      "key": "clear",
+      "value": "/clear",
+      "positionInQueue": 1,
+      "sectionId": "section-25"
+    },
+    "119": {
+      "id": 119,
+      "key": "code-comprehension/ page",
+      "value": "let's change our code comprehension page to just have five buttons spaced out evenly in a circle. there should be arrows connecting each of these buttons. these buttons should correspond to the 5 nodes found in our backends/Error-Annotater/ dir. ",
+      "positionInQueue": 2,
+      "sectionId": "section-25"
+    },
+    "120": {
+      "id": 120,
+      "key": "hidden pdf",
+      "value": "let's change the pdf in our code-comprehension page to just show no pdf (if none is given). our page should not reserve any space for the pdf section if there is no pdf. it should be gone completely.",
+      "positionInQueue": 2,
+      "sectionId": "section-26"
+    },
+    "121": {
+      "id": 121,
+      "key": "clar",
+      "value": "/clear",
+      "positionInQueue": 1,
+      "sectionId": "section-26"
+    }
+  },
+  "sections": {
+    "section-25": {
+      "id": "section-25",
+      "name": "Default",
+      "isLocked": false,
+      "positionInQueue": 1
+    },
+    "section-26": {
+      "id": "section-26",
+      "name": "code-comprehension/ page pdf view",
+      "isLocked": false,
+      "positionInQueue": 2
+    }
+  },
   "isLocked": false,
-  "nextId": 118,
-  "nextSectionId": 25
+  "nextId": 122,
+  "nextSectionId": 27
 }

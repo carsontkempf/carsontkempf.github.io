@@ -125,7 +125,10 @@
     "backends/Error-Annotater/run.py": true,
     "backends/Error-Annotater/backend.log": true,
     "backends/Error-Annotater/proxy-server.log": true,
-    "backends/Error-Annotater/venv/": true
+    "backends/Error-Annotater/venv/": true,
+    "backends/Error-Annotater/code_comprehension_api.log": true,
+    "backends/Error-Annotater/lang_graph/node-1/.pylintrc": true,
+    "backends/Error-Annotater/lang_graph/__init__.py": true
   },
   "jest.shell": {
     "path": "/bin/bash",
@@ -480,12 +483,15 @@
           "backends/Error-Annotater/run.py",
           "backends/Error-Annotater/backend.log",
           "backends/Error-Annotater/proxy-server.log",
-          "backends/Error-Annotater/venv/"
+          "backends/Error-Annotater/venv/",
+          "backends/Error-Annotater/code_comprehension_api.log",
+          "backends/Error-Annotater/lang_graph/node-1/.pylintrc",
+          "backends/Error-Annotater/lang_graph/__init__.py"
         ],
         "name": "Code Comprehension",
         "description": "",
         "detail": "",
-        "peek": ["start-dev.sh"]
+        "peek": ["start-dev.sh", "backends/Error-Annotater/lang-graph-service/"]
       }
     ]
   },

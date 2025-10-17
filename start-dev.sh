@@ -14,11 +14,7 @@ if [ -f ".env" ]; then
     fi
 fi
 
-# Get Error-Annotater submodule sync info
-cd backends/Error-Annotater
-SUBMODULE_COMMIT=$(git rev-parse HEAD)
-SUBMODULE_BRANCH="feature/flask-api"
-cd ../..
+rsync -avzn /Users/ctk/Programming/Published/carsontkempf.github.io/backends/Error-Annotater/ ctkfdp@rs8sgz564.managed.mst.edu:/home/ctkfdp/Error-Annotater/
 
 # Enhanced startup script with progress bars
 # This script now uses Node.js with cli-progress for better visual feedback
@@ -36,9 +32,7 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-# Export submodule info for the Node.js script
-export SUBMODULE_COMMIT
-export SUBMODULE_BRANCH
+# Skip exporting git submodule info - using new deployment solution
 
 # Run the enhanced startup script with progress bars
 node startup-with-progress.js
