@@ -2,7 +2,7 @@
 const config = {
     // Backend API configuration
     api: {
-        baseUrl: 'http://131.151.90.18:5000',
+        baseUrl: 'http://127.0.0.1:5000',
         endpoints: {
             // Simulation & Core Control
             simulation: {

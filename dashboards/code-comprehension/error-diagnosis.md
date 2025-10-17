@@ -507,7 +507,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       try {
         // Get the backend API URL from environment or use default
-        const backendUrl = window.ENV?.BACKEND_API_URL || 'http://localhost:5000';
+        const backendUrl = window.ENV?.BACKEND_API_URL || 'http://127.0.0.1:5000';
         
         const response = await fetch(`${backendUrl}/api/v1/diagnosis/analyze-errors`, {
           method: 'POST',

@@ -484,7 +484,7 @@ description: Interactive documentation for all Flask backend API endpoints
 
 <script>
 function getServerUrl() {
-    return 'http://131.151.90.18:5000';
+    return 'http://127.0.0.1:5000';
 }
 
 function showResponse(elementId, data, isError = false) {

@@ -1,26 +1,26 @@
 circular_nodes:
-  - title: Error Annotator
-    url: /code-comprehension/error-annotator/
-    icon: 🔍
+  - title: "Ingest & Baseline"
+    url: /code-comprehension/ingest-baseline/
+    icon: 📥
     color: "#e74c3c"
-    description: "Annotate and categorize code errors"
-  - title: Tree Visualizer
-    url: /code-comprehension/tree-visualizer/
-    icon: 🌳
-    color: "#27ae60"
-    description: "Visualize refactoring decision trees"
-  - title: API Endpoints
-    url: /code-comprehension/api-endpoints/
-    icon: 🔌
-    color: "#9b59b6"
-    description: "Flask API documentation"
-  - title: Simulation
-    url: /code-comprehension/simulation/
-    icon: ⚡
-    color: "#3498db"
-    description: "Run refactoring simulations"
-  - title: Error Diagnosis
-    url: /code-comprehension/error-diagnosis/
-    icon: 🏥
+    description: "Establishes objective entry point and baseline measurements"
+  - title: "Perplexity Router"
+    url: /code-comprehension/perplexity-router/
+    icon: 🧠
     color: "#f39c12"
-    description: "AI-powered error analysis"
+    description: "Intelligent triage system for code complexity"
+  - title: "Strategy Prediction"
+    url: /code-comprehension/strategy-prediction/
+    icon: 🎯
+    color: "#3498db"
+    description: "Decision tree brain for refactoring strategy"
+  - title: "Targeted Execution"
+    url: /code-comprehension/targeted-execution/
+    icon: ⚡
+    color: "#27ae60"
+    description: "Surgical precision refactoring execution"
+  - title: "Results"
+    url: /code-comprehension/results/
+    icon: 📈
+    color: "#9b59b6"
+    description: "Prompt tree and analysis results"

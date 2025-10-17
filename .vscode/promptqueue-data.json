@@ -41,9 +41,15 @@
       "name": "code-comprehension/ page pdf view",
       "isLocked": false,
       "positionInQueue": 2
+    },
+    "section-27": {
+      "id": "section-27",
+      "name": "x",
+      "isLocked": false,
+      "positionInQueue": 3
     }
   },
   "isLocked": false,
   "nextId": 122,
-  "nextSectionId": 27
+  "nextSectionId": 28
 }

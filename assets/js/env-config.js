@@ -1,7 +1,7 @@
 // Environment configuration for the Code Comprehension Project
 window.ENV = {
   // Backend API URLs
-  BACKEND_API_URL: 'http://localhost:5000',
+  BACKEND_API_URL: 'http://127.0.0.1:5001',
   
   // Frontend configuration
   FRONTEND_URL: window.location.origin,
@@ -11,7 +11,8 @@ window.ENV = {
     diagnosis: '/api/v1/diagnosis',
     simulation: '/api/v1/simulation',
     data: '/api/v1/data',
-    config: '/api/v1/config'
+    config: '/api/v1/config',
+    nodes: '/api/v1/node'
   },
   
   // Feature flags
@@ -28,7 +29,7 @@ if (window.location.hostname === 'carsontkempf.github.io') {
   window.ENV.BACKEND_API_URL = 'https://your-backend-server.com';
 } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
   // Development environment
-  window.ENV.BACKEND_API_URL = 'http://localhost:5000';
+  window.ENV.BACKEND_API_URL = 'http://127.0.0.1:5000';
 }
 
 console.log('Environment loaded:', window.ENV);

@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   const angleOffset = -90; // Start pointing up
   let currentNodeIndex = 0;
+  let lastClickedIndex = 0; // Track the last clicked button
 
   // Set CSS custom properties for each node
   function setNodeAngles() {
@@ -18,13 +19,22 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize pointer position
   function initializeInterface() {
     setNodeAngles();
+    
+    // Check for saved last clicked button in localStorage
+    const savedLastClicked = localStorage.getItem('code-comprehension-last-clicked');
+    if (savedLastClicked !== null && nodes[savedLastClicked]) {
+      lastClickedIndex = parseInt(savedLastClicked, 10);
+    } else {
+      lastClickedIndex = 0; // Default to first button
+    }
+    
     if (nodes.length > 0) {
-      const firstNode = nodes[0];
-      const firstAngle = parseInt(firstNode.getAttribute('data-angle'), 10);
-      pointer.style.transform = `rotate(${firstAngle + angleOffset}deg)`;
+      const targetNode = nodes[lastClickedIndex];
+      const targetAngle = parseInt(targetNode.getAttribute('data-angle'), 10);
+      pointer.style.transform = `rotate(${targetAngle + angleOffset}deg)`;
       
-      // Add active class to first node
-      firstNode.classList.add('active');
+      // Add active class to remembered button
+      targetNode.classList.add('active');
     }
   }
 
@@ -34,26 +44,32 @@ document.addEventListener('DOMContentLoaded', function() {
     pointer.style.transform = `rotate(${rotation}deg)`;
   }
 
-  // Handle node hover events
+  // Update active state to show last clicked button
+  function updateActiveState(clickedIndex) {
+    nodes.forEach(n => n.classList.remove('active'));
+    if (nodes[clickedIndex]) {
+      nodes[clickedIndex].classList.add('active');
+    }
+    lastClickedIndex = clickedIndex;
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('code-comprehension-last-clicked', clickedIndex.toString());
+  }
+
+  // Handle node events
   nodes.forEach((node, index) => {
     // Add tabindex for keyboard accessibility
     node.setAttribute('tabindex', '0');
     node.setAttribute('role', 'button');
     node.setAttribute('aria-label', `Navigate to ${node.getAttribute('data-title')}`);
-    
-    // Hover events for pointer rotation
-    node.addEventListener('mouseenter', () => {
+
+    // Click events for navigation and pointer rotation
+    node.addEventListener('click', (event) => {
+      // Update pointer to point at clicked button
       const nodeAngle = parseInt(node.getAttribute('data-angle'), 10);
       rotatePointer(nodeAngle);
+      updateActiveState(index);
       
-      // Remove active class from all nodes and add to current
-      nodes.forEach(n => n.classList.remove('active'));
-      node.classList.add('active');
-      currentNodeIndex = index;
-    });
-
-    // Click events for navigation
-    node.addEventListener('click', (event) => {
       // Add a small delay for visual feedback
       event.preventDefault();
       
@@ -70,13 +86,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 200);
     });
 
-    // Focus events for keyboard navigation
+    // Focus events for keyboard navigation (no pointer movement)
     node.addEventListener('focus', () => {
-      const nodeAngle = parseInt(node.getAttribute('data-angle'), 10);
-      rotatePointer(nodeAngle);
-      
-      nodes.forEach(n => n.classList.remove('active'));
-      node.classList.add('active');
       currentNodeIndex = index;
     });
   });
@@ -106,6 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
       case ' ':
         event.preventDefault();
         if (nodes[currentNodeIndex]) {
+          // Simulate a click which will move the pointer and navigate
           nodes[currentNodeIndex].click();
         }
         return;
@@ -116,35 +128,12 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // Update interface for keyboard navigation
+    // Update keyboard focus (but don't move pointer)
     const currentNode = nodes[currentNodeIndex];
     if (currentNode) {
       currentNode.focus();
-      const nodeAngle = parseInt(currentNode.getAttribute('data-angle'), 10);
-      rotatePointer(nodeAngle);
-      
-      // Update active state
-      nodes.forEach(n => n.classList.remove('active'));
-      currentNode.classList.add('active');
     }
   });
-
-  // Handle mouse leave from entire circular menu
-  const circularMenu = document.querySelector('.circular-menu');
-  if (circularMenu) {
-    circularMenu.addEventListener('mouseleave', () => {
-      // Return to the first node when mouse leaves
-      const firstNode = nodes[0];
-      if (firstNode) {
-        const firstAngle = parseInt(firstNode.getAttribute('data-angle'), 10);
-        rotatePointer(firstAngle);
-        
-        nodes.forEach(n => n.classList.remove('active'));
-        firstNode.classList.add('active');
-        currentNodeIndex = 0;
-      }
-    });
-  }
 
   // Handle window resize to recalculate positions
   let resizeTimeout;
@@ -152,6 +141,11 @@ document.addEventListener('DOMContentLoaded', function() {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
       setNodeAngles();
+      // Keep pointer pointed at last clicked button after resize
+      if (nodes[lastClickedIndex]) {
+        const nodeAngle = parseInt(nodes[lastClickedIndex].getAttribute('data-angle'), 10);
+        rotatePointer(nodeAngle);
+      }
     }, 250);
   });
 

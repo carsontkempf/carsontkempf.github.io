@@ -15,7 +15,7 @@ if [ -f ".env" ]; then
     fi
 fi
 
-rsync -aiz --delete --exclude='.venv' /Users/ctk/Programming/Published/carsontkempf.github.io/backends/Error-Annotater/ ctkfdp@rs8sgz564.managed.mst.edu:/home/ctkfdp/Error-Annotater/
+rsync -av --exclude-from=rsync-exclude.txt /Users/ctk/Programming/Published/carsontkempf.github.io/backends/Error-Annotater/ ctkfdp@rs8sgz564.managed.mst.edu:/home/ctkfdp/Error-Annotater/
 # Enhanced startup script with progress bars
 # This script now uses Node.js with cli-progress for better visual feedback
 

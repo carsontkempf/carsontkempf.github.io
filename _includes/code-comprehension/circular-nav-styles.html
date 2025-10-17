@@ -2,9 +2,7 @@
 .circular-menu-container {
   text-align: center;
   padding: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
-  color: white;
   position: relative;
   overflow: hidden;
 }
@@ -20,7 +18,7 @@
 .circular-menu-container p {
   margin: 0 0 3rem 0;
   font-size: clamp(1rem, 2vw, 1.2rem);
-  opacity: 0.9;
+  opacity: 0.8;
   z-index: 100;
   position: relative;
 }
@@ -105,29 +103,17 @@
 
 .pointer {
   position: absolute;
-  width: 4px;
+  width: 3px;
   height: calc(min(80vw, 80vh, 500px) / 2.5);
-  background: linear-gradient(to bottom, #ff6b6b, #ee5a52);
+  background: #333;
   top: 50%;
   left: 50%;
-  transform-origin: 50% 100%;
-  margin-left: -2px;
-  margin-top: calc(min(80vw, 80vh, 500px) / -2.5);
+  transform-origin: 50% 50%;
+  margin-left: -1.5px;
+  margin-top: calc(min(80vw, 80vh, 500px) / -5);
   transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   z-index: 75;
-  border-radius: 2px;
-}
-
-.pointer::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: -6px;
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-bottom: 16px solid #ff6b6b;
+  border-radius: 1.5px;
 }
 
 
