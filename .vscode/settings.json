@@ -128,7 +128,13 @@
     "backends/Error-Annotater/venv/": true,
     "backends/Error-Annotater/code_comprehension_api.log": true,
     "backends/Error-Annotater/lang_graph/node-1/.pylintrc": true,
-    "backends/Error-Annotater/lang_graph/__init__.py": true
+    "backends/Error-Annotater/lang_graph/__init__.py": true,
+    "dashboards/": true,
+    "backends/Error-Annotater/.env": true,
+    ".env": true,
+    "babel.config.js": true,
+    "rsync-exclude.txt": true,
+    "startup-with-progress.js": true
   },
   "jest.shell": {
     "path": "/bin/bash",
@@ -486,7 +492,15 @@
           "backends/Error-Annotater/venv/",
           "backends/Error-Annotater/code_comprehension_api.log",
           "backends/Error-Annotater/lang_graph/node-1/.pylintrc",
-          "backends/Error-Annotater/lang_graph/__init__.py"
+          "backends/Error-Annotater/lang_graph/__init__.py",
+          "dashboards/",
+          "backends/Error-Annotater/.env",
+          ".env",
+          "babel.config.js",
+          "rsync-exclude.txt",
+          "start-dev.sh",
+          "startup-with-progress.js",
+          "start-dev.sh"
         ],
         "name": "Code Comprehension",
         "description": "",

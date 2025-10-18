@@ -36,14 +36,14 @@ back_text: Code Comprehension
 
 <div class="node-container">
   <div class="header-section">
-    <h1>🧠 Perplexity Router Agent</h1>
+    <h1>Perplexity Router Agent</h1>
     <p><strong>Node 2 of 5-Step Circular Processing System</strong></p>
     <p>Intelligent triage system that routes code based on complexity analysis</p>
   </div>
 
   <div class="content-grid">
     <div class="info-card">
-      <h3>🎯 Primary Function</h3>
+      <h3>Primary Function</h3>
       <ul>
         <li>Calculates <strong>maximum token-level perplexity</strong></li>
         <li>Compares against <code>CONFUSION_THRESHOLD</code></li>
@@ -54,7 +54,7 @@ back_text: Code Comprehension
     </div>
 
     <div class="info-card">
-      <h3>📊 Routing Logic</h3>
+      <h3>Routing Logic</h3>
       <ul>
         <li><strong>Low Perplexity:</strong> → Node 3 (Strategy Prediction)</li>
         <li><strong>High Perplexity:</strong> → Node 5 (Special Analysis)</li>
@@ -66,7 +66,7 @@ back_text: Code Comprehension
   </div>
 
   <div class="decision-tree">
-    <h3>🔀 Decision Tree Logic</h3>
+    <h3>Decision Tree Logic</h3>
     <div style="text-align: center;">
       <div class="decision-node">Input Code</div>
       <div style="margin: 20px 0;">↓</div>
@@ -86,7 +86,7 @@ back_text: Code Comprehension
   </div>
 
   <div class="flow-diagram">
-    <h3>🔄 Processing Flow</h3>
+    <h3>Processing Flow</h3>
     <div class="flow-step">Baseline Data</div>
     <span class="flow-arrow">→</span>
     <div class="flow-step">Load Model</div>
@@ -98,7 +98,7 @@ back_text: Code Comprehension
     <div class="flow-step">Route Decision</div>
   </div>
 
-  <h3>📝 Input/Output Schema</h3>
+  <h3>Input/Output Schema</h3>
   
   <h4>Input Format:</h4>
   <div class="json-example">{
@@ -132,7 +132,7 @@ back_text: Code Comprehension
 }</div>
 
   <div class="api-section">
-    <h3>🔌 API Testing Interface</h3>
+    <h3>API Testing Interface</h3>
     
     <div class="api-buttons">
       <button class="btn btn-create" onclick="createNodeInput()">Create Input (POST)</button>

@@ -35,11 +35,11 @@ class SimulationView {
                     <h3>Simulation Control</h3>
                     <div class="button-group">
                         <button id="run-cycle-btn" class="btn btn-primary">
-                            <span class="btn-icon">▶️</span>
+                            <span class="btn-icon">Run</span>
                             Run Cycle
                         </button>
                         <button id="reset-session-btn" class="btn btn-secondary">
-                            <span class="btn-icon">🔄</span>
+                            <span class="btn-icon">Reset</span>
                             Reset Session
                         </button>
                     </div>
@@ -52,7 +52,7 @@ class SimulationView {
                             <option value="">Select checkpoint...</option>
                         </select>
                         <button id="resimulate-btn" class="btn btn-warning" disabled>
-                            <span class="btn-icon">⏪</span>
+                            <span class="btn-icon">Back</span>
                             Resimulate
                         </button>
                     </div>
@@ -249,12 +249,12 @@ class SimulationView {
 
         if (isRunning) {
             runBtn.disabled = true;
-            runBtn.innerHTML = '<span class="btn-icon">⏳</span> Running...';
+            runBtn.innerHTML = '<span class="btn-icon">Loading</span> Running...';
             resetBtn.disabled = true;
             resimulateBtn.disabled = true;
         } else {
             runBtn.disabled = false;
-            runBtn.innerHTML = '<span class="btn-icon">▶️</span> Run Cycle';
+            runBtn.innerHTML = '<span class="btn-icon">Run</span> Run Cycle';
             resetBtn.disabled = false;
             const checkpointSelect = this.element.querySelector('#checkpoint-select');
             resimulateBtn.disabled = !checkpointSelect.value;

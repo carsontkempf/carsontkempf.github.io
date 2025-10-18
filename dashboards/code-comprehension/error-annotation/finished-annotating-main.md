@@ -413,7 +413,7 @@ back_text: Code Comprehension
 
 <div id="finished-annotating-container">
     <div class="finished-header">
-        <h1>🎉 Finished Annotating</h1>
+        <h1>Finished Annotating</h1>
         <p>Export your annotations and generate enhanced prompts based on your analysis</p>
         
         <!-- Navigation Buttons -->
@@ -435,7 +435,7 @@ back_text: Code Comprehension
 
     <!-- Statistics Summary -->
     <div class="export-section stats-section" id="statisticsSection" style="display: none;">
-        <h4>📊 Annotation Statistics</h4>
+        <h4>Annotation Statistics</h4>
         <div id="statsDisplay" class="stats-grid"></div>
         <div id="detailedStats" style="margin-top: 20px;"></div>
     </div>
@@ -444,7 +444,7 @@ back_text: Code Comprehension
 
     <!-- Interactive Error Analysis Chart -->
     <div class="export-section data-section" id="dataSection" style="display: none;">
-        <h4>📊 Interactive Error Analysis</h4>
+        <h4>Interactive Error Analysis</h4>
         <p class="section-description">Click on error categories to view detailed breakdowns. Charts are automatically exported as PDFs.</p>
         
         <!-- Chart Container -->
@@ -468,7 +468,7 @@ back_text: Code Comprehension
 <!-- Save to Google Drive Section (Bottom of Page) -->
 <div style="width: 100%; text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-top: 1px solid #dee2e6; margin-top: 40px;">
     <button id="saveAllToDriveBtn" class="export-btn primary" style="background: #4285f4; color: white; padding: 18px 40px; font-size: 18px; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 6px 20px rgba(66,133,244,0.3); transform: translateY(0); position: relative;">
-        📁 Save to Google Drive
+        Save to Google Drive
     </button>
     <div style="margin-top: 15px; color: #6c757d; font-size: 16px; font-weight: 500;">
         Select or create a folder in Google Drive to save your analysis data

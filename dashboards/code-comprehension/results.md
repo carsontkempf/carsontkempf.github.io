@@ -47,14 +47,14 @@ back_text: Code Comprehension
 
 <div class="node-container">
   <div class="header-section">
-    <h1>📈 Results & Prompt Tree</h1>
+    <h1>Results & Prompt Tree</h1>
     <p><strong>Node 5 of 5-Step Circular Processing System</strong></p>
     <p>Comprehensive analysis, learning insights, and prompt tree visualization</p>
   </div>
 
   <div class="content-grid">
     <div class="info-card">
-      <h3>🎯 Measure & Learn Functions</h3>
+      <h3>Measure & Learn Functions</h3>
       <ul>
         <li><strong>Comprehensive Measurement:</strong> Standard test suite</li>
         <li><strong>Custom Statistics:</strong> AST analysis and advanced metrics</li>
@@ -65,7 +65,7 @@ back_text: Code Comprehension
     </div>
 
     <div class="info-card">
-      <h3>📊 Analysis Metrics</h3>
+      <h3>Analysis Metrics</h3>
       <ul>
         <li><strong>Static Error Delta:</strong> Change in linting errors</li>
         <li><strong>AST Node Change:</strong> Structural complexity change</li>
@@ -96,7 +96,7 @@ back_text: Code Comprehension
   </div>
 
   <div class="tree-visualizer">
-    <h3>🌳 Interactive Prompt Tree</h3>
+    <h3>Interactive Prompt Tree</h3>
     <p>Click on any node to view detailed prompt information and results</p>
     
     <div class="tree-level">
@@ -142,7 +142,7 @@ back_text: Code Comprehension
   </div>
 
   <div class="learning-insights">
-    <h3>🧠 Learning Insights</h3>
+    <h3>Learning Insights</h3>
     <ul>
       <li><strong>Variable renaming highly effective</strong> - 95% success rate in reducing complexity</li>
       <li><strong>Function extraction improved modularity</strong> - Average 40% reduction in cyclomatic complexity</li>
@@ -152,7 +152,7 @@ back_text: Code Comprehension
   </div>
 
   <div class="flow-diagram">
-    <h3>🔄 Learning Cycle</h3>
+    <h3>Learning Cycle</h3>
     <div class="flow-step">Execution Results</div>
     <span class="flow-arrow">→</span>
     <div class="flow-step">Run Measurements</div>
@@ -164,7 +164,7 @@ back_text: Code Comprehension
     <div class="flow-step">Back to Node 1</div>
   </div>
 
-  <h3>📝 Input/Output Schema</h3>
+  <h3>Input/Output Schema</h3>
   
   <h4>Input Format:</h4>
   <div class="json-example">{
@@ -221,7 +221,7 @@ back_text: Code Comprehension
 }</div>
 
   <div class="api-section">
-    <h3>🔌 API Testing Interface</h3>
+    <h3>API Testing Interface</h3>
     
     <div class="api-buttons">
       <button class="btn btn-create" onclick="createNodeInput()">Create Input (POST)</button>

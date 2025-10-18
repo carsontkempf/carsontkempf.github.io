@@ -36,14 +36,14 @@ back_text: Code Comprehension
 
 <div class="node-container">
   <div class="header-section">
-    <h1>🎯 Strategy Prediction Agent</h1>
+    <h1>Strategy Prediction Agent</h1>
     <p><strong>Node 3 of 5-Step Circular Processing System</strong></p>
     <p>Decision tree brain that predicts optimal refactoring strategies</p>
   </div>
 
   <div class="content-grid">
     <div class="info-card">
-      <h3>🎯 Primary Function</h3>
+      <h3>Primary Function</h3>
       <ul>
         <li><strong>Feature Engineering:</strong> Calculates code metrics</li>
         <li><strong>Model Prediction:</strong> Uses Random Forest model</li>
@@ -54,7 +54,7 @@ back_text: Code Comprehension
     </div>
 
     <div class="info-card">
-      <h3>📊 Key Features</h3>
+      <h3>Key Features</h3>
       <ul>
         <li><strong>Cyclomatic Complexity:</strong> Control flow analysis</li>
         <li><strong>Line Count:</strong> Code length metrics</li>
@@ -66,7 +66,7 @@ back_text: Code Comprehension
   </div>
 
   <div class="strategy-list">
-    <h3>🧠 Available Refactoring Strategies</h3>
+    <h3>Available Refactoring Strategies</h3>
     <div style="text-align: center;">
       <div class="strategy-item">Extract Method</div>
       <div class="strategy-item">Rename Variable</div>
@@ -80,7 +80,7 @@ back_text: Code Comprehension
   </div>
 
   <div class="ml-model">
-    <h3>🤖 Machine Learning Model</h3>
+    <h3>Machine Learning Model</h3>
     <p><strong>Model Type:</strong> Random Forest Classifier</p>
     <p><strong>Training Data:</strong> Historical refactoring outcomes</p>
     <p><strong>Features:</strong> 15+ code complexity metrics</p>
@@ -89,7 +89,7 @@ back_text: Code Comprehension
   </div>
 
   <div class="flow-diagram">
-    <h3>🔄 Processing Flow</h3>
+    <h3>Processing Flow</h3>
     <div class="flow-step">Routed Code</div>
     <span class="flow-arrow">→</span>
     <div class="flow-step">Feature Engineering</div>
@@ -101,7 +101,7 @@ back_text: Code Comprehension
     <div class="flow-step">Node 4</div>
   </div>
 
-  <h3>📝 Input/Output Schema</h3>
+  <h3>Input/Output Schema</h3>
   
   <h4>Input Format:</h4>
   <div class="json-example">{
@@ -151,7 +151,7 @@ back_text: Code Comprehension
 }</div>
 
   <div class="api-section">
-    <h3>🔌 API Testing Interface</h3>
+    <h3>API Testing Interface</h3>
     
     <div class="api-buttons">
       <button class="btn btn-create" onclick="createNodeInput()">Create Input (POST)</button>

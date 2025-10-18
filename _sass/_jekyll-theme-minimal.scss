@@ -2156,3 +2156,325 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
         }
     }
 }
+
+// =============================================================================
+// Code Comprehension Interface Styles
+// =============================================================================
+
+/* PDF Interface Container */
+#pdf-interface-container {
+    @extend %tile;
+    margin: var(--grid-gap) 0;
+}
+
+.pdf-header {
+    text-align: center;
+    padding: var(--base-padding);
+    
+    h1 {
+        color: var(--text-heading);
+        margin-bottom: 0.5rem;
+    }
+    
+    p {
+        color: var(--text-main);
+        opacity: 0.9;
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Pipeline Container */
+.pipeline-container {
+    background: var(--bg-tile);
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin: 2rem auto;
+    max-width: 600px;
+}
+
+.pipeline-header {
+    padding: 1.25rem;
+    background: var(--bg-accent);
+    color: var(--text-heading);
+    text-align: center;
+    
+    h3 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 600;
+    }
+    
+    p {
+        margin: 8px 0 0 0;
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+}
+
+.pipeline-content {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Node Styles */
+.node-container {
+    background: var(--bg-accent);
+    border-radius: var(--border-radius);
+    padding: 1.25rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        border-color: var(--link-bg);
+        transform: translateY(-2px);
+    }
+    
+    h4 {
+        color: var(--text-heading);
+        margin: 0 0 10px 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    
+    p {
+        color: var(--text-main);
+        margin: 0 0 15px 0;
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+}
+
+.node-actions {
+    display: flex;
+    gap: 0.625rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.node-btn, .node-link {
+    display: inline-block;
+    background: var(--bg-code-block);
+    color: var(--text-heading);
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    border: 2px solid var(--link-bg);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 0.9rem;
+    border: none;
+    
+    &:hover {
+        background: var(--link-bg);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+/* API Tools Section */
+.api-tools {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.api-tool-card {
+    background: var(--bg-accent);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    max-width: 400px;
+    flex: 1;
+    min-width: 300px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        border-color: var(--link-bg);
+        transform: translateY(-2px);
+    }
+    
+    h3 {
+        color: var(--text-heading);
+        margin: 0 0 1.25rem 0;
+        font-size: 1.3rem;
+    }
+    
+    .api-tool-link {
+        display: inline-block;
+        background: var(--bg-code-block);
+        color: var(--text-heading);
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        border: 2px solid var(--link-bg);
+        transition: all 0.3s ease;
+        
+        &:hover {
+            background: var(--link-bg);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+    }
+}
+
+/* Modal Styles */
+.json-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.json-modal-content {
+    background: var(--bg-tile);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    
+    h3 {
+        margin-top: 0;
+        color: var(--text-heading);
+        margin-bottom: 1rem;
+    }
+}
+
+.json-textarea {
+    width: 100%;
+    height: 200px;
+    border: 2px solid var(--bg-accent);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    resize: vertical;
+    background: var(--bg-page);
+    color: var(--text-main);
+    
+    &:focus {
+        outline: none;
+        border-color: var(--link-bg);
+    }
+    
+    &[readonly] {
+        background: var(--bg-code-block);
+        opacity: 0.9;
+    }
+}
+
+.modal-actions {
+    margin-top: 1.25rem;
+    display: flex;
+    gap: 0.625rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.modal-btn {
+    background: var(--bg-accent);
+    color: var(--text-heading);
+    border: none;
+    padding: 0.625rem 1.25rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        background: var(--link-bg);
+        transform: translateY(-1px);
+    }
+    
+    &.primary {
+        background: var(--link-bg);
+        
+        &:hover {
+            background: var(--bg-accent);
+        }
+    }
+    
+    &.secondary {
+        background: var(--bg-code-block);
+        
+        &:hover {
+            background: var(--bg-accent);
+        }
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .pipeline-container {
+        margin: 1rem;
+    }
+    
+    .pipeline-header,
+    .pipeline-content {
+        padding: 1rem;
+    }
+    
+    .node-container {
+        padding: 1rem;
+        
+        h4 {
+            font-size: 1.1rem;
+        }
+    }
+    
+    .node-actions {
+        flex-direction: column;
+        align-items: center;
+        
+        .node-btn,
+        .node-link {
+            width: 100%;
+            max-width: 200px;
+        }
+    }
+    
+    .api-tools {
+        flex-direction: column;
+        margin: 1rem;
+        
+        .api-tool-card {
+            min-width: auto;
+        }
+    }
+    
+    .json-modal-content {
+        padding: 1.5rem;
+        width: 95%;
+        
+        .modal-actions {
+            flex-direction: column;
+            
+            .modal-btn {
+                width: 100%;
+            }
+        }
+    }
+}

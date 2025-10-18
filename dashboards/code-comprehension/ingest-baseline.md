@@ -137,14 +137,14 @@ back_text: Code Comprehension
 
 <div class="node-container">
   <div class="header-section">
-    <h1>📥 Ingest & Baseline Agent</h1>
+    <h1>Ingest & Baseline Agent</h1>
     <p><strong>Node 1 of 5-Step Circular Processing System</strong></p>
     <p>The objective entry point that establishes clean baseline measurements</p>
   </div>
 
   <div class="content-grid">
     <div class="info-card">
-      <h3>🎯 Primary Function</h3>
+      <h3>Primary Function</h3>
       <ul>
         <li>Selects a code snippet for analysis</li>
         <li>Runs full suite of baseline measurements</li>
@@ -155,7 +155,7 @@ back_text: Code Comprehension
     </div>
 
     <div class="info-card">
-      <h3>📊 Output Metrics</h3>
+      <h3>Output Metrics</h3>
       <ul>
         <li><strong>Static Error Count:</strong> Linting violations</li>
         <li><strong>Type Error Count:</strong> Type system violations</li>
@@ -167,7 +167,7 @@ back_text: Code Comprehension
   </div>
 
   <div class="flow-diagram">
-    <h3>🔄 Processing Flow</h3>
+    <h3>Processing Flow</h3>
     <div class="flow-step">Code Input</div>
     <span class="flow-arrow">→</span>
     <div class="flow-step">UUID Generation</div>
@@ -179,7 +179,7 @@ back_text: Code Comprehension
     <div class="flow-step">Node 2</div>
   </div>
 
-  <h3>📝 Input/Output Schema</h3>
+  <h3>Input/Output Schema</h3>
   
   <h4>Input Format:</h4>
   <div class="json-example">{
@@ -213,7 +213,7 @@ back_text: Code Comprehension
 }</div>
 
   <div class="api-section">
-    <h3>🔌 API Testing Interface</h3>
+    <h3>API Testing Interface</h3>
     
     <div class="api-buttons">
       <button class="btn btn-create" onclick="createNodeInput()">Create Input (POST)</button>

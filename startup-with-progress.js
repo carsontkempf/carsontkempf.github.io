@@ -79,6 +79,22 @@ async function startBackend() {
   backendBar.update(60, { status: "Starting remote backend server..." });
   await delay(300);
 
+  // Start SSH port forwarding for local development
+  backendBar.update(70, { status: "Setting up port forwarding..." });
+  const portForward = spawn(
+    "ssh",
+    [
+      "-N", "-L", "5000:127.0.0.1:5000",
+      `${SERVER_USER}@${SERVER_IP}`
+    ],
+    { stdio: "pipe", detached: true }
+  );
+
+  // Store port forwarding process for cleanup
+  process.portForwardProcess = portForward;
+
+  await delay(1000);
+
   // Start backend on remote server with proper backgrounding and SSH disconnect
   const startRemoteBackend = spawn(
     "ssh",
@@ -111,6 +127,12 @@ async function startBackend() {
 
   backendBar.update(100, { status: "Remote backend startup complete!" });
   await delay(500);
+
+  // Run CORS test if requested
+  if (process.env.RUN_CORS_TEST === 'true') {
+    backendBar.update(100, { status: "Running CORS debug test..." });
+    await runCorsTest();
+  }
 }
 
 async function startFrontend() {
@@ -171,6 +193,35 @@ async function startFrontend() {
   });
 }
 
+async function runCorsTest() {
+  const { SERVER_USER, SERVER_IP } = process.env;
+
+  console.log("\n");
+  console.log("─".repeat(process.stdout.columns || 80));
+  console.log("🔍 CORS Debug Test Results:");
+  console.log("─".repeat(process.stdout.columns || 80));
+  console.log("");
+
+  try {
+    const corsTest = spawn(
+      "ssh",
+      [
+        `${SERVER_USER}@${SERVER_IP}`,
+        'cd Error-Annotater && python3 test_cors_debug.py',
+      ],
+      { stdio: "inherit" }
+    );
+
+    await new Promise((resolve) => {
+      corsTest.on("close", resolve);
+    });
+  } catch (error) {
+    console.log("Could not run CORS test");
+  }
+
+  console.log("\n");
+}
+
 async function showBackendLog() {
   const { SERVER_USER, SERVER_IP } = process.env;
 
@@ -221,6 +272,12 @@ async function main() {
 // Handle graceful shutdown
 process.on("SIGINT", async () => {
   multibar.stop();
+  
+  // Kill port forwarding if it exists
+  if (process.portForwardProcess) {
+    process.portForwardProcess.kill();
+  }
+  
   process.logShown = true;
   await showBackendLog();
   process.exit(0);
@@ -228,6 +285,12 @@ process.on("SIGINT", async () => {
 
 process.on("SIGTERM", async () => {
   multibar.stop();
+  
+  // Kill port forwarding if it exists
+  if (process.portForwardProcess) {
+    process.portForwardProcess.kill();
+  }
+  
   process.logShown = true;
   await showBackendLog();
   process.exit(0);

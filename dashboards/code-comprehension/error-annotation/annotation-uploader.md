@@ -81,7 +81,7 @@ back_text: Code Comprehension
             <div class="file-upload-area" id="pdf-upload-complete">
               <input type="file" id="pdf-file-complete" accept=".pdf" style="display: none;">
               <div class="upload-placeholder">
-                <div class="upload-icon">📄</div>
+                <div class="upload-icon">File</div>
                 <p>Click to select PDF file or drag and drop</p>
                 <small>Supported format: .pdf (max 100MB)</small>
               </div>

@@ -10,7 +10,7 @@ back_text: Code Comprehension
 
 <style>
 .node-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-.api-section { background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #9b59b6; }
+.api-section { background: var(--bg-tile); border-radius: var(--border-radius); padding: 20px; margin: 20px 0; border-left: 4px solid var(--link-bg); }
 .api-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
 .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
 .btn-create { background: #27ae60; color: white; }
@@ -18,17 +18,40 @@ back_text: Code Comprehension
 .btn-update { background: #f39c12; color: white; }
 .btn-delete { background: #e74c3c; color: white; }
 .btn:hover { transform: translateY(-2px); opacity: 0.9; }
-.response-area { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; margin: 10px 0; min-height: 100px; white-space: pre-wrap; font-family: 'Monaco', 'Menlo', monospace; display: none; }
+.response-area { background: var(--bg-code-block); color: var(--text-main); padding: 15px; border-radius: 5px; margin: 10px 0; min-height: 100px; white-space: pre-wrap; font-family: 'Monaco', 'Menlo', monospace; display: none; }
 .input-area { margin: 15px 0; }
-.input-area textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: 'Monaco', 'Menlo', monospace; }
+.input-area textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid var(--bg-accent); border-radius: 5px; font-family: 'Monaco', 'Menlo', monospace; background: var(--bg-page); color: var(--text-main); }
 .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
 .status-success { background: #27ae60; }
 .status-error { background: #e74c3c; }
 .status-pending { background: #f39c12; }
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  padding: 20px;
+  background: var(--bg-tile);
+  border-radius: var(--border-radius);
+  border: 2px solid var(--bg-accent);
+}
+
+.navigation .btn {
+  background: var(--link-bg) !important;
+  color: var(--text-heading) !important;
+  border: 2px solid var(--bg-accent);
+}
+
+.navigation .btn:hover {
+  background: var(--bg-accent) !important;
+  border-color: var(--link-bg);
+  transform: translateY(-2px);
+}
 </style>
 
 <div class="node-container">
-  <h1>📈 Step 5: Measure & Learn Agent</h1>
+  <h1>Step 5: Measure & Learn Agent</h1>
   
   <div class="description">
     <p>This final, consolidated agent handles all post-mortem analysis and ensures the system improves over time.</p>
@@ -43,7 +66,7 @@ back_text: Code Comprehension
   </div>
 
   <div class="api-section">
-    <h3>🔌 API Testing Interface</h3>
+    <h3>API Testing Interface</h3>
     <p><span class="status-indicator status-pending"></span>Node 5 API Endpoints</p>
     
     <div class="api-buttons">
@@ -80,6 +103,27 @@ back_text: Code Comprehension
     </div>
 
     <div id="responseArea" class="response-area"></div>
+  </div>
+
+  <!-- Analysis & Annotation Tools -->
+  <div class="api-section" style="border-left-color: #e74c3c;">
+    <h3>Error Annotator Tool</h3>
+    <p>Annotate and categorize errors found during the analysis process for continuous learning.</p>
+    <div style="text-align: center; margin: 20px 0;">
+      <a href="/code-comprehension/error-annotator/" style="display: inline-block; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 12px rgba(231,76,60,0.3); transition: all 0.3s ease;">
+        Open Error Annotator →
+      </a>
+    </div>
+  </div>
+
+  <div class="api-section" style="border-left-color: #16a085;">
+    <h3>Tree Visualizer Tool</h3>
+    <p>Visualize the refactoring tree and analysis results to understand system learning patterns.</p>
+    <div style="text-align: center; margin: 20px 0;">
+      <a href="/code-comprehension/tree-visualizer/" style="display: inline-block; background: linear-gradient(135deg, #16a085 0%, #1abc9c 100%); color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 12px rgba(22,160,133,0.3); transition: all 0.3s ease;">
+        Open Tree Visualizer →
+      </a>
+    </div>
   </div>
 
   <div class="navigation">

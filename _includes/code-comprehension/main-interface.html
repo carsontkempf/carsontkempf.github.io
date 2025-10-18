@@ -1,2 +1,298 @@
-{% include code-comprehension/circular-nav-styles.html %}
-{% include code-comprehension/circular-nav.html %}
+<div id="pdf-interface-container">
+    <div class="pdf-header">
+        <h1>Code Comprehension Project</h1>
+        <p>Multi-Container PDF Memory System & Error Analysis Tools</p>
+        
+        <!-- 5 Node Processing Pipeline -->
+        <div class="pipeline-container">
+            <div class="pipeline-header">
+                <h3>5-Node Processing Pipeline</h3>
+                <p>Code analysis and refactoring system</p>
+            </div>
+            <div class="pipeline-content">
+                    <!-- Node 1: Ingest & Baseline -->
+                    <div class="node-container">
+                        <h4>Node 1: Ingest & Baseline Agent</h4>
+                        <p>Initialize experiment and calculate baseline metrics</p>
+                        <div class="node-actions">
+                            <a href="/code-comprehension/node-1/" class="node-link">
+                                Open Node 1 →
+                            </a>
+                            <button onclick="inputJsonNode(1)" class="node-btn">
+                                Input JSON
+                            </button>
+                            <button onclick="outputJsonNode(1)" class="node-btn">
+                                Output JSON
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Node 2: Perplexity Router -->
+                    <div class="node-container">
+                        <h4>Node 2: Perplexity Router Agent</h4>
+                        <p>Intelligent triage system for code complexity</p>
+                        <div class="node-actions">
+                            <a href="/code-comprehension/node-2/" class="node-link">
+                                Open Node 2 →
+                            </a>
+                            <button onclick="inputJsonNode(2)" class="node-btn">
+                                Input JSON
+                            </button>
+                            <button onclick="outputJsonNode(2)" class="node-btn">
+                                Output JSON
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Node 3: Strategy Prediction -->
+                    <div class="node-container">
+                        <h4>Node 3: Strategy Prediction Agent</h4>
+                        <p>Decision tree brain for optimal refactoring</p>
+                        <div class="node-actions">
+                            <a href="/code-comprehension/node-3/" class="node-link">
+                                Open Node 3 →
+                            </a>
+                            <button onclick="inputJsonNode(3)" class="node-btn">
+                                Input JSON
+                            </button>
+                            <button onclick="outputJsonNode(3)" class="node-btn">
+                                Output JSON
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Node 4: Targeted Execution -->
+                    <div class="node-container">
+                        <h4>Node 4: Targeted Execution Agent</h4>
+                        <p>Precise refactoring implementation</p>
+                        <div class="node-actions">
+                            <a href="/code-comprehension/node-4/" class="node-link">
+                                Open Node 4 →
+                            </a>
+                            <button onclick="inputJsonNode(4)" class="node-btn">
+                                Input JSON
+                            </button>
+                            <button onclick="outputJsonNode(4)" class="node-btn">
+                                Output JSON
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Node 5: Measure & Learn -->
+                    <div class="node-container">
+                        <h4>Node 5: Measure & Learn Agent</h4>
+                        <p>Analysis, verdict, and continuous learning</p>
+                        <div class="node-actions">
+                            <a href="/code-comprehension/node-5/" class="node-link">
+                                Open Node 5 →
+                            </a>
+                            <button onclick="inputJsonNode(5)" class="node-btn">
+                                Input JSON
+                            </button>
+                            <button onclick="outputJsonNode(5)" class="node-btn">
+                                Output JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remaining Tools -->
+        <div class="api-tools">
+            <!-- API Endpoints Tool -->
+            <div class="api-tool-card">
+                <h3>Flask API Endpoints</h3>
+                <a href="/code-comprehension/api-endpoints/" class="api-tool-link">
+                    View API Docs →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function inputJsonNode(nodeNumber) {
+    // Create modal for JSON input
+    const modal = document.createElement('div');
+    modal.className = 'json-modal';
+    
+    const modalContent = document.createElement('div');
+    modalContent.className = 'json-modal-content';
+    
+    modalContent.innerHTML = `
+        <h3>Input JSON for Node ${nodeNumber}</h3>
+        <textarea id="jsonInput" placeholder="Paste your JSON here..." class="json-textarea"></textarea>
+        <div class="modal-actions">
+            <button onclick="closeModal()" class="modal-btn secondary">Cancel</button>
+            <button onclick="processInputJson(${nodeNumber})" class="modal-btn primary">Process JSON</button>
+        </div>
+    `;
+    
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // Close modal when clicking outside
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    window.currentModal = modal;
+}
+
+function outputJsonNode(nodeNumber) {
+    // Create modal for JSON output
+    const modal = document.createElement('div');
+    modal.className = 'json-modal';
+    
+    const modalContent = document.createElement('div');
+    modalContent.className = 'json-modal-content';
+    
+    // Generate sample output JSON based on node
+    const sampleOutput = generateSampleOutput(nodeNumber);
+    
+    modalContent.innerHTML = `
+        <h3>Output JSON from Node ${nodeNumber}</h3>
+        <textarea id="jsonOutput" readonly class="json-textarea">${sampleOutput}</textarea>
+        <div class="modal-actions">
+            <button onclick="copyToClipboard()" class="modal-btn primary">Copy to Clipboard</button>
+            <button onclick="downloadJson(${nodeNumber})" class="modal-btn">Download JSON</button>
+            <button onclick="closeModal()" class="modal-btn secondary">Close</button>
+        </div>
+    `;
+    
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // Close modal when clicking outside
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    window.currentModal = modal;
+}
+
+function processInputJson(nodeNumber) {
+    const jsonInput = document.getElementById('jsonInput').value;
+    
+    try {
+        const parsedJson = JSON.parse(jsonInput);
+        
+        // Here you would typically send this to your Flask backend
+        // For now, we'll just show a success message
+        alert(`✅ JSON successfully processed for Node ${nodeNumber}!\n\nThis would be sent to your Flask backend endpoint for processing.`);
+        
+        // In a real implementation, you might do:
+        // fetch('/api/v1/node/' + nodeNumber + '/input', {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: jsonInput
+        // });
+        
+        closeModal();
+    } catch (error) {
+        alert('❌ Invalid JSON format. Please check your input and try again.');
+    }
+}
+
+function generateSampleOutput(nodeNumber) {
+    const outputs = {
+        1: {
+            "node": 1,
+            "status": "completed",
+            "baseline_metrics": {
+                "initial_errors": 3,
+                "code_complexity": 7.2,
+                "maintainability_index": 68
+            },
+            "timestamp": new Date().toISOString(),
+            "next_node": 2
+        },
+        2: {
+            "node": 2,
+            "status": "completed", 
+            "perplexity_analysis": {
+                "complexity_score": 8.1,
+                "recommended_strategy": "incremental_refactor",
+                "confidence": 0.87
+            },
+            "timestamp": new Date().toISOString(),
+            "next_node": 3
+        },
+        3: {
+            "node": 3,
+            "status": "completed",
+            "strategy_prediction": {
+                "chosen_strategy": "extract_method",
+                "priority_areas": ["function_length", "cyclomatic_complexity"],
+                "estimated_improvement": 0.73
+            },
+            "timestamp": new Date().toISOString(),
+            "next_node": 4
+        },
+        4: {
+            "node": 4,
+            "status": "completed",
+            "execution_results": {
+                "refactored_code": "// Refactored code would be here",
+                "changes_made": 12,
+                "test_results": "all_passed"
+            },
+            "timestamp": new Date().toISOString(),
+            "next_node": 5
+        },
+        5: {
+            "node": 5,
+            "status": "completed",
+            "analysis_results": {
+                "errors_introduced": 0,
+                "errors_fixed": 2,
+                "net_improvement": 2,
+                "learning_points": ["extracted_methods_improve_readability"]
+            },
+            "timestamp": new Date().toISOString(),
+            "pipeline_complete": true
+        }
+    };
+    
+    return JSON.stringify(outputs[nodeNumber], null, 2);
+}
+
+function copyToClipboard() {
+    const jsonOutput = document.getElementById('jsonOutput');
+    jsonOutput.select();
+    document.execCommand('copy');
+    alert('📋 JSON copied to clipboard!');
+}
+
+function downloadJson(nodeNumber) {
+    const jsonOutput = document.getElementById('jsonOutput').value;
+    const blob = new Blob([jsonOutput], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `node-${nodeNumber}-output-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function closeModal() {
+    if (window.currentModal) {
+        document.body.removeChild(window.currentModal);
+        window.currentModal = null;
+    }
+}
+
+// Add keyboard support for closing modal
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && window.currentModal) {
+        closeModal();
+    }
+});
+</script>

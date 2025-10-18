@@ -16,21 +16,22 @@ description: Interactive documentation for all Flask backend API endpoints
 }
 
 .api-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-    border-radius: 12px;
+    background: var(--bg-tile);
+    border-radius: var(--border-radius);
     padding: 25px;
     margin: 20px 0;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--bg-accent);
 }
 
 .endpoint-card {
-    background: white;
-    border-radius: 8px;
+    background: var(--bg-page);
+    border-radius: var(--border-radius);
     padding: 20px;
     margin: 15px 0;
-    border-left: 4px solid #007bff;
+    border-left: 4px solid var(--link-bg);
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    color: var(--text-main);
 }
 
 .method-badge {
@@ -50,16 +51,17 @@ description: Interactive documentation for all Flask backend API endpoints
 
 .endpoint-url {
     font-family: 'Monaco', 'Menlo', monospace;
-    background: #f8f9fa;
+    background: var(--bg-code-block);
+    color: var(--text-main);
     padding: 8px 12px;
     border-radius: 4px;
     margin: 10px 0;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--bg-accent);
 }
 
 .test-button {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-    color: white;
+    background: var(--link-bg);
+    color: var(--text-heading);
     border: none;
     padding: 10px 20px;
     border-radius: 6px;
@@ -70,13 +72,14 @@ description: Interactive documentation for all Flask backend API endpoints
 }
 
 .test-button:hover {
+    background: var(--bg-accent);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .copy-button {
-    background: #6c757d;
-    color: white;
+    background: var(--bg-accent);
+    color: var(--text-heading);
     border: none;
     padding: 5px 10px;
     border-radius: 4px;
@@ -86,12 +89,13 @@ description: Interactive documentation for all Flask backend API endpoints
 }
 
 .copy-button:hover {
-    background: #5a6268;
+    background: var(--link-bg);
 }
 
 .response-area {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
+    background: var(--bg-code-block);
+    color: var(--text-main);
+    border: 1px solid var(--bg-accent);
     border-radius: 4px;
     padding: 15px;
     margin: 15px 0;
@@ -103,10 +107,10 @@ description: Interactive documentation for all Flask backend API endpoints
 }
 
 .server-config {
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-    color: white;
+    background: var(--bg-accent);
+    color: var(--text-heading);
     padding: 20px;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     margin: 20px 0;
 }
 
@@ -114,9 +118,11 @@ description: Interactive documentation for all Flask backend API endpoints
     width: 100%;
     padding: 8px 12px;
     margin: 5px 0;
-    border: 1px solid #ced4da;
+    border: 1px solid var(--bg-accent);
     border-radius: 4px;
     font-family: 'Monaco', 'Menlo', monospace;
+    background: var(--bg-page);
+    color: var(--text-main);
 }
 
 /* API Progress Section Styles */
@@ -314,7 +320,7 @@ description: Interactive documentation for all Flask backend API endpoints
     <!-- API Connection Progress Section -->
     <div id="api-progress-section" class="api-progress-section">
         <div class="progress-title">
-            <span>🔗</span>
+            <span>Link</span>
             <span>Connecting to Flask Backend APIs</span>
         </div>
         <div class="progress-bars-container">
@@ -342,12 +348,12 @@ description: Interactive documentation for all Flask backend API endpoints
         </div>
     </div>
 
-    <h1 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">🔌 Flask API Endpoints</h1>
+    <h1 style="text-align: center; color: var(--text-heading); margin-bottom: 30px;">Flask API Endpoints</h1>
     
 
     <!-- Prompt Processing APIs -->
     <div class="api-section">
-        <h2 style="color: #2c3e50; border-bottom: 2px solid #007bff; padding-bottom: 10px;">📝 Prompt Processing</h2>
+        <h2 style="color: var(--text-heading); border-bottom: 2px solid var(--link-bg); padding-bottom: 10px;">Prompt Processing</h2>
         
         <div class="endpoint-card">
             <h3>Submit JSON for Prompt Generation</h3>
@@ -388,7 +394,7 @@ description: Interactive documentation for all Flask backend API endpoints
 
     <!-- Data Analysis APIs -->
     <div class="api-section">
-        <h2 style="color: #2c3e50; border-bottom: 2px solid #28a745; padding-bottom: 10px;">📊 Data Analysis</h2>
+        <h2 style="color: var(--text-heading); border-bottom: 2px solid var(--link-bg); padding-bottom: 10px;">Data Analysis</h2>
         
         <div class="endpoint-card">
             <h3>Get Error Statistics</h3>
@@ -426,7 +432,7 @@ description: Interactive documentation for all Flask backend API endpoints
 
     <!-- Annotation APIs -->
     <div class="api-section">
-        <h2 style="color: #2c3e50; border-bottom: 2px solid #ffc107; padding-bottom: 10px;">📝 Annotation Management</h2>
+        <h2 style="color: var(--text-heading); border-bottom: 2px solid var(--link-bg); padding-bottom: 10px;">Annotation Management</h2>
         
         <div class="endpoint-card">
             <h3>Save Annotated Prompt</h3>
@@ -456,7 +462,7 @@ description: Interactive documentation for all Flask backend API endpoints
 
     <!-- System APIs -->
     <div class="api-section">
-        <h2 style="color: #2c3e50; border-bottom: 2px solid #dc3545; padding-bottom: 10px;">⚙️ System Operations</h2>
+        <h2 style="color: var(--text-heading); border-bottom: 2px solid var(--link-bg); padding-bottom: 10px;">System Operations</h2>
         
         <div class="endpoint-card">
             <h3>Health Check</h3>
@@ -495,7 +501,7 @@ function showResponse(elementId, data, isError = false) {
     element.style.color = isError ? '#dc3545' : '#495057';
     element.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <strong>${isError ? '❌ Error' : '✅ Response'}:</strong>
+            <strong>${isError ? 'Error' : 'Response'}:</strong>
             <button class="copy-button" onclick="copyToClipboard('${elementId}')">Copy JSON</button>
         </div>
         <div id="${elementId}-content">${responseText}</div>
@@ -508,7 +514,7 @@ function copyToClipboard(elementId) {
         // Show temporary success message
         const button = event.target;
         const originalText = button.textContent;
-        button.textContent = '✓ Copied!';
+        button.textContent = 'Copied!';
         button.style.background = '#28a745';
         setTimeout(() => {
             button.textContent = originalText;

@@ -10,7 +10,7 @@ back_text: Code Comprehension
 
 <style>
 .node-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-.api-section { background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #3498db; }
+.api-section { background: var(--bg-tile); border-radius: var(--border-radius); padding: 20px; margin: 20px 0; border-left: 4px solid var(--link-bg); }
 .api-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
 .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
 .btn-create { background: #27ae60; color: white; }
@@ -18,17 +18,40 @@ back_text: Code Comprehension
 .btn-update { background: #f39c12; color: white; }
 .btn-delete { background: #e74c3c; color: white; }
 .btn:hover { transform: translateY(-2px); opacity: 0.9; }
-.response-area { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; margin: 10px 0; min-height: 100px; white-space: pre-wrap; font-family: 'Monaco', 'Menlo', monospace; display: none; }
+.response-area { background: var(--bg-code-block); color: var(--text-main); padding: 15px; border-radius: 5px; margin: 10px 0; min-height: 100px; white-space: pre-wrap; font-family: 'Monaco', 'Menlo', monospace; display: none; }
 .input-area { margin: 15px 0; }
-.input-area textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: 'Monaco', 'Menlo', monospace; }
+.input-area textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid var(--bg-accent); border-radius: 5px; font-family: 'Monaco', 'Menlo', monospace; background: var(--bg-page); color: var(--text-main); }
 .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
 .status-success { background: #27ae60; }
 .status-error { background: #e74c3c; }
 .status-pending { background: #f39c12; }
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  padding: 20px;
+  background: var(--bg-tile);
+  border-radius: var(--border-radius);
+  border: 2px solid var(--bg-accent);
+}
+
+.navigation .btn {
+  background: var(--link-bg) !important;
+  color: var(--text-heading) !important;
+  border: 2px solid var(--bg-accent);
+}
+
+.navigation .btn:hover {
+  background: var(--bg-accent) !important;
+  border-color: var(--link-bg);
+  transform: translateY(-2px);
+}
 </style>
 
 <div class="node-container">
-  <h1>🎯 Step 3: Strategy Prediction Agent (Decision Tree Brain)</h1>
+  <h1>Step 3: Strategy Prediction Agent (Decision Tree Brain)</h1>
   
   <div class="description">
     <p>This agent consolidates the feature engineering and prediction steps into a single "thinking" module. It only runs on code that passed the perplexity check.</p>
@@ -44,7 +67,7 @@ back_text: Code Comprehension
   </div>
 
   <div class="api-section">
-    <h3>🔌 API Testing Interface</h3>
+    <h3>API Testing Interface</h3>
     <p><span class="status-indicator status-pending"></span>Node 3 API Endpoints</p>
     
     <div class="api-buttons">

@@ -2,59 +2,18 @@
 layout: default
 ---
 
-<style>
-  #pdf-viewer {
-    width: 100%;
-    height: 80vh;
-    border: 1px solid #ccc;
-  }
-</style>
-
-<div id="pdf-viewer"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
-<script>
-  // Specify the URL of the PDF file
-  var url = "{{ site.baseurl }}/assets/pdf/mermaid_graph.pdf";
-
-  // Asynchronous download of PDF
-  var loadingTask = pdfjsLib.getDocument(url);
-  loadingTask.promise.then(
-    function (pdf) {
-      console.log("PDF loaded");
-
-      // Fetch the first page
-      var pageNumber = 1;
-      pdf.getPage(pageNumber).then(function (page) {
-        console.log("Page loaded");
-
-        var scale = 1.5;
-        var viewport = page.getViewport({ scale: scale });
-
-        // Prepare canvas using PDF page dimensions
-        var canvas = document.createElement("canvas");
-        var context = canvas.getContext("2d");
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        // Append canvas to the viewer container
-        var viewer = document.getElementById("pdf-viewer");
-        viewer.appendChild(canvas);
-
-        // Render PDF page into canvas context
-        var renderContext = {
-          canvasContext: context,
-          viewport: viewport,
-        };
-        var renderTask = page.render(renderContext);
-        renderTask.promise.then(function () {
-          console.log("Page rendered");
-        });
-      });
-    },
-    function (reason) {
-      // PDF loading error
-      console.error(reason);
-    }
-  );
-</script>
+<div id="pdf-viewer-container">
+  <h2>{{ page.title }}</h2>
+  <iframe
+    id="pdf-viewer"
+    src="{{ site.baseurl }}/assets/js/web/viewer.html?file={{ site.baseurl }}/assets/pdfs/lang-graph-diagram.pdf"
+    width="100%"
+    height="800px"
+    frameborder="0"
+  ></iframe>
+  
+  <div class="pdf-controls" style="margin-top: 15px;">
+    <p><em>Diagram showing the LangGraph node structure and data flow for the code comprehension system.</em></p>
+    <a href="{{ site.baseurl }}/assets/pdfs/lang-graph-diagram.pdf" target="_blank" class="btn">Open PDF in New Tab</a>
+  </div>
+</div>

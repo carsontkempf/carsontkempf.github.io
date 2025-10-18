@@ -37,7 +37,7 @@ back_text: Code Comprehension
     <div class="file-upload-area" id="file-upload-area">
       <input type="file" id="error-file-input" accept=".json" style="display: none;">
       <div class="upload-content">
-        <div class="upload-icon">📁</div>
+        <div class="upload-icon">File</div>
         <p>Drop JSON error file here or click to browse</p>
         <button id="browse-button" class="btn btn-primary">Browse Files</button>
       </div>
@@ -52,7 +52,7 @@ back_text: Code Comprehension
   <div class="diagnosis-controls">
     <button id="diagnose-button" class="btn btn-success" disabled>
       <span id="diagnose-text">Diagnose Errors</span>
-      <span id="diagnose-spinner" class="spinner" style="display: none;">🔄</span>
+      <span id="diagnose-spinner" class="spinner" style="display: none;">Loading</span>
     </button>
   </div>
 

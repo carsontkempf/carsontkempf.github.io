@@ -37,14 +37,14 @@ back_text: Code Comprehension
 
 <div class="node-container">
   <div class="header-section">
-    <h1>⚡ Targeted Execution Agent</h1>
+    <h1>Targeted Execution Agent</h1>
     <p><strong>Node 4 of 5-Step Circular Processing System</strong></p>
     <p>The "hands" of the operation - executes refactoring with surgical precision</p>
   </div>
 
   <div class="content-grid">
     <div class="info-card">
-      <h3>🎯 Primary Function</h3>
+      <h3>Primary Function</h3>
       <ul>
         <li>Takes predicted refactoring action from Node 3</li>
         <li>Builds targeted prompt around strategy</li>
@@ -55,7 +55,7 @@ back_text: Code Comprehension
     </div>
 
     <div class="info-card">
-      <h3>⚙️ Execution Parameters</h3>
+      <h3>Execution Parameters</h3>
       <ul>
         <li><strong>LLM Model:</strong> GPT-4, Claude, or local models</li>
         <li><strong>Temperature:</strong> 0.3 (low for consistency)</li>
@@ -67,7 +67,7 @@ back_text: Code Comprehension
   </div>
 
   <div class="execution-examples">
-    <h3>🔧 Refactoring Example: Extract Method</h3>
+    <h3>Refactoring Example: Extract Method</h3>
     
     <h4>Before (Original Code):</h4>
     <div class="code-before">
@@ -102,7 +102,7 @@ def calculate_stats(numbers):
   </div>
 
   <div class="prompt-template">
-    <h3>📝 Prompt Template Structure</h3>
+    <h3>Prompt Template Structure</h3>
     <p><strong>Strategy-Specific Prompts:</strong> Each refactoring strategy has a custom prompt template</p>
     <p><strong>Context Injection:</strong> Original code and specific instructions are injected</p>
     <p><strong>Constraint Specification:</strong> Semantic preservation requirements</p>
@@ -110,7 +110,7 @@ def calculate_stats(numbers):
   </div>
 
   <div class="flow-diagram">
-    <h3>🔄 Processing Flow</h3>
+    <h3>Processing Flow</h3>
     <div class="flow-step">Strategy Input</div>
     <span class="flow-arrow">→</span>
     <div class="flow-step">Load Template</div>
@@ -124,7 +124,7 @@ def calculate_stats(numbers):
     <div class="flow-step">Node 5</div>
   </div>
 
-  <h3>📝 Input/Output Schema</h3>
+  <h3>Input/Output Schema</h3>
   
   <h4>Input Format:</h4>
   <div class="json-example">{
@@ -163,7 +163,7 @@ def calculate_stats(numbers):
 }</div>
 
   <div class="api-section">
-    <h3>🔌 API Testing Interface</h3>
+    <h3>API Testing Interface</h3>
     
     <div class="api-buttons">
       <button class="btn btn-create" onclick="createNodeInput()">Create Input (POST)</button>

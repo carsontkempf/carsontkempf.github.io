@@ -25,7 +25,7 @@ class Header {
                         </div>
                         <span class="health-value" id="global-health-value">100%</span>
                     </div>
-                    <button class="emergency-reset-btn" id="emergency-reset">🔄 Reset</button>
+                    <button class="emergency-reset-btn" id="emergency-reset">Reset</button>
                 </div>
             </div>
         `;

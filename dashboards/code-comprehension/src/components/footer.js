@@ -21,7 +21,7 @@ class Footer {
                     <div class="status-indicators">
                         <div class="status-item">
                             <span class="status-label">Backend:</span>
-                            <span class="status-indicator" id="backend-status">🔴 Disconnected</span>
+                            <span class="status-indicator" id="backend-status">Disconnected</span>
                         </div>
                         <div class="status-item">
                             <span class="status-label">Last Update:</span>
@@ -50,10 +50,10 @@ class Footer {
     updateBackendStatus(isConnected) {
         const statusIndicator = this.element.querySelector('#backend-status');
         if (isConnected) {
-            statusIndicator.innerHTML = '🟢 Connected';
+            statusIndicator.innerHTML = 'Connected';
             statusIndicator.className = 'status-indicator connected';
         } else {
-            statusIndicator.innerHTML = '🔴 Disconnected';
+            statusIndicator.innerHTML = 'Disconnected';
             statusIndicator.className = 'status-indicator disconnected';
         }
     }
