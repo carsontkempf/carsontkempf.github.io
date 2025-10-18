@@ -32,8 +32,6 @@ if [ -f ".env" ]; then
     fi
 fi
 
-rsync -av --exclude-from=rsync-exclude.txt /Users/ctk/Programming/Published/carsontkempf.github.io/backends/Error-Annotater/ ctkfdp@rs8sgz564.managed.mst.edu:/home/ctkfdp/Error-Annotater/
-
 # Store the test flag for later use
 export RUN_CORS_TEST=$TEST_CORS
 # Enhanced startup script with progress bars

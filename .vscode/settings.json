@@ -133,8 +133,7 @@
     "backends/Error-Annotater/.env": true,
     ".env": true,
     "babel.config.js": true,
-    "rsync-exclude.txt": true,
-    "startup-with-progress.js": true
+    "rsync-exclude.txt": true
   },
   "jest.shell": {
     "path": "/bin/bash",
@@ -505,7 +504,11 @@
         "name": "Code Comprehension",
         "description": "",
         "detail": "",
-        "peek": ["start-dev.sh", "backends/Error-Annotater/lang-graph-service/"]
+        "peek": [
+          "start-dev.sh",
+          "backends/Error-Annotater/lang-graph-service/",
+          "startup-with-progress.js"
+        ]
       }
     ]
   },

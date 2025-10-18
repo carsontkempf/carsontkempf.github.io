@@ -5,11 +5,35 @@ const { spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
+// ANSI color codes
+const colors = {
+  reset: "\x1b[0m",
+  green: "\x1b[32m",
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  cyan: "\x1b[36m",
+  grey: "\x1b[90m",
+};
+
+// Helper functions for colored output
+function success(message) {
+  console.log(`${colors.green}${message}${colors.reset}`);
+}
+
+function error(message) {
+  console.log(`${colors.red}${message}${colors.reset}`);
+}
+
+function info(message) {
+  console.log(message);
+}
+
 // Load environment variables from .env file
 function loadEnvFile() {
   const envPath = path.join(__dirname, ".env");
   if (!fs.existsSync(envPath)) {
-    console.error(
+    error(
       "Error: .env file not found. Please create one based on .env.example"
     );
     process.exit(1);
@@ -39,28 +63,88 @@ const multibar = new cliProgress.MultiBar(
 );
 
 // Progress bars
-const backendBar = multibar.create(100, 0, {
-  phase: "Backend ",
-  status: "Initializing...",
+const syncBar = multibar.create(100, 0, {
+  phase: "Sync    ",
+  status: "Syncing repositories...",
 });
 
+let backendBar;
+let connectionBar;
 let frontendBar;
 
 async function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function syncRepositories() {
+  syncBar.update(10, { status: "Preparing repository sync..." });
+  await delay(200);
+
+  syncBar.update(30, { status: "Syncing repositories..." });
+
+  // Run rsync with suppressed output
+  const rsync = spawn(
+    "rsync",
+    [
+      "-av",
+      "--exclude-from=rsync-exclude.txt",
+      "/Users/ctk/Programming/Published/carsontkempf.github.io/backends/Error-Annotater/",
+      "ctkfdp@rs8sgz564.managed.mst.edu:/home/ctkfdp/Error-Annotater/",
+    ],
+    { stdio: "pipe" }
+  );
+
+  let progress = 30;
+  const progressInterval = setInterval(() => {
+    if (progress < 90) {
+      progress += 10;
+      syncBar.update(progress, { status: "Syncing repositories..." });
+    }
+  }, 500);
+
+  await new Promise((resolve, reject) => {
+    rsync.on("close", (code) => {
+      clearInterval(progressInterval);
+      if (code === 0) {
+        syncBar.update(100, {
+          status: `${colors.green}Repository sync complete!${colors.reset}`,
+        });
+        resolve();
+      } else {
+        syncBar.update(100, {
+          status: `${colors.red}Repository sync failed!${colors.reset}`,
+        });
+        reject(new Error(`rsync failed with exit code ${code}`));
+      }
+    });
+    rsync.on("error", (error) => {
+      clearInterval(progressInterval);
+      syncBar.update(100, {
+        status: `${colors.red}Repository sync failed!${colors.reset}`,
+      });
+      reject(error);
+    });
+  });
+
+  await delay(300);
+}
+
 async function startBackend() {
   const { SERVER_USER, SERVER_IP, SUBMODULE_COMMIT, SUBMODULE_BRANCH } =
     process.env;
 
-  backendBar.update(5, { status: "Connecting to remote server..." });
+  // Create backend bar only when we start backend process
+  backendBar = multibar.create(100, 0, {
+    phase: "Backend ",
+    status: "Connecting to remote server...",
+  });
+
+  // Show progress incrementally on the same line
+  backendBar.update(10, { status: "Connecting to remote server..." });
   await delay(300);
 
-  // Skip git sync - using new deployment solution
-
   // Stop any existing backend processes
-  backendBar.update(35, { status: "Stopping existing backend processes..." });
+  backendBar.update(30, { status: "Stopping existing processes..." });
   const killOld = spawn(
     "ssh",
     [
@@ -76,24 +160,21 @@ async function startBackend() {
     killOld.on("close", resolve);
   });
 
-  backendBar.update(60, { status: "Starting remote backend server..." });
-  await delay(300);
+  backendBar.update(50, { status: "Setting up port forwarding..." });
 
   // Start SSH port forwarding for local development
-  backendBar.update(70, { status: "Setting up port forwarding..." });
   const portForward = spawn(
     "ssh",
-    [
-      "-N", "-L", "5000:127.0.0.1:5000",
-      `${SERVER_USER}@${SERVER_IP}`
-    ],
+    ["-N", "-L", "5000:127.0.0.1:5000", `${SERVER_USER}@${SERVER_IP}`],
     { stdio: "pipe", detached: true }
   );
 
   // Store port forwarding process for cleanup
   process.portForwardProcess = portForward;
 
-  await delay(1000);
+  await delay(800);
+
+  backendBar.update(70, { status: "Starting remote backend server..." });
 
   // Start backend on remote server with proper backgrounding and SSH disconnect
   const startRemoteBackend = spawn(
@@ -105,31 +186,39 @@ async function startBackend() {
     { stdio: "pipe", detached: true }
   );
 
-  backendBar.update(85, { status: "Backend starting on server..." });
-
   await new Promise((resolve, reject) => {
     startRemoteBackend.on("close", (code) => {
       if (code === 0) {
         resolve();
       } else {
+        backendBar.update(100, {
+          status: `${colors.red}Remote backend startup failed!${colors.reset}`,
+        });
         reject(
           new Error(`Failed to start remote backend with exit code ${code}`)
         );
       }
     });
-    startRemoteBackend.on("error", reject);
+    startRemoteBackend.on("error", (error) => {
+      backendBar.update(100, {
+        status: `${colors.red}Remote backend startup failed!${colors.reset}`,
+      });
+      reject(error);
+    });
   });
 
-  backendBar.update(95, { status: "SSH disconnected, backend running remotely..." });
-  
-  // Give the backend a moment to fully initialize
-  await delay(3000);
+  backendBar.update(90, { status: "Backend initializing..." });
 
-  backendBar.update(100, { status: "Remote backend startup complete!" });
-  await delay(500);
+  // Give the backend a moment to fully initialize
+  await delay(2500);
+
+  backendBar.update(100, {
+    status: `${colors.green}Remote backend startup complete!${colors.reset}`,
+  });
+  await delay(300);
 
   // Run CORS test if requested
-  if (process.env.RUN_CORS_TEST === 'true') {
+  if (process.env.RUN_CORS_TEST === "true") {
     backendBar.update(100, { status: "Running CORS debug test..." });
     await runCorsTest();
   }
@@ -156,17 +245,24 @@ async function startFrontend() {
   frontendBar.update(80, { status: "Jekyll server starting..." });
   await delay(300);
 
-  frontendBar.update(100, { status: "Jekyll server ready!" });
+  frontendBar.update(100, {
+    status: `${colors.green}Jekyll server ready!${colors.reset}`,
+  });
   await delay(300);
 
+  console.log("\n");
+
   multibar.stop();
+
+  // Show backend logs before starting Jekyll
+  await showBackendLog();
 
   // Clean separator
   console.log("\n");
   console.log("─".repeat(process.stdout.columns || 80));
   console.log("");
 
-  // Start Jekyll server with full output
+  // Start Jekyll server with filtered output
   const jekyllCommand = [
     "env",
     "JEKYLL_ENV=production",
@@ -180,14 +276,106 @@ async function startFrontend() {
 
   const jekyll = spawn(jekyllCommand[0], jekyllCommand.slice(1), {
     cwd: JEKYLL_PROJECT_PATH,
-    stdio: "inherit",
+    stdio: ["inherit", "pipe", "pipe"],
+  });
+
+  let isInitialBuild = true;
+  let serverInfo = "";
+
+  // Filter Jekyll output
+  jekyll.stdout.on("data", (data) => {
+    const output = data.toString();
+    const lines = output.split("\n");
+
+    for (let line of lines) {
+      line = line.trim();
+      if (!line) continue;
+
+      // Always show these important lines
+      if (
+        line.includes("Configuration file:") ||
+        line.includes("Server address:") ||
+        line.includes("Server running...")
+      ) {
+        // Color server address and server running lines grey
+        if (
+          line.includes("Server address:") ||
+          line.includes("Server running...")
+        ) {
+          console.log(`${colors.grey}${line}${colors.reset}`);
+          serverInfo += line + "\n\n";
+          // Add extra newline after both server address and server running message
+          console.log("");
+        } else {
+          // Handle Configuration file line with yellow filename
+          if (line.includes("Configuration file:")) {
+            const parts = line.split(": ");
+            if (parts.length === 2) {
+              console.log(
+                `${parts[0]}: ${colors.yellow}${parts[1]}${colors.reset}`
+              );
+            } else {
+              console.log(line);
+            }
+          } else {
+            console.log(line);
+          }
+        }
+      }
+      // Show initial build completion
+      else if (
+        isInitialBuild &&
+        line.includes("done in") &&
+        line.includes("seconds")
+      ) {
+        console.log(`${colors.grey}${line}${colors.reset}`);
+        console.log(""); // Add extra newline after build completion
+        isInitialBuild = false;
+      }
+      // Show only regeneration status (overwrite previous)
+      else if (line.includes("Regenerating:")) {
+        // Clear any previous regeneration and show new one
+        process.stdout.write("\r\x1b[K"); // Clear current line
+        process.stdout.write(`      ${line}`);
+      } else if (
+        !isInitialBuild &&
+        line.includes("...done in") &&
+        line.includes("seconds")
+      ) {
+        // Complete the regeneration line, then clear for next time
+        process.stdout.write(` - ${line}\r\x1b[K`);
+        process.stdout.write(`      File regenerated - ${line}\n`);
+      }
+    }
+  });
+
+  // Handle Jekyll errors
+  jekyll.stderr.on("data", (data) => {
+    const output = data.toString();
+    // Only show actual errors, not warnings
+    if (
+      !output.includes("Build Warning:") &&
+      !output.includes("GitHub Metadata:") &&
+      !output.includes("retry middleware")
+    ) {
+      error(output.trim());
+    }
   });
 
   // Keep the process alive for Jekyll
   jekyll.on("close", async (code) => {
+    if (code !== 0) {
+      // Update frontend bar to show failure
+      if (frontendBar) {
+        frontendBar.update(100, {
+          status: `${colors.red}Jekyll server failed!${colors.reset}`,
+        });
+      }
+    }
+
     // Only show log if not already shown by signal handler
     if (!process.logShown) {
-      await showBackendLog();
+      await showBackendLog(true); // Force detailed logs on unexpected exit
     }
     process.exit(code);
   });
@@ -198,7 +386,7 @@ async function runCorsTest() {
 
   console.log("\n");
   console.log("─".repeat(process.stdout.columns || 80));
-  console.log("🔍 CORS Debug Test Results:");
+  console.log("CORS Debug Test Results:");
   console.log("─".repeat(process.stdout.columns || 80));
   console.log("");
 
@@ -207,7 +395,7 @@ async function runCorsTest() {
       "ssh",
       [
         `${SERVER_USER}@${SERVER_IP}`,
-        'cd Error-Annotater && python3 test_cors_debug.py',
+        "cd Error-Annotater && python3 test_cors_debug.py",
       ],
       { stdio: "inherit" }
     );
@@ -216,37 +404,90 @@ async function runCorsTest() {
       corsTest.on("close", resolve);
     });
   } catch (error) {
-    console.log("Could not run CORS test");
+    error("Could not run CORS test");
   }
 
   console.log("\n");
 }
 
-async function showBackendLog() {
+async function showBackendLog(showDetailedLogs = false) {
   const { SERVER_USER, SERVER_IP } = process.env;
 
-  console.log("\n\n");
-  console.log("─".repeat(process.stdout.columns || 80));
-  console.log("📋 Backend Log (last 20 lines):");
-  console.log("─".repeat(process.stdout.columns || 80));
-  console.log("\n");
-
   try {
-    // Get the backend log from the server
-    const getLog = spawn(
+    // First check for errors in the log
+    const checkErrors = spawn(
       "ssh",
       [
         `${SERVER_USER}@${SERVER_IP}`,
-        'tail -20 Error-Annotater/backend.log 2>/dev/null || echo "No backend log found"',
+        'tail -20 Error-Annotater/backend.log 2>/dev/null | grep -i "error\\|exception\\|failed\\|traceback" || echo "NO_ERRORS"',
       ],
-      { stdio: "inherit" }
+      { stdio: "pipe" }
     );
 
-    await new Promise((resolve) => {
-      getLog.on("close", resolve);
+    let hasErrors = false;
+    let errorOutput = "";
+
+    checkErrors.stdout.on("data", (data) => {
+      errorOutput += data.toString();
     });
+
+    await new Promise((resolve) => {
+      checkErrors.on("close", () => {
+        hasErrors =
+          !errorOutput.trim().includes("NO_ERRORS") &&
+          errorOutput.trim() !== "";
+        resolve();
+      });
+    });
+
+    // Only show detailed logs if there are errors or explicitly requested
+    if (hasErrors || showDetailedLogs) {
+      console.log("\n\n");
+      console.log("─".repeat(process.stdout.columns || 80));
+      console.log(
+        hasErrors
+          ? "Backend Log (errors detected):"
+          : "Backend Log (last 20 lines):"
+      );
+      console.log("─".repeat(process.stdout.columns || 80));
+      console.log("\n");
+
+      // Get the full backend log
+      const getLog = spawn(
+        "ssh",
+        [
+          `${SERVER_USER}@${SERVER_IP}`,
+          'tail -20 Error-Annotater/backend.log 2>/dev/null || echo "No backend log found"',
+        ],
+        { stdio: "inherit" }
+      );
+
+      await new Promise((resolve) => {
+        getLog.on("close", resolve);
+      });
+    } else {
+      // Create connection testing progress bar
+      connectionBar = multibar.create(100, 0, {
+        phase: "Connect ",
+        status: "Testing backend connection...",
+      });
+
+      connectionBar.update(30, { status: "Testing backend connection..." });
+      await delay(500);
+
+      connectionBar.update(70, { status: "Verifying API endpoints..." });
+      await delay(800);
+
+      connectionBar.update(100, {
+        status: `${colors.green}Frontend-backend connection ready!${colors.reset}`,
+      });
+      await delay(300);
+
+      // Add two newlines after connection bar completes (like sync and backend)
+      console.log("\n");
+    }
   } catch (error) {
-    console.log("Could not retrieve backend log");
+    error("\nCould not retrieve backend log\n");
   }
 }
 
@@ -255,16 +496,21 @@ async function main() {
     console.log("\n");
     loadEnvFile();
 
+    // First sync repositories
+    await syncRepositories();
+
+    console.log("\n");
+
     // Start backend deployment
     await startBackend();
 
-    console.log("");
+    console.log("\n");
 
     // Start frontend after backend is ready
     await startFrontend();
   } catch (error) {
     multibar.stop();
-    console.error("\n❌ Error during startup:", error.message);
+    error(`\nError during startup: ${error.message}`);
     process.exit(1);
   }
 }
@@ -272,27 +518,27 @@ async function main() {
 // Handle graceful shutdown
 process.on("SIGINT", async () => {
   multibar.stop();
-  
+
   // Kill port forwarding if it exists
   if (process.portForwardProcess) {
     process.portForwardProcess.kill();
   }
-  
+
   process.logShown = true;
-  await showBackendLog();
+  await showBackendLog(true); // Force detailed logs on manual exit
   process.exit(0);
 });
 
 process.on("SIGTERM", async () => {
   multibar.stop();
-  
+
   // Kill port forwarding if it exists
   if (process.portForwardProcess) {
     process.portForwardProcess.kill();
   }
-  
+
   process.logShown = true;
-  await showBackendLog();
+  await showBackendLog(true); // Force detailed logs on manual exit
   process.exit(0);
 });
 
