@@ -8,15 +8,16 @@ permalink: /
     text-align: center;
     margin: 30px 0;
     padding: 30px 20px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 12px;
-    border: 2px solid #dee2e6;
+    background: var(--bg-tile);
+    border-radius: var(--border-radius);
+    border: 2px solid var(--bg-accent);
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease-in-out;
 }
 
 .project-navigation h2 {
     margin-bottom: 25px;
-    color: #2c3e50;
+    color: var(--text-heading);
     font-size: 2rem;
     font-weight: 600;
 }
@@ -39,17 +40,23 @@ permalink: /
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     min-width: 200px;
     text-align: center;
+    background: var(--bg-accent);
+    color: var(--text-heading);
+    border: 2px solid var(--link-bg);
 }
 
 .project-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0,0,0,0.2);
     text-decoration: none;
+    background: var(--link-bg);
+    color: var(--text-heading);
 }
 
 .spotify-btn {
     background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
     color: white;
+    border-color: #1db954;
 }
 
 .spotify-btn:hover {
@@ -60,6 +67,7 @@ permalink: /
 .error-annotator-btn {
     background: linear-gradient(135deg, #e74c3c 0%, #ff6b6b 100%);
     color: white;
+    border-color: #e74c3c;
 }
 
 .error-annotator-btn:hover {

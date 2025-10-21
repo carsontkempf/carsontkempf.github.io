@@ -1,0 +1,82 @@
+# API Configuration for Code Comprehension Project
+# This file provides frontend with backend API endpoint information
+
+# Base URLs for different environments
+base_urls:
+  development: "http://localhost:5001"
+  production: "https://your-backend-server.com"
+  staging: "https://staging-backend.your-domain.com"
+
+# Current environment (set by build process)
+environment: development
+base_url: "http://localhost:5001"
+
+# Legacy compatibility
+development:
+  base_url: "http://localhost:5001/api/v1"
+production:
+  base_url: "https://your-backend-server.com/api/v1"
+
+# API Endpoints
+endpoints:
+  # Node System API (CRUD operations for 5-node system)
+  nodes:
+    # Input endpoints (POST)
+    node_1_input: "/api/node/1/input"
+    node_2_input: "/api/node/2/input"
+    node_3_input: "/api/node/3/input"
+    node_4_input: "/api/node/4/input"
+    node_5_input: "/api/node/5/input"
+    
+    # Output endpoints (GET)
+    node_1_output: "/api/node/1/output"
+    node_2_output: "/api/node/2/output"
+    node_3_output: "/api/node/3/output"
+    node_4_output: "/api/node/4/output"
+    node_5_output: "/api/node/5/output"
+    
+    # System endpoints
+    status: "/api/node/status"
+    reset: "/api/node/reset"
+
+  # LangGraph Integration API
+  langgraph:
+    # Main execution
+    execute: "/api/v1/langgraph/execute"
+    state: "/api/v1/langgraph/state/{thread_id}"
+    reset: "/api/v1/langgraph/reset/{thread_id}"
+    
+    # Node management
+    nodes_status: "/api/v1/langgraph/nodes/status"
+    execute_node: "/api/v1/langgraph/node/{node_id}/execute"
+    
+    # Performance and analytics
+    performance_summary: "/api/v1/langgraph/performance/summary"
+
+  # Visualization API
+  visualization:
+    # Graph generation
+    generate: "/api/v1/visualization/generate"
+    node_graph: "/api/v1/visualization/node-graph"
+    data_flow: "/api/v1/visualization/data-flow"
+    
+    # Workflow state visualization
+    workflow_state: "/api/v1/visualization/workflow-state/{thread_id}"
+    node_tools: "/api/v1/visualization/node-tools/{node_id}"
+    
+    # File management
+    files: "/api/v1/visualization/files"
+    download: "/api/v1/visualization/download/{filename}"
+    
+    # PDF generation
+    mermaid_to_pdf: "/api/v1/visualization/mermaid-to-pdf"
+    graph_status: "/api/v1/visualization/graph-status"
+
+# Features flags
+features:
+  langgraph_integration: true
+  visualization_support: true
+  performance_analytics: true
+  real_time_updates: true
+  pdf_generation: true
+  mermaid_diagrams: true

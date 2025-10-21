@@ -20,7 +20,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         // 1. Create the Auth0 client with REFRESH TOKEN support
-        const redirectUri = window.location.origin;
+        // Use production URL for production, otherwise use current origin
+        const isNetlifyPreview = window.location.hostname.includes('netlify.app') || window.location.hostname.includes('auth0.com');
+        const redirectUri = isNetlifyPreview ? 'https://carsontkempf.github.io' : window.location.origin;
         console.log('Auth0 Configuration:', {
             domain: config.domain,
             clientId: config.clientId,

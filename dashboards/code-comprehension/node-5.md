@@ -48,6 +48,48 @@ back_text: Code Comprehension
   border-color: var(--link-bg);
   transform: translateY(-2px);
 }
+
+.memory-section {
+  margin-top: 40px;
+  border-top: 2px solid var(--bg-accent);
+  padding-top: 30px;
+}
+
+.memory-container {
+  margin: 20px 0;
+  background: var(--bg-tile);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  border: 1px solid var(--bg-accent);
+}
+
+.memory-container h3 {
+  color: var(--text-heading);
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--bg-accent);
+  padding-bottom: 10px;
+}
+
+.memory-editor-minimal {
+  border: 1px solid var(--bg-accent);
+  border-radius: 5px;
+  background: var(--bg-page);
+}
+
+.memory-editor-minimal .EasyMDEContainer {
+  border: none;
+}
+
+.memory-editor-minimal .editor-toolbar {
+  background: var(--bg-tile);
+  border-bottom: 1px solid var(--bg-accent);
+}
+
+.memory-editor-minimal .CodeMirror {
+  background: var(--bg-page);
+  color: var(--text-main);
+  min-height: 200px;
+}
 </style>
 
 <div class="node-container">
@@ -126,12 +168,33 @@ back_text: Code Comprehension
     </div>
   </div>
 
+  <!-- Memory Editors Section -->
+  <div class="memory-section">
+    <h2>AI Agent Memory</h2>
+    
+    <!-- Short-term Memory Editor -->
+    <div class="memory-container">
+      <h3>Short-term Memory</h3>
+      <div id="short-term-memory-editor"></div>
+    </div>
+    
+    <!-- Long-term Memory Editor -->
+    <div class="memory-container">
+      <h3>Long-term Memory</h3>
+      <div id="long-term-memory-editor"></div>
+    </div>
+  </div>
+
   <div class="navigation">
     <a href="/code-comprehension/node-4/" class="btn btn-read">← Step 4</a>
     <a href="/code-comprehension/node-1/" class="btn btn-read">Complete Cycle: Step 1 →</a>
   </div>
 </div>
 
+<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+<link rel="stylesheet" href="/assets/css/memory-editor.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<script src="/assets/js/memory-editor.js"></script>
 <script src="/assets/js/env-config.js"></script>
 <script src="/assets/js/code-comprehension/node-api.js"></script>
 <script>
@@ -200,4 +263,38 @@ async function chainToNextNode() {
     showResponse({ success: false, error: error.message });
   }
 }
+
+// Initialize Memory Editors
+document.addEventListener('DOMContentLoaded', function() {
+  const memoryEditors = window.initializeMemoryEditors({
+    nodeId: NODE_ID,
+    agentType: 'Measure & Learn Agent',
+    defaultLongTermContent: `# Measure & Learn Agent - Node ${NODE_ID}
+
+## Agent Purpose
+Measure & Learn Agent - Analyzes results and updates knowledge base
+
+## Key Responsibilities
+- Performance measurement
+- Result analysis
+- Knowledge extraction
+- Feedback integration
+
+## Analysis Process
+- Comprehensive measurement of final code
+- Custom statistics module execution
+- Verdict assignment (IMPROVEMENT, REGRESSION, FLAGGED_AS_CONFUSING)
+- Experiment logging and model retraining
+
+## Learning Notes
+- Handles all post-mortem analysis
+- Ensures system improves over time
+- Runs complete measurement suite
+- Executes custom statistics scripts for advanced metrics
+- Adds features and outcomes to training data`
+  });
+  
+  // Store editors globally for potential API interactions
+  window.memoryEditors = memoryEditors;
+});
 </script>

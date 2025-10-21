@@ -55,7 +55,6 @@
     "index.md": true,
     "my-account.md": true,
     "assets/css/": true,
-    "CLAUDE.local.md": true,
     "README.md": true,
     "tests/coverage/clover.xml": true,
     "tests/coverage/coverage-final.json": true,
@@ -107,7 +106,6 @@
     "_layouts/dashboard-project.html": true,
     "_layouts/dashboard-tool.html": true,
     "_layouts/dashboard.html": true,
-    "_layouts/default.html": true,
     "_layouts/error-category.html": true,
     "_layouts/page.html": true,
     "_layouts/post.html": true,
@@ -133,7 +131,24 @@
     "backends/Error-Annotater/.env": true,
     ".env": true,
     "babel.config.js": true,
-    "rsync-exclude.txt": true
+    "rsync-exclude.txt": true,
+    "backends/Error-Annotater/.pytest_cache/": true,
+    "backends/Error-Annotater/=0.2.0": true,
+    "backends/Error-Annotater/fix-dependencies.sh": true,
+    "backends/Error-Annotater/fix-dependencies.py": true,
+    "backends/Error-Annotater/demo-visualization.py": true,
+    "backends/Error-Annotater/remote-run-backend.sh": true,
+    "backends/Error-Annotater/main.py": true,
+    "backends/Error-Annotater/test_cors_debug.py": true,
+    "backends/Error-Annotater/test-enhanced-system.py": true,
+    "backends/Error-Annotater/test-human-in-the-loop.py": true,
+    "backends/Error-Annotater/test-langgraph-setup.py": true,
+    "backends/Error-Annotater/test-langgraph-visualization.py": true,
+    "backends/Error-Annotater/test-langgraph-workflow.py": true,
+    "backends/Error-Annotater/test-multiagent-system.py": true,
+    "MEMORY_EDITOR_SETUP.md": true,
+    "memory-editor-test.html": true,
+    "PLAN.md": true
   },
   "jest.shell": {
     "path": "/bin/bash",
@@ -499,7 +514,28 @@
           "rsync-exclude.txt",
           "start-dev.sh",
           "startup-with-progress.js",
-          "start-dev.sh"
+          "start-dev.sh",
+          "backends/Error-Annotater/.pytest_cache/",
+          "startup-with-progress.js",
+          "startup-with-progress.js",
+          "backends/Error-Annotater/=0.2.0",
+          "backends/Error-Annotater/fix-dependencies.sh",
+          "backends/Error-Annotater/fix-dependencies.py",
+          "backends/Error-Annotater/demo-visualization.py",
+          "backends/Error-Annotater/remote-run-backend.sh",
+          "backends/Error-Annotater/main.py",
+          "backends/Error-Annotater/test_cors_debug.py",
+          "backends/Error-Annotater/test-enhanced-system.py",
+          "backends/Error-Annotater/test-human-in-the-loop.py",
+          "backends/Error-Annotater/test-langgraph-setup.py",
+          "backends/Error-Annotater/test-langgraph-visualization.py",
+          "backends/Error-Annotater/test-langgraph-workflow.py",
+          "backends/Error-Annotater/test-multiagent-system.py",
+          "MEMORY_EDITOR_SETUP.md",
+          "memory-editor-test.html",
+          "startup-with-progress.js",
+          "start-dev.sh",
+          "PLAN.md"
         ],
         "name": "Code Comprehension",
         "description": "",
@@ -507,7 +543,9 @@
         "peek": [
           "start-dev.sh",
           "backends/Error-Annotater/lang-graph-service/",
-          "startup-with-progress.js"
+          "startup-with-progress.js",
+          "_layouts/default.html",
+          "CLAUDE.local.md"
         ]
       }
     ]

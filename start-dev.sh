@@ -1,11 +1,37 @@
 #!/bin/bash
 
+# Enhanced Development Startup Script
+#
+# Usage:
+#   ./start-dev.sh                  - Normal startup
+#   ./start-dev.sh --test-cors      - Test CORS functionality  
+#   ./start-dev.sh --test-langgraph - Test LangGraph functionality
+#   ./start-dev.sh --test-dependencies - Test all critical dependencies
+#
+# The --test-dependencies flag will check:
+# - Python environment and virtual environment
+# - Critical packages: langchain_ollama, torch, langgraph, transformers
+# - Node-specific imports and Flask app availability
+# - Full LangGraph initialization test
+#
+# Use this flag to diagnose the "langchain_ollama not available" errors.
+
 # Parse command line arguments
 TEST_CORS=false
+TEST_LANGGRAPH=false
+TEST_DEPENDENCIES=false
 for arg in "$@"; do
     case $arg in
         --test-cors)
         TEST_CORS=true
+        shift
+        ;;
+        --test-langgraph)
+        TEST_LANGGRAPH=true
+        shift
+        ;;
+        --test-dependencies)
+        TEST_DEPENDENCIES=true
         shift
         ;;
         *)
@@ -32,8 +58,10 @@ if [ -f ".env" ]; then
     fi
 fi
 
-# Store the test flag for later use
+# Store the test flags for later use
 export RUN_CORS_TEST=$TEST_CORS
+export RUN_LANGGRAPH_TEST=$TEST_LANGGRAPH
+export RUN_DEPENDENCY_TEST=$TEST_DEPENDENCIES
 # Enhanced startup script with progress bars
 # This script now uses Node.js with cli-progress for better visual feedback
 

@@ -48,6 +48,48 @@ back_text: Code Comprehension
   border-color: var(--link-bg);
   transform: translateY(-2px);
 }
+
+.memory-section {
+  margin-top: 40px;
+  border-top: 2px solid var(--bg-accent);
+  padding-top: 30px;
+}
+
+.memory-container {
+  margin: 20px 0;
+  background: var(--bg-tile);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  border: 1px solid var(--bg-accent);
+}
+
+.memory-container h3 {
+  color: var(--text-heading);
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--bg-accent);
+  padding-bottom: 10px;
+}
+
+.memory-editor-minimal {
+  border: 1px solid var(--bg-accent);
+  border-radius: 5px;
+  background: var(--bg-page);
+}
+
+.memory-editor-minimal .EasyMDEContainer {
+  border: none;
+}
+
+.memory-editor-minimal .editor-toolbar {
+  background: var(--bg-tile);
+  border-bottom: 1px solid var(--bg-accent);
+}
+
+.memory-editor-minimal .CodeMirror {
+  background: var(--bg-page);
+  color: var(--text-main);
+  min-height: 200px;
+}
 </style>
 
 <div class="node-container">
@@ -109,12 +151,33 @@ back_text: Code Comprehension
     <div id="responseArea" class="response-area"></div>
   </div>
 
+  <!-- Memory Editors Section -->
+  <div class="memory-section">
+    <h2>AI Agent Memory</h2>
+    
+    <!-- Short-term Memory Editor -->
+    <div class="memory-container">
+      <h3>Short-term Memory</h3>
+      <div id="short-term-memory-editor"></div>
+    </div>
+    
+    <!-- Long-term Memory Editor -->
+    <div class="memory-container">
+      <h3>Long-term Memory</h3>
+      <div id="long-term-memory-editor"></div>
+    </div>
+  </div>
+
   <div class="navigation">
     <a href="/code-comprehension/node-2/" class="btn btn-read">← Step 2</a>
     <a href="/code-comprehension/node-4/" class="btn btn-read">Next: Step 4 →</a>
   </div>
 </div>
 
+<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+<link rel="stylesheet" href="/assets/css/memory-editor.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<script src="/assets/js/memory-editor.js"></script>
 <script src="/assets/js/env-config.js"></script>
 <script src="/assets/js/code-comprehension/node-api.js"></script>
 <script>
@@ -183,4 +246,35 @@ async function chainToNextNode() {
     showResponse({ success: false, error: error.message });
   }
 }
+
+// Initialize Memory Editors
+document.addEventListener('DOMContentLoaded', function() {
+  const memoryEditors = window.initializeMemoryEditors({
+    nodeId: NODE_ID,
+    agentType: 'Strategy Prediction Agent',
+    defaultLongTermContent: `# Strategy Prediction Agent - Node ${NODE_ID}
+
+## Agent Purpose
+Strategy Prediction Agent - Analyzes code and predicts optimal refactoring strategies
+
+## Key Responsibilities
+- Feature engineering
+- Strategy selection
+- Pattern recognition
+- Refactoring recommendation
+
+## Decision Tree Model
+- Uses trained Random Forest model (refactoring_model.pkl)
+- Calculates features: cyclomatic_complexity, line_count, duplication_score
+- Predicts single optimal refactoring action
+
+## Learning Notes
+- Replace guessing with data-driven decisions
+- Only processes code that passed perplexity check
+- Consolidates feature engineering and prediction into single module`
+  });
+  
+  // Store editors globally for potential API interactions
+  window.memoryEditors = memoryEditors;
+});
 </script>

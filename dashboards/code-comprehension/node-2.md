@@ -48,6 +48,48 @@ back_text: Code Comprehension
   border-color: var(--link-bg);
   transform: translateY(-2px);
 }
+
+.memory-section {
+  margin-top: 40px;
+  border-top: 2px solid var(--bg-accent);
+  padding-top: 30px;
+}
+
+.memory-container {
+  margin: 20px 0;
+  background: var(--bg-tile);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  border: 1px solid var(--bg-accent);
+}
+
+.memory-container h3 {
+  color: var(--text-heading);
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--bg-accent);
+  padding-bottom: 10px;
+}
+
+.memory-editor-minimal {
+  border: 1px solid var(--bg-accent);
+  border-radius: 5px;
+  background: var(--bg-page);
+}
+
+.memory-editor-minimal .EasyMDEContainer {
+  border: none;
+}
+
+.memory-editor-minimal .editor-toolbar {
+  background: var(--bg-tile);
+  border-bottom: 1px solid var(--bg-accent);
+}
+
+.memory-editor-minimal .CodeMirror {
+  background: var(--bg-page);
+  color: var(--text-main);
+  min-height: 200px;
+}
 </style>
 
 <div class="node-container">
@@ -120,10 +162,31 @@ back_text: Code Comprehension
     <a href="/code-comprehension/node-1/" class="btn btn-read">← Step 1</a>
     <a href="/code-comprehension/node-3/" class="btn btn-read">Next: Step 3 →</a>
   </div>
+
+  <!-- Memory Editors Section -->
+  <div class="memory-section">
+    <h2>AI Agent Memory</h2>
+    
+    <!-- Short-term Memory Editor -->
+    <div class="memory-container">
+      <h3>Short-term Memory</h3>
+      <div id="short-term-memory-editor"></div>
+    </div>
+    
+    <!-- Long-term Memory Editor -->
+    <div class="memory-container">
+      <h3>Long-term Memory</h3>
+      <div id="long-term-memory-editor"></div>
+    </div>
+  </div>
 </div>
 
+<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+<link rel="stylesheet" href="/assets/css/memory-editor.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
 <script src="/assets/js/env-config.js"></script>
 <script src="/assets/js/code-comprehension/node-api.js"></script>
+<script src="/assets/js/memory-editor.js"></script>
 <script>
 const NODE_ID = 2;
 
@@ -188,6 +251,113 @@ async function chainToNextNode() {
     showResponse(result);
   } catch (error) {
     showResponse({ success: false, error: error.message });
+  }
+}
+
+// Initialize memory editors for Node 2
+let shortTermEditor, longTermEditor;
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Get API base URL from env config
+  const apiBaseUrl = window.ENV_CONFIG?.API_BASE_URL || 'http://localhost:5000/api/v1';
+  
+  // Initialize short-term memory editor
+  const shortTermTextarea = document.createElement('textarea');
+  shortTermTextarea.id = 'short-term-textarea';
+  document.getElementById('short-term-memory-editor').appendChild(shortTermTextarea);
+  
+  shortTermEditor = new EasyMDE({
+    element: shortTermTextarea,
+    placeholder: 'Enter short-term memory for Node 2...',
+    spellChecker: false,
+    toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', '|', 'preview'],
+    status: false,
+    autofocus: false,
+    minHeight: '200px'
+  });
+  
+  // Initialize long-term memory editor
+  const longTermTextarea = document.createElement('textarea');
+  longTermTextarea.id = 'long-term-textarea';
+  document.getElementById('long-term-memory-editor').appendChild(longTermTextarea);
+  
+  longTermEditor = new EasyMDE({
+    element: longTermTextarea,
+    placeholder: 'Enter long-term memory for Node 2...',
+    spellChecker: false,
+    toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', '|', 'preview'],
+    status: ['lines', 'words'],
+    autofocus: false,
+    minHeight: '300px'
+  });
+  
+  // Load memory content
+  loadNodeMemory();
+  
+  // Auto-save functionality
+  let saveTimeout;
+  function autoSave() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(saveNodeMemory, 5000);
+  }
+  
+  shortTermEditor.codemirror.on('change', autoSave);
+  longTermEditor.codemirror.on('change', autoSave);
+});
+
+async function loadNodeMemory() {
+  const apiBaseUrl = window.ENV_CONFIG?.API_BASE_URL || 'http://localhost:5000/api/v1';
+  
+  try {
+    // Load short-term memory
+    const shortTermResponse = await fetch(`${apiBaseUrl}/memory/node-2/short-term`);
+    if (shortTermResponse.ok) {
+      const shortTermData = await shortTermResponse.json();
+      shortTermEditor.value(shortTermData.content || '# Node 2 Short-term Memory\n\n');
+    } else {
+      shortTermEditor.value('# Node 2 Short-term Memory\n\n## Current Session\n- Perplexity calculations: None\n- Routing decisions: None\n');
+    }
+    
+    // Load long-term memory
+    const longTermResponse = await fetch(`${apiBaseUrl}/memory/node-2/long-term`);
+    if (longTermResponse.ok) {
+      const longTermData = await longTermResponse.json();
+      longTermEditor.value(longTermData.content || '# Node 2 Long-term Memory\n\n');
+    } else {
+      longTermEditor.value('# Node 2: Perplexity Router Agent - Long-term Memory\n\n## Purpose\nIntelligent triage system for determining code refactoring candidacy.\n\n## Key Responsibilities\n- Calculate token-level perplexity of code\n- Compare against confusion threshold\n- Route code to appropriate next step\n- Handle model selection for perplexity calculation\n\n## Learned Patterns\n- Effective perplexity thresholds for different code types\n- Common confusion patterns in code\n- Successful routing decisions\n- Model performance comparisons\n');
+    }
+  } catch (error) {
+    console.error('Failed to load memory:', error);
+    // Set default content if backend is not available
+    shortTermEditor.value('# Node 2 Short-term Memory\n\n## Current Session\n- Backend not available - working offline\n');
+    longTermEditor.value('# Node 2: Perplexity Router Agent - Long-term Memory\n\n## Purpose\nIntelligent triage system for determining code refactoring candidacy.\n\n## Key Responsibilities\n- Calculate token-level perplexity of code\n- Compare against confusion threshold\n- Route code to appropriate next step\n- Handle model selection for perplexity calculation\n');
+  }
+}
+
+async function saveNodeMemory() {
+  const apiBaseUrl = window.ENV_CONFIG?.API_BASE_URL || 'http://localhost:5000/api/v1';
+  
+  try {
+    // Save short-term memory
+    await fetch(`${apiBaseUrl}/memory/node-2/short-term`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: shortTermEditor.value() })
+    });
+    
+    // Save long-term memory
+    await fetch(`${apiBaseUrl}/memory/node-2/long-term`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: longTermEditor.value() })
+    });
+    
+    console.log('Node 2 memory saved successfully');
+  } catch (error) {
+    console.error('Failed to save memory:', error);
+    // Save to localStorage as fallback
+    localStorage.setItem('node-2-short-term', shortTermEditor.value());
+    localStorage.setItem('node-2-long-term', longTermEditor.value());
   }
 }
 </script>

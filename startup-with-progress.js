@@ -68,6 +68,7 @@ const syncBar = multibar.create(100, 0, {
   status: "Syncing repositories...",
 });
 
+let venvBar;
 let backendBar;
 let connectionBar;
 let frontendBar;
@@ -129,6 +130,126 @@ async function syncRepositories() {
   await delay(300);
 }
 
+async function setupVirtualEnvironment() {
+  const { SERVER_USER, SERVER_IP } = process.env;
+
+  // Create venv bar
+  venvBar = multibar.create(100, 0, {
+    phase: "Venv   ",
+    status: "Setting up virtual environment...",
+  });
+
+  venvBar.update(10, { status: "Checking virtual environment..." });
+  await delay(200);
+
+  // Check if .venv exists on remote server
+  const checkVenv = spawn(
+    "ssh",
+    [
+      `${SERVER_USER}@${SERVER_IP}`,
+      'cd Error-Annotater && [ -d ".venv" ] && echo "VENV_EXISTS" || echo "VENV_MISSING"',
+    ],
+    { stdio: "pipe" }
+  );
+
+  let venvExists = false;
+  checkVenv.stdout.on("data", (data) => {
+    if (data.toString().trim().includes("VENV_EXISTS")) {
+      venvExists = true;
+    }
+  });
+
+  await new Promise((resolve) => {
+    checkVenv.on("close", resolve);
+  });
+
+  if (!venvExists) {
+    venvBar.update(30, { status: "Creating virtual environment..." });
+
+    const createVenv = spawn(
+      "ssh",
+      [
+        `${SERVER_USER}@${SERVER_IP}`,
+        "cd Error-Annotater && python3 -m venv .venv",
+      ],
+      { stdio: "pipe" }
+    );
+
+    await new Promise((resolve) => {
+      createVenv.on("close", resolve);
+    });
+  } else {
+    venvBar.update(30, { status: "Virtual environment exists" });
+    await delay(200);
+  }
+
+  venvBar.update(40, { status: "Checking dependencies..." });
+
+  // Check if dependencies need to be installed on remote server
+  const checkDeps = spawn(
+    "ssh",
+    [
+      `${SERVER_USER}@${SERVER_IP}`,
+      'cd Error-Annotater && source .venv/bin/activate && python -c "import langgraph, langchain_ollama, torch" && echo "DEPS_OK" || echo "DEPS_MISSING"',
+    ],
+    { stdio: "pipe" }
+  );
+
+  let needInstall = false;
+  checkDeps.stdout.on("data", (data) => {
+    if (data.toString().trim().includes("DEPS_MISSING")) {
+      needInstall = true;
+    }
+  });
+
+  await new Promise((resolve) => {
+    checkDeps.on("close", resolve);
+  });
+
+  if (needInstall) {
+    venvBar.update(50, { status: "Installing Python dependencies..." });
+
+    const installDeps = spawn(
+      "ssh",
+      [
+        `${SERVER_USER}@${SERVER_IP}`,
+        "cd Error-Annotater && source .venv/bin/activate && python -m pip install --upgrade pip",
+      ],
+      { stdio: "pipe" }
+    );
+
+    await new Promise((resolve) => {
+      installDeps.on("close", resolve);
+    });
+
+    venvBar.update(70, { status: "Installing LangGraph packages..." });
+
+    const installLangGraph = spawn(
+      "ssh",
+      [
+        `${SERVER_USER}@${SERVER_IP}`,
+        "cd Error-Annotater && source .venv/bin/activate && python -m pip install -r requirements.txt",
+      ],
+      { stdio: "pipe" }
+    );
+
+    await new Promise((resolve) => {
+      installLangGraph.on("close", resolve);
+    });
+  } else {
+    venvBar.update(70, { status: "Dependencies already installed" });
+    await delay(300);
+  }
+
+  venvBar.update(90, { status: "Verifying installation..." });
+  await delay(500);
+
+  venvBar.update(100, {
+    status: `${colors.green}Virtual environment ready!${colors.reset}`,
+  });
+  await delay(300);
+}
+
 async function startBackend() {
   const { SERVER_USER, SERVER_IP, SUBMODULE_COMMIT, SUBMODULE_BRANCH } =
     process.env;
@@ -160,7 +281,7 @@ async function startBackend() {
     killOld.on("close", resolve);
   });
 
-  backendBar.update(50, { status: "Setting up port forwarding..." });
+  backendBar.update(30, { status: "Setting up port forwarding..." });
 
   // Start SSH port forwarding for local development
   const portForward = spawn(
@@ -174,7 +295,7 @@ async function startBackend() {
 
   await delay(800);
 
-  backendBar.update(70, { status: "Starting remote backend server..." });
+  backendBar.update(50, { status: "Starting remote backend server..." });
 
   // Start backend on remote server with proper backgrounding and SSH disconnect
   const startRemoteBackend = spawn(
@@ -207,7 +328,7 @@ async function startBackend() {
     });
   });
 
-  backendBar.update(90, { status: "Backend initializing..." });
+  backendBar.update(70, { status: "Backend initializing..." });
 
   // Give the backend a moment to fully initialize
   await delay(2500);
@@ -256,6 +377,11 @@ async function startFrontend() {
 
   // Show backend logs before starting Jekyll
   await showBackendLog();
+
+  // Run LangGraph test if requested (after all progress bars are complete)
+  if (process.env.RUN_LANGGRAPH_TEST === "true") {
+    await runLangGraphTest();
+  }
 
   // Clean separator
   console.log("\n");
@@ -410,6 +536,117 @@ async function runCorsTest() {
   console.log("\n");
 }
 
+async function runDependencyTest() {
+  const { SERVER_USER, SERVER_IP } = process.env;
+
+  console.log("\n");
+  console.log("─".repeat(process.stdout.columns || 80));
+  console.log("🔍 Testing LangGraph Dependencies...");
+  console.log("─".repeat(process.stdout.columns || 80));
+  console.log("");
+
+  try {
+    const depTest = spawn(
+      "ssh",
+      [
+        `${SERVER_USER}@${SERVER_IP}`,
+        `cd Error-Annotater && source .venv/bin/activate && python -c "
+import sys
+print('  ✅ Testing langchain_ollama...')
+try:
+    import langchain_ollama
+    print('  ✅ langchain_ollama: Available')
+except ImportError as e:
+    print('  ❌ langchain_ollama: Missing')
+    print(f'     Error: {e}')
+    
+print('  ✅ Testing torch...')
+try:
+    import torch
+    print('  ✅ torch: Available')
+    print(f'     Version: {torch.__version__}')
+except ImportError as e:
+    print('  ❌ torch: Missing')
+    print(f'     Error: {e}')
+    
+print('  ✅ Testing langgraph...')
+try:
+    import langgraph
+    print('  ✅ langgraph: Available')
+    try:
+        print(f'     Version: {langgraph.__version__}')
+    except AttributeError:
+        print('     Version: Unknown (no __version__ attribute)')
+except ImportError as e:
+    print('  ❌ langgraph: Missing')
+    print(f'     Error: {e}')
+    
+print('  ✅ Testing transformers...')
+try:
+    import transformers
+    print('  ✅ transformers: Available')
+    print(f'     Version: {transformers.__version__}')
+except ImportError as e:
+    print('  ❌ transformers: Missing')
+    print(f'     Error: {e}')
+
+print('🎯 Dependency test completed!')
+"`,
+      ],
+      { stdio: "inherit" }
+    );
+
+    await new Promise((resolve) => {
+      depTest.on("close", resolve);
+    });
+  } catch (error) {
+    error("Could not run dependency test");
+  }
+
+  console.log("\n");
+}
+
+async function runLangGraphTest() {
+  const { SERVER_USER, SERVER_IP } = process.env;
+
+  console.log("\n");
+  console.log("─".repeat(process.stdout.columns || 80));
+  console.log("LangGraph Multi-Agent System Test Results:");
+  console.log("─".repeat(process.stdout.columns || 80));
+  console.log("");
+
+  try {
+    const langGraphTest = spawn(
+      "ssh",
+      [
+        `${SERVER_USER}@${SERVER_IP}`,
+        'cd Error-Annotater && python3 -c "' +
+          "import requests; " +
+          "import json; " +
+          "test_data = {'original_code': 'def test(): return 1+1', 'prompt': 'Test LangGraph'}; " +
+          "print('Testing LangGraph Multi-Agent Initialize...'); " +
+          "r1 = requests.post('http://localhost:5000/api/v1/multiagent/initialize'); " +
+          "print(f'Initialize Status: {r1.status_code}'); " +
+          "print(f'Response: {r1.text[:200]}...'); " +
+          "print('\\nTesting LangGraph Status...'); " +
+          "r2 = requests.get('http://localhost:5000/api/v1/multiagent/status'); " +
+          "print(f'Status: {r2.status_code}'); " +
+          "print(f'Response: {r2.text[:200]}...'); " +
+          "print('\\nLangGraph Test Complete!')\"",
+      ],
+      { stdio: "inherit" }
+    );
+
+    await new Promise((resolve) => {
+      langGraphTest.on("close", resolve);
+    });
+  } catch (error) {
+    error("Could not run LangGraph test");
+  }
+
+  console.log("\n");
+}
+
 async function showBackendLog(showDetailedLogs = false) {
   const { SERVER_USER, SERVER_IP } = process.env;
 
@@ -500,6 +737,16 @@ async function main() {
     await syncRepositories();
 
     console.log("\n");
+
+    // Setup virtual environment and dependencies
+    await setupVirtualEnvironment();
+
+    console.log("\n");
+
+    // Run dependency test if requested (after venv setup)
+    if (process.env.RUN_DEPENDENCY_TEST === "true") {
+      await runDependencyTest();
+    }
 
     // Start backend deployment
     await startBackend();

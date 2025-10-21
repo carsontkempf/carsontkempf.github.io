@@ -2,16 +2,17 @@
 .recent-posts {
     margin: 40px 0;
     padding: 30px 20px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 12px;
-    border: 2px solid #dee2e6;
+    background: var(--bg-tile);
+    border-radius: var(--border-radius);
+    border: 2px solid var(--bg-accent);
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease-in-out;
 }
 
 .recent-posts h2 {
     text-align: center;
     margin-bottom: 30px;
-    color: #2c3e50;
+    color: var(--text-heading);
     font-size: 2rem;
     font-weight: 600;
 }
@@ -23,39 +24,41 @@
 }
 
 .post-card {
-    background: white;
+    background: var(--bg-page);
     padding: 20px;
     border-radius: 8px;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--bg-accent);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
     cursor: pointer;
     text-decoration: none;
-    color: inherit;
+    color: var(--text-main);
 }
 
 .post-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(0,0,0,0.15);
     text-decoration: none;
-    color: inherit;
+    color: var(--text-main);
+    background: var(--bg-accent);
 }
 
 .post-title {
     font-size: 1.3rem;
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--text-heading);
     margin-bottom: 8px;
 }
 
 .post-meta {
     font-size: 0.9rem;
-    color: #6c757d;
+    color: var(--text-main);
+    opacity: 0.8;
     margin-bottom: 12px;
 }
 
 .post-excerpt {
-    color: #495057;
+    color: var(--text-main);
     line-height: 1.5;
     position: relative;
     overflow: hidden;
@@ -69,7 +72,11 @@
     right: 0;
     width: 30%;
     height: 1.2em;
-    background: linear-gradient(to right, transparent, white);
+    background: linear-gradient(to right, transparent, var(--bg-page));
+}
+
+.post-card:hover .post-excerpt::after {
+    background: linear-gradient(to right, transparent, var(--bg-accent));
 }
 
 .read-more-btn {
@@ -77,18 +84,19 @@
     width: fit-content;
     margin: 0 auto;
     padding: 12px 30px;
-    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-    color: white;
+    background: var(--bg-accent);
+    color: var(--text-heading);
     text-decoration: none;
     border-radius: 6px;
     font-weight: 500;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 2px solid var(--link-bg);
 }
 
 .read-more-btn:hover {
-    background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
-    color: white;
+    background: var(--link-bg);
+    color: var(--text-heading);
     text-decoration: none;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
