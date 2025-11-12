@@ -1,0 +1,11 @@
+<div class="header-content">
+  <h1>
+    <a href="{{ site.baseurl }}/">{{ site.title | default: site.github.repository_name }}</a>
+  </h1>
+  <p class="skinny">
+    {{ site.description | default: site.github.project_tagline }}
+  </p>
+</div>
+
+{% include components/ui/theme-switch.html %}
+{% include components/auth/status.html %}

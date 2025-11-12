@@ -1,0 +1,24 @@
+<div class="theme-switch">
+    <input type="radio" id="ts-light" name="theme" value="light" checked>
+    <input type="radio" id="ts-dark" name="theme" value="dark">
+    <input type="radio" id="ts-lr" name="theme" value="lr">
+    <div class="slider"></div>
+    <label for="ts-light" class="opt"></label>
+    <label for="ts-dark" class="opt"></label>
+    <label for="ts-lr" class="opt"></label>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var saved = localStorage.getItem('theme') || 'light';
+      var radio = document.getElementById('ts-' + saved);
+      if (radio) radio.checked = true;
+      document.documentElement.setAttribute('data-theme', saved);
+    });
+    document.querySelectorAll('.theme-switch input').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var mode = this.value;
+        document.documentElement.setAttribute('data-theme', mode);
+        localStorage.setItem('theme', mode);
+      });
+    });
+</script>

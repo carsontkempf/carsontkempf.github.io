@@ -1,0 +1,122 @@
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  {% seo %}
+  <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
+  <!-- Debug CSS loading -->
+  <script>
+    // Verify CSS loaded correctly
+    document.addEventListener('DOMContentLoaded', function() {
+      var link = document.querySelector('link[href*="style.css"]');
+      if (link) {
+        console.log('CSS file path:', link.href);
+      }
+    });
+  </script>
+  <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <!-- Google APIs -->
+  <script defer src="https://apis.google.com/js/api.js"></script>
+  <script defer src="https://accounts.google.com/gsi/client"></script>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (theme && theme !== 'light') {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+      
+      // Chrome-specific background fix (Safari-safe)
+      var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+      
+      if (isChrome) {
+        function applyThemeColors(currentTheme) {
+          var bgColor, textColor, headingColor;
+          
+          // Set colors based on theme
+          if (!currentTheme || currentTheme === 'light') {
+            bgColor = '#FAF3F0';   // Light mode - cream bg
+            textColor = '#3D352E'; // dark text
+            headingColor = '#222'; // darker headings
+          } else if (currentTheme === 'dark') {
+            bgColor = '#2a2927';   // Dark mode - dark bg
+            textColor = '#ecf0f1'; // light text
+            headingColor = '#ffffff'; // white headings
+          } else if (currentTheme === 'lr') {
+            bgColor = '#F8FAFC';   // Pink mode - light bg
+            textColor = '#3D352E'; // dark text
+            headingColor = '#222'; // darker headings
+          }
+          
+          // Apply background and text colors
+          document.documentElement.style.setProperty('background-color', bgColor, 'important');
+          document.documentElement.style.setProperty('background', bgColor, 'important');
+          document.documentElement.style.setProperty('color', textColor, 'important');
+          
+          if (document.body) {
+            document.body.style.setProperty('background-color', bgColor, 'important');
+            document.body.style.setProperty('background', bgColor, 'important');
+            document.body.style.setProperty('color', textColor, 'important');
+          }
+          
+          // Force sidebar and page text colors
+          function forceTextColors() {
+            // Sidebar content
+            var sidebarContent = document.querySelector('.sidebar-content');
+            if (sidebarContent) {
+              sidebarContent.style.setProperty('color', textColor, 'important');
+              
+              var selectors = ['*', 'a', 'li', 'p', 'span', 'div'];
+              selectors.forEach(function(selector) {
+                var elements = sidebarContent.querySelectorAll(selector);
+                for (var i = 0; i < elements.length; i++) {
+                  elements[i].style.setProperty('color', textColor, 'important');
+                }
+              });
+              
+              // Sidebar headings
+              var sidebarHeadings = sidebarContent.querySelectorAll('h1, h2, h3');
+              for (var i = 0; i < sidebarHeadings.length; i++) {
+                sidebarHeadings[i].style.setProperty('color', headingColor, 'important');
+              }
+            }
+            
+            // Page headings
+            var pageHeadings = document.querySelectorAll('h1, h2, h3');
+            for (var i = 0; i < pageHeadings.length; i++) {
+              pageHeadings[i].style.setProperty('color', headingColor, 'important');
+            }
+          }
+          
+          forceTextColors();
+          setTimeout(forceTextColors, 100);
+        }
+        
+        // Apply initial theme colors
+        applyThemeColors(theme);
+        
+        // Listen for theme changes
+        document.addEventListener('DOMContentLoaded', function() {
+          // Apply colors again after DOM loads
+          var currentTheme = localStorage.getItem('theme') || 'light';
+          applyThemeColors(currentTheme);
+          
+          // Listen for theme switch changes
+          document.querySelectorAll('.theme-switch input').forEach(function(input) {
+            input.addEventListener('change', function() {
+              applyThemeColors(this.value);
+            });
+          });
+          
+          // Also listen for storage changes (if theme changes in another tab)
+          window.addEventListener('storage', function(e) {
+            if (e.key === 'theme') {
+              applyThemeColors(e.newValue);
+            }
+          });
+        });
+      }
+    })();
+  </script>
+</head>

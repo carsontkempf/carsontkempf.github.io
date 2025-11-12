@@ -1,0 +1,1292 @@
+@import "fonts";
+@import "rouge-github";
+
+// 1. Root Variables & Base Setup
+// =============================================================================
+:root {
+  --sidebar-offset: 1rem;
+  --button-size: 3.5rem;
+  --sidebar-width-collapsed: var(--button-size);
+  --sidebar-width-expanded: 280px;
+  --border-radius: 12px;
+  --sidebar-border-radius: 5rem;
+  --base-padding: 1.5rem;
+  --grid-gap: 1.5rem;
+
+  // Theme Colors
+  --bg-page: #FAF3F0;
+  --bg-tile: #F4E7E1;
+  --text-main: #3D352E;
+  --text-heading: #222;
+  --bg-accent: #dac4bc;
+  --link-bg: #e6bab6;
+  --bg-code-block: #f3dfd2; // New variable for code blocks
+}
+
+[data-theme="dark"] {
+  --bg-page: #2a2927;
+  --bg-tile: #222222;
+  --text-main: #ecf0f1;
+  --text-heading: #ffffff;
+  --bg-accent: #3C486B;
+  --link-bg: #3b5269;
+  --bg-code-block: #8282ae; // Dark code background
+}
+
+[data-theme="lr"] {
+  --bg-page: #F8FAFC;
+  --bg-tile: #F4E7E1;
+  --text-main: #3D352E;
+  --text-heading: #222;
+  --bg-accent: #F3D0D7;
+  --link-bg: #E6D7B6;
+  --bg-code-block: #FFDFDF; // New variable for code blocks
+}
+
+body {
+  font-family: "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  margin: 0;
+  box-sizing: border-box; // Ensures padding is included correctly
+  padding-top: var(--base-padding); // Adds space at the top
+  transition: all 0.3s ease-in-out;
+
+}
+
+[data-sidebar="expanded"] body {
+  grid-template-columns: var(--sidebar-width-expanded) 1fr;
+}
+
+// 2. Main Layout Components
+// =============================================================================
+%tile {
+  background-color: var(--bg-tile);
+  border-radius: var(--border-radius);
+  padding: var(--base-padding);
+  box-sizing: border-box;
+  position: relative;
+  transition: all 0.3s ease-in-out;
+
+}
+
+// Targets the <header> tag and makes it a positioning context
+header {
+  transition: all 0.3s ease-in-out;
+  @extend %tile; // This provides padding and border-radius
+  position: relative; // This is the crucial change
+  background-color: var(--bg-accent);
+  margin: 0 var(--grid-gap); 
+  border-radius: 2rem;
+  min-height: calc(var(--base-padding) * 5); // Make header 1.25x taller
+  padding: calc(var(--base-padding) * 1.25); // Increase padding proportionally
+
+}
+
+// Positions the theme switch in the top right of the header
+header .theme-switch {
+  position: absolute;
+  top: var(--base-padding);
+  right: var(--base-padding);
+}
+
+.page-content {
+  margin-left: calc(var(--sidebar-width-collapsed) + var(--sidebar-offset));
+  transition: margin-left 0.3s ease-in-out;
+}
+
+[data-sidebar="expanded"] .page-content {
+  margin-left: calc(var(--sidebar-width-expanded) + var(--sidebar-offset));
+}
+
+
+.wrapper {
+  padding: var(--grid-gap);
+}
+
+
+// 3. Sidebar Content & Button
+// =============================================================================
+//
+// MAIN SIDEBAR STYLES
+//
+
+.sidebar {
+  position: fixed;
+  left: var(--sidebar-offset);
+  bottom: var(--sidebar-offset);
+  width: var(--sidebar-width-collapsed);
+  top: calc(var(--button-size) - 2rem); // Corrected height
+  transition: all 0.3s ease-in-out;
+  background-color: var(--bg-accent);
+  padding: 1rem 0;
+  box-sizing: border-box;
+  display: flex; 
+  z-index: 9;
+  border-radius: 5rem;
+}
+
+[data-sidebar="expanded"] .sidebar {
+  position: fixed; // Re-asserts the position context
+  bottom: var(--sidebar-offset);
+  width: var(--sidebar-width-expanded);
+  top: calc(var(--button-size) - 2rem); // Corrected height
+  transition: all 0.3s ease-in-out;
+  padding: 1rem;
+  border-radius: calc(var(--sidebar-border-radius) - 3rem); 
+  overflow-y: auto;
+  overflow-x: hidden; // Add this to contain wide content
+
+}
+
+[data-sidebar="expanded"] .sidebar-toggle-btn {
+  position: fixed;
+  bottom: calc(var(--sidebar-offset) + 0.25rem);
+  // This calculates the left position to place the button on the bottom-right
+  left: calc(var(--sidebar-width-expanded) - var(--button-size) - var(--sidebar-offset) + 1.5rem);
+  transform: none;
+  z-index: 10;
+}
+
+.sidebar-content {
+  opacity: 0; // Start fully transparent
+  visibility: hidden; // Hide from view and interaction
+  transition: opacity 0.1s ease-in-out, visibility 0.1s ease-in-out;
+}
+
+[data-sidebar="expanded"] .sidebar-content {
+  opacity: 1; // Fade in to be fully visible
+  visibility: visible;
+}
+
+.sidebar-toggle-btn {
+  position: absolute;
+  bottom: calc(var(--sidebar-offset) - 1rem);
+  left: 50%;
+  transform: translateX(0%);
+  transition: all 0.3s ease-in-out; // Add this transition
+  z-index: 10; 
+  cursor: pointer;
+  background-color: var(--bg-accent);
+  color: var(--text-heading);
+  border-radius: 50%;
+  width: var(--button-size);
+  height: var(--button-size);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  border: none;
+}
+
+
+// 4. Header Content & Buttons
+// =============================================================================
+.header-content {
+  padding-right: 6rem; /* Padding for theme switcher and dashboard button on right side */
+}
+
+.header .theme-switch {
+  position: absolute;
+  top: var(--base-padding);
+  right: var(--base-padding);
+}
+
+/* ADD */
+// Positions the login button in the bottom right of the header
+header #auth-status, #auth-status {
+  position: absolute;
+  bottom: var(--base-padding);
+  right: var(--base-padding);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  /* Removed margin-top since header is now taller */
+}
+
+/* ADD */
+/* Styles the actual login buttons for a rounded look */
+#auth-status a,
+#auth-status button,
+.login-btn {
+  background-color: var(--bg-code-block);
+  padding: 0.5rem 1rem;
+  border-radius: 50px; /* Creates a pill shape */
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: all 0.2s ease; /* Animate all property changes */
+  cursor: pointer;
+}
+
+#auth-status a:hover,
+#auth-status button:hover,
+.login-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.9); /* This darkens the button */
+}
+
+// **********************************************************************************************
+// 5. General Typography & Content
+// **********************************************************************************************
+h1, h2, h3 { color: var(--text-heading); margin: 0 0 1rem 0; }
+a { color: inherit; text-decoration: none; }
+pre { 
+  padding: 1rem; 
+  border-radius: var(--border-radius); 
+  overflow-x: auto; 
+  background-color: var(--bg-code-block); // Use the new variable
+}
+img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
+// Targets the container Jekyll/Rouge uses for code blocks
+.highlight {
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  overflow-x: auto;
+  background-color: var(--bg-code-block); // Applies the theme background
+  margin: calc(var(--base-padding) + 2rem) auto; 
+
+}
+
+
+// Styles for images within the main article content
+.main-content img {
+  display: block; // Allows the use of auto margins for centering
+  width: 66.67%; // Sets the image to 2/3 of its container's width
+  height: auto; // Maintains the correct aspect ratio
+  
+  // Sets top/bottom margin for spacing and auto left/right for centering
+  margin: calc(var(--base-padding) + 2rem) auto; 
+}
+// **********************************************************************************************
+// 6. Page-Specific Styles (Login, Dashboard)
+// **********************************************************************************************
+.layout-login .main-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 60vh;
+}
+.login-card {
+  background-color: var(--bg-page);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+
+@media (max-width: 768px) {
+  [data-sidebar="expanded"] .page-content {
+    display: none;
+  }
+
+  [data-sidebar="expanded"] .sidebar {
+    width: 100%;
+    left: 0;
+    bottom: 0;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  [data-sidebar="expanded"] .sidebar-toggle-btn {
+    left: calc(100% - var(--button-size) - 1rem);
+    bottom: 1rem;
+  }
+}
+
+/* ADD to your stylesheet */
+
+/* 8. Page-Specific: Dashboard Header */
+/* ============================================================================= */
+.dashboard-header {
+  text-align: center;
+  padding: var(--base-padding) 0;
+  margin-bottom: var(--grid-gap);
+}
+
+.dashboard-header h1 {
+  margin-bottom: 0.5rem; /* Adds space below the "Dashboard" title */
+}
+
+.dashboard-header .welcome-message {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+.dashboard-header .login-status {
+  font-size: 1rem;
+  color: var(--text-main);
+  margin-top: 0.25rem;
+  opacity: 0.9;
+}
+
+/* 9. Custom Dashboard Sections (Essays, LangChain, etc.) */
+/* ============================================================================= */
+
+/* General Dashboard Grid Layouts */
+.posts-grid, .essays-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--grid-gap);
+  margin-top: var(--grid-gap);
+}
+
+/* Dashboard Section Headers */
+.section-header, .essays-header {
+  text-align: center;
+  padding: var(--base-padding) 0;
+  margin-bottom: var(--grid-gap);
+}
+
+.section-description, .essays-description {
+  font-size: 1.1rem;
+  color: var(--text-main);
+  margin: 0.5rem 0 0 0;
+  opacity: 0.9;
+}
+
+/* Post/Essay Cards */
+.post-card, .essay-card {
+  @extend %tile;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: var(--bg-accent);
+  }
+}
+
+.post-card-content, .essay-card-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.post-title, .essay-title {
+  margin: 0 0 1rem 0;
+  
+  a {
+    color: var(--text-heading);
+    text-decoration: none;
+    
+    &:hover {
+      color: var(--text-main);
+    }
+  }
+}
+
+.post-meta, .essay-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.post-date, .essay-date {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.post-tags, .essay-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.post-tag, .essay-tag {
+  background-color: var(--bg-accent);
+  color: var(--text-main);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.post-excerpt, .essay-excerpt {
+  color: var(--text-main);
+  line-height: 1.6;
+  flex-grow: 1;
+}
+
+/* No Content Messages */
+.no-posts-message, .no-essays-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-main);
+  opacity: 0.7;
+}
+
+/* 10. Spotify Dashboard Styles */
+/* ============================================================================= */
+
+/* Main Spotify Content Wrapper */
+#spotify-apple-content-wrapper {
+  @extend %tile;
+}
+
+/* Spotify Dashboard Header */
+.dashboard-header {
+  text-align: center;
+  padding: var(--base-padding) 0;
+  margin-bottom: var(--grid-gap);
+  border-bottom: 2px solid var(--bg-accent);
+}
+
+.dashboard-main-content {
+  padding: var(--base-padding) 0;
+}
+
+/* Spotify Authorization Section */
+#spotify-auth-section {
+  @extend %tile;
+  margin-bottom: var(--grid-gap);
+  text-align: center;
+}
+
+/* Dashboard Buttons Container */
+.dashboard-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  margin: var(--grid-gap) 0;
+}
+
+/* Dashboard Buttons */
+.dashboard-btn {
+  background-color: var(--bg-accent);
+  color: var(--text-heading);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  min-width: 200px;
+  width: 100%;
+  max-width: 300px;
+  margin: 0; /* Remove individual margins */
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    filter: brightness(0.9);
+    text-decoration: none;
+    color: var(--text-heading);
+  }
+  
+  &:visited {
+    color: var(--text-heading);
+  }
+  
+  &.secondary {
+    background-color: var(--bg-tile);
+    border: 2px solid var(--bg-accent);
+  }
+}
+
+/* Auth0 Dashboard Specific Styles */
+#auth-management-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+}
+
+
+/* Service Icons Container */
+.service-icons-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
+  backdrop-filter: blur(10px);
+}
+
+.service-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.service-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  background: var(--bg-tile);
+  padding: 8px;
+  
+  /* Remove transparency backgrounds and make solid */
+  background-image: 
+    linear-gradient(45deg, var(--bg-tile) 25%, transparent 25%), 
+    linear-gradient(-45deg, var(--bg-tile) 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, var(--bg-tile) 75%), 
+    linear-gradient(-45deg, transparent 75%, var(--bg-tile) 75%);
+  background-size: 0px 0px; /* Disable the checkered pattern */
+  background-color: var(--bg-tile); /* Solid background color */
+  
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+  }
+}
+
+/* Spotify specific styling */
+.spotify-logo {
+  /* Scale to 1.5x current size (75px * 1.5 = 112.5px) */
+  height: 112.5px !important;
+  width: 112.5px !important;
+}
+
+/* Apple Music specific styling */
+.apple-music-logo {
+  /* Match Spotify icon size exactly */
+  height: 112.5px !important;
+  width: 112.5px !important;
+  
+  /* Crop and scale to fit */
+  object-fit: cover;
+  object-position: center;
+  
+  /* Apply light white filter for text/foreground */
+  filter: brightness(2.5) contrast(0.6) saturate(0);
+  
+  &:hover {
+    filter: brightness(2.2) contrast(0.7) saturate(0.1);
+    transform: scale(1.05);
+  }
+}
+
+.transfer-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-heading);
+  opacity: 0.7;
+  font-size: 1.5rem;
+  animation: pulse 2s infinite;
+  
+  svg {
+    width: 32px;
+    height: 32px;
+    stroke: var(--text-heading);
+    /* Rotate arrow to point downward for vertical layout */
+    transform: rotate(90deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Dark theme adjustments for service icons */
+[data-theme="dark"] .service-icons-container {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .service-logo {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+  
+  &:hover {
+    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Responsive design for service icons */
+@media (max-width: 768px) {
+  .service-icons-container {
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .service-logo {
+    width: 60px;
+    height: 60px;
+  }
+  
+  /* Spotify responsive styling */
+  .spotify-logo {
+    height: 84.375px !important;
+    width: 84.375px !important; /* 1.5x current size (56.25px * 1.5 = 84.375px) */
+  }
+  
+  /* Apple Music responsive styling */
+  .apple-music-logo {
+    height: 84.375px !important;
+    width: 84.375px !important; /* Match Spotify icon size exactly */
+  }
+  
+  .transfer-arrow svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Spotify User Info */
+#spotify-user-info {
+  @extend %tile;
+  margin: 1rem 0;
+  background-color: var(--bg-page);
+  
+  p {
+    margin: 0.5rem 0;
+  }
+}
+
+/* Playlists Summary */
+.playlists-summary {
+  @extend %tile;
+  background-color: var(--bg-accent);
+  text-align: center;
+  margin-bottom: var(--grid-gap);
+  
+  h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-heading);
+  }
+  
+  p {
+    margin: 0;
+    opacity: 0.8;
+  }
+}
+
+/* Playlists Grid */
+.playlists-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--grid-gap);
+}
+
+/* Individual Playlist Items */
+.playlist-item {
+  @extend %tile;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  
+  h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-heading);
+  }
+  
+  p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: var(--text-main);
+  }
+  
+  .playlist-type {
+    font-weight: 500;
+    opacity: 0.8;
+  }
+  
+  .click-hint {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    font-style: italic;
+    margin-top: 0.5rem;
+  }
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: var(--bg-accent);
+  }
+}
+
+/* Playlist Tracks Header */
+.playlist-tracks-header {
+  @extend %tile;
+  background-color: var(--bg-accent);
+  margin-bottom: var(--grid-gap);
+  text-align: center;
+  
+  h3 {
+    margin: 0.5rem 0;
+    color: var(--text-heading);
+  }
+  
+  p {
+    margin: 0;
+    opacity: 0.8;
+  }
+}
+
+/* Back Button */
+.back-btn {
+  @extend .dashboard-btn;
+  background-color: var(--bg-tile);
+  border: 2px solid var(--bg-accent);
+  margin-bottom: 1rem;
+  
+  &:hover {
+    background-color: var(--bg-accent);
+  }
+}
+
+/* Tracks List */
+.tracks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Individual Track Items */
+.track-item {
+  @extend %tile;
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: var(--bg-accent);
+    transform: translateX(5px);
+  }
+}
+
+.track-number {
+  font-weight: bold;
+  color: var(--text-heading);
+  text-align: center;
+}
+
+.track-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.track-name {
+  font-weight: 600;
+  color: var(--text-heading);
+  font-size: 1rem;
+}
+
+.track-artist {
+  color: var(--text-main);
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.track-album {
+  color: var(--text-main);
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+.track-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.track-duration {
+  font-weight: 500;
+  color: var(--text-heading);
+}
+
+.track-added {
+  color: var(--text-main);
+  opacity: 0.6;
+}
+
+/* Login Prompt */
+#spotify-apple-login-prompt {
+  @extend %tile;
+  text-align: center;
+  padding: 3rem;
+  
+  h2 {
+    color: var(--text-heading);
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    margin-bottom: 2rem;
+    color: var(--text-main);
+  }
+}
+
+/* Mobile Responsiveness for Dashboards */
+@media (max-width: 768px) {
+  .posts-grid, .essays-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .playlists-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .track-item {
+    grid-template-columns: 30px 1fr;
+    gap: 0.75rem;
+    
+    .track-meta {
+      grid-column: 2;
+      align-items: flex-start;
+      margin-top: 0.5rem;
+    }
+  }
+  
+  .track-number {
+    grid-row: 1 / 3;
+  }
+}
+
+
+// =============================================================================
+// 18. Apple Music Integration Styles
+// =============================================================================
+
+// Service icons container
+.service-icons-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: var(--bg-tile);
+    border-radius: var(--border-radius);
+}
+
+.service-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    // Remove circular background and shadow
+}
+
+.service-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+}
+
+// Specific styling for Spotify icon
+.spotify-logo {
+    background: #000000; // Black background for Spotify
+    border-radius: 8px;
+    padding: 8px;
+}
+
+// Specific styling for Apple Music icon
+.apple-music-logo {
+    // Apply a filter to make text white while preserving the icon structure
+    filter: invert(1); // Invert colors to make dark text white
+    border-radius: 8px;
+    // Add a subtle background if the icon itself is transparent
+    background: transparent;
+}
+
+.transfer-arrow {
+    color: var(--text-main);
+    opacity: 0.7;
+    font-size: 1.5rem;
+}
+
+// Playlist actions
+.playlist-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--bg-accent);
+}
+
+.convert-btn {
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    &:disabled {
+        background: var(--bg-accent);
+        color: var(--text-main);
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+}
+
+// Progress bar for conversion
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-accent);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+#progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+// Conversion section
+#conversion-section {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: var(--bg-tile);
+    border-radius: var(--border-radius);
+}
+
+#conversion-progress {
+    text-align: center;
+    padding: 2rem;
+}
+
+#progress-text {
+    font-weight: 600;
+    margin: 1rem 0;
+    color: var(--text-heading);
+}
+
+#conversion-details {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    
+    p {
+        margin: 0.5rem 0;
+    }
+}
+
+// Conversion results
+#conversion-results {
+    padding: 2rem;
+    text-align: center;
+}
+
+.conversion-summary {
+    background: var(--bg-page);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    
+    h5 {
+        color: var(--text-heading);
+        margin: 0 0 1rem 0;
+        font-size: 1.3rem;
+    }
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+    
+    p {
+        background: var(--bg-tile);
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 0;
+        font-weight: 600;
+    }
+}
+
+// Failed tracks section
+#failed-tracks {
+    background: var(--bg-page);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-top: 2rem;
+    
+    h5 {
+        color: var(--text-heading);
+        margin: 0 0 1rem 0;
+    }
+}
+
+#failed-tracks-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.failed-track {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 2fr;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--bg-accent);
+    font-size: 0.9rem;
+    
+    &:last-child {
+        border-bottom: none;
+    }
+    
+    .track-name {
+        font-weight: 600;
+        color: var(--text-heading);
+    }
+    
+    .track-artist {
+        color: var(--text-main);
+        opacity: 0.8;
+    }
+    
+    .error-reason {
+        color: #d32f2f;
+        font-size: 0.8rem;
+        font-style: italic;
+    }
+}
+
+// Apple Music auth section
+#apple-music-auth-section {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: var(--bg-tile);
+    border-radius: var(--border-radius);
+    
+    h3 {
+        color: var(--text-heading);
+        margin: 0 0 1rem 0;
+    }
+    
+    p {
+        margin: 0 0 1.5rem 0;
+        opacity: 0.9;
+    }
+}
+
+// Responsive adjustments for Apple Music integration
+@media (max-width: 768px) {
+    .service-icons-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .transfer-arrow {
+        transform: rotate(90deg);
+    }
+    
+    .stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .failed-track {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        text-align: left;
+    }
+    
+    .convert-btn {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+}
+
+// Explicit Content Badge Styles
+// =============================================================================
+.explicit-badge {
+    display: inline-block;
+    background: #ff4444;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 4px;
+    border-radius: 3px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    line-height: 1;
+    
+    &::before {
+        content: "E";
+    }
+}
+
+[data-theme="dark"] .explicit-badge {
+    background: #cc3333;
+}
+
+// Apple Music Convert Button Styles  
+// =============================================================================
+.playlist-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    
+    .convert-btn {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        background: linear-gradient(135deg, #FA7268, #FF5722);
+        color: white;
+        
+        &:hover:not(:disabled) {
+            background: linear-gradient(135deg, #FF5722, #FA7268);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(250, 114, 104, 0.4);
+        }
+        
+        &:disabled {
+            background: #ccc;
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        &:active:not(:disabled) {
+            transform: translateY(0);
+        }
+    }
+}
+
+// Enhanced Conversion Progress Display
+// =============================================================================
+.conversion-details {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--bg-tile);
+    border-radius: 8px;
+    border-left: 4px solid #1DB954;
+    
+    p {
+        margin: 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        
+        &:first-child {
+            margin-top: 0;
+        }
+        
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+// Catalog-Only Mode Notice
+// =============================================================================
+.catalog-only-notice {
+    background: linear-gradient(135deg, #ff9500, #ffad33);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    font-weight: 500;
+    
+    strong {
+        font-weight: 700;
+    }
+}
+
+[data-theme="dark"] .catalog-only-notice {
+    background: linear-gradient(135deg, #cc7700, #e68900);
+}
+
+// Track Item Enhancements for Explicit Display
+// =============================================================================
+.track-item {
+    .track-name {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+    }
+}
+
+// Failed Track Display Enhancement
+// =============================================================================
+.failed-track {
+    .track-name {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+    }
+}
+
+// Responsive Adjustments for New Styles
+// =============================================================================
+@media (max-width: 768px) {
+    .playlist-actions {
+        .convert-btn {
+            font-size: 0.8rem;
+            padding: 0.6rem 0.8rem;
+        }
+    }
+    
+    .explicit-badge {
+        font-size: 0.6rem;
+        padding: 1px 3px;
+        margin-left: 0.3rem;
+    }
+    
+    .conversion-details {
+        padding: 0.8rem;
+        
+        p {
+            font-size: 0.9rem;
+        }
+    }
+}

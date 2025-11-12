@@ -1,0 +1,78 @@
+<div class="sidebar-content">
+  <div class="navigation-section">
+    <h2>Navigation</h2>
+    <ul class="nav-list">
+      <li><a href="{{ '/' | relative_url }}">Home</a></li>
+      <li><a href="{{ '/essays/' | relative_url }}" class="essays-link">Essays</a></li>
+      <li><a href="{{ '/langchain/' | relative_url }}" class="langchain-link">LangChain</a></li>
+      <li><a href="{{ '/extensions/' | relative_url }}" class="extensions-link">Extensions</a></li>
+      <li><a href="{{ '/ai/' | relative_url }}" class="ai-link">AI & Algorithms</a></li>
+      <li><a href="{{ '/apps/' | relative_url }}" class="apps-link">Apps</a></li>
+      <li><a href="{{ '/json-to-sheets/' | relative_url }}" class="json-to-sheets-link">JSON to Google Sheets</a></li>
+      <li><a href="{{ '/auth0-users/' | relative_url }}" class="auth0-users-link">Auth0 User Management</a></li>
+    </ul>
+  </div>
+  
+  {% comment %}
+  Determine which section we're currently viewing
+  {% endcomment %}
+  {% assign current_section = "none" %}
+  {% assign section_category = "" %}
+  {% assign section_title = "" %}
+  
+  {% if page.url == '/essays/' or page.categories contains 'Essays' %}
+    {% assign current_section = "essays" %}
+    {% assign section_category = "Essays" %}
+    {% assign section_title = "Essays" %}
+  {% elsif page.url == '/langchain/' or page.categories contains 'LangChain' %}
+    {% assign current_section = "langchain" %}
+    {% assign section_category = "LangChain" %}
+    {% assign section_title = "LangChain" %}
+  {% elsif page.url == '/extensions/' or page.categories contains 'Extensions' %}
+    {% assign current_section = "extensions" %}
+    {% assign section_category = "Extensions" %}
+    {% assign section_title = "Extensions" %}
+  {% elsif page.url == '/ai/' or page.categories contains 'AI' %}
+    {% assign current_section = "ai" %}
+    {% assign section_category = "AI" %}
+    {% assign section_title = "AI & Algorithms" %}
+  {% elsif page.url == '/apps/' or page.categories contains 'Apps' %}
+    {% assign current_section = "apps" %}
+    {% assign section_category = "Apps" %}
+    {% assign section_title = "Apps" %}
+  {% endif %}
+  
+  {% if current_section != "none" %}
+    {% comment %}
+    Show only current section posts when on section dashboard or viewing a section post
+    {% endcomment %}
+    {% assign section_posts = site.categories[section_category] %}
+    {% if section_posts.size > 0 %}
+      <h2>{{ section_title }}</h2>
+      <ol>
+        <ul>
+          {% for post in section_posts %}
+            <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </ol>
+    {% endif %}
+  {% else %}
+    {% comment %}
+    Show all categories except dashboard categories when not on dashboard pages
+    {% endcomment %}
+    {% assign dashboard_categories = "Essays,LangChain,Extensions,AI,Apps" | split: "," %}
+    {% for category in site.categories %}
+      {% unless dashboard_categories contains category[0] %}
+        <h2>{{ category[0] }}</h2>
+        <ol>
+          <ul>
+            {% for post in category[1] %}
+              <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
+            {% endfor %}
+          </ul>
+        </ol>
+      {% endunless %}
+    {% endfor %}
+  {% endif %}
+</div>

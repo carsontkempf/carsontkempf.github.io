@@ -1,45 +1,217 @@
 <!DOCTYPE html>
-<html lang="en-US" data-theme="light">
+<html lang="en-US">
   <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>Hello! Happy you Made it! | Carson’s Meditations</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Carson’s Meditations</title>
 <meta name="generator" content="Jekyll v3.10.0" />
-<meta property="og:title" content="Hello! Happy you Made it!" />
+<meta property="og:title" content="Carson’s Meditations" />
 <meta name="author" content="Carson Kempf" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="My site for my reflections on all types of projects" />
-<meta property="og:description" content="My site for my reflections on all types of projects" />
 <link rel="canonical" href="https://carsontkempf.github.io/" />
 <meta property="og:url" content="https://carsontkempf.github.io/" />
 <meta property="og:site_name" content="Carson’s Meditations" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Hello! Happy you Made it!" />
+<meta property="twitter:title" content="Carson’s Meditations" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","author":{"@type":"Person","name":"Carson Kempf"},"description":"My site for my reflections on all types of projects","headline":"Hello! Happy you Made it!","name":"Carson’s Meditations","url":"https://carsontkempf.github.io/"}</script>
+{"@context":"https://schema.org","@type":"WebSite","author":{"@type":"Person","name":"Carson Kempf"},"headline":"Carson’s Meditations","name":"Carson’s Meditations","url":"https://carsontkempf.github.io/"}</script>
 <!-- End Jekyll SEO tag -->
 
-    <link rel="stylesheet" href="/assets/css/style.css?v=b4a6cf313c17d87e16de50d0a09fa0c58770e3e7">
-    <!--[if lt IE 9]>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <![endif]-->
-    <!-- Load Auth0 SPA SDK deferred to avoid issues with document.write and improve performance -->
-    <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <script>
-      (function() {
-        var theme = localStorage.getItem('theme');
-        if (theme && theme !== 'light') {
-          document.documentElement.setAttribute('data-theme', theme);
+  <link rel="stylesheet" href="/assets/css/style.css?v=875048d29c5167634cfc28d2bcc5c8c8a25c4be3">
+  <!-- Debug CSS loading -->
+  <script>
+    // Verify CSS loaded correctly
+    document.addEventListener('DOMContentLoaded', function() {
+      var link = document.querySelector('link[href*="style.css"]');
+      if (link) {
+        console.log('CSS file path:', link.href);
+      }
+    });
+  </script>
+  <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <!-- Google APIs -->
+  <script defer src="https://apis.google.com/js/api.js"></script>
+  <script defer src="https://accounts.google.com/gsi/client"></script>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (theme && theme !== 'light') {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+      
+      // Chrome-specific background fix (Safari-safe)
+      var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+      
+      if (isChrome) {
+        function applyThemeColors(currentTheme) {
+          var bgColor, textColor, headingColor;
+          
+          // Set colors based on theme
+          if (!currentTheme || currentTheme === 'light') {
+            bgColor = '#FAF3F0';   // Light mode - cream bg
+            textColor = '#3D352E'; // dark text
+            headingColor = '#222'; // darker headings
+          } else if (currentTheme === 'dark') {
+            bgColor = '#2a2927';   // Dark mode - dark bg
+            textColor = '#ecf0f1'; // light text
+            headingColor = '#ffffff'; // white headings
+          } else if (currentTheme === 'lr') {
+            bgColor = '#F8FAFC';   // Pink mode - light bg
+            textColor = '#3D352E'; // dark text
+            headingColor = '#222'; // darker headings
+          }
+          
+          // Apply background and text colors
+          document.documentElement.style.setProperty('background-color', bgColor, 'important');
+          document.documentElement.style.setProperty('background', bgColor, 'important');
+          document.documentElement.style.setProperty('color', textColor, 'important');
+          
+          if (document.body) {
+            document.body.style.setProperty('background-color', bgColor, 'important');
+            document.body.style.setProperty('background', bgColor, 'important');
+            document.body.style.setProperty('color', textColor, 'important');
+          }
+          
+          // Force sidebar and page text colors
+          function forceTextColors() {
+            // Sidebar content
+            var sidebarContent = document.querySelector('.sidebar-content');
+            if (sidebarContent) {
+              sidebarContent.style.setProperty('color', textColor, 'important');
+              
+              var selectors = ['*', 'a', 'li', 'p', 'span', 'div'];
+              selectors.forEach(function(selector) {
+                var elements = sidebarContent.querySelectorAll(selector);
+                for (var i = 0; i < elements.length; i++) {
+                  elements[i].style.setProperty('color', textColor, 'important');
+                }
+              });
+              
+              // Sidebar headings
+              var sidebarHeadings = sidebarContent.querySelectorAll('h1, h2, h3');
+              for (var i = 0; i < sidebarHeadings.length; i++) {
+                sidebarHeadings[i].style.setProperty('color', headingColor, 'important');
+              }
+            }
+            
+            // Page headings
+            var pageHeadings = document.querySelectorAll('h1, h2, h3');
+            for (var i = 0; i < pageHeadings.length; i++) {
+              pageHeadings[i].style.setProperty('color', headingColor, 'important');
+            }
+          }
+          
+          forceTextColors();
+          setTimeout(forceTextColors, 100);
         }
-      })();
-    </script>
-
-  </head>
+        
+        // Apply initial theme colors
+        applyThemeColors(theme);
+        
+        // Listen for theme changes
+        document.addEventListener('DOMContentLoaded', function() {
+          // Apply colors again after DOM loads
+          var currentTheme = localStorage.getItem('theme') || 'light';
+          applyThemeColors(currentTheme);
+          
+          // Listen for theme switch changes
+          document.querySelectorAll('.theme-switch input').forEach(function(input) {
+            input.addEventListener('change', function() {
+              applyThemeColors(this.value);
+            });
+          });
+          
+          // Also listen for storage changes (if theme changes in another tab)
+          window.addEventListener('storage', function(e) {
+            if (e.key === 'theme') {
+              applyThemeColors(e.newValue);
+            }
+          });
+        });
+      }
+    })();
+  </script>
+</head>
   <body>
-    <div class="theme-switch">
+    <aside class="sidebar">
+      <div class="sidebar-content">
+  <div class="navigation-section">
+    <h2>Navigation</h2>
+    <ul class="nav-list">
+      <li><a href="/">Home</a></li>
+      <li><a href="/essays/" class="essays-link">Essays</a></li>
+      <li><a href="/langchain/" class="langchain-link">LangChain</a></li>
+      <li><a href="/extensions/" class="extensions-link">Extensions</a></li>
+      <li><a href="/ai/" class="ai-link">AI & Algorithms</a></li>
+      <li><a href="/apps/" class="apps-link">Apps</a></li>
+      <li><a href="/json-to-sheets/" class="json-to-sheets-link">JSON to Google Sheets</a></li>
+      <li><a href="/auth0-users/" class="auth0-users-link">Auth0 User Management</a></li>
+    </ul>
+  </div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    
+    
+    
+  
+</div>
+    </aside>
+
+    <div class="sidebar-toggle-btn" id="sidebar-toggle-btn" style="--icon-offset-y: -3px;">
+  <span class="toggle-icon">☰</span>
+</div>
+<script>
+  document.getElementById('sidebar-toggle-btn').addEventListener('click', function() {
+    var root = document.documentElement;
+    if (root.getAttribute('data-sidebar') === 'expanded') {
+      root.removeAttribute('data-sidebar');
+    } else {
+      root.setAttribute('data-sidebar', 'expanded');
+    }
+  });
+  // call with a number (positive or negative) to move the icon vertically
+  function setIconOffset(y) {
+    document.getElementById('sidebar-toggle-btn')
+      .style.setProperty('--icon-offset-y', y + 'px');
+  }
+</script>
+<style>
+  .sidebar-toggle-btn {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 210; /* Needs to be higher than the sidebar's z-index (200) */
+  }
+  .sidebar-toggle-btn .toggle-icon {
+    display: inline-block;
+    transform: translateY(var(--icon-offset-y));
+  }
+</style>
+
+    <div class="page-content">
+      <header class="header">
+        <div class="header-content">
+  <h1>
+    <a href="/">Carson's Meditations</a>
+  </h1>
+  <p class="skinny">
+    
+  </p>
+</div>
+
+<div class="theme-switch">
     <input type="radio" id="ts-light" name="theme" value="light" checked>
     <input type="radio" id="ts-dark" name="theme" value="dark">
     <input type="radio" id="ts-lr" name="theme" value="lr">
@@ -47,8 +219,8 @@
     <label for="ts-light" class="opt"></label>
     <label for="ts-dark" class="opt"></label>
     <label for="ts-lr" class="opt"></label>
-  </div>
-  <script>
+</div>
+<script>
     document.addEventListener('DOMContentLoaded', function() {
       var saved = localStorage.getItem('theme') || 'light';
       var radio = document.getElementById('ts-' + saved);
@@ -62,134 +234,153 @@
         localStorage.setItem('theme', mode);
       });
     });
-  </script>
-    <div class="wrapper">
-      <!-- Header Section -->
-      <aside class="header">
-        <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
-
-<!-- Setup Google Analytics -->
-
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DSMK52452T"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-DSMK52452T');
-  </script>
-
-
-<!-- You can set your favicon here -->
-<!-- link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" -->
-
-<header>
-  <h1>
-    <a href="/">Carson's Meditations</a>
-  </h1>
-
-  
-
-  <p class="skinny">
-    My site for my reflections on all types of projects
-  </p>
-
-  <p class="view">
-    <a href="/resume">Check Out My Resume</a>
-  </p>
-
-  
-  
-    <p>
-      <a href="https://github.com/carsontkempf">View My GitHub Profile</a>
-    </p>
-  
-</header>
-
-<!-- end custom head snippets -->
-      </aside>
-      <aside class="sidebar">
-        <div class="sidebar skinny">
-
-    
-
-    <h2>LangChain</h2>
-
-  <ol>
-    <ul>
-      
-        <li><a href="/LangChain-With-Search/">LangChain-With-Search</a></li>
-      
-        <li><a href="/LangChain-Tools/">LangChain-Tools</a></li>
-      
-        <li><a href="/LangChain-Conceptual-Guide/">LangChain-Conceptual-Guide</a></li>
-      
-        <li><a href="/LangChain/">LangChain Overview</a></li>
-      
-    </ul>
-  </ol>
-
-
-    
-
-    <h2>AI</h2>
-
-  <ol>
-    <ul>
-      
-        <li><a href="/Computer-Chess-Program/">Computer-Chess-Program</a></li>
-      
-        <li><a href="/Chess-Program/">Chess-Program</a></li>
-      
-        <li><a href="/Chess-Program-Requirements/">Chess-Program-Requirements</a></li>
-      
-        <li><a href="/River-Toad-Game/">River-Toad-Game</a></li>
-      
-        <li><a href="/A-Star-Search-Assignment/">A-Star-Search-Assignment</a></li>
-      
-    </ul>
-  </ol>
-
-
-    
-
-    <h2>Apps</h2>
-
-  <ol>
-    <ul>
-      
-        <li><a href="/LangGraph-ChatBot/">LangGraph-ChatBot</a></li>
-      
-        <li><a href="/To-Do-App/">To-Do-App</a></li>
-      
-    </ul>
-  </ol>
-
-
-    
-
-    <h2>Extensions</h2>
-
-  <ol>
-    <ul>
-      
-        <li><a href="/Chrome-Extension/">Chrome-Extension</a></li>
-      
-        <li><a href="/VSCode-Extension/">VSCode-Extension</a></li>
-      
-    </ul>
-  </ol>
-
-
-    
+</script>
+<div id="auth-status">
+    <button id="btn-login">Log In</button>
+    <a href="/dashboard/" id="btn-dashboard" style="display: none;">Dashboard</a>
+    <button id="btn-logout" style="display: none;">Log Out</button>
 </div>
-      </aside>
-      <!-- Body Section -->
-      <section class="main-content">
-        <small></small>
-<h1>Hello! Happy you Made it!</h1>
+      </header>
+      
+      <div class="wrapper">
+        <main class="main-content">
+          <small></small>
+<h1></h1>
 
 <p class="view">by Carson Kempf</p>
+
+<style>
+.project-navigation {
+    text-align: center;
+    margin: 30px 0;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    border: 2px solid #dee2e6;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.project-navigation h2 {
+    margin-bottom: 25px;
+    color: #2c3e50;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.project-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.project-btn {
+    display: inline-block;
+    padding: 18px 35px;
+    font-size: 18px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 200px;
+    text-align: center;
+}
+
+.project-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    text-decoration: none;
+}
+
+.spotify-btn {
+    background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+    color: white;
+}
+
+.spotify-btn:hover {
+    color: white;
+    background: linear-gradient(135deg, #1aa34a 0%, #1bc653 100%);
+}
+
+.error-annotator-btn {
+    background: linear-gradient(135deg, #e74c3c 0%, #ff6b6b 100%);
+    color: white;
+}
+
+.error-annotator-btn:hover {
+    color: white;
+    background: linear-gradient(135deg, #c0392b 0%, #e55353 100%);
+}
+
+@media (max-width: 768px) {
+    .project-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .project-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+</style>
+
+<div class="project-navigation">
+    <h2>Featured Projects</h2>
+    <div class="project-buttons">
+        <a href="/spotify-apple/" class="project-btn spotify-btn" id="spotify-btn">
+            🎵 Spotify → Apple Music
+        </a>
+        <a href="/code-comprehension/error-annotator/" class="project-btn error-annotator-btn" id="error-annotator-btn">
+            🔍 Code Comprehension Tool
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to handle login redirect for non-authenticated users
+    function handleProjectClick(event, projectUrl) {
+        // Check if user is authenticated
+        if (!window.authService || !window.authService.isAuthenticated) {
+            event.preventDefault();
+            
+            // Store the intended destination
+            localStorage.setItem('intendedDestination', projectUrl);
+            
+            // Redirect to Auth0 login
+            if (window.authService && window.authService.login) {
+                window.authService.login();
+            } else {
+                // Fallback if authService not ready
+                alert('Please log in to access this feature.');
+            }
+        }
+        // If authenticated, let the normal navigation proceed
+    }
+    
+    // Add click handlers to project buttons
+    document.getElementById('spotify-btn').addEventListener('click', function(event) {
+        handleProjectClick(event, '/spotify-apple/');
+    });
+    
+    document.getElementById('error-annotator-btn').addEventListener('click', function(event) {
+        handleProjectClick(event, '/code-comprehension/error-annotator/');
+    });
+    
+    // Check for intended destination after login
+    document.addEventListener('authReady', function() {
+        if (window.authService && window.authService.isAuthenticated) {
+            const intendedDestination = localStorage.getItem('intendedDestination');
+            if (intendedDestination) {
+                localStorage.removeItem('intendedDestination');
+                window.location.href = intendedDestination;
+            }
+        }
+    });
+});
+</script>
 
 <h1 id="check-me-out">Check Me Out</h1>
 
@@ -210,7 +401,9 @@
   <li>Assignments for School</li>
   <li>Projects I’m Working On
     <blockquote>
-      <p>Deepseek ChatBot -&gt; Chatbot utilizing DeepSeek and Tavily APIs to replace my $20/month ChatGPT subscription.</p>
+      <p>Research Projects / Notes
+App Design
+Deepseek ChatBot -&gt; Chatbot utilizing DeepSeek and Tavily APIs to replace my $20/month ChatGPT subscription.</p>
     </blockquote>
   </li>
 </ul>
@@ -287,51 +480,30 @@
   <p>Cal Newport: Slow Productivity, Deep Work, Digital Minimalism</p>
 </blockquote>
 
-      </section>
-      <!-- Footer Section -->
-      <section class="footer">
-        <footer>
+
+
+
+        </main>
+        <footer class="footer">
+          <footer>
 
 
 </footer>
-      </section>
+        </footer>
+      </div>
     </div>
-    <script src="/assets/js/scale.fix.js"></script>
-    <div class="sidebar-toggle-btn" id="sidebar-toggle-btn" style="--icon-offset-y: -3px;">
-  <span class="toggle-icon">☰</span>
-</div>
-<script>
-  document.getElementById('sidebar-toggle-btn').addEventListener('click', function() {
-    var root = document.documentElement;
-    if (root.getAttribute('data-sidebar') === 'expanded') {
-      root.removeAttribute('data-sidebar');
-    } else {
-      root.setAttribute('data-sidebar', 'expanded');
-    }
-  });
-  // call with a number (positive or negative) to move the icon vertically
-  function setIconOffset(y) {
-    document.getElementById('sidebar-toggle-btn')
-      .style.setProperty('--icon-offset-y', y + 'px');
-  }
-</script>
-<style>
-  .sidebar-toggle-btn .toggle-icon {
-    display: inline-block;
-    transform: translateY(var(--icon-offset-y));
-  }
-</style>
-
-    <!-- Auth0 UI Integration -->
-    <!-- /Users/ctk/Programming/VSCodeProjects/carsontkempf.github.io/_includes/auth_ui.html -->
-<div id="auth-status-buttons" style="position: fixed; top: 10px; right: 10px; z-index: 1000; background: white; padding: 5px; border: 1px solid #ccc;">
-    <button id="btn-login" onclick="siteAuth.login()" style="display: none;">Log In</button>
-    <p id="user-info" style="display: none; margin: 0;"></p>
-    <a href="/dashboard/" id="btn-dashboard" style="display: none;">Dashboard</a>
-    <button id="btn-logout" onclick="siteAuth.logout()" style="display: none;">Log Out</button>
-</div>
-
-    <!-- Your custom auth script, can remain deferred -->
-    <script defer src="/assets/js/auth.js"></script>
+    
+    <!-- MusicKit JS for Apple Music integration -->
+    <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js" defer></script>
+    
+    <script src="/assets/js/env-config.js"></script>
+    <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/google-drive-service.js"></script>
+    <script src="/assets/js/google-picker-service.js"></script>
+    <!-- <script src="/assets/js/google-sheets-service.js"></script> -->
+    <!-- <script src="/assets/js/json-sheets-utility.js"></script> -->
+    <script src="/assets/js/folder-debug-service.js"></script>
+    <script src="/assets/js/annotation-drive-service.js"></script>
+    <script src="/assets/js/apple-music-service.js"></script>
   </body>
 </html>

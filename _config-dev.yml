@@ -1,0 +1,56 @@
+# Development Configuration
+# Complete standalone config for development
+
+title: Carson's Meditations
+email: ctkfdp@umsystem.edu
+description: >- 
+  Software Developer and Computer Science Student. 
+  Building innovative solutions with modern technologies.
+baseurl: "" 
+url: "http://localhost:4000" 
+repository: "carsontkempf/carsontkempf.github.io"
+github_username: carsontkempf
+author: Carson Kempf
+
+safe: false
+show_downloads: false
+google_analytics: "G-DSMK52452T"
+theme: jekyll-theme-minimal
+sass:
+  sass_dir: _sass
+
+# Process .liquid files as JavaScript
+defaults:
+  - scope:
+      path: "assets/js"
+    values:
+      layout: null
+
+# Include .liquid files in processing
+include:
+  - assets/js/*.liquid
+
+# Spotify API Configuration
+spotify:
+  client_id: "80826ef3daa547f49d843c254ad224b6"
+
+# Auth0 Development Configuration  
+auth0:
+  domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
+  client_id: "ql8ttR4YSmZXZbGE30wP8foWCUuZs2jh"
+  audience: "https://carsontkempf.github.io/api/carsons-meditations"
+
+
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - tests/
+  - .env
+  - .gitignore
+  - package.json
+  - package-lock.json
