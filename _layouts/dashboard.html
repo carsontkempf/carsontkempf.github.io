@@ -63,58 +63,8 @@ title: Dashboard
 
     <!-- Dashboard functionality script -->
     <script>
-      document.addEventListener('DOMContentLoaded', async () => {
-          console.log('[Dashboard Layout Script] Page loaded. Checking auth status via siteAuth.');
-      
-          function waitForSiteAuthData() {
-              return new Promise((resolve, reject) => {
-                  const timeout = setTimeout(() => {
-                      document.removeEventListener('siteAuthReady', listener);
-                      console.error('[Dashboard Layout Script] Timeout! siteAuthReady event not received.');
-                      reject(new Error("siteAuthReady event timed out."));
-                  }, 7000);
-                  const listener = (event) => {
-                      clearTimeout(timeout);
-                      document.removeEventListener('siteAuthReady', listener);
-                      console.log('[Dashboard Layout Script] siteAuthReady event received.');
-                      resolve(event.detail);
-                  };
-                  document.addEventListener('siteAuthReady', listener);
-                  if (window.siteAuth && typeof window.siteAuth.isAuthenticated === 'boolean' && window.siteAuth.auth0Client) {
-                     console.log('[Dashboard Layout Script] siteAuth seems ready, attempting to resolve without event.');
-                     listener({ detail: window.siteAuth });
-                  }
-              });
-          }
-      
-          try {
-              const siteAuth = await waitForSiteAuthData();
-      
-              if (siteAuth.isAuthenticated) {
-                  console.log('[Dashboard Layout Script] User is authenticated. Proceeding to load dashboard content.');
-                  const dashboardContentEl = document.getElementById('dashboard-content');
-                  if (dashboardContentEl) {
-                    dashboardContentEl.innerHTML = `
-                        <p>Hello, ${siteAuth.user ? siteAuth.user.name : 'User'}!</p>
-                        <p>Your access token starts with: ${siteAuth.accessToken ? siteAuth.accessToken.substring(0, 20) + '...' : 'No token available'}</p>
-                        <p>You can add subscriber-only content here.</p>
-                    `;
-                  }
-              } else {
-                  console.warn('[Dashboard Layout Script] User is NOT authenticated. This should have been handled by global redirect.');
-                  const dashboardContentEl = document.getElementById('dashboard-content');
-                  if (dashboardContentEl) {
-                    dashboardContentEl.innerHTML = "<p>Access Denied. You should be redirected to login shortly. If not, please <a href='{{ '/' | relative_url }}'>click here to go home</a>.</p>";
-                  }
-              }
-          } catch (error) {
-              console.error('[Dashboard Layout Script] Error initializing dashboard:', error);
-              const dashboardContentEl = document.getElementById('dashboard-content');
-              if (dashboardContentEl) {
-                dashboardContentEl.innerHTML = `<p>Error loading dashboard: ${error.message}</p>`;
-              }
-          }
-      });
+      // Removed automatic content override - let individual pages control their content
+      console.log('[Dashboard Layout] Dashboard layout loaded, ready for custom content.');
 
       // Add logout functionality when DOM is ready
       document.addEventListener('DOMContentLoaded', () => {
