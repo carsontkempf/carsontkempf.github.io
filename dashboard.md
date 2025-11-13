@@ -86,21 +86,24 @@ document.addEventListener('siteAuthReady', async () => {
       `;
     }
 
-    // Check user's subscription status - support both VIP and subscriber roles
+    // Check user's subscription status - support VIP, admin, and subscriber roles
     const user = await window.siteAuth.auth0Client.getUser();
     const rolesNamespace = 'https://carsontkempf.github.io/auth/roles';
     const userRoles = user && user[rolesNamespace] ? user[rolesNamespace] : [];
     
+    const hasAdminAccess = userRoles.includes('admin');
     const hasVipAccess = userRoles.includes('VIP');
     const hasSubscriberAccess = userRoles.includes('subscriber');
-    const hasPremiumAccess = hasVipAccess || hasSubscriberAccess;
+    const hasPremiumAccess = hasAdminAccess || hasVipAccess || hasSubscriberAccess;
     
     if (hasPremiumAccess) {
-      // User has VIP or subscriber access
+      // User has admin, VIP, or subscriber access
       subscriberContent.style.display = 'block';
       freeUserContent.style.display = 'none';
       
-      if (hasVipAccess) {
+      if (hasAdminAccess) {
+        document.getElementById('account-type').textContent = 'Admin';
+      } else if (hasVipAccess) {
         document.getElementById('account-type').textContent = 'VIP';
       } else {
         document.getElementById('account-type').textContent = 'Subscriber';

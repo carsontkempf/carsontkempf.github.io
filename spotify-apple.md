@@ -376,14 +376,15 @@ async function loadUserPlaylists() {
 // Main initialization - Listen for siteAuthReady event to ensure proper Auth0 integration
 document.addEventListener('siteAuthReady', async () => {
     if (window.siteAuth.isAuthenticated) {
-        // Check if user has VIP or subscriber access
+        // Check if user has admin, VIP, or subscriber access
         const user = await window.siteAuth.auth0Client.getUser();
         const rolesNamespace = 'https://carsontkempf.github.io/auth/roles';
         const userRoles = user && user[rolesNamespace] ? user[rolesNamespace] : [];
         
+        const hasAdminAccess = userRoles.includes('admin');
         const hasVipAccess = userRoles.includes('VIP');
         const hasSubscriberAccess = userRoles.includes('subscriber');
-        const hasPremiumAccess = hasVipAccess || hasSubscriberAccess;
+        const hasPremiumAccess = hasAdminAccess || hasVipAccess || hasSubscriberAccess;
         
         if (hasPremiumAccess) {
             document.getElementById('spotify-apple-content-wrapper').style.display = 'block';
