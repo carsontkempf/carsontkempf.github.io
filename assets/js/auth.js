@@ -167,7 +167,7 @@ window.onerror = function(message, source, lineno, colno, error) {
 
 // These constants will be used by functions within onAuth0SdkReady
 const auth0Domain = 'dev-l57dcpkhob0u7ykb.us.auth0.com';
-const auth0ClientId = 'Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC'; // Ensure this is the Client ID for your "Carson's Meditations" APPLICATION
+const auth0ClientId = 'ql8ttR4YSmZXZbGE30wP8foWCUuZs2jh'; // Use consistent client ID from env-config
 const auth0Audience = 'https://carsontkempf.github.io/api/carsons-meditations'; // <-- UPDATE THIS to your new API Identifier
 
 // To be determined once on DOMContentLoaded
@@ -208,9 +208,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 				siteAuthError('[Auth.js] appLogin: auth0Client is not initialized! Cannot redirect.');
 				return;
 			}
+			const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+			const redirectUri = isLocalhost ? 'http://localhost:4000' : window.location.origin;
+			
 			await window.siteAuth.auth0Client.loginWithRedirect({
 				authorizationParams: {
-					redirect_uri: window.location.origin,
+					redirect_uri: redirectUri,
 					audience: auth0Audience
 				}
 			});
@@ -267,11 +270,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 					siteAuthError('CRITICAL: window.auth0 or window.auth0.createAuth0Client is not available. Auth0 SDK might not be loaded or initialized correctly.');
 					throw new Error('Auth0 SDK (window.auth0.createAuth0Client) is not available or invalid.');
 				}
+				// Determine appropriate redirect URI based on environment
+				const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+				const redirectUri = isLocalhost ? 'http://localhost:4000' : window.location.origin;
+				
 				const clientOptions = {
 					domain: auth0Domain,
 					clientId: auth0ClientId, // Corrected to camelCase
 					authorizationParams: {
-						redirect_uri: window.location.origin, // Ensure this matches Auth0 allowed callback URLs
+						redirect_uri: redirectUri, // Use environment-appropriate URI
 						audience: auth0Audience
 					},
 				};

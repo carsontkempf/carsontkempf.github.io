@@ -7,3 +7,6 @@ node_modules/
 
 # Jekyll build output
 _site/
+
+# Local environment variables and secrets
+.env

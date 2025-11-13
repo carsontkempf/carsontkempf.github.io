@@ -1,0 +1,3 @@
+# Python tools for our main.py script
+tqdm         # For progress bars (from tqdm/tqdm)
+colorama     # For terminal colors (inspired by reorx/python-terminal-color)

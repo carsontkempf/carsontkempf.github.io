@@ -3,128 +3,66 @@ title: Dashboard
 ---
 
 <!DOCTYPE html>
-<html lang="en-US" data-theme="{{ localStorage.theme | default: 'light' }}">
-  <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% seo %}
-    <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
-    <!--[if lt IE 9]>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <![endif]-->
-    <!-- Load Auth0 SPA SDK deferred -->
-    <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <script>
-      // Basic theme persistence
-      (function() {
-        var theme = localStorage.getItem('theme');
-        if (theme) {
-          document.documentElement.setAttribute('data-theme', theme);
-        }
-      })();
-    </script>
-    
-    <!-- Dashboard-specific styles -->
-    <style>
-      .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 0;
-        border-bottom: 1px solid #eee;
-        margin-bottom: 2rem;
-      }
-      
-      .dashboard-nav {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-      }
-      
-      .nav-link {
-        text-decoration: none;
-        padding: 0.5rem 1rem;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-        color: #0066cc;
-        border: none;
-        background: none;
-        cursor: pointer;
-        font-size: 1rem;
-      }
-      
-      .nav-link:hover {
-        background-color: #f0f0f0;
-        text-decoration: none;
-      }
-      
-      .logout-btn {
-        background-color: #dc3545;
-        color: white;
-      }
-      
-      .logout-btn:hover {
-        background-color: #c82333;
-        color: white;
-      }
-      
-      .dashboard-wrapper {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 1rem;
-      }
-      
-      /* Hide auth status buttons on dashboard page */
-      #auth-status-buttons {
-        display: none !important;
-      }
-      
-      /* Center the theme toggle on dashboard page */
-      body .theme-switch {
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        position: fixed !important;
-        top: 1rem !important;
-        z-index: 1000 !important;
-      }
-    </style>
-  </head>
+<html lang="en-US">
+  {% include widgets/header/head.html %}
   <body>
-    {% include theme-switch.html %}
-    <div class="dashboard-wrapper">
-      <header class="dashboard-header">
-        <!-- page.title will come from the page using this layout -->
-        <h1>{{ page.title | default: "Dashboard" }}</h1>
-        
-        <!-- Navigation links -->
-        <nav class="dashboard-nav">
-          <a href="{{ '/resume' | relative_url }}" class="nav-link">Home</a>
-          <button id="logout-btn" class="nav-link logout-btn">Logout</button>
-        </nav>
-        
-        {% include auth0.html %}
-      </header>
-      <main class="dashboard-main-content">
-        <!-- Specific Dashboard HTML structure -->
-        <h2>Welcome to your Dashboard!</h2>
-        <p>This page is only visible to authenticated users.</p>
-        <div id="dashboard-content">
-            <p>Loading dashboard data...</p>
-        </div>
+    <aside class="sidebar">
+      {% include widgets/sidebar/sidebar.html %}
+    </aside>
 
-        <!-- This is where content from the page using this layout will be injected -->
-        {{ content }}
-      </main>
+    {% include components/ui/sidebar-toggle.html %}
+
+    <div class="page-content">
+      <header class="header">
+        {% include widgets/header/main.html %}
+      </header>
+      
+      <div class="wrapper">
+        <main class="main-content">
+          <!-- Dashboard-specific content wrapper -->
+          <div class="dashboard-container">
+            <div class="dashboard-header">
+              <h1>{{ page.title | default: "Dashboard" }}</h1>
+              <nav class="dashboard-nav">
+                <a href="{{ '/' | relative_url }}" class="nav-link">Home</a>
+                <button id="logout-btn" class="nav-link logout-btn">Logout</button>
+              </nav>
+            </div>
+            
+            <div class="dashboard-main-content">
+              <h2>Welcome to your Dashboard!</h2>
+              <p>This page is only visible to authenticated users.</p>
+              <div id="dashboard-content">
+                  <p>Loading dashboard data...</p>
+              </div>
+
+              <!-- This is where content from the page using this layout will be injected -->
+              {{ content }}
+            </div>
+          </div>
+        </main>
+        <footer class="footer">
+          {% include widgets/footer/footer.html %}
+        </footer>
+      </div>
     </div>
 
-    <!-- Your custom auth script, essential for dashboard functionality -->
-    <script defer src="{{ '/assets/js/auth.js' | relative_url }}"></script>
+    <!-- Load Auth0 SPA SDK -->
+    <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    
+    <!-- MusicKit JS for Apple Music integration -->
+    <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js" defer></script>
+    
+    <script src="{{ '/assets/js/env-config.js' | relative_url }}"></script>
+    <script src="{{ '/assets/js/auth.js' | relative_url }}"></script>
+    <script src="{{ '/assets/js/google-drive-service.js' | relative_url }}"></script>
+    <script src="{{ '/assets/js/google-picker-service.js' | relative_url }}"></script>
+    <script src="{{ '/assets/js/folder-debug-service.js' | relative_url }}"></script>
+    <script src="{{ '/assets/js/annotation-drive-service.js' | relative_url }}"></script>
+    <script src="{{ '/assets/js/apple-music-service.js' | relative_url }}"></script>
 
-    <!-- Inline script that populates #dashboard-content -->
+    <!-- Dashboard functionality script -->
     <script>
-      // The script from your original /dashboard.html (page file) goes here.
-      // This script will run in the context of the dashboard layout.
       document.addEventListener('DOMContentLoaded', async () => {
           console.log('[Dashboard Layout Script] Page loaded. Checking auth status via siteAuth.');
       
@@ -134,21 +72,17 @@ title: Dashboard
                       document.removeEventListener('siteAuthReady', listener);
                       console.error('[Dashboard Layout Script] Timeout! siteAuthReady event not received.');
                       reject(new Error("siteAuthReady event timed out."));
-                  }, 7000); // Wait up to 7 seconds for the event
+                  }, 7000);
                   const listener = (event) => {
                       clearTimeout(timeout);
                       document.removeEventListener('siteAuthReady', listener);
                       console.log('[Dashboard Layout Script] siteAuthReady event received.');
-                      resolve(event.detail); // event.detail contains window.siteAuth
+                      resolve(event.detail);
                   };
                   document.addEventListener('siteAuthReady', listener);
-                  // Also check if auth.js might have already fired it if this script runs late
                   if (window.siteAuth && typeof window.siteAuth.isAuthenticated === 'boolean' && window.siteAuth.auth0Client) {
-                     // If auth.js seems to have run and set things up, try resolving immediately.
-                     // This is a fallback, the event is preferred.
-                     // Check a key property like auth0Client to ensure auth.js has done significant work.
                      console.log('[Dashboard Layout Script] siteAuth seems ready, attempting to resolve without event.');
-                     listener({ detail: window.siteAuth }); // Simulate event
+                     listener({ detail: window.siteAuth });
                   }
               });
           }
@@ -170,7 +104,7 @@ title: Dashboard
                   console.warn('[Dashboard Layout Script] User is NOT authenticated. This should have been handled by global redirect.');
                   const dashboardContentEl = document.getElementById('dashboard-content');
                   if (dashboardContentEl) {
-                    dashboardContentEl.innerHTML = "<p>Access Denied. You should be redirected to login shortly. If not, please <a href='{{ '/login/' | relative_url }}'>click here to log in</a>.</p>";
+                    dashboardContentEl.innerHTML = "<p>Access Denied. You should be redirected to login shortly. If not, please <a href='{{ '/' | relative_url }}'>click here to go home</a>.</p>";
                   }
               }
           } catch (error) {
@@ -182,23 +116,27 @@ title: Dashboard
           }
       });
 
-      // Add logout functionality
-      document.getElementById('logout-btn').addEventListener('click', async () => {
-          console.log('[Dashboard] Logout button clicked');
-          if (window.siteAuth && window.siteAuth.auth0Client) {
-              try {
-                  await window.siteAuth.auth0Client.logout({
-                      logoutParams: {
-                          returnTo: window.location.origin
+      // Add logout functionality when DOM is ready
+      document.addEventListener('DOMContentLoaded', () => {
+          const logoutBtn = document.getElementById('logout-btn');
+          if (logoutBtn) {
+              logoutBtn.addEventListener('click', async () => {
+                  console.log('[Dashboard] Logout button clicked');
+                  if (window.siteAuth && window.siteAuth.auth0Client) {
+                      try {
+                          await window.siteAuth.auth0Client.logout({
+                              logoutParams: {
+                                  returnTo: window.location.origin
+                              }
+                          });
+                      } catch (error) {
+                          console.error('[Dashboard] Error during logout:', error);
                       }
-                  });
-              } catch (error) {
-                  console.error('[Dashboard] Error during logout:', error);
-              }
-          } else {
-              console.warn('[Dashboard] No auth client available for logout');
-              // Fallback: redirect to home
-              window.location.href = '{{ "/" | relative_url }}';
+                  } else {
+                      console.warn('[Dashboard] No auth client available for logout');
+                      window.location.href = '{{ "/" | relative_url }}';
+                  }
+              });
           }
       });
     </script>

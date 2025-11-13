@@ -1,5 +1,6 @@
 theme: minima
 title: Notes
+repository: carsontkempf/carsontkempf.github.io
 include:
   - README.md
 
@@ -12,3 +13,6 @@ gist:
 kramdown:
   math_engine: mathjax
   syntax_highlighter: rouge
+
+# Auth0 Production Configuration (loaded by custom plugin from system env vars)
+# Values will be set by _plugins/env_vars.rb

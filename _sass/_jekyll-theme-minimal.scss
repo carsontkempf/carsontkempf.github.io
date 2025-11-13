@@ -1290,3 +1290,123 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
         }
     }
 }
+
+// =============================================================================
+// 19. Dashboard Layout Styles
+// =============================================================================
+
+.dashboard-container {
+  @extend %tile;
+  padding: 2rem;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--bg-accent);
+  margin-bottom: 2rem;
+  
+  h1 {
+    color: var(--text-heading);
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+}
+
+.dashboard-nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  
+  .nav-link {
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    color: var(--text-main);
+    border: 1px solid var(--bg-accent);
+    background: var(--bg-page);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    
+    &:hover {
+      background-color: var(--bg-accent);
+      text-decoration: none;
+      transform: translateY(-1px);
+    }
+    
+    &.logout-btn {
+      background-color: #dc3545;
+      color: white;
+      border-color: #dc3545;
+      
+      &:hover {
+        background-color: #c82333;
+        border-color: #c82333;
+        color: white;
+      }
+    }
+  }
+}
+
+.dashboard-main-content {
+  h2 {
+    color: var(--text-heading);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    color: var(--text-main);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  
+  #dashboard-content {
+    background: var(--bg-page);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin: 1.5rem 0;
+    border: 1px solid var(--bg-accent);
+    
+    p {
+      margin: 0.5rem 0;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+// Dashboard responsive styles
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+    }
+  }
+  
+  .dashboard-nav {
+    justify-content: center;
+    flex-wrap: wrap;
+    
+    .nav-link {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.9rem;
+    }
+  }
+  
+  .dashboard-container {
+    padding: 1.5rem;
+  }
+}

@@ -103,16 +103,15 @@ class EnvironmentConfig {
      * Load configuration from Jekyll site config (fallback method)
      */
     async loadFromSiteConfig() {
-        // This uses hardcoded values as a temporary fallback
-        // In production, this should be replaced with environment variables
+        // Load values from Jekyll site configuration and environment variables
         this.config = {
             googleDrive: {
                 client_id: '53684428529-27609a7n7fd3rtov2a86vrq1gvffs62t.apps.googleusercontent.com',
                 api_key: 'AIzaSyBeYgUCi017eGe7Gt1_aSbNXn96LgcE18o'
             },
             auth0: {
-                domain: 'dev-l57dcpkhob0u7ykb.us.auth0.com',
-                client_id: 'ql8ttR4YSmZXZbGE30wP8foWCUuZs2jh',
+                domain: '{{ site.auth0_domain | default: "dev-l57dcpkhob0u7ykb.us.auth0.com" }}',
+                client_id: '{{ site.auth0_client_id | default: "ql8ttR4YSmZXZbGE30wP8foWCUuZs2jh" }}',
                 audience: 'https://carsontkempf.github.io/api/carsons-meditations'
             },
             spotify: {

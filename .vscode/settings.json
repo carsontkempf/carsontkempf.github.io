@@ -36,7 +36,9 @@
         "Gemfile": true,
         "Gemfile-carson": true,
         "Gemfile.lock": true,
-        "netlify.toml": true
+        "netlify.toml": true,
+        ".venv/": true,
+        "script-requirements.txt": true
     },
     "hidefiles.selectedProfile": "Default"
 }
