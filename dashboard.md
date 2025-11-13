@@ -86,14 +86,25 @@ document.addEventListener('siteAuthReady', async () => {
       `;
     }
 
-    // Check user's subscription status using the checkAccess function
-    const isSubscriber = await window.siteAuth.checkAccess('subscriber');
+    // Check user's subscription status - support both VIP and subscriber roles
+    const user = await window.siteAuth.auth0Client.getUser();
+    const rolesNamespace = 'https://carsontkempf.github.io/auth/roles';
+    const userRoles = user && user[rolesNamespace] ? user[rolesNamespace] : [];
     
-    if (isSubscriber) {
-      // User has subscriber access
+    const hasVipAccess = userRoles.includes('VIP');
+    const hasSubscriberAccess = userRoles.includes('subscriber');
+    const hasPremiumAccess = hasVipAccess || hasSubscriberAccess;
+    
+    if (hasPremiumAccess) {
+      // User has VIP or subscriber access
       subscriberContent.style.display = 'block';
       freeUserContent.style.display = 'none';
-      document.getElementById('account-type').textContent = 'Subscriber';
+      
+      if (hasVipAccess) {
+        document.getElementById('account-type').textContent = 'VIP';
+      } else {
+        document.getElementById('account-type').textContent = 'Subscriber';
+      }
     } else {
       // User is a free user
       subscriberContent.style.display = 'none';

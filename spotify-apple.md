@@ -40,7 +40,7 @@ permalink: /spotify-apple/
 <div id="spotify-apple-login-prompt" style="display: none;">
     <h2>Access Denied</h2>
     <p>You must be logged in to view this page.</p>
-    <button onclick="authService.login()" class="login-btn">Log In</button>
+    <button onclick="window.siteAuth.login()" class="login-btn">Log In</button>
 </div>
 
 <script>
@@ -373,12 +373,30 @@ async function loadUserPlaylists() {
     }
 }
 
-// Main initialization
-document.addEventListener('authReady', async () => {
-    if (window.authService.isAuthenticated) {
-        document.getElementById('spotify-apple-content-wrapper').style.display = 'block';
+// Main initialization - Listen for siteAuthReady event to ensure proper Auth0 integration
+document.addEventListener('siteAuthReady', async () => {
+    if (window.siteAuth.isAuthenticated) {
+        // Check if user has VIP or subscriber access
+        const user = await window.siteAuth.auth0Client.getUser();
+        const rolesNamespace = 'https://carsontkempf.github.io/auth/roles';
+        const userRoles = user && user[rolesNamespace] ? user[rolesNamespace] : [];
         
-        const user = window.authService.user;
+        const hasVipAccess = userRoles.includes('VIP');
+        const hasSubscriberAccess = userRoles.includes('subscriber');
+        const hasPremiumAccess = hasVipAccess || hasSubscriberAccess;
+        
+        if (hasPremiumAccess) {
+            document.getElementById('spotify-apple-content-wrapper').style.display = 'block';
+        } else {
+            document.getElementById('spotify-apple-login-prompt').innerHTML = `
+                <h2>Premium Access Required</h2>
+                <p>This feature requires VIP or Subscriber access. Please upgrade your account.</p>
+                <button onclick="window.location.href='/dashboard/'" class="login-btn">Go to Dashboard</button>
+            `;
+            document.getElementById('spotify-apple-login-prompt').style.display = 'block';
+            return;
+        }
+        
         const profileDiv = document.getElementById('user-profile-details');
         
         if (user && profileDiv) {
