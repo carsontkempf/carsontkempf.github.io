@@ -378,7 +378,7 @@ document.addEventListener('siteAuthReady', async () => {
     if (window.siteAuth.isAuthenticated) {
         // Check if user has admin, VIP, or subscriber access
         const user = await window.siteAuth.auth0Client.getUser();
-        const rolesNamespace = 'https://carsontkempf.github.io/auth/roles';
+        const rolesNamespace = 'https://carsontkempf.github.io/roles';
         const userRoles = user && user[rolesNamespace] ? user[rolesNamespace] : [];
         
         const hasAdminAccess = userRoles.includes('admin');

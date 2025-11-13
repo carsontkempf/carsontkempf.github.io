@@ -7,6 +7,7 @@
 #   ./run.sh dev              # Start development server
 #   ./run.sh prod             # Build for production
 #   ./run.sh dev --verbose    # Start development server with verbose output
+clear
 
 set -e  # Exit on any error
 

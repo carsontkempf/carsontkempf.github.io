@@ -72,6 +72,7 @@ document.addEventListener('siteAuthReady', async () => {
     const userProfileSection = document.getElementById('user-profile-section');
     const subscriberContent = document.getElementById('subscriber-content');
     const freeUserContent = document.getElementById('free-user-content');
+    const dashboardContent = document.getElementById('dashboard-content');
     
     console.log('Dashboard - Elements found:', {
         authenticatedContent: !!authenticatedContent,
@@ -79,6 +80,7 @@ document.addEventListener('siteAuthReady', async () => {
         userProfileSection: !!userProfileSection,
         subscriberContent: !!subscriberContent,
         freeUserContent: !!freeUserContent,
+        dashboardContent: !!dashboardContent,
         siteAuthExists: !!window.siteAuth,
         isAuthenticated: window.siteAuth?.isAuthenticated
     });
@@ -89,13 +91,16 @@ document.addEventListener('siteAuthReady', async () => {
         // Hide login prompt and show authenticated content
         if (loginRequiredContent) loginRequiredContent.style.display = 'none';
         if (authenticatedContent) authenticatedContent.style.display = 'block';
+        
+        // Hide the generic loading message
+        if (dashboardContent) dashboardContent.style.display = 'none';
 
         // Get user data directly from siteAuth (which should match auth0Client.getUser())
         const user = window.siteAuth.user;
         console.log('Dashboard - User data:', user);
         
         // Check user roles using the same pattern as Code Comprehension Project
-        const customRoles = user['https://carsontkempf.github.io/auth/roles'] || [];
+        const customRoles = user['https://carsontkempf.github.io/roles'] || [];
         const auth0Roles = user['https://auth0.com/roles'] || [];
         const appMetadataRoles = user.app_metadata?.roles || [];
         const userMetadataRoles = user.user_metadata?.roles || [];
@@ -177,6 +182,9 @@ document.addEventListener('siteAuthReady', async () => {
         // User is not authenticated
         if (loginRequiredContent) loginRequiredContent.style.display = 'block';
         if (authenticatedContent) authenticatedContent.style.display = 'none';
+        
+        // Hide the generic loading message
+        if (dashboardContent) dashboardContent.style.display = 'none';
     }
 });
 
@@ -189,11 +197,13 @@ setTimeout(() => {
     
     const authenticatedContent = document.getElementById('authenticated-content');
     const loginRequiredContent = document.getElementById('login-required-content');
+    const dashboardContent = document.getElementById('dashboard-content');
     
     if (!window.siteAuth || !window.siteAuth.isAuthenticated) {
         console.log('Dashboard - Timeout triggered, showing login prompt');
         if (loginRequiredContent) loginRequiredContent.style.display = 'block';
         if (authenticatedContent) authenticatedContent.style.display = 'none';
+        if (dashboardContent) dashboardContent.style.display = 'none';
     } else if (authenticatedContent && authenticatedContent.style.display !== 'block') {
         console.log('Dashboard - Auth available but content not shown, triggering manual auth check');
         // Manually trigger auth check
