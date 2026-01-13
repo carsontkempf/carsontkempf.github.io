@@ -263,6 +263,16 @@ class AppleMusicService {
             headers
         });
 
+        // Handle rate limiting (429 Too Many Requests)
+        if (response.status === 429) {
+            const retryAfter = response.headers.get('Retry-After') || '60';
+            const waitSeconds = parseInt(retryAfter);
+            console.log(`Apple Music API rate limited. Waiting ${waitSeconds} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, waitSeconds * 1000));
+            // Retry the request
+            return this.apiRequest(endpoint, options);
+        }
+
         if (!response.ok) {
             throw new Error(`Apple Music API error: ${response.status} ${response.statusText}`);
         }
@@ -284,6 +294,16 @@ class AppleMusicService {
             ...options,
             headers
         });
+
+        // Handle rate limiting (429 Too Many Requests)
+        if (response.status === 429) {
+            const retryAfter = response.headers.get('Retry-After') || '60';
+            const waitSeconds = parseInt(retryAfter);
+            console.log(`Apple Music Catalog API rate limited. Waiting ${waitSeconds} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, waitSeconds * 1000));
+            // Retry the request
+            return this.catalogRequest(endpoint, options);
+        }
 
         if (!response.ok) {
             throw new Error(`Apple Music Catalog API error: ${response.status} ${response.statusText}`);
@@ -512,7 +532,14 @@ class AppleMusicService {
 
         for (let i = 0; i < spotifyTracks.length; i++) {
             const track = spotifyTracks[i];
-            
+
+            // Check for cancellation
+            if (options.checkCancellation && options.checkCancellation()) {
+                console.log('Conversion cancelled by user');
+                results.cancelled = true;
+                return results;
+            }
+
             try {
                 const result = await this.convertSpotifyTrack(track, options);
                 
@@ -670,6 +697,29 @@ class AppleMusicService {
             // Convert tracks with explicit filtering
             const conversionResults = await this.convertSpotifyTracks(spotifyTracks, onProgress, options);
 
+            // Check if conversion was cancelled
+            if (conversionResults.cancelled) {
+                const explicitMatchRate = conversionResults.successful.length > 0
+                    ? Math.round((conversionResults.explicitMatches / conversionResults.successful.length) * 100)
+                    : 0;
+
+                return {
+                    success: false,
+                    cancelled: true,
+                    appleMusicPlaylist: null,
+                    conversionResults: conversionResults,
+                    summary: {
+                        originalTracks: conversionResults.total,
+                        convertedTracks: conversionResults.successful.length,
+                        failedTracks: conversionResults.failed.length,
+                        successRate: Math.round((conversionResults.successful.length / conversionResults.total) * 100),
+                        explicitMatches: conversionResults.explicitMatches,
+                        explicitMismatches: conversionResults.explicitMismatches,
+                        explicitMatchRate: explicitMatchRate
+                    }
+                };
+            }
+
             if (conversionResults.successful.length === 0) {
                 throw new Error('No tracks could be converted');
             }
@@ -746,15 +796,46 @@ class AppleMusicService {
                 return await operation();
             } catch (error) {
                 console.warn(`${context} attempt ${attempt} failed:`, error);
-                
-                if (attempt === this.retryAttempts) {
+
+                // Check if error should be retried
+                const shouldRetry = this.isRetryableError(error);
+
+                if (!shouldRetry || attempt === this.retryAttempts) {
                     throw error;
                 }
-                
-                // Exponential backoff
-                await new Promise(resolve => setTimeout(resolve, this.retryDelay * attempt));
+
+                // Exponential backoff: 2^attempt * retryDelay
+                const waitTime = Math.pow(2, attempt) * this.retryDelay;
+                console.log(`Retrying in ${waitTime}ms...`);
+                await new Promise(resolve => setTimeout(resolve, waitTime));
             }
         }
+    }
+
+    /**
+     * Determine if an error should be retried
+     */
+    isRetryableError(error) {
+        const errorMessage = error.message || error.toString();
+
+        // Don't retry client errors (4xx except 429 which is handled separately)
+        if (errorMessage.includes('400') || errorMessage.includes('401') ||
+            errorMessage.includes('403') || errorMessage.includes('404')) {
+            return false;
+        }
+
+        // Retry network errors, timeouts, and server errors (5xx)
+        if (errorMessage.includes('NetworkError') ||
+            errorMessage.includes('Failed to fetch') ||
+            errorMessage.includes('Network request failed') ||
+            errorMessage.includes('timeout') ||
+            errorMessage.includes('500') || errorMessage.includes('502') ||
+            errorMessage.includes('503') || errorMessage.includes('504')) {
+            return true;
+        }
+
+        // Default: retry unknown errors (be conservative)
+        return true;
     }
 }
 

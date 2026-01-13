@@ -80,6 +80,9 @@ permalink: /spotify-apple/
           </div>
           <div id="progress-text">Preparing conversion...</div>
           <div id="conversion-details"></div>
+          <button id="cancel-conversion-btn" class="dashboard-btn secondary" style="margin-top: 15px;">
+            Cancel Transfer
+          </button>
         </div>
         
         <div id="conversion-results" style="display: none;">
@@ -103,6 +106,46 @@ permalink: /spotify-apple/
 </div>
 
 <script>
+// Conversion cancellation flag
+let conversionCancelled = false;
+let conversionInProgress = false;
+
+// User-friendly error messages mapping
+const ERROR_MESSAGES = {
+    'Not authorized with Apple Music': 'Please connect your Apple Music account to continue.',
+    'Not authorized': 'Please connect your Spotify account to continue.',
+    'Authorization expired': 'Your Spotify session has expired. Please reconnect.',
+    '401': 'Your session has expired. Please reconnect.',
+    '403': 'Access denied. Please check your Apple Music subscription and permissions.',
+    '404': 'The requested content was not found.',
+    '429': 'Too many requests. The system is slowing down to respect rate limits...',
+    '500': 'Server error. Please try again in a few moments.',
+    '502': 'Service temporarily unavailable. Please try again.',
+    '503': 'Service temporarily unavailable. Please try again.',
+    '504': 'Request timeout. Please try again.',
+    'NetworkError': 'Connection lost. Please check your internet connection.',
+    'Failed to fetch': 'Connection lost. Please check your internet connection.',
+    'Network request failed': 'Connection lost. Please check your internet connection.',
+    'timeout': 'Request timed out. Please try again.',
+    'No tracks found in playlist': 'This playlist appears to be empty.',
+    'No tracks could be converted': 'None of the tracks could be found in Apple Music. This might be a region restriction issue.',
+    'Transfer cancelled by user': 'Transfer cancelled'
+};
+
+function getUserFriendlyError(technicalError) {
+    const errorString = typeof technicalError === 'string' ? technicalError : technicalError.message || technicalError.toString();
+
+    // Check each error pattern
+    for (const [key, message] of Object.entries(ERROR_MESSAGES)) {
+        if (errorString.includes(key)) {
+            return message;
+        }
+    }
+
+    // Default: return a generic friendly message
+    return 'An unexpected error occurred. Please try again or contact support if the problem persists.';
+}
+
 // Spotify OAuth Configuration
 const spotifyConfig = {
     clientId: '{{ site.spotify.client_id }}',
@@ -273,7 +316,7 @@ window.spotifyService = {
         if (!window.spotifyService.accessToken) {
             throw new Error('Not authorized');
         }
-        
+
         const response = await fetch(`https://api.spotify.com/v1${endpoint}`, {
             ...options,
             headers: {
@@ -282,7 +325,17 @@ window.spotifyService = {
                 ...options.headers,
             },
         });
-        
+
+        // Handle rate limiting (429 Too Many Requests)
+        if (response.status === 429) {
+            const retryAfter = response.headers.get('Retry-After') || '60';
+            const waitSeconds = parseInt(retryAfter);
+            console.log(`Spotify API rate limited. Waiting ${waitSeconds} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, waitSeconds * 1000));
+            // Retry the request
+            return window.spotifyService.apiRequest(endpoint, options);
+        }
+
         if (response.status === 401) {
             // Token might be expired, try to refresh
             const refreshed = await window.spotifyService.refreshAccessToken();
@@ -299,7 +352,7 @@ window.spotifyService = {
             }
             throw new Error('Authorization expired');
         }
-        
+
         return response;
     },
     
@@ -618,52 +671,80 @@ async function convertPlaylistToAppleMusic(playlistId, playlistName, trackCount)
         alert('Please connect to Apple Music first');
         return;
     }
-    
+
     if (!window.spotifyService.isAuthorized) {
         alert('Spotify connection lost. Please reconnect.');
         return;
     }
-    
+
     try {
+        // Reset and set cancellation flags
+        conversionCancelled = false;
+        conversionInProgress = true;
+
         // Show progress
         showConversionProgress();
         updateProgressText(`Loading tracks from "${playlistName}"...`);
-        
+
         // Get all tracks from Spotify playlist
         const spotifyTracks = await window.spotifyService.getPlaylistTracks(playlistId);
-        
+
+        // Handle empty playlist
         if (!spotifyTracks.items || spotifyTracks.items.length === 0) {
-            throw new Error('No tracks found in playlist');
+            hideConversionProgress();
+            alert(`Playlist "${playlistName}" is empty. No tracks to convert.`);
+            return;
         }
-        
+
+        // Check for cancellation
+        if (conversionCancelled) {
+            throw new Error('Transfer cancelled by user');
+        }
+
         // Count explicit tracks for info
         const explicitCount = spotifyTracks.items.filter(item => item.track && item.track.explicit).length;
         console.log(`📊 Playlist contains ${explicitCount}/${spotifyTracks.items.length} explicit tracks`);
-        
+
         // Get playlist details
         const spotifyPlaylist = {
             id: playlistId,
             name: playlistName,
             track_count: trackCount
         };
-        
+
         // Convert playlist with explicit preservation enabled by default
         const result = await window.appleMusicService.convertSpotifyPlaylist(
-            spotifyPlaylist, 
+            spotifyPlaylist,
             spotifyTracks.items,
             (progress) => {
                 updateConversionProgress(progress);
             },
-            { maintainExplicit: true }
+            {
+                maintainExplicit: true,
+                checkCancellation: () => conversionCancelled
+            }
         );
-        
-        // Show results
-        showConversionResults(result);
-        
+
+        // Check if cancelled
+        if (result.cancelled) {
+            showConversionResults({
+                ...result,
+                message: 'Transfer cancelled by user. Partial results shown below.'
+            });
+        } else {
+            // Show results
+            showConversionResults(result);
+        }
+
     } catch (error) {
         console.error('Conversion failed:', error);
         hideConversionProgress();
-        alert(`Conversion failed: ${error.message}`);
+
+        // Show user-friendly error message
+        const friendlyMessage = getUserFriendlyError(error);
+        alert(friendlyMessage);
+    } finally {
+        conversionInProgress = false;
     }
 }
 
@@ -854,15 +935,35 @@ document.addEventListener('authReady', async () => {
                 console.error('Apple Music disconnect failed:', error);
             }
         });
-        
+
+        // Set up cancel button event listener
+        document.getElementById('cancel-conversion-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (conversionInProgress) {
+                if (confirm('Are you sure you want to cancel the transfer? Partial progress will be lost.')) {
+                    conversionCancelled = true;
+                    console.log('User cancelled conversion');
+                }
+            }
+        });
+
         // Listen for Apple Music auth changes
         window.addEventListener('appleMusicAuthChanged', (event) => {
             console.log('🍎 Apple Music auth changed event:', event.detail);
             updateAppleMusicUI();
         });
-        
+
     } else {
         document.getElementById('spotify-apple-login-prompt').style.display = 'block';
+    }
+});
+
+// Warn user before leaving page during conversion
+window.addEventListener('beforeunload', (e) => {
+    if (conversionInProgress) {
+        e.preventDefault();
+        e.returnValue = 'Playlist transfer is in progress. Are you sure you want to leave? Progress will be lost.';
+        return e.returnValue;
     }
 });
 </script>
