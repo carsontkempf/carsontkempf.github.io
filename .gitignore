@@ -14,5 +14,8 @@ node_modules/*
 # Apple Music sensitive data
 _data/apple_music_token.yml
 /_data/apple_music_token.yml
+_data/*.p8
+/_data/*.p8
+*.p8
 /node_modules
 node_modules
