@@ -10,6 +10,7 @@ node_modules/*
 .env
 .env.local
 .env.production
+_config-prod-env.yml
 
 # Apple Music sensitive data
 _data/apple_music_token.yml

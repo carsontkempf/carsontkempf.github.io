@@ -1,0 +1,98 @@
+---
+layout: default
+title: Debug Configuration
+---
+
+<h1>Environment Configuration Debug</h1>
+
+<div id="debug-output"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const output = document.getElementById('debug-output');
+
+    output.innerHTML = '<p>Initializing environment config...</p>';
+
+    // Wait for config to be ready
+    await new Promise(resolve => {
+        if (window.envConfig && window.envConfig.initialized) {
+            resolve();
+        } else {
+            window.addEventListener('configReady', resolve, { once: true });
+        }
+    });
+
+    output.innerHTML += '<p>Environment config initialized!</p>';
+
+    try {
+        const auth0Config = window.envConfig.getAuth0Config();
+        const spotifyConfig = window.envConfig.getSpotifyConfig();
+
+        output.innerHTML += `
+            <h2>Auth0 Configuration</h2>
+            <ul>
+                <li><strong>Domain:</strong> ${auth0Config.domain}</li>
+                <li><strong>Client ID:</strong> ${auth0Config.client_id}</li>
+                <li><strong>Audience:</strong> ${auth0Config.audience}</li>
+            </ul>
+
+            <h2>Spotify Configuration</h2>
+            <ul>
+                <li><strong>Client ID:</strong> ${spotifyConfig.client_id}</li>
+            </ul>
+
+            <h2>Diagnostics</h2>
+            <ul>
+                <li><strong>Hostname:</strong> ${window.location.hostname}</li>
+                <li><strong>Is Production:</strong> ${window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'}</li>
+                <li><strong>Config Ready:</strong> ${window.envConfig.isReady()}</li>
+            </ul>
+        `;
+
+        // Check for invalid values
+        const issues = [];
+        if (auth0Config.domain.includes('${')) {
+            issues.push('Auth0 domain contains template variable - environment variables not substituted!');
+        }
+        if (auth0Config.client_id.includes('${')) {
+            issues.push('Auth0 client_id contains template variable - environment variables not substituted!');
+        }
+        if (auth0Config.domain === '') {
+            issues.push('Auth0 domain is empty!');
+        }
+        if (auth0Config.client_id === '') {
+            issues.push('Auth0 client_id is empty!');
+        }
+
+        if (issues.length > 0) {
+            output.innerHTML += '<h2 style="color: red;">Issues Found</h2><ul>';
+            issues.forEach(issue => {
+                output.innerHTML += `<li style="color: red;">${issue}</li>`;
+            });
+            output.innerHTML += '</ul>';
+
+            output.innerHTML += `
+                <h2>Required Actions</h2>
+                <ol>
+                    <li>Ensure environment variables are set in Netlify Dashboard:
+                        <ul>
+                            <li>AUTH0_DOMAIN</li>
+                            <li>AUTH0_CLIENT_ID</li>
+                            <li>AUTH0_AUDIENCE_SERVER</li>
+                            <li>SPOTIFY_CLIENT_ID</li>
+                        </ul>
+                    </li>
+                    <li>Redeploy the site after setting environment variables</li>
+                    <li>Check that the Netlify function at /.netlify/functions/get-api-key is working</li>
+                </ol>
+            `;
+        } else {
+            output.innerHTML += '<h2 style="color: green;">Configuration looks good!</h2>';
+        }
+
+    } catch (error) {
+        output.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+        output.innerHTML += `<pre>${error.stack}</pre>`;
+    }
+});
+</script>

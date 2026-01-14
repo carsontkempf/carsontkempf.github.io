@@ -1,5 +1,5 @@
 [build]
-  command = "bundle install && JEKYLL_ENV=production bundle exec jekyll build --config _config.yml,_config-prod.yml"
+  command = "bundle install && chmod +x scripts/build.sh && JEKYLL_ENV=production ./scripts/build.sh"
   publish = "_site"
 
 [functions]
@@ -7,7 +7,7 @@
 
 # Production context uses production environment variables
 [context.production]
-  command = "bundle install && JEKYLL_ENV=production bundle exec jekyll build --config _config.yml,_config-prod.yml"
+  command = "bundle install && chmod +x scripts/build.sh && JEKYLL_ENV=production ./scripts/build.sh"
 
 # Branch deploys use dev environment variables
 [context.branch-deploy]

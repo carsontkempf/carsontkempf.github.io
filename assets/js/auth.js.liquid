@@ -15,29 +15,39 @@ window.authService = {
 };
 
 /* ADD */
-document.addEventListener('DOMContentLoaded', async () => {
-    const config = {
-        domain: '{{ site.auth0.domain }}',
-        clientId: '{{ site.auth0.client_id }}',
-        audience: '{{ site.auth0.audience }}'
-    };
-
-    // DEBUG: Log raw template values before processing
-    console.log('[DEBUG] Raw Jekyll template values:', {
-        domain: '{{ site.auth0.domain }}',
-        clientId: '{{ site.auth0.client_id }}',
-        audience: '{{ site.auth0.audience }}'
-    });
-
-    // DEBUG: Log if values are empty or undefined
-    if (!config.domain || config.domain === '' || config.domain.includes('${')) {
-        console.error('[DEBUG] Auth0 domain is not properly configured!', config.domain);
+// Wait for environment config to be ready before initializing auth
+async function initializeAuth() {
+    // Wait for envConfig to be initialized
+    if (!window.envConfig || !window.envConfig.initialized) {
+        console.log('[DEBUG] Waiting for environment configuration...');
+        await new Promise(resolve => {
+            window.addEventListener('configReady', resolve, { once: true });
+        });
     }
-    if (!config.clientId || config.clientId === '' || config.clientId.includes('${')) {
-        console.error('[DEBUG] Auth0 client_id is not properly configured!', config.clientId);
+
+    // Get Auth0 configuration from envConfig service
+    let config;
+    try {
+        config = window.envConfig.getAuth0Config();
+        console.log('[DEBUG] Auth0 config loaded from envConfig:', {
+            domain: config.domain,
+            clientId: config.client_id,
+            audience: config.audience
+        });
+    } catch (error) {
+        console.error('[DEBUG] Failed to get Auth0 config from envConfig:', error);
+        throw error;
+    }
+
+    // Validate configuration
+    if (!config.domain || config.domain === '' || config.domain.includes('${')) {
+        throw new Error(`Invalid Auth0 domain: ${config.domain}`);
+    }
+    if (!config.client_id || config.client_id === '' || config.client_id.includes('${')) {
+        throw new Error(`Invalid Auth0 client_id: ${config.client_id}`);
     }
     if (!config.audience || config.audience === '' || config.audience.includes('${')) {
-        console.error('[DEBUG] Auth0 audience is not properly configured!', config.audience);
+        throw new Error(`Invalid Auth0 audience: ${config.audience}`);
     }
 
     try {
@@ -47,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('[DEBUG] Starting Auth0 initialization...');
         console.log('[DEBUG] Auth0 Configuration:', {
             domain: config.domain,
-            clientId: config.clientId,
+            clientId: config.client_id,
             audience: config.audience,
             redirectUri: redirectUri,
             currentUrl: window.location.href
@@ -63,7 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('[DEBUG] Creating Auth0 client...');
         const auth0Client = await window.auth0.createAuth0Client({
             domain: config.domain,
-            clientId: config.clientId,
+            clientId: config.client_id,
             authorizationParams: {
                 redirect_uri: redirectUri,
                 audience: config.audience
@@ -179,4 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         console.error("Fatal Error during Auth0 Initialization:", error);
     }
-});
+}
+
+// Initialize auth on page load
+document.addEventListener('DOMContentLoaded', initializeAuth);
