@@ -67,7 +67,8 @@
         "generate-apple-token.js": true,
         ".well-known/appspecific/": true,
         ".well-known/": true,
-        "docs/": true
+        "docs/": true,
+        ".jekyll-metadata": true
     },
     "jest.shell": {
         "path": "/bin/bash",
@@ -194,7 +195,8 @@
                     "generate-apple-token.js",
                     ".well-known/appspecific/",
                     ".well-known/",
-                    "docs/"
+                    "docs/",
+                    ".jekyll-metadata"
                 ]
             },
             {
