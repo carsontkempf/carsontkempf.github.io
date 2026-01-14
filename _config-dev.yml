@@ -1,41 +1,16 @@
 # Development Configuration
-# Complete standalone config for development
+# For local development, hardcoded values are used
+# For Netlify builds, these will be replaced with environment variables
 
-title: Carson's Meditations
-email: ctkfdp@umsystem.edu
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://localhost:4000" # Development URL
-repository: "carsontkempf/carsontkempf.github.io"
-github_username:  carsontkempf
-author: Carson Kempf
+auth0:
+  domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
+  client_id: "Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC"
+  audience: "https://carsontkempf.github.io/api/carsons-meditations"
 
-safe: false
-show_downloads: false
-google_analytics: "G-DSMK52452T"
-theme: jekyll-theme-minimal
-sass:
-  sass_dir: _sass
-
-# Spotify API Configuration
 spotify:
   client_id: "80826ef3daa547f49d843c254ad224b6"
 
-# Auth0 Development Configuration  
-auth0:
-  domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
-  client_id: "ql8ttR4YSmZXZbGE30wP8foWCUuZs2jh"
-  audience: "https://carsontkempf.github.io/api/carsons-meditations"
-
-# Google Drive API Configuration (development)
-google_drive:
-  client_id: "53684428529-27609a7n7fd3rtov2a86vrq1gvffs62t.apps.googleusercontent.com"
-  api_key: "AIzaSyBeYgUCi017eGe7Gt1_aSbNXn96LgcE18o"
-
-
-# Exclude files from processing
-exclude:
-  - README.md
-  - Gemfile
-  - Gemfile.lock
-  - node_modules
-  - vendor
+apple_music:
+  team_id: "5S855HB895"
+  key_id: "T5ZX676QRQ"
+  developer_token: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlQ1Wlg2NzZRUlEifQ.eyJpYXQiOjE3NjgzNTUxNzUsImV4cCI6MTc4MzkwNzE3NSwiaXNzIjoiNVM4NTVIQjg5NSJ9.0jmfs0ZKeSx_ARzqIJnOeoaucjH0U16WTuqd9N1K6ZGLAZZimyF4ebXB-aOgvM8BuP08w0SItlhBjW8kQdZGiw"

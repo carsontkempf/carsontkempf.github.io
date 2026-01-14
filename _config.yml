@@ -34,6 +34,13 @@ theme: jekyll-theme-minimal
 sass:
   sass_dir: _sass
 
+# Disable plugins that cause SSL timeouts
+plugins:
+  - jekyll-feed
+
+# Explicitly disable github-metadata to prevent SSL timeout
+github: [metadata]
+
 # Process .liquid files as JavaScript
 defaults:
   - scope:
@@ -44,18 +51,23 @@ defaults:
 # Include .liquid files in processing
 include:
   - assets/js/*.liquid
+  - .well-known
 
-# Spotify API Configuration
-spotify:
-  client_id: "80826ef3daa547f49d843c254ad224b6"
-
-# Auth0 Configuration (production - gh-pages branch)
+# API Configuration
+# These values will be overridden by generated config files during build
+# For local development, use: AUTH0_CLIENT_ID_DEV, SPOTIFY_CLIENT_ID_DEV env vars
 auth0:
   domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
   client_id: "Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC"
   audience: "https://carsontkempf.github.io/api/carsons-meditations"
 
+spotify:
+  client_id: "80826ef3daa547f49d843c254ad224b6"
 
+apple_music:
+  team_id: "5S855HB895"
+  key_id: "T5ZX676QRQ"
+  developer_token: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlQ1Wlg2NzZRUlEifQ.eyJpYXQiOjE3NjgzNTUxNzUsImV4cCI6MTc4MzkwNzE3NSwiaXNzIjoiNVM4NTVIQjg5NSJ9.0jmfs0ZKeSx_ARzqIJnOeoaucjH0U16WTuqd9N1K6ZGLAZZimyF4ebXB-aOgvM8BuP08w0SItlhBjW8kQdZGiw"
 
 # Exclude files from processing
 exclude:

@@ -7,7 +7,11 @@ window.authService = {
     user: null,
     client: null,
     login: () => console.error("Login service not ready."),
-    logout: () => console.error("Login service not ready.")
+    logout: () => console.error("Login service not ready."),
+    getApiKey: async () => {
+        console.error("API key service not available");
+        return null;
+    }
 };
 
 /* ADD */
@@ -18,17 +22,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         audience: '{{ site.auth0.audience }}'
     };
 
+    // DEBUG: Log raw template values before processing
+    console.log('[DEBUG] Raw Jekyll template values:', {
+        domain: '{{ site.auth0.domain }}',
+        clientId: '{{ site.auth0.client_id }}',
+        audience: '{{ site.auth0.audience }}'
+    });
+
+    // DEBUG: Log if values are empty or undefined
+    if (!config.domain || config.domain === '' || config.domain.includes('${')) {
+        console.error('[DEBUG] Auth0 domain is not properly configured!', config.domain);
+    }
+    if (!config.clientId || config.clientId === '' || config.clientId.includes('${')) {
+        console.error('[DEBUG] Auth0 client_id is not properly configured!', config.clientId);
+    }
+    if (!config.audience || config.audience === '' || config.audience.includes('${')) {
+        console.error('[DEBUG] Auth0 audience is not properly configured!', config.audience);
+    }
+
     try {
         // 1. Create the Auth0 client with REFRESH TOKEN support
-        const redirectUri = window.location.origin;
-        console.log('Auth0 Configuration:', {
+        // Use /dashboard/ path to match Auth0 allowed callbacks
+        const redirectUri = window.location.origin + '/dashboard/';
+        console.log('[DEBUG] Starting Auth0 initialization...');
+        console.log('[DEBUG] Auth0 Configuration:', {
             domain: config.domain,
             clientId: config.clientId,
             audience: config.audience,
             redirectUri: redirectUri,
             currentUrl: window.location.href
         });
-        
+
+        // DEBUG: Verify Auth0 SDK is loaded
+        if (!window.auth0) {
+            console.error('[DEBUG] Auth0 SDK not loaded! window.auth0 is undefined');
+            throw new Error('Auth0 SDK not loaded');
+        }
+        console.log('[DEBUG] Auth0 SDK loaded successfully');
+
+        console.log('[DEBUG] Creating Auth0 client...');
         const auth0Client = await window.auth0.createAuth0Client({
             domain: config.domain,
             clientId: config.clientId,
@@ -39,6 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             useRefreshTokens: true,
             cacheLocation: 'localstorage'
         });
+        console.log('[DEBUG] Auth0 client created successfully');
         window.authService.client = auth0Client;
 
         // 2. Handle the user returning from Auth0
@@ -61,6 +94,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.authService.logout = () => auth0Client.logout({
             logoutParams: { returnTo: window.location.origin }
         });
+
+        // 4b. Define getApiKey method
+        window.authService.getApiKey = async () => {
+            if (!isAuthenticated) {
+                throw new Error('User not authenticated');
+            }
+
+            try {
+                const token = await auth0Client.getTokenSilently();
+                const response = await fetch('/.netlify/functions/get-api-key', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to get API key: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.apiKey || data.key || JSON.stringify(data);
+            } catch (error) {
+                console.error('Error getting API key:', error);
+                return null;
+            }
+        };
 
         // 5. Get references to the UI buttons
         const loginBtn = document.getElementById('btn-login');
@@ -106,6 +165,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.dispatchEvent(new CustomEvent('authReady'));
 
     } catch (error) {
+        console.error('[DEBUG] Fatal Error during Auth0 Initialization');
+        console.error('[DEBUG] Error type:', error.constructor.name);
+        console.error('[DEBUG] Error message:', error.message);
+        console.error('[DEBUG] Error stack:', error.stack);
+        console.error('[DEBUG] Full error object:', error);
+
+        // Additional network-specific debugging
+        if (error.message && error.message.includes('Failed to fetch')) {
+            console.error('[DEBUG] Network error detected - could be CORS or DNS issue');
+            console.error('[DEBUG] Trying to reach:', `https://${config.domain}`);
+        }
+
         console.error("Fatal Error during Auth0 Initialization:", error);
     }
 });

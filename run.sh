@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Usage: ./run.sh [--prod]
+#
+# Starts Jekyll server, killing any process on port 4000 first
+# Prevents SSL timeout errors from GitHub metadata plugin
+#
+# Default (no args): Development mode using _config.yml
+# --prod: Production mode (for testing, not recommended locally)
+
+# Kill any process using port 4000
+echo "Killing any process on port 4000..."
+lsof -ti:4000 | xargs kill -9 2>/dev/null || true
+
+# Determine which config to use
+# NOTE: _config-dev.yml and _config-prod.yml use ${} env vars that Netlify substitutes
+# For local development, just use _config.yml with hardcoded values
+if [[ "$1" == "--prod" ]]; then
+    echo "Starting Jekyll in PRODUCTION mode (testing prod config locally)..."
+    echo "WARNING: Using _config-prod.yml locally - env vars won't be substituted!"
+    CONFIG_FILE="_config.yml,_config-prod.yml"
+else
+    echo "Starting Jekyll in DEVELOPMENT mode..."
+    CONFIG_FILE="_config.yml"
+fi
+
+# Disable GitHub Metadata to avoid SSL timeout
+export JEKYLL_GITHUB_TOKEN=""
+
+# Run Jekyll with livereload
+bundle exec jekyll serve \
+    --config "$CONFIG_FILE" \
+    --livereload

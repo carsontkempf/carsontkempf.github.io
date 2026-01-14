@@ -4,6 +4,68 @@ title: Spotify Apple Integration
 permalink: /spotify-apple/
 ---
 
+<style>
+.playlist-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.playlist-item {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    padding: 15px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.playlist-checkbox {
+    display: flex;
+    align-items: flex-start;
+    padding-top: 5px;
+}
+
+.playlist-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.playlist-content {
+    flex: 1;
+    cursor: pointer;
+}
+
+.playlist-content:hover {
+    opacity: 0.8;
+}
+
+#convert-selected-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+</style>
+
 <div id="spotify-apple-content-wrapper" style="display: none;">
   
   <header class="dashboard-header">
@@ -64,6 +126,14 @@ permalink: /spotify-apple/
     <!-- Spotify Data Section -->
     <div id="spotify-data-section" style="display: none;">
       <h3>Your Playlists</h3>
+      <div class="playlist-controls">
+        <label class="checkbox-label">
+          <input type="checkbox" id="select-all-playlists"> Select All
+        </label>
+        <button id="convert-selected-btn" class="dashboard-btn" style="display: none;" disabled>
+          Convert Selected to Apple Music
+        </button>
+      </div>
       <div id="playlists-container">
         <p>Loading playlists...</p>
       </div>
@@ -497,31 +567,31 @@ async function loadUserPlaylists() {
             const playlistsHtml = `
                 <div class="playlists-summary">
                     <h4>Found ${playlistsData.total} playlists</h4>
-                    <p>Showing all playlists including those in folders</p>
+                    <p>Select playlists to convert to Apple Music</p>
                 </div>
                 <div class="playlists-grid">
                     ${playlistsData.items.map(playlist => `
-                        <div class="playlist-item clickable-playlist">
-                            <div onclick="showPlaylistTracks('${playlist.id}', '${playlist.name.replace(/'/g, "\\'")}')">
+                        <div class="playlist-item" data-playlist-id="${playlist.id}" data-playlist-name="${playlist.name.replace(/"/g, '&quot;')}" data-track-count="${playlist.tracks.total}">
+                            <div class="playlist-checkbox">
+                                <input type="checkbox" class="playlist-select" value="${playlist.id}">
+                            </div>
+                            <div class="playlist-content" onclick="showPlaylistTracks('${playlist.id}', '${playlist.name.replace(/'/g, "\\'")}')">
                                 <h4>${playlist.name}</h4>
                                 <p>Tracks: ${playlist.tracks.total}</p>
                                 <p>Owner: ${playlist.owner.display_name || playlist.owner.id}</p>
                                 <p class="playlist-type">${playlist.public ? 'Public' : 'Private'} • ${playlist.collaborative ? 'Collaborative' : 'Solo'}</p>
                                 <p class="click-hint">Click to view tracks</p>
                             </div>
-                            <div class="playlist-actions">
-                                <button onclick="event.stopPropagation(); convertPlaylistToAppleMusic('${playlist.id}', '${playlist.name.replace(/'/g, "\\'")}', ${playlist.tracks.total})" 
-                                        class="convert-btn" 
-                                        ${!window.appleMusicService?.isAuthorized && !window.appleMusicService?.catalogOnlyMode ? 'disabled title="Connect Apple Music first"' : ''}>
-                                    🍎 Add to Apple Music
-                                </button>
-                            </div>
                         </div>
                     `).join('')}
                 </div>
             `;
-            
+
             playlistsContainer.innerHTML = playlistsHtml;
+
+            // Show convert button and enable selection
+            document.getElementById('convert-selected-btn').style.display = 'inline-block';
+            setupPlaylistSelection();
         } else {
             playlistsContainer.innerHTML = '<p>No playlists found.</p>';
         }
@@ -949,14 +1019,230 @@ document.addEventListener('authReady', async () => {
 
         // Listen for Apple Music auth changes
         window.addEventListener('appleMusicAuthChanged', (event) => {
-            console.log('🍎 Apple Music auth changed event:', event.detail);
+            console.log('Apple Music auth changed event:', event.detail);
             updateAppleMusicUI();
+        });
+
+        // Set up convert selected button
+        document.getElementById('convert-selected-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await convertSelectedPlaylists();
         });
 
     } else {
         document.getElementById('spotify-apple-login-prompt').style.display = 'block';
     }
 });
+
+// Setup playlist selection functionality
+function setupPlaylistSelection() {
+    const selectAllCheckbox = document.getElementById('select-all-playlists');
+    const convertSelectedBtn = document.getElementById('convert-selected-btn');
+    const playlistCheckboxes = document.querySelectorAll('.playlist-select');
+
+    // Handle select all
+    selectAllCheckbox.addEventListener('change', (e) => {
+        playlistCheckboxes.forEach(checkbox => {
+            checkbox.checked = e.target.checked;
+        });
+        updateConvertButtonState();
+    });
+
+    // Handle individual checkbox changes
+    playlistCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            updateConvertButtonState();
+
+            // Update select all state
+            const allChecked = Array.from(playlistCheckboxes).every(cb => cb.checked);
+            const someChecked = Array.from(playlistCheckboxes).some(cb => cb.checked);
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = someChecked && !allChecked;
+        });
+    });
+}
+
+// Update convert button state based on selection
+function updateConvertButtonState() {
+    const convertSelectedBtn = document.getElementById('convert-selected-btn');
+    const selectedCheckboxes = document.querySelectorAll('.playlist-select:checked');
+    const count = selectedCheckboxes.length;
+
+    if (count > 0) {
+        convertSelectedBtn.disabled = false;
+        convertSelectedBtn.textContent = `Convert ${count} Selected Playlist${count > 1 ? 's' : ''} to Apple Music`;
+    } else {
+        convertSelectedBtn.disabled = true;
+        convertSelectedBtn.textContent = 'Convert Selected to Apple Music';
+    }
+}
+
+// Convert selected playlists to Apple Music
+async function convertSelectedPlaylists() {
+    if (!window.appleMusicService.isAuthorized && !window.appleMusicService.catalogOnlyMode) {
+        alert('Please connect to Apple Music first');
+        return;
+    }
+
+    if (!window.spotifyService.isAuthorized) {
+        alert('Spotify connection lost. Please reconnect.');
+        return;
+    }
+
+    const selectedCheckboxes = document.querySelectorAll('.playlist-select:checked');
+    if (selectedCheckboxes.length === 0) {
+        alert('Please select at least one playlist to convert');
+        return;
+    }
+
+    // Get playlist data from DOM
+    const selectedPlaylists = Array.from(selectedCheckboxes).map(checkbox => {
+        const playlistItem = checkbox.closest('.playlist-item');
+        return {
+            id: playlistItem.dataset.playlistId,
+            name: playlistItem.dataset.playlistName,
+            trackCount: parseInt(playlistItem.dataset.trackCount)
+        };
+    });
+
+    const totalPlaylists = selectedPlaylists.length;
+    const totalEstimatedTracks = selectedPlaylists.reduce((sum, p) => sum + p.trackCount, 0);
+
+    if (!confirm(`Convert ${totalPlaylists} playlist${totalPlaylists > 1 ? 's' : ''} (approximately ${totalEstimatedTracks} tracks) to Apple Music?\n\nThis may take several minutes.`)) {
+        return;
+    }
+
+    try {
+        conversionCancelled = false;
+        conversionInProgress = true;
+
+        showConversionProgress();
+
+        let overallProgress = {
+            current: 0,
+            total: totalPlaylists,
+            successful: 0,
+            failed: 0,
+            tracksConverted: 0,
+            tracksFailed: 0
+        };
+
+        const results = [];
+
+        for (let i = 0; i < selectedPlaylists.length; i++) {
+            if (conversionCancelled) {
+                break;
+            }
+
+            const playlist = selectedPlaylists[i];
+            updateProgressText(`Converting playlist ${i + 1} of ${totalPlaylists}: ${playlist.name}...`);
+
+            try {
+                // Get playlist tracks
+                const spotifyTracks = await window.spotifyService.getPlaylistTracks(playlist.id);
+
+                if (!spotifyTracks.items || spotifyTracks.items.length === 0) {
+                    overallProgress.failed++;
+                    results.push({
+                        playlist: playlist.name,
+                        success: false,
+                        error: 'Empty playlist'
+                    });
+                    continue;
+                }
+
+                // Convert playlist
+                const result = await window.appleMusicService.convertSpotifyPlaylist(
+                    playlist,
+                    spotifyTracks.items,
+                    (progress) => {
+                        const percentage = Math.round(((i + (progress.current / progress.total)) / totalPlaylists) * 100);
+                        document.getElementById('progress-fill').style.width = `${percentage}%`;
+                    },
+                    {
+                        maintainExplicit: true,
+                        checkCancellation: () => conversionCancelled
+                    }
+                );
+
+                if (result.cancelled) {
+                    break;
+                }
+
+                overallProgress.successful++;
+                overallProgress.tracksConverted += result.conversionResults.successful.length;
+                overallProgress.tracksFailed += result.conversionResults.failed.length;
+
+                results.push({
+                    playlist: playlist.name,
+                    success: true,
+                    result: result
+                });
+
+            } catch (error) {
+                console.error(`Failed to convert playlist ${playlist.name}:`, error);
+                overallProgress.failed++;
+                results.push({
+                    playlist: playlist.name,
+                    success: false,
+                    error: error.message
+                });
+            }
+
+            overallProgress.current = i + 1;
+        }
+
+        // Show batch results
+        showBatchConversionResults(overallProgress, results);
+
+    } catch (error) {
+        console.error('Batch conversion failed:', error);
+        hideConversionProgress();
+        alert(getUserFriendlyError(error));
+    } finally {
+        conversionInProgress = false;
+    }
+}
+
+// Show batch conversion results
+function showBatchConversionResults(overallProgress, results) {
+    hideConversionProgress();
+
+    const resultsDiv = document.getElementById('conversion-results');
+    const summaryDiv = document.getElementById('results-summary');
+    const failedDiv = document.getElementById('failed-tracks');
+
+    const successfulPlaylists = results.filter(r => r.success);
+    const failedPlaylists = results.filter(r => !r.success);
+
+    summaryDiv.innerHTML = `
+        <div class="conversion-summary">
+            <h5>Batch Conversion Complete</h5>
+            <div class="stats">
+                <p><strong>Playlists converted:</strong> ${overallProgress.successful} / ${overallProgress.total}</p>
+                <p><strong>Tracks converted:</strong> ${overallProgress.tracksConverted}</p>
+                <p><strong>Tracks failed:</strong> ${overallProgress.tracksFailed}</p>
+            </div>
+
+            ${successfulPlaylists.length > 0 ? `
+                <h5>Successfully Converted Playlists:</h5>
+                <ul>
+                    ${successfulPlaylists.map(r => `<li>${r.playlist}</li>`).join('')}
+                </ul>
+            ` : ''}
+
+            ${failedPlaylists.length > 0 ? `
+                <h5>Failed Playlists:</h5>
+                <ul>
+                    ${failedPlaylists.map(r => `<li>${r.playlist} - ${r.error}</li>`).join('')}
+                </ul>
+            ` : ''}
+        </div>
+    `;
+
+    failedDiv.style.display = 'none';
+    resultsDiv.style.display = 'block';
+}
 
 // Warn user before leaving page during conversion
 window.addEventListener('beforeunload', (e) => {

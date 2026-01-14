@@ -101,30 +101,49 @@ class AppleMusicService {
      * Handle authorization status changes
      */
     handleAuthStatusChange(status) {
-        console.log('Apple Music auth status changed:', status);
-        
-        // Handle both numeric status and object with status property
-        const actualStatus = typeof status === 'object' && status.authorizationStatus !== undefined 
-            ? status.authorizationStatus 
-            : status;
-        
-        this.isAuthorized = actualStatus === MusicKit.AuthorizationStatus.authorized;
-        
-        if (this.isAuthorized) {
-            this.userToken = this.musicKit.musicUserToken;
-            console.log('Apple Music authorization successful');
-        } else {
-            this.userToken = null;
-            console.log('Apple Music authorization lost or denied');
-        }
+        console.log('[DEBUG] Apple Music auth status changed:', status);
+        console.log('[DEBUG] MusicKit available:', !!window.MusicKit);
+        console.log('[DEBUG] MusicKit.AuthorizationStatus:', window.MusicKit?.AuthorizationStatus);
 
-        // Dispatch custom event for UI updates
-        window.dispatchEvent(new CustomEvent('appleMusicAuthChanged', { 
-            detail: { 
-                isAuthorized: this.isAuthorized,
-                status: status
+        try {
+            // Handle both numeric status and object with status property
+            const actualStatus = typeof status === 'object' && status.authorizationStatus !== undefined
+                ? status.authorizationStatus
+                : status;
+
+            console.log('[DEBUG] Actual status value:', actualStatus);
+            console.log('[DEBUG] Actual status type:', typeof actualStatus);
+
+            // Check if MusicKit.AuthorizationStatus exists
+            if (!window.MusicKit || !window.MusicKit.AuthorizationStatus) {
+                console.error('[DEBUG] MusicKit.AuthorizationStatus not available!');
+                // Fallback: check if status is 3 (authorized in older versions)
+                this.isAuthorized = actualStatus === 3 || actualStatus === 'authorized';
+            } else {
+                this.isAuthorized = actualStatus === MusicKit.AuthorizationStatus.authorized;
             }
-        }));
+
+            console.log('[DEBUG] isAuthorized result:', this.isAuthorized);
+
+            if (this.isAuthorized) {
+                this.userToken = this.musicKit.musicUserToken;
+                console.log('[DEBUG] Apple Music authorization successful');
+            } else {
+                this.userToken = null;
+                console.log('[DEBUG] Apple Music authorization lost or denied');
+            }
+
+            // Dispatch custom event for UI updates
+            window.dispatchEvent(new CustomEvent('appleMusicAuthChanged', {
+                detail: {
+                    isAuthorized: this.isAuthorized,
+                    status: status
+                }
+            }));
+        } catch (error) {
+            console.error('[DEBUG] Error in handleAuthStatusChange:', error);
+            console.error('[DEBUG] Stack:', error.stack);
+        }
     }
 
     /**
@@ -136,45 +155,47 @@ class AppleMusicService {
         }
 
         try {
-            console.log('🎵 Apple Music: Opening authorization popup...');
-            console.log('📋 Instructions: A popup will appear - click "Allow" to authorize');
-            
+            console.log('[DEBUG] Apple Music: Opening authorization popup...');
+            console.log('[DEBUG] Instructions: A popup will appear - click "Allow" to authorize');
+
             // Check for popup blockers
-            console.log('🔍 Testing popup permissions...');
+            console.log('[DEBUG] Testing popup permissions...');
             const testPopup = window.open('', '_blank', 'width=1,height=1');
             if (!testPopup || testPopup.closed) {
-                console.warn('🚫 POPUP BLOCKER DETECTED!');
-                console.log('💡 Fix: Enable popups for 127.0.0.1 in your browser');
-                console.log('   Chrome: Click the popup icon in address bar');
-                console.log('   Safari: Safari > Settings > Websites > Pop-up Windows');
-                console.log('   Firefox: Click the shield icon in address bar');
+                alert('POPUP BLOCKED!\n\nPlease allow popups for 127.0.0.1\n\nChrome: Click the popup icon in the address bar\nSafari: Safari > Settings > Websites > Pop-up Windows\nFirefox: Click the shield icon in address bar\n\nThen try "Connect Apple Music" again.');
+                throw new Error('Popup blocked by browser');
             } else {
-                console.log('✅ Popup permissions OK');
+                console.log('[DEBUG] Popup permissions OK');
                 testPopup.close();
             }
-            
+
+            // Show alert to prepare user
+            alert('IMPORTANT:\n\nAn Apple Music authorization popup will open.\n\nYou have 60 seconds to click "Allow".\n\nClick OK to continue...');
+
             const authPromise = this.musicKit.authorize();
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('No response to authorization popup after 30 seconds')), 30000)
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('No response to authorization popup after 60 seconds')), 60000)
             );
-            
+
+            console.log('[DEBUG] Waiting for user to authorize in popup...');
             const userToken = await Promise.race([authPromise, timeoutPromise]);
             
             this.userToken = userToken;
             this.isAuthorized = true;
             
-            console.log('✅ Apple Music authorization successful');
+            console.log('[DEBUG] Apple Music authorization successful');
+            console.log('[DEBUG] User token received:', !!userToken);
+            alert('Success! Apple Music connected.\n\nYou can now convert playlists.');
             return true;
         } catch (error) {
-            if (error.message.includes('30 seconds')) {
-                console.log('❌ Authorization popup timed out');
-                console.log('💡 Possible causes:');
-                console.log('   • Popup was blocked by browser');
-                console.log('   • Popup appeared but user didn\'t click "Allow"'); 
-                console.log('   • User clicked "Don\'t Allow"');
-                console.log('   • Popup is hidden behind other windows');
+            if (error.message.includes('60 seconds')) {
+                console.error('[DEBUG] Authorization popup timed out after 60 seconds');
+                alert('Authorization Timeout\n\nYou did not click "Allow" within 60 seconds.\n\nPossible causes:\n• Popup was blocked\n• You didn\'t click "Allow"\n• You clicked "Don\'t Allow"\n• Popup is hidden behind windows\n\nPlease try again and click "Allow" when the popup appears.');
+            } else if (error.message.includes('Popup blocked')) {
+                console.error('[DEBUG] Popup was blocked:', error.message);
             } else {
-                console.log('❌ Apple Music authorization failed:', error.message);
+                console.error('[DEBUG] Apple Music authorization failed:', error.message);
+                alert('Apple Music Authorization Failed\n\n' + error.message + '\n\nPlease try again.');
             }
             
             this.isAuthorized = false;
@@ -258,7 +279,23 @@ class AppleMusicService {
             ...options.headers
         };
 
-        const response = await fetch(`https://api.music.apple.com/v1${endpoint}`, {
+        // DEBUG: Log request details
+        const requestUrl = `https://api.music.apple.com/v1${endpoint}`;
+        console.log('[DEBUG] Apple Music API Request:', {
+            url: requestUrl,
+            method: options.method || 'GET',
+            hasUserToken: !!this.userToken,
+            hasDeveloperToken: !!this.developerToken,
+            userTokenLength: this.userToken?.length,
+            developerTokenLength: this.developerToken?.length,
+            bodyLength: options.body?.length
+        });
+
+        if (options.body) {
+            console.log('[DEBUG] Request body preview:', options.body.substring(0, 500));
+        }
+
+        const response = await fetch(requestUrl, {
             ...options,
             headers
         });
@@ -274,6 +311,32 @@ class AppleMusicService {
         }
 
         if (!response.ok) {
+            // DEBUG: Get detailed error information
+            let errorDetails = {
+                status: response.status,
+                statusText: response.statusText,
+                endpoint: endpoint,
+                method: options.method || 'GET'
+            };
+
+            try {
+                const errorBody = await response.text();
+                console.error('[DEBUG] Apple Music API Error Response:', errorBody);
+                errorDetails.responseBody = errorBody;
+
+                // Try to parse as JSON
+                try {
+                    const errorJson = JSON.parse(errorBody);
+                    errorDetails.parsedError = errorJson;
+                    console.error('[DEBUG] Parsed Error:', JSON.stringify(errorJson, null, 2));
+                } catch (e) {
+                    console.error('[DEBUG] Could not parse error as JSON');
+                }
+            } catch (e) {
+                console.error('[DEBUG] Could not read error response body:', e);
+            }
+
+            console.error('[DEBUG] Full error details:', errorDetails);
             throw new Error(`Apple Music API error: ${response.status} ${response.statusText}`);
         }
 
@@ -596,16 +659,45 @@ class AppleMusicService {
         await this.ensureAuth();
 
         try {
+            // DEBUG: Validate and clean input
+            console.log('[DEBUG] Raw playlist name:', name);
+            console.log('[DEBUG] Name type:', typeof name);
+            console.log('[DEBUG] Name length:', name?.length);
+            console.log('[DEBUG] Description length:', description?.length);
+
+            // Apple Music has restrictions on playlist names/descriptions
+            // Names should be non-empty and reasonable length
+            if (!name || typeof name !== 'string') {
+                console.error('[DEBUG] Invalid playlist name:', name);
+                throw new Error('Playlist name must be a non-empty string');
+            }
+
+            if (name.length > 100) {
+                console.warn('[DEBUG] Playlist name too long, truncating from', name.length, 'to 100 chars');
+                name = name.substring(0, 100);
+            }
+
+            if (description && description.length > 255) {
+                console.warn('[DEBUG] Description too long, truncating from', description.length, 'to 255 chars');
+                description = description.substring(0, 255);
+            }
+
+            // FIXED: Apple Music API expects attributes directly, not wrapped in data array
             const playlistData = {
-                data: [{
-                    type: 'library-playlists',
-                    attributes: {
-                        name: name,
-                        description: description,
-                        isPublic: isPublic
-                    }
-                }]
+                attributes: {
+                    name: name,
+                    description: description || '',
+                    isPublic: isPublic
+                }
             };
+
+            // DEBUG: Log the request being sent
+            console.log('[DEBUG] Creating Apple Music playlist with data:', JSON.stringify(playlistData, null, 2));
+            console.log('[DEBUG] Final playlist name:', name);
+            console.log('[DEBUG] Final description:', description);
+            console.log('[DEBUG] isPublic:', isPublic);
+            console.log('[DEBUG] User token present:', !!this.userToken);
+            console.log('[DEBUG] Developer token present:', !!this.developerToken);
 
             const response = await this.apiRequest('/me/library/playlists', {
                 method: 'POST',
@@ -613,10 +705,14 @@ class AppleMusicService {
             });
 
             const data = await response.json();
-            
+
+            console.log('[DEBUG] Playlist creation response:', JSON.stringify(data, null, 2));
+
             if (data.data && data.data.length > 0) {
+                console.log('[DEBUG] Playlist created successfully:', data.data[0].id);
                 return data.data[0];
             } else {
+                console.error('[DEBUG] Unexpected response format:', data);
                 throw new Error('Failed to create playlist');
             }
 
@@ -756,9 +852,9 @@ class AppleMusicService {
             }
 
             // Full mode: create actual playlist
-            const playlistName = `${spotifyPlaylist.name} (from Spotify)`;
-            const description = `Converted from Spotify playlist "${spotifyPlaylist.name}" • ${conversionResults.successful.length}/${conversionResults.total} tracks converted • ${explicitMatchRate}% explicit matches preserved`;
-            
+            const playlistName = spotifyPlaylist.name;
+            const description = '(from Spotify)';
+
             const appleMusicPlaylist = await this.createPlaylist(playlistName, description, false);
 
             // Add converted songs to playlist
