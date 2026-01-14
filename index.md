@@ -3,92 +3,81 @@ layout: post
 ---
 
 <style>
-.project-navigation {
-    text-align: center;
-    margin: 30px 0;
-    padding: 30px 20px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 12px;
-    border: 2px solid #dee2e6;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.project-navigation h2 {
-    margin-bottom: 25px;
-    color: #2c3e50;
-    font-size: 2rem;
-    font-weight: 600;
-}
-
-.project-buttons {
+.hero-container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    gap: 25px;
-    flex-wrap: wrap;
-}
-
-.project-btn {
-    display: inline-block;
-    padding: 18px 35px;
-    font-size: 18px;
-    font-weight: 600;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    min-width: 200px;
+    align-items: center;
+    min-height: 70vh;
     text-align: center;
+    padding: 5vh 5vw;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    border: 2px solid #dee2e6;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    margin: 2vh 0;
 }
 
-.project-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+.hero-title {
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 4vh;
+    line-height: 1.2;
+}
+
+.spotify-apple-btn {
+    display: inline-block;
+    padding: clamp(20px, 3vh, 40px) clamp(40px, 6vw, 80px);
+    font-size: clamp(1.5rem, 3vw, 3rem);
+    font-weight: 700;
     text-decoration: none;
-}
-
-.spotify-btn {
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba(29, 185, 84, 0.3);
     background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
     color: white;
+    min-width: min(80vw, 400px);
+    text-align: center;
+    letter-spacing: 0.5px;
 }
 
-.spotify-btn:hover {
+.spotify-apple-btn:hover {
     color: white;
     background: linear-gradient(135deg, #1aa34a 0%, #1bc653 100%);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(29, 185, 84, 0.4);
+    text-decoration: none;
 }
 
-.error-annotator-btn {
-    background: linear-gradient(135deg, #e74c3c 0%, #ff6b6b 100%);
-    color: white;
-}
-
-.error-annotator-btn:hover {
-    color: white;
-    background: linear-gradient(135deg, #c0392b 0%, #e55353 100%);
+.spotify-apple-btn:active {
+    transform: translateY(-2px) scale(1.01);
 }
 
 @media (max-width: 768px) {
-    .project-buttons {
-        flex-direction: column;
-        align-items: center;
+    .hero-container {
+        min-height: 60vh;
+        padding: 4vh 4vw;
     }
-    
-    .project-btn {
-        width: 100%;
-        max-width: 300px;
+
+    .spotify-apple-btn {
+        width: 90vw;
+        max-width: none;
+    }
+}
+
+@media (min-width: 1920px) {
+    .spotify-apple-btn {
+        max-width: 600px;
     }
 }
 </style>
 
-<div class="project-navigation">
-    <h2>Featured Projects</h2>
-    <div class="project-buttons">
-        <a href="/spotify-apple/" class="project-btn spotify-btn" id="spotify-btn">
-            🎵 Spotify → Apple Music
-        </a>
-        <a href="/code-comprehension/error-annotator/" class="project-btn error-annotator-btn" id="error-annotator-btn">
-            🔍 Code Comprehension Tool
-        </a>
-    </div>
+<div class="hero-container">
+    <h1 class="hero-title">Playlist Transfer</h1>
+    <a href="/spotify-apple/" class="spotify-apple-btn" id="spotify-btn">
+        Spotify to Apple Music
+    </a>
 </div>
 
 <script>
@@ -98,10 +87,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if user is authenticated
         if (!window.authService || !window.authService.isAuthenticated) {
             event.preventDefault();
-            
+
             // Store the intended destination
             localStorage.setItem('intendedDestination', projectUrl);
-            
+
             // Redirect to Auth0 login
             if (window.authService && window.authService.login) {
                 window.authService.login();
@@ -112,16 +101,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         // If authenticated, let the normal navigation proceed
     }
-    
-    // Add click handlers to project buttons
+
+    // Add click handler to project button
     document.getElementById('spotify-btn').addEventListener('click', function(event) {
         handleProjectClick(event, '/spotify-apple/');
     });
-    
-    document.getElementById('error-annotator-btn').addEventListener('click', function(event) {
-        handleProjectClick(event, '/code-comprehension/error-annotator/');
-    });
-    
+
     // Check for intended destination after login
     document.addEventListener('authReady', function() {
         if (window.authService && window.authService.isAuthenticated) {

@@ -5,64 +5,352 @@ permalink: /spotify-apple/
 ---
 
 <style>
+/* Mobile-First Responsive Design */
+
+/* Playlist Controls - Responsive */
 .playlist-controls {
     display: flex;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: clamp(12px, 2vw, 20px);
     align-items: center;
-    margin-bottom: 20px;
-    padding: 15px;
+    margin-bottom: clamp(15px, 3vh, 20px);
+    padding: clamp(12px, 2vh, 15px);
     background: rgba(0, 0, 0, 0.05);
-    border-radius: 8px;
+    border-radius: clamp(6px, 1vw, 8px);
 }
 
 .checkbox-label {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: clamp(6px, 1vw, 8px);
     cursor: pointer;
     font-weight: 500;
+    font-size: clamp(0.9rem, 2vw, 1rem);
 }
 
 .checkbox-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: clamp(16px, 3vw, 18px);
+    height: clamp(16px, 3vw, 18px);
     cursor: pointer;
 }
 
+/* Playlist Item - Mobile Optimized */
 .playlist-item {
     display: flex;
-    gap: 15px;
+    gap: clamp(10px, 2vw, 15px);
     align-items: flex-start;
-    padding: 15px;
+    padding: clamp(12px, 2.5vh, 15px);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    margin-bottom: 10px;
+    border-radius: clamp(6px, 1vw, 8px);
+    margin-bottom: clamp(8px, 1.5vh, 10px);
+    min-height: 80px;
 }
 
 .playlist-checkbox {
     display: flex;
     align-items: flex-start;
-    padding-top: 5px;
+    padding-top: clamp(3px, 0.5vh, 5px);
+    flex-shrink: 0;
 }
 
 .playlist-checkbox input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+    width: clamp(18px, 4vw, 20px);
+    height: clamp(18px, 4vw, 20px);
     cursor: pointer;
 }
 
 .playlist-content {
     flex: 1;
     cursor: pointer;
+    min-width: 0;
+}
+
+.playlist-content h4 {
+    font-size: clamp(1rem, 3vw, 1.2rem);
+    word-wrap: break-word;
+}
+
+.playlist-content p {
+    font-size: clamp(0.85rem, 2.2vw, 0.9rem);
 }
 
 .playlist-content:hover {
     opacity: 0.8;
 }
 
+/* Convert Selected Button - Responsive */
+#convert-selected-btn {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    padding: clamp(10px, 2vh, 12px) clamp(16px, 3vw, 20px);
+    white-space: nowrap;
+}
+
 #convert-selected-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* Dashboard Header - Mobile Friendly */
+.dashboard-header {
+    padding: clamp(1rem, 3vh, 1.5rem) 0;
+}
+
+.dashboard-header h1 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+}
+
+/* Service Icons - Responsive Sizing */
+.service-icons-container {
+    padding: clamp(1rem, 3vh, 1.5rem);
+    gap: clamp(1rem, 3vw, 2rem);
+}
+
+.service-logo {
+    width: clamp(60px, 15vw, 112.5px) !important;
+    height: clamp(60px, 15vw, 112.5px) !important;
+}
+
+.transfer-arrow svg {
+    width: clamp(24px, 6vw, 32px);
+    height: clamp(24px, 6vw, 32px);
+}
+
+/* Auth Sections - Mobile Optimized */
+#spotify-auth-section,
+#apple-music-auth-section {
+    padding: clamp(1rem, 3vh, 1.5rem);
+}
+
+#spotify-auth-section h3,
+#apple-music-auth-section h3 {
+    font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+}
+
+#spotify-auth-section p,
+#apple-music-auth-section p {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+}
+
+/* Dashboard Buttons - Mobile Friendly */
+.dashboard-btn {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    padding: clamp(10px, 2vh, 12px) clamp(20px, 4vw, 24px);
+    min-width: min(200px, 90vw);
+}
+
+/* Playlists Summary - Responsive */
+.playlists-summary h4 {
+    font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+}
+
+.playlists-summary p {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+}
+
+/* Track Items - Mobile Optimized */
+.track-item {
+    padding: clamp(0.75rem, 2vh, 1rem);
+    gap: clamp(0.5rem, 2vw, 1rem);
+}
+
+.track-number {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+}
+
+.track-name {
+    font-size: clamp(0.95rem, 2.8vw, 1rem);
+}
+
+.track-artist {
+    font-size: clamp(0.85rem, 2.3vw, 0.9rem);
+}
+
+.track-album {
+    font-size: clamp(0.8rem, 2.2vw, 0.85rem);
+}
+
+/* Progress Bar - Responsive */
+.progress-bar {
+    height: clamp(6px, 1vh, 8px);
+    margin: clamp(0.75rem, 2vh, 1rem) 0;
+}
+
+/* Conversion Section - Mobile Friendly */
+#conversion-progress,
+#conversion-results {
+    padding: clamp(1rem, 3vh, 2rem);
+}
+
+#progress-text {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    margin: clamp(0.75rem, 2vh, 1rem) 0;
+}
+
+#conversion-details p {
+    font-size: clamp(0.85rem, 2.3vw, 0.9rem);
+    margin: clamp(0.4rem, 1vh, 0.5rem) 0;
+}
+
+/* Conversion Summary - Responsive */
+.conversion-summary h5 {
+    font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+}
+
+.stats p {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    padding: clamp(0.75rem, 2vh, 1rem);
+}
+
+/* Failed Tracks - Mobile Optimized */
+#failed-tracks h5 {
+    font-size: clamp(1rem, 3vw, 1.1rem);
+}
+
+.failed-track {
+    padding: clamp(0.6rem, 1.5vh, 0.75rem);
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+    font-size: clamp(0.85rem, 2.3vw, 0.9rem);
+}
+
+/* Back Button - Responsive */
+.back-btn {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    padding: clamp(10px, 2vh, 12px) clamp(20px, 4vw, 24px);
+    margin-bottom: clamp(0.75rem, 2vh, 1rem);
+}
+
+/* User Info - Mobile Friendly */
+#spotify-user-info p,
+#apple-music-user-info p {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    margin: clamp(0.4rem, 1vh, 0.5rem) 0;
+}
+
+/* Login Prompt - Responsive */
+#spotify-apple-login-prompt {
+    padding: clamp(2rem, 5vh, 3rem);
+    text-align: center;
+}
+
+#spotify-apple-login-prompt h2 {
+    font-size: clamp(1.3rem, 4vw, 1.5rem);
+    margin-bottom: clamp(0.75rem, 2vh, 1rem);
+}
+
+#spotify-apple-login-prompt p {
+    font-size: clamp(0.95rem, 2.8vw, 1rem);
+    margin-bottom: clamp(1.5rem, 3vh, 2rem);
+}
+
+#spotify-apple-login-prompt .login-btn {
+    font-size: clamp(1rem, 3vw, 1.1rem) !important;
+    padding: clamp(12px, 2.5vh, 15px) clamp(24px, 5vw, 30px) !important;
+}
+
+/* Mobile Breakpoint - Tablet */
+@media (max-width: 768px) {
+    .playlist-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .checkbox-label {
+        justify-content: center;
+    }
+
+    #convert-selected-btn {
+        width: 100%;
+    }
+
+    .playlists-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .track-item {
+        grid-template-columns: 30px 1fr !important;
+    }
+
+    .track-meta {
+        grid-column: 2;
+        align-items: flex-start !important;
+        margin-top: 0.5rem;
+    }
+
+    .track-number {
+        grid-row: 1 / 3;
+    }
+
+    .stats {
+        grid-template-columns: 1fr !important;
+    }
+
+    .failed-track {
+        grid-template-columns: 1fr !important;
+        text-align: left;
+    }
+
+    .service-icons-container {
+        flex-direction: column;
+    }
+
+    .transfer-arrow svg {
+        transform: rotate(90deg);
+    }
+}
+
+/* Mobile Breakpoint - Small Phone */
+@media (max-width: 480px) {
+    .playlist-item {
+        flex-direction: column;
+        gap: clamp(8px, 2vw, 12px);
+    }
+
+    .playlist-checkbox {
+        padding-top: 0;
+    }
+
+    .playlist-content h4 {
+        margin-top: 0;
+    }
+
+    .dashboard-btn {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .track-item {
+        grid-template-columns: 1fr !important;
+        gap: 0.5rem !important;
+    }
+
+    .track-number {
+        grid-row: auto;
+    }
+
+    .track-meta {
+        margin-top: 0;
+    }
+}
+
+/* Landscape Mobile Optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+    .dashboard-header {
+        padding: clamp(0.5rem, 2vh, 1rem) 0;
+    }
+
+    .service-icons-container {
+        flex-direction: row;
+        gap: 1rem;
+    }
+
+    .service-logo {
+        width: clamp(40px, 10vw, 60px) !important;
+        height: clamp(40px, 10vw, 60px) !important;
+    }
+
+    .transfer-arrow svg {
+        transform: none;
+    }
 }
 </style>
 
@@ -773,7 +1061,7 @@ async function convertPlaylistToAppleMusic(playlistId, playlistName, trackCount)
 
         // Count explicit tracks for info
         const explicitCount = spotifyTracks.items.filter(item => item.track && item.track.explicit).length;
-        console.log(`📊 Playlist contains ${explicitCount}/${spotifyTracks.items.length} explicit tracks`);
+        console.log(`[INFO] Playlist contains ${explicitCount}/${spotifyTracks.items.length} explicit tracks`);
 
         // Get playlist details
         const spotifyPlaylist = {
@@ -840,7 +1128,7 @@ function updateConversionProgress(progress) {
     const percentage = Math.round((progress.current / progress.total) * 100);
     document.getElementById('progress-fill').style.width = `${percentage}%`;
     
-    const explicitIndicator = progress.currentExplicit ? ' 🔞' : '';
+    const explicitIndicator = progress.currentExplicit ? ' [E]' : '';
     updateProgressText(`Converting track ${progress.current} of ${progress.total}: ${progress.currentTrack}${explicitIndicator}`);
     
     const explicitMatchRate = progress.successful > 0 
@@ -848,10 +1136,10 @@ function updateConversionProgress(progress) {
         : 0;
     
     document.getElementById('conversion-details').innerHTML = `
-        <p>✅ Successfully converted: ${progress.successful}</p>
-        <p>❌ Failed to convert: ${progress.failed}</p>
-        <p>🎯 Explicit matches: ${progress.explicitMatches || 0}/${progress.successful || 0} (${explicitMatchRate}%)</p>
-        <p>⚠️ Explicit mismatches: ${progress.explicitMismatches || 0}</p>
+        <p>Successfully converted: ${progress.successful}</p>
+        <p>Failed to convert: ${progress.failed}</p>
+        <p>Explicit matches: ${progress.explicitMatches || 0}/${progress.successful || 0} (${explicitMatchRate}%)</p>
+        <p>Explicit mismatches: ${progress.explicitMismatches || 0}</p>
     `;
 }
 
@@ -864,13 +1152,13 @@ function showConversionResults(result) {
     const failedDiv = document.getElementById('failed-tracks');
     const failedListDiv = document.getElementById('failed-tracks-list');
     
-    const modeMessage = result.catalogOnlyMode 
-        ? `<div class="catalog-only-notice">📋 <strong>Preview Mode:</strong> ${result.message}</div>`
+    const modeMessage = result.catalogOnlyMode
+        ? `<div class="catalog-only-notice"><strong>Preview Mode:</strong> ${result.message}</div>`
         : `<p>The playlist has been added to your Apple Music library.</p>`;
-    
+
     summaryDiv.innerHTML = `
         <div class="conversion-summary">
-            <h5>🎉 Playlist "${result.appleMusicPlaylist.attributes.name}" ${result.catalogOnlyMode ? 'analyzed' : 'created'} successfully!</h5>
+            <h5>Playlist "${result.appleMusicPlaylist.attributes.name}" ${result.catalogOnlyMode ? 'analyzed' : 'created'} successfully!</h5>
             <div class="stats">
                 <p><strong>Original tracks:</strong> ${result.summary.originalTracks}</p>
                 <p><strong>Successfully converted:</strong> ${result.summary.convertedTracks}</p>

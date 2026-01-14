@@ -54,20 +54,20 @@ include:
   - .well-known
 
 # API Configuration
-# These values will be overridden by generated config files during build
-# For local development, use: AUTH0_CLIENT_ID_DEV, SPOTIFY_CLIENT_ID_DEV env vars
+# These placeholders are overridden by _config-dev.yml (local) or _config-prod.yml (Netlify)
+# Do not hardcode secrets here - use environment-specific config files
 auth0:
-  domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
-  client_id: "Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC"
-  audience: "https://carsontkempf.github.io/api/carsons-meditations"
+  domain: "${AUTH0_DOMAIN}"
+  client_id: "${AUTH0_CLIENT_ID}"
+  audience: "${AUTH0_AUDIENCE_SERVER}"
 
 spotify:
-  client_id: "80826ef3daa547f49d843c254ad224b6"
+  client_id: "${SPOTIFY_CLIENT_ID}"
 
 apple_music:
-  team_id: "5S855HB895"
-  key_id: "T5ZX676QRQ"
-  developer_token: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlQ1Wlg2NzZRUlEifQ.eyJpYXQiOjE3NjgzNTUxNzUsImV4cCI6MTc4MzkwNzE3NSwiaXNzIjoiNVM4NTVIQjg5NSJ9.0jmfs0ZKeSx_ARzqIJnOeoaucjH0U16WTuqd9N1K6ZGLAZZimyF4ebXB-aOgvM8BuP08w0SItlhBjW8kQdZGiw"
+  team_id: "${APPLE_TEAM_ID}"
+  key_id: "${APPLE_KEY_ID}"
+  developer_token: "${APPLE_MUSIC_DEVELOPER_TOKEN}"
 
 # Exclude files from processing
 exclude:

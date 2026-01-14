@@ -4,11 +4,114 @@ title: Dashboard
 permalink: /dashboard/
 ---
 
+<style>
+/* Dashboard Mobile-First Responsive Design */
+.dashboard-header {
+    padding: clamp(1rem, 3vh, 1.5rem) 0;
+    text-align: center;
+}
+
+.dashboard-header h1 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+}
+
+.dashboard-header .welcome-message {
+    font-size: clamp(1rem, 3vw, 1.2rem);
+}
+
+.dashboard-header .login-status {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+}
+
+.dashboard-main-content {
+    padding: clamp(1rem, 3vh, 2rem) 0;
+}
+
+.dashboard-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1rem, 2.5vh, 1.5rem);
+    align-items: center;
+    margin: clamp(1rem, 3vh, 1.5rem) 0;
+}
+
+.dashboard-btn {
+    font-size: clamp(1.1rem, 3.5vw, 1.5rem) !important;
+    padding: clamp(15px, 3vh, 20px) clamp(30px, 6vw, 40px) !important;
+    min-width: min(300px, 90vw) !important;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+#auth-management-buttons {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 2vh, 1rem);
+    align-items: center;
+}
+
+#auth-management-buttons .dashboard-btn {
+    width: 100%;
+}
+
+/* Mobile Breakpoint - Tablet */
+@media (max-width: 768px) {
+    .dashboard-buttons {
+        padding: 0 clamp(1rem, 3vw, 1.5rem);
+    }
+
+    .dashboard-btn {
+        max-width: 100%;
+    }
+
+    #auth-management-buttons {
+        max-width: 100%;
+    }
+}
+
+/* Mobile Breakpoint - Small Phone */
+@media (max-width: 480px) {
+    .dashboard-header h1 {
+        word-wrap: break-word;
+    }
+
+    .dashboard-btn {
+        font-size: clamp(1rem, 4vw, 1.3rem) !important;
+        padding: clamp(12px, 2.5vh, 16px) clamp(24px, 5vw, 32px) !important;
+    }
+}
+
+/* Login Prompt - Mobile Friendly */
+#dashboard-login-prompt {
+    padding: clamp(2rem, 5vh, 3rem);
+    text-align: center;
+}
+
+#dashboard-login-prompt h2 {
+    font-size: clamp(1.3rem, 4vw, 1.5rem);
+    margin-bottom: clamp(0.75rem, 2vh, 1rem);
+}
+
+#dashboard-login-prompt p {
+    font-size: clamp(0.95rem, 2.8vw, 1rem);
+    margin-bottom: clamp(1.5rem, 3vh, 2rem);
+}
+
+.login-btn {
+    font-size: clamp(1rem, 3vw, 1.1rem) !important;
+    padding: clamp(12px, 2.5vh, 15px) clamp(24px, 5vw, 30px) !important;
+}
+</style>
+
 <div id="dashboard-content-wrapper" style="display: none;">
-  
+
   <header class="dashboard-header">
     <h1>{{ page.title }}</h1>
-    <div id="user-profile-details"></div> 
+    <div id="user-profile-details"></div>
   </header>
 
   <main class="dashboard-main-content">
@@ -70,14 +173,8 @@ permalink: /dashboard/
         if (hasAdminRole || isSiteOwner) {
             // Full admin access - show all buttons
             authButtonsDiv.innerHTML = `
-                <a href="{{ '/controls/' | relative_url }}" class="dashboard-btn">🔧 Server Controls</a>
+                <a href="{{ '/controls/' | relative_url }}" class="dashboard-btn">Server Controls</a>
                 <a href="{{ '/auth0-users/' | relative_url }}" class="dashboard-btn">Auth0 User Management</a>
-                <a href="{{ '/code-comprehension/' | relative_url }}" class="dashboard-btn">Code Comprehension Project</a>
-            `;
-        } else if (hasCodeComprehensionRole) {
-            // Limited access - only show Code Comprehension Project
-            authButtonsDiv.innerHTML = `
-                <a href="{{ '/code-comprehension/' | relative_url }}" class="dashboard-btn">Code Comprehension Project</a>
             `;
         }
         // If user has no special roles, no additional buttons are shown
