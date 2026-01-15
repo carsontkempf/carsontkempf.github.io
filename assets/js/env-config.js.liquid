@@ -12,30 +12,13 @@ class EnvironmentConfig {
     }
 
     /**
-     * Initialize configuration from various secure sources
+     * Initialize configuration from Jekyll site config (build-time substitution)
      */
     async initialize() {
-        // Skip Netlify function for local development (Jekyll can't serve functions)
-        const isLocalDevelopment = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
-
-        // For local development, use site config directly
-        if (isLocalDevelopment) {
-            await this.loadFromSiteConfig();
-            this.initialized = true;
-            return;
-        }
-
-        // For production, try Netlify function first
-        try {
-            await this.loadFromNetlifyFunction();
-            this.initialized = true;
-            return;
-        } catch (error) {
-            console.warn('Failed to load from Netlify function, using site config:', error.message);
-            // Fallback to site config
-            await this.loadFromSiteConfig();
-            this.initialized = true;
-        }
+        // Use Jekyll liquid templates to inject config at build time
+        // This works for both GitHub Pages and Netlify deployments
+        await this.loadFromSiteConfig();
+        this.initialized = true;
     }
 
     /**

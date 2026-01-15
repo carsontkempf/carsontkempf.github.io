@@ -281,7 +281,62 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
 }
 
 
+// =============================================================================
+// Mobile Responsive Design
+// =============================================================================
+
+// Tablet and below
 @media (max-width: 768px) {
+  // Adjust page content margin to prevent sidebar overlap
+  .page-content {
+    margin-left: calc(var(--sidebar-width-collapsed) + var(--sidebar-offset) + 0.5rem);
+  }
+
+  // Header adjustments for mobile
+  header {
+    min-height: auto;
+    padding: 1rem;
+    margin: 0 0.5rem;
+  }
+
+  // Stack header content properly
+  .header-content {
+    padding-right: 0;
+    padding-bottom: 4rem; // Space for buttons at bottom
+  }
+
+  // Position auth buttons at bottom left of header
+  header #auth-status, #auth-status {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    right: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-width: calc(100% - 5rem); // Leave space for theme switch
+  }
+
+  // Make buttons more touch-friendly
+  #auth-status a,
+  #auth-status button,
+  .login-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+    min-height: 44px; // Touch target size
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // Theme switch stays top-right but with adjusted spacing
+  header .theme-switch {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  // Sidebar adjustments when expanded
   [data-sidebar="expanded"] .page-content {
     display: none;
   }
@@ -297,6 +352,78 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
   [data-sidebar="expanded"] .sidebar-toggle-btn {
     left: calc(100% - var(--button-size) - 1rem);
     bottom: 1rem;
+  }
+
+  // Dashboard buttons
+  .dashboard-btn {
+    min-height: 44px;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+  }
+}
+
+// Small mobile phones
+@media (max-width: 480px) {
+  // Further reduce page margins
+  .page-content {
+    margin-left: calc(var(--sidebar-width-collapsed) + 0.25rem);
+  }
+
+  // Tighter spacing in header
+  header {
+    padding: 0.75rem;
+    margin: 0 0.25rem;
+  }
+
+  .header-content {
+    padding-bottom: 5rem; // More space for stacked buttons
+  }
+
+  // Stack auth buttons vertically on very small screens
+  header #auth-status, #auth-status {
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: calc(100% - 2rem);
+  }
+
+  #auth-status a,
+  #auth-status button,
+  .login-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  // Smaller theme switch
+  header .theme-switch {
+    transform: scale(0.9);
+    transform-origin: top right;
+  }
+
+  // Wrapper adjustments
+  .wrapper {
+    padding: 0.5rem;
+  }
+
+  // Smaller dashboard buttons
+  .dashboard-btn {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+// Landscape mobile optimization
+@media (max-height: 600px) and (orientation: landscape) {
+  header {
+    min-height: auto;
+    padding: 0.5rem 1rem;
+  }
+
+  .header-content {
+    padding-bottom: 3rem;
+  }
+
+  header #auth-status, #auth-status {
+    bottom: 0.5rem;
   }
 }
 
@@ -854,24 +981,78 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .playlists-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
-  
+
   .track-item {
     grid-template-columns: 30px 1fr;
     gap: 0.75rem;
-    
+    padding: 0.75rem;
+
     .track-meta {
       grid-column: 2;
       align-items: flex-start;
       margin-top: 0.5rem;
     }
   }
-  
+
   .track-number {
     grid-row: 1 / 3;
+  }
+
+  // Dashboard header
+  .dashboard-header {
+    padding: 1rem 0;
+  }
+
+  // Auth sections
+  #spotify-auth-section,
+  #apple-music-auth-section {
+    padding: 1rem;
+    margin: 0.5rem 0;
+  }
+
+  // Dashboard buttons container
+  .dashboard-buttons {
+    gap: 0.75rem;
+  }
+
+  // Service icons
+  .service-icons-container {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .transfer-arrow svg {
+    transform: rotate(90deg);
+  }
+
+  // Playlist items
+  .playlist-item {
+    padding: 1rem;
+  }
+
+  // Stats grid
+  .stats {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  // Failed tracks
+  .failed-track {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    text-align: left;
+  }
+
+  // Conversion section
+  #conversion-section {
+    padding: 1rem;
+    margin: 0.5rem 0;
   }
 }
 
@@ -1980,24 +2161,86 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
         flex-direction: column;
         gap: 1rem;
     }
-    
+
     .transfer-arrow {
         transform: rotate(90deg);
     }
-    
+
     .stats {
         grid-template-columns: 1fr;
     }
-    
+
     .failed-track {
         grid-template-columns: 1fr;
         gap: 0.5rem;
         text-align: left;
     }
-    
+
     .convert-btn {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+        min-height: 44px; // Touch-friendly
+    }
+
+    // Playlist actions
+    .playlist-actions {
+        .convert-btn {
+            width: 100%;
+        }
+    }
+
+    // Conversion progress
+    #conversion-progress,
+    #conversion-results {
         padding: 1rem;
-        font-size: 1rem;
+    }
+
+    .conversion-summary {
+        padding: 1rem;
+    }
+}
+
+// Very small mobile phones
+@media (max-width: 480px) {
+    .service-logo {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    .spotify-logo,
+    .apple-music-logo {
+        width: 84px !important;
+        height: 84px !important;
+    }
+
+    .transfer-arrow svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .convert-btn {
+        padding: 0.7rem 0.9rem;
+        font-size: 0.85rem;
+    }
+
+    // Tighter dashboard spacing
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+
+    #spotify-auth-section,
+    #apple-music-auth-section {
+        padding: 0.75rem;
+    }
+
+    // Stack everything vertically
+    .playlist-item {
+        padding: 0.75rem;
+    }
+
+    .track-item {
+        padding: 0.5rem;
+        gap: 0.5rem;
     }
 }
 
@@ -2137,22 +2380,30 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
 @media (max-width: 768px) {
     .playlist-actions {
         .convert-btn {
-            font-size: 0.8rem;
-            padding: 0.6rem 0.8rem;
+            font-size: 0.85rem;
+            padding: 0.7rem 0.9rem;
+            min-height: 44px;
         }
     }
-    
+
     .explicit-badge {
-        font-size: 0.6rem;
-        padding: 1px 3px;
+        font-size: 0.65rem;
+        padding: 2px 4px;
         margin-left: 0.3rem;
     }
-    
+
     .conversion-details {
         padding: 0.8rem;
-        
+
         p {
             font-size: 0.9rem;
         }
+    }
+}
+
+@media (max-width: 480px) {
+    .explicit-badge {
+        font-size: 0.6rem;
+        padding: 1px 3px;
     }
 }

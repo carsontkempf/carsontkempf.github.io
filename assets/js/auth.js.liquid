@@ -15,56 +15,18 @@ window.authService = {
 };
 
 /* ADD */
-// Initialize Auth0 by fetching credentials from Netlify at runtime
-async function initializeAuth() {
-    console.log('[AUTH] Waiting for environment configuration from Netlify...');
-
-    // Wait for envConfig to be initialized
-    if (!window.envConfig || !window.envConfig.initialized) {
-        await new Promise(resolve => {
-            window.addEventListener('configReady', resolve, { once: true });
-        });
-    }
-
-    console.log('[AUTH] Environment config ready, loading Auth0 configuration...');
-
-    // Get Auth0 configuration from envConfig service (which fetches from Netlify)
-    let config;
-    try {
-        const envAuth0Config = window.envConfig.getAuth0Config();
-        config = {
-            domain: envAuth0Config.domain,
-            clientId: envAuth0Config.client_id,
-            audience: envAuth0Config.audience
-        };
-
-        console.log('[AUTH] Auth0 config loaded from Netlify:', {
-            domain: config.domain,
-            clientId: config.clientId,
-            audience: config.audience
-        });
-    } catch (error) {
-        console.error('[AUTH] Failed to get Auth0 config from Netlify:', error);
-        throw error;
-    }
-
-    // Validate configuration
-    if (!config.domain || config.domain === '' || config.domain.includes('${')) {
-        throw new Error(`Invalid Auth0 domain: ${config.domain}. Check Netlify environment variables.`);
-    }
-    if (!config.clientId || config.clientId === '' || config.clientId.includes('${')) {
-        throw new Error(`Invalid Auth0 client_id: ${config.clientId}. Check Netlify environment variables.`);
-    }
-    if (!config.audience || config.audience === '' || config.audience.includes('${')) {
-        throw new Error(`Invalid Auth0 audience: ${config.audience}. Check Netlify environment variables.`);
-    }
+document.addEventListener('DOMContentLoaded', async () => {
+    // Use Jekyll liquid templates to inject Auth0 config at build time
+    const config = {
+        domain: '{{ site.auth0.domain }}',
+        clientId: '{{ site.auth0.client_id }}',
+        audience: '{{ site.auth0.audience }}'
+    };
 
     try {
         // 1. Create the Auth0 client with REFRESH TOKEN support
-        // Use /dashboard/ path to match Auth0 allowed callbacks
-        const redirectUri = window.location.origin + '/dashboard/';
-        console.log('[DEBUG] Starting Auth0 initialization...');
-        console.log('[DEBUG] Auth0 Configuration:', {
+        const redirectUri = window.location.origin;
+        console.log('Auth0 Configuration:', {
             domain: config.domain,
             clientId: config.clientId,
             audience: config.audience,
@@ -184,21 +146,6 @@ async function initializeAuth() {
         document.dispatchEvent(new CustomEvent('authReady'));
 
     } catch (error) {
-        console.error('[DEBUG] Fatal Error during Auth0 Initialization');
-        console.error('[DEBUG] Error type:', error.constructor.name);
-        console.error('[DEBUG] Error message:', error.message);
-        console.error('[DEBUG] Error stack:', error.stack);
-        console.error('[DEBUG] Full error object:', error);
-
-        // Additional network-specific debugging
-        if (error.message && error.message.includes('Failed to fetch')) {
-            console.error('[DEBUG] Network error detected - could be CORS or DNS issue');
-            console.error('[DEBUG] Trying to reach:', `https://${config.domain}`);
-        }
-
         console.error("Fatal Error during Auth0 Initialization:", error);
     }
-}
-
-// Initialize auth when DOM is ready
-document.addEventListener('DOMContentLoaded', initializeAuth);
+});
