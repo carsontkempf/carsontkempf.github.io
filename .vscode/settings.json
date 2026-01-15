@@ -62,7 +62,6 @@
         "deno.lock": true,
         ".env": true,
         "_plugins/": true,
-        "_data/": true,
         "node_modules/": true,
         "generate-apple-token.js": true,
         ".well-known/appspecific/": true,
@@ -197,6 +196,9 @@
                     ".well-known/",
                     "docs/",
                     ".jekyll-metadata"
+                ],
+                "peek": [
+                    "_data/"
                 ]
             },
             {
