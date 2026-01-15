@@ -528,6 +528,10 @@ const spotifyConfig = {
     ]
 };
 
+// Debug: Log the redirect URI being used
+console.log('[SPOTIFY] Redirect URI configured:', spotifyConfig.redirectUri);
+console.log('[SPOTIFY] Expected: https://carsontkempf.github.io/spotify-apple/');
+
 // Spotify Service Object
 window.spotifyService = {
     accessToken: null,
@@ -556,12 +560,18 @@ window.spotifyService = {
     
     // Start Spotify authorization
     authorize: async () => {
+        console.log('[SPOTIFY] ========================================');
+        console.log('[SPOTIFY] Starting Spotify authorization...');
+        console.log('[SPOTIFY] Client ID:', spotifyConfig.clientId);
+        console.log('[SPOTIFY] Redirect URI:', spotifyConfig.redirectUri);
+        console.log('[SPOTIFY] ========================================');
+
         const codeVerifier = window.spotifyService.generateRandomString(128);
         const codeChallenge = await window.spotifyService.generateCodeChallenge(codeVerifier);
-        
+
         // Store code verifier for later use
         localStorage.setItem('spotify_code_verifier', codeVerifier);
-        
+
         const params = new URLSearchParams({
             response_type: 'code',
             client_id: spotifyConfig.clientId,
@@ -570,19 +580,41 @@ window.spotifyService = {
             code_challenge_method: 'S256',
             code_challenge: codeChallenge,
         });
-        
-        window.location = `https://accounts.spotify.com/authorize?${params}`;
+
+        const authUrl = `https://accounts.spotify.com/authorize?${params}`;
+        console.log('[SPOTIFY] Authorization URL:', authUrl);
+        console.log('[SPOTIFY] Redirecting to Spotify...');
+
+        window.location = authUrl;
     },
     
     // Handle authorization callback
     handleCallback: async () => {
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
-        
+        const error = urlParams.get('error');
+
+        console.log('[SPOTIFY] ========================================');
+        console.log('[SPOTIFY] Handling callback from Spotify...');
+        console.log('[SPOTIFY] Current URL:', window.location.href);
+        console.log('[SPOTIFY] Code present:', !!code);
+        console.log('[SPOTIFY] Error:', error || 'none');
+        console.log('[SPOTIFY] ========================================');
+
+        if (error) {
+            console.error('[SPOTIFY] Authorization error:', error);
+            alert(`Spotify authorization failed: ${error}`);
+            return false;
+        }
+
         if (code) {
             const codeVerifier = localStorage.getItem('spotify_code_verifier');
-            
+            console.log('[SPOTIFY] Code verifier found:', !!codeVerifier);
+
             try {
+                console.log('[SPOTIFY] Exchanging code for token...');
+                console.log('[SPOTIFY] Using redirect URI:', spotifyConfig.redirectUri);
+
                 const response = await fetch('https://accounts.spotify.com/api/token', {
                     method: 'POST',
                     headers: {
@@ -596,29 +628,39 @@ window.spotifyService = {
                         code_verifier: codeVerifier,
                     }),
                 });
-                
+
                 const data = await response.json();
-                
+                console.log('[SPOTIFY] Token response status:', response.status);
+
+                if (!response.ok) {
+                    console.error('[SPOTIFY] Token exchange failed:', data);
+                    alert(`Spotify token exchange failed: ${data.error_description || data.error || 'Unknown error'}`);
+                    return false;
+                }
+
                 if (data.access_token) {
+                    console.log('[SPOTIFY] ✓ Successfully received access token');
                     window.spotifyService.accessToken = data.access_token;
                     window.spotifyService.refreshToken = data.refresh_token;
                     window.spotifyService.isAuthorized = true;
-                    
+
                     // Store tokens securely
                     localStorage.setItem('spotify_access_token', data.access_token);
                     localStorage.setItem('spotify_refresh_token', data.refresh_token);
                     localStorage.setItem('spotify_token_expires', Date.now() + (data.expires_in * 1000));
-                    
+
                     // Clean up
                     localStorage.removeItem('spotify_code_verifier');
-                    
+
                     // Remove code from URL
                     window.history.replaceState(null, null, window.location.pathname);
-                    
+
+                    console.log('[SPOTIFY] ✓ Authorization complete!');
                     return true;
                 }
             } catch (error) {
-                console.error('Error exchanging code for token:', error);
+                console.error('[SPOTIFY] Error exchanging code for token:', error);
+                alert(`Spotify authorization failed: ${error.message}`);
             }
         }
         return false;
