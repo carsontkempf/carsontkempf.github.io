@@ -352,6 +352,18 @@ permalink: /spotify-apple/
         transform: none;
     }
 }
+
+/* Desktop Breakpoint - Smaller Title and Button */
+@media (min-width: 1024px) {
+    .dashboard-header h1 {
+        font-size: 1.2rem;
+    }
+
+    #convert-selected-btn {
+        font-size: 0.85rem;
+        padding: 8px 16px;
+    }
+}
 </style>
 
 <div id="spotify-apple-content-wrapper" style="display: none;">
