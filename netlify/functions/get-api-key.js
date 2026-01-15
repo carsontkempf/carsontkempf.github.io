@@ -59,46 +59,44 @@ const promisifyMiddleware = (middleware) => (event, context) =>
   });
 
 exports.handler = async (event, context) => {
-  if (!jwtCheck) {
+  // Read credentials from environment variables
+  const auth0Domain = process.env.AUTH0_DOMAIN;
+  const auth0ClientId = process.env.AUTH0_CLIENT_ID;
+  const auth0Audience = process.env.AUTH0_AUDIENCE_SERVER;
+  const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
+  const appleMusicDeveloperToken = process.env.APPLE_MUSIC_DEVELOPER_TOKEN;
+
+  // Auth0 client credentials (domain, client_id, audience) are public OAuth2 credentials
+  // They can be safely returned without authentication
+  // Only sensitive credentials like private keys should require authentication
+
+  // Check if we have the minimum required configuration
+  if (!auth0Domain || !auth0ClientId) {
+    console.error('CRITICAL: AUTH0_DOMAIN or AUTH0_CLIENT_ID environment variables not set.');
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Authentication service not configured correctly on the server (missing env vars).' })
     };
   }
 
+  // Return public OAuth2 credentials without authentication
+  // These are meant to be public - security comes from PKCE flow and callback URL validation
   try {
-    const authResult = await promisifyMiddleware(jwtCheck)(event, context);
-    if (!authResult.authenticated) {
-      // If not authenticated, authResult itself is the error response
-      return authResult;
-    }
-    // console.log('Authenticated user (from token sub):', authResult.user.payload.sub);
-
-    // Attempt to read the API keys from environment variables
-    const auth0Domain = process.env.AUTH0_DOMAIN;
-    const auth0ClientId = process.env.AUTH0_CLIENT_ID;
-    const auth0Audience = process.env.AUTH0_AUDIENCE_SERVER;
-    const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
-    const appleMusicDeveloperToken = process.env.APPLE_MUSIC_DEVELOPER_TOKEN;
-
-    if (auth0Domain && auth0ClientId && spotifyClientId) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          auth0Domain,
-          auth0ClientId,
-          auth0Audience,
-          spotifyClientId,
-          appleMusicDeveloperToken
-        }),
-      };
-    } else {
-      console.error('CRITICAL: Required API credentials not found in environment variables.');
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'API credentials not configured on server' }),
-      };
-    }
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*', // Allow CORS for public credentials
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        auth0Domain,
+        auth0ClientId,
+        auth0Audience,
+        spotifyClientId,
+        appleMusicDeveloperToken: appleMusicDeveloperToken || null
+      }),
+    };
   } catch (error) {
     console.error('Unexpected error in get-api-key function:', error);
     return {

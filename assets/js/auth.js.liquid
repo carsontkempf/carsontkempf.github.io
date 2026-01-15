@@ -15,9 +15,9 @@ window.authService = {
 };
 
 /* ADD */
-// Wait for environment config to be ready before initializing auth
+// Initialize Auth0 by fetching credentials from Netlify at runtime
 async function initializeAuth() {
-    console.log('[AUTH] Waiting for environment configuration...');
+    console.log('[AUTH] Waiting for environment configuration from Netlify...');
 
     // Wait for envConfig to be initialized
     if (!window.envConfig || !window.envConfig.initialized) {
@@ -28,7 +28,7 @@ async function initializeAuth() {
 
     console.log('[AUTH] Environment config ready, loading Auth0 configuration...');
 
-    // Get Auth0 configuration from envConfig service
+    // Get Auth0 configuration from envConfig service (which fetches from Netlify)
     let config;
     try {
         const envAuth0Config = window.envConfig.getAuth0Config();
@@ -38,25 +38,25 @@ async function initializeAuth() {
             audience: envAuth0Config.audience
         };
 
-        console.log('[AUTH] Auth0 config loaded:', {
+        console.log('[AUTH] Auth0 config loaded from Netlify:', {
             domain: config.domain,
             clientId: config.clientId,
             audience: config.audience
         });
     } catch (error) {
-        console.error('[AUTH] Failed to get Auth0 config from envConfig:', error);
+        console.error('[AUTH] Failed to get Auth0 config from Netlify:', error);
         throw error;
     }
 
     // Validate configuration
     if (!config.domain || config.domain === '' || config.domain.includes('${')) {
-        throw new Error(`Invalid Auth0 domain: ${config.domain}`);
+        throw new Error(`Invalid Auth0 domain: ${config.domain}. Check Netlify environment variables.`);
     }
     if (!config.clientId || config.clientId === '' || config.clientId.includes('${')) {
-        throw new Error(`Invalid Auth0 client_id: ${config.clientId}`);
+        throw new Error(`Invalid Auth0 client_id: ${config.clientId}. Check Netlify environment variables.`);
     }
     if (!config.audience || config.audience === '' || config.audience.includes('${')) {
-        throw new Error(`Invalid Auth0 audience: ${config.audience}`);
+        throw new Error(`Invalid Auth0 audience: ${config.audience}. Check Netlify environment variables.`);
     }
 
     try {

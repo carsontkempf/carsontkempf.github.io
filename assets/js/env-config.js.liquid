@@ -40,26 +40,26 @@ class EnvironmentConfig {
 
     /**
      * Load configuration from Netlify Functions (secure for production)
+     * Fetches public OAuth2 credentials from Netlify environment variables
      */
     async loadFromNetlifyFunction() {
         try {
-            // Try to get Auth0 token for authenticated request
-            let headers = {};
-            if (window.authService && window.authService.client && window.authService.isAuthenticated) {
-                try {
-                    const token = await window.authService.client.getTokenSilently();
-                    headers['Authorization'] = `Bearer ${token}`;
-                } catch (tokenError) {
-                    console.warn('Could not get Auth0 token for API request:', tokenError);
+            console.log('[ENV-CONFIG] Fetching configuration from Netlify function...');
+
+            const response = await fetch('/.netlify/functions/get-api-key', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
                 }
-            }
-            
-            const response = await fetch('/.netlify/functions/get-api-key', { headers });
+            });
+
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            
+
             const data = await response.json();
+            console.log('[ENV-CONFIG] Configuration received from Netlify');
+
             this.config = {
                 auth0: {
                     domain: data.auth0Domain,
@@ -71,14 +71,19 @@ class EnvironmentConfig {
                 },
                 appleMusic: {
                     developer_token: data.appleMusicDeveloperToken,
-                    team_id: data.appleMusicTeamId || '{{ site.apple_music.team_id }}',
-                    key_id: data.appleMusicKeyId || '{{ site.apple_music.key_id }}',
-                    private_key: data.appleMusicPrivateKey
+                    team_id: '{{ site.apple_music.team_id }}',
+                    key_id: '{{ site.apple_music.key_id }}',
+                    private_key: null
                 }
             };
-            
-            // Configuration loaded successfully
+
+            console.log('[ENV-CONFIG] Configuration loaded successfully:', {
+                auth0Domain: this.config.auth0.domain,
+                auth0ClientId: this.config.auth0.client_id,
+                spotifyClientId: this.config.spotify.client_id
+            });
         } catch (error) {
+            console.error('[ENV-CONFIG] Failed to load from Netlify function:', error);
             throw new Error(`Failed to load from Netlify function: ${error.message}`);
         }
     }
