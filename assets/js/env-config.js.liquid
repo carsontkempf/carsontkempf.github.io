@@ -12,85 +12,52 @@ class EnvironmentConfig {
     }
 
     /**
-     * Initialize configuration from Jekyll site config (build-time substitution)
+     * Initialize configuration - HARDCODED for GitHub Pages deployment
      */
     async initialize() {
-        // Use Jekyll liquid templates to inject config at build time
-        // This works for both GitHub Pages and Netlify deployments
+        console.log('[ENV-CONFIG] ========================================');
+        console.log('[ENV-CONFIG] Starting initialization...');
+        console.log('[ENV-CONFIG] Hostname:', window.location.hostname);
+        console.log('[ENV-CONFIG] ========================================');
+
+        // Use hardcoded values for GitHub Pages (like working commit b5cf944)
         await this.loadFromSiteConfig();
         this.initialized = true;
+
+        console.log('[ENV-CONFIG] ========================================');
+        console.log('[ENV-CONFIG] Initialization complete!');
+        console.log('[ENV-CONFIG] Auth0 Domain:', this.config.auth0.domain);
+        console.log('[ENV-CONFIG] Auth0 Client ID:', this.config.auth0.client_id);
+        console.log('[ENV-CONFIG] Auth0 Audience:', this.config.auth0.audience);
+        console.log('[ENV-CONFIG] Spotify Client ID:', this.config.spotify.client_id);
+        console.log('[ENV-CONFIG] ========================================');
     }
 
     /**
-     * Load configuration from Netlify Functions (secure for production)
-     * Fetches public OAuth2 credentials from Netlify environment variables
-     */
-    async loadFromNetlifyFunction() {
-        try {
-            console.log('[ENV-CONFIG] Fetching configuration from Netlify function...');
-
-            const response = await fetch('/.netlify/functions/get-api-key', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            console.log('[ENV-CONFIG] Configuration received from Netlify');
-
-            this.config = {
-                auth0: {
-                    domain: data.auth0Domain,
-                    client_id: data.auth0ClientId,
-                    audience: data.auth0Audience
-                },
-                spotify: {
-                    client_id: data.spotifyClientId
-                },
-                appleMusic: {
-                    developer_token: data.appleMusicDeveloperToken,
-                    team_id: '{{ site.apple_music.team_id }}',
-                    key_id: '{{ site.apple_music.key_id }}',
-                    private_key: null
-                }
-            };
-
-            console.log('[ENV-CONFIG] Configuration loaded successfully:', {
-                auth0Domain: this.config.auth0.domain,
-                auth0ClientId: this.config.auth0.client_id,
-                spotifyClientId: this.config.spotify.client_id
-            });
-        } catch (error) {
-            console.error('[ENV-CONFIG] Failed to load from Netlify function:', error);
-            throw new Error(`Failed to load from Netlify function: ${error.message}`);
-        }
-    }
-
-    /**
-     * Load configuration from Jekyll site config (fallback method)
+     * Load configuration - HARDCODED VALUES (working approach from b5cf944)
      */
     async loadFromSiteConfig() {
+        console.log('[ENV-CONFIG] Loading hardcoded configuration...');
+
+        // HARDCODED VALUES - This is how it worked in commit b5cf944
         this.config = {
             auth0: {
-                domain: '{{ site.auth0.domain }}',
-                client_id: '{{ site.auth0.client_id }}',
-                audience: '{{ site.auth0.audience }}'
+                domain: 'dev-l57dcpkhob0u7ykb.us.auth0.com',
+                client_id: 'Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC',
+                audience: 'https://carsontkempf.github.io/api/carsons-meditations'
             },
             spotify: {
-                client_id: '{{ site.spotify.client_id }}'
+                client_id: '80826ef3daa547f49d843c254ad224b6'
             },
             appleMusic: {
-                developer_token: '{{ site.apple_music.developer_token }}',
-                team_id: '{{ site.apple_music.team_id }}',
-                key_id: '{{ site.apple_music.key_id }}',
+                developer_token: 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlQ1Wlg2NzZRUlEifQ.eyJpYXQiOjE3NjgzNTUxNzUsImV4cCI6MTc4MzkwNzE3NSwiaXNzIjoiNVM4NTVIQjg5NSJ9.0jmfs0ZKeSx_ARzqIJnOeoaucjH0U16WTuqd9N1K6ZGLAZZimyF4ebXB-aOgvM8BuP08w0SItlhBjW8kQdZGiw',
+                team_id: '5S855HB895',
+                key_id: 'T5ZX676QRQ',
                 private_key: ''
             }
         };
+
+        console.log('[ENV-CONFIG] Hardcoded configuration loaded successfully');
     }
 
 

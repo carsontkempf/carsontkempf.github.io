@@ -16,32 +16,39 @@ window.authService = {
 
 /* ADD */
 document.addEventListener('DOMContentLoaded', async () => {
-    // Use Jekyll liquid templates to inject Auth0 config at build time
+    console.log('========================================');
+    console.log('[AUTH] DOMContentLoaded event fired');
+    console.log('[AUTH] Starting Auth0 initialization...');
+    console.log('[AUTH] Current URL:', window.location.href);
+    console.log('========================================');
+
+    // HARDCODED CONFIG - This is the working approach from commit b5cf944
     const config = {
-        domain: '{{ site.auth0.domain }}',
-        clientId: '{{ site.auth0.client_id }}',
-        audience: '{{ site.auth0.audience }}'
+        domain: 'dev-l57dcpkhob0u7ykb.us.auth0.com',
+        clientId: 'Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC',
+        audience: 'https://carsontkempf.github.io/api/carsons-meditations'
     };
 
-    try {
-        // 1. Create the Auth0 client with REFRESH TOKEN support
-        const redirectUri = window.location.origin;
-        console.log('Auth0 Configuration:', {
-            domain: config.domain,
-            clientId: config.clientId,
-            audience: config.audience,
-            redirectUri: redirectUri,
-            currentUrl: window.location.href
-        });
+    console.log('[AUTH] ========================================');
+    console.log('[AUTH] Using HARDCODED Auth0 Configuration:');
+    console.log('[AUTH] Domain:', config.domain);
+    console.log('[AUTH] Client ID:', config.clientId);
+    console.log('[AUTH] Audience:', config.audience);
+    console.log('[AUTH] ========================================');
 
-        // DEBUG: Verify Auth0 SDK is loaded
+    try {
+        // 1. Verify Auth0 SDK is loaded
         if (!window.auth0) {
-            console.error('[DEBUG] Auth0 SDK not loaded! window.auth0 is undefined');
+            console.error('[AUTH] FATAL ERROR: Auth0 SDK not loaded! window.auth0 is undefined');
+            console.error('[AUTH] Make sure auth0-spa-js is included in the page');
             throw new Error('Auth0 SDK not loaded');
         }
-        console.log('[DEBUG] Auth0 SDK loaded successfully');
+        console.log('[AUTH] ✓ Auth0 SDK loaded successfully');
 
-        console.log('[DEBUG] Creating Auth0 client...');
+        // 2. Create the Auth0 client with REFRESH TOKEN support
+        const redirectUri = window.location.origin;
+        console.log('[AUTH] Creating Auth0 client with redirect URI:', redirectUri);
+
         const auth0Client = await window.auth0.createAuth0Client({
             domain: config.domain,
             clientId: config.clientId,
@@ -52,31 +59,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             useRefreshTokens: true,
             cacheLocation: 'localstorage'
         });
-        console.log('[DEBUG] Auth0 client created successfully');
+        console.log('[AUTH] ✓ Auth0 client created successfully');
         window.authService.client = auth0Client;
 
-        // 2. Handle the user returning from Auth0
+        // 3. Handle the user returning from Auth0
+        console.log('[AUTH] Checking for Auth0 redirect callback...');
         if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
+            console.log('[AUTH] Auth0 callback detected, processing...');
             await auth0Client.handleRedirectCallback();
+            console.log('[AUTH] ✓ Callback handled, redirecting to dashboard...');
             window.history.replaceState({}, document.title, '/dashboard/');
             window.location.href = '/dashboard/';
             return;
         }
+        console.log('[AUTH] No Auth0 callback detected');
 
-        // 3. Check the session and update the state
+        // 4. Check the session and update the state
+        console.log('[AUTH] Checking authentication status...');
         const isAuthenticated = await auth0Client.isAuthenticated();
+        console.log('[AUTH] Authentication status:', isAuthenticated);
         window.authService.isAuthenticated = isAuthenticated;
         if (isAuthenticated) {
             window.authService.user = await auth0Client.getUser();
+            console.log('[AUTH] ✓ User authenticated:', window.authService.user.email || window.authService.user.sub);
+        } else {
+            console.log('[AUTH] User not authenticated');
         }
 
-        // 4. Define the global login/logout methods
-        window.authService.login = () => auth0Client.loginWithRedirect();
-        window.authService.logout = () => auth0Client.logout({
-            logoutParams: { returnTo: window.location.origin }
-        });
+        // 5. Define the global login/logout methods
+        console.log('[AUTH] Setting up login/logout methods...');
+        window.authService.login = () => {
+            console.log('[AUTH] Login triggered, redirecting to Auth0...');
+            auth0Client.loginWithRedirect();
+        };
+        window.authService.logout = () => {
+            console.log('[AUTH] Logout triggered...');
+            auth0Client.logout({
+                logoutParams: { returnTo: window.location.origin }
+            });
+        };
+        console.log('[AUTH] ✓ Login/logout methods configured');
 
-        // 4b. Define getApiKey method
+        // 6. Define getApiKey method (NOTE: This won't work on GitHub Pages without backend)
         window.authService.getApiKey = async () => {
             if (!isAuthenticated) {
                 throw new Error('User not authenticated');
@@ -102,12 +126,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
 
-        // 5. Get references to the UI buttons
+        // 7. Get references to the UI buttons
+        console.log('[AUTH] Configuring UI buttons...');
         const loginBtn = document.getElementById('btn-login');
         const dashboardBtn = document.getElementById('btn-dashboard');
         const logoutBtn = document.getElementById('btn-logout');
 
-        // 6. Update button visibility based on auth state and page location
+        console.log('[AUTH] Button elements:', {
+            loginBtn: !!loginBtn,
+            dashboardBtn: !!dashboardBtn,
+            logoutBtn: !!logoutBtn
+        });
+
+        // 8. Update button visibility based on auth state and page location
         if (isAuthenticated) {
             if (loginBtn) loginBtn.style.display = 'none';
             
@@ -128,7 +159,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (logoutBtn) logoutBtn.style.display = 'none';
         }
 
-        // 7. Wire up the buttons to the auth service methods
+        console.log('[AUTH] ✓ Button visibility configured');
+
+        // 9. Wire up the buttons to the auth service methods
         if (loginBtn) {
             loginBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -142,10 +175,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // 8. Fire the "ready" event for page-specific scripts
+        console.log('[AUTH] ✓ Button event listeners configured');
+
+        // 10. Fire the "ready" event for page-specific scripts
+        console.log('[AUTH] Dispatching authReady event...');
         document.dispatchEvent(new CustomEvent('authReady'));
 
+        console.log('========================================');
+        console.log('[AUTH] ✓ Auth0 initialization complete!');
+        console.log('========================================');
+
     } catch (error) {
-        console.error("Fatal Error during Auth0 Initialization:", error);
+        console.error('========================================');
+        console.error('[AUTH] FATAL ERROR during initialization:');
+        console.error('[AUTH] Error:', error);
+        console.error('[AUTH] Error message:', error.message);
+        console.error('[AUTH] Error stack:', error.stack);
+        console.error('========================================');
     }
 });
