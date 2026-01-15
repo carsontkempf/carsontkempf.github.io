@@ -166,21 +166,23 @@ class EnvironmentConfig {
 // Create global instance
 window.envConfig = new EnvironmentConfig();
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', async () => {
+// Initialize immediately when script loads (not waiting for DOMContentLoaded)
+// This ensures config is ready before other scripts that depend on it
+(async () => {
     try {
         await window.envConfig.initialize();
+        console.log('[ENV-CONFIG] Configuration initialized successfully');
 
         // Dispatch event when config is ready
         window.dispatchEvent(new CustomEvent('configReady', {
             detail: { envConfig: window.envConfig }
         }));
     } catch (error) {
-        console.error('Failed to initialize environment configuration:', error);
+        console.error('[ENV-CONFIG] Failed to initialize environment configuration:', error);
 
         // Dispatch error event
         window.dispatchEvent(new CustomEvent('configError', {
             detail: { error: error.message }
         }));
     }
-});
+})();

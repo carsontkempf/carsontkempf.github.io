@@ -25,9 +25,10 @@
     
     <!-- MusicKit JS for Apple Music integration -->
     <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js" defer></script>
-    
-    <script src="{{ '/assets/js/env-config.js' | relative_url }}"></script>
-    <script src="{{ '/assets/js/auth.js' | relative_url }}"></script>
-    <script src="{{ '/assets/js/apple-music-service.js' | relative_url }}"></script>
+
+    <!-- Load env-config first to initialize credentials before other scripts -->
+    <script defer src="{{ '/assets/js/env-config.js' | relative_url }}"></script>
+    <script defer src="{{ '/assets/js/auth.js' | relative_url }}"></script>
+    <script defer src="{{ '/assets/js/apple-music-service.js' | relative_url }}"></script>
   </body>
 </html>
