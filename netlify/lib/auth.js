@@ -50,7 +50,7 @@ async function verifyAuth0Token(request) {
 }
 
 /**
- * Checks if user has required role(s)
+ * Checks if user has required role(s) - case-insensitive
  * Roles are expected in the JWT payload under namespace/roles
  * @param {Object} payload - Verified JWT payload
  * @param {string|string[]} requiredRoles - Single role or array of roles (user needs at least one)
@@ -70,7 +70,9 @@ function hasRole(payload, requiredRoles) {
   }
 
   const required = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
-  return required.some(role => roles.includes(role));
+  // Case-insensitive comparison
+  const rolesLower = roles.map(r => String(r).toLowerCase());
+  return required.some(role => rolesLower.includes(String(role).toLowerCase()));
 }
 
 /**

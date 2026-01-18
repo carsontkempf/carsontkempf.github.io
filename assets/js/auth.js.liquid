@@ -117,14 +117,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         };
 
-        // Define role checking method
+        // Define role checking method (case-insensitive)
         window.authService.hasRole = (requiredRole) => {
             if (!window.authService.roles || window.authService.roles.length === 0) {
                 return false;
             }
             // Support single role string or array of roles
             const required = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-            return required.some(role => window.authService.roles.includes(role));
+            // Case-insensitive comparison
+            const userRolesLower = window.authService.roles.map(r => r.toLowerCase());
+            return required.some(role => userRolesLower.includes(role.toLowerCase()));
         };
 
         console.log('[AUTH] ✓ Login/logout methods configured');
