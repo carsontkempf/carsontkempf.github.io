@@ -29,7 +29,9 @@ class EnvironmentConfig {
         console.log('[ENV-CONFIG] Auth0 Domain:', this.config.auth0.domain);
         console.log('[ENV-CONFIG] Auth0 Client ID:', this.config.auth0.client_id);
         console.log('[ENV-CONFIG] Auth0 Audience:', this.config.auth0.audience);
+        console.log('[ENV-CONFIG] Auth0 Callback URL:', this.config.auth0.callback_url);
         console.log('[ENV-CONFIG] Spotify Client ID:', this.config.spotify.client_id);
+        console.log('[ENV-CONFIG] Spotify Callback URL:', this.config.spotify.callback_url);
         console.log('[ENV-CONFIG] ========================================');
     }
 
@@ -44,10 +46,12 @@ class EnvironmentConfig {
             auth0: {
                 domain: 'dev-l57dcpkhob0u7ykb.us.auth0.com',
                 client_id: 'Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC',
-                audience: 'https://carsontkempf.github.io/api/carsons-meditations'
+                audience: 'https://carsontkempf.github.io/api/carsons-meditations',
+                callback_url: 'https://carsontkempf.github.io'
             },
             spotify: {
-                client_id: '80826ef3daa547f49d843c254ad224b6'
+                client_id: '80826ef3daa547f49d843c254ad224b6',
+                callback_url: 'https://carsontkempf.github.io/spotify-apple/'
             },
             appleMusic: {
                 developer_token: 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlQ1Wlg2NzZRUlEifQ.eyJpYXQiOjE3NjgzNTUxNzUsImV4cCI6MTc4MzkwNzE3NSwiaXNzIjoiNVM4NTVIQjg5NSJ9.0jmfs0ZKeSx_ARzqIJnOeoaucjH0U16WTuqd9N1K6ZGLAZZimyF4ebXB-aOgvM8BuP08w0SItlhBjW8kQdZGiw',

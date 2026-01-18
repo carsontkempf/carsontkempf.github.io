@@ -5,9 +5,14 @@ permalink: /assets/js/auth.js
 window.authService = {
     isAuthenticated: false,
     user: null,
+    roles: [],
     client: null,
     login: () => console.error("Login service not ready."),
     logout: () => console.error("Login service not ready."),
+    hasRole: (role) => {
+        console.error("Role checking not ready");
+        return false;
+    },
     getApiKey: async () => {
         console.error("API key service not available");
         return null;
@@ -26,7 +31,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const config = {
         domain: 'dev-l57dcpkhob0u7ykb.us.auth0.com',
         clientId: 'Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC',
-        audience: 'https://carsontkempf.github.io/api/carsons-meditations'
+        audience: 'https://carsontkempf.github.io/api/carsons-meditations',
+        callbackUrl: 'https://carsontkempf.github.io'
     };
 
     console.log('[AUTH] ========================================');
@@ -34,6 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('[AUTH] Domain:', config.domain);
     console.log('[AUTH] Client ID:', config.clientId);
     console.log('[AUTH] Audience:', config.audience);
+    console.log('[AUTH] Callback URL:', config.callbackUrl);
     console.log('[AUTH] ========================================');
 
     try {
@@ -46,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('[AUTH] ✓ Auth0 SDK loaded successfully');
 
         // 2. Create the Auth0 client with REFRESH TOKEN support
-        const redirectUri = window.location.origin;
+        const redirectUri = config.callbackUrl || window.location.origin;
         console.log('[AUTH] Creating Auth0 client with redirect URI:', redirectUri);
 
         const auth0Client = await window.auth0.createAuth0Client({
@@ -82,8 +89,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isAuthenticated) {
             window.authService.user = await auth0Client.getUser();
             console.log('[AUTH] ✓ User authenticated:', window.authService.user.email || window.authService.user.sub);
+
+            // Extract roles from user claims (Auth0 custom claims are namespaced)
+            const roles = window.authService.user['https://carsontkempf.github.io/roles']
+                || window.authService.user['roles']
+                || window.authService.user['user_metadata']?.roles
+                || window.authService.user['app_metadata']?.roles
+                || [];
+
+            window.authService.roles = Array.isArray(roles) ? roles : [];
+            console.log('[AUTH] User roles:', window.authService.roles);
         } else {
             console.log('[AUTH] User not authenticated');
+            window.authService.roles = [];
         }
 
         // 5. Define the global login/logout methods
@@ -98,6 +116,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 logoutParams: { returnTo: window.location.origin }
             });
         };
+
+        // Define role checking method
+        window.authService.hasRole = (requiredRole) => {
+            if (!window.authService.roles || window.authService.roles.length === 0) {
+                return false;
+            }
+            // Support single role string or array of roles
+            const required = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+            return required.some(role => window.authService.roles.includes(role));
+        };
+
         console.log('[AUTH] ✓ Login/logout methods configured');
 
         // 6. Define getApiKey method (NOTE: This won't work on GitHub Pages without backend)

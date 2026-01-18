@@ -3,6 +3,10 @@ layout: page
 title: Essays
 permalink: /essays/
 ---
+<script src="/assets/js/role-protection.js"></script>
+
+<div id="auth-message"></div>
+
 
 <div id="essays-dashboard">
   <header class="essays-header">
@@ -47,6 +51,41 @@ permalink: /essays/
 </div>
 
 <script>
+// Role-based access protection
+document.addEventListener('authReady', async () => {
+  const hasAccess = window.authService.isAuthenticated &&
+                   window.authService.hasRole(['Admin', 'Root']);
+
+  if (!hasAccess) {
+    document.getElementById('essays-dashboard').style.display = 'none';
+    const messageEl = document.getElementById('auth-message');
+
+    if (!window.authService.isAuthenticated) {
+      messageEl.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+          <h2>Authentication Required</h2>
+          <p>Please log in to access this page.</p>
+          <button onclick="window.authService.login()" style="padding: 10px 20px; margin-top: 20px; cursor: pointer;">
+            Log In
+          </button>
+        </div>
+      `;
+    } else {
+      messageEl.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+          <h2>Access Denied</h2>
+          <p>You do not have permission to access this page.</p>
+          <p>This page requires Admin or Root role.</p>
+          <p>Your roles: ${window.authService.roles.join(', ') || 'None'}</p>
+        </div>
+      `;
+    }
+    messageEl.style.display = 'block';
+  }
+});
+
+// Existing card hover effect
+
 document.addEventListener('DOMContentLoaded', function() {
   // Add dynamic interactions for essay cards
   const essayCards = document.querySelectorAll('.essay-card');

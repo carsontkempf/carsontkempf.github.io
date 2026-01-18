@@ -6,9 +6,11 @@ auth0:
   domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
   client_id: "Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC"
   audience: "https://carsontkempf.github.io/api/carsons-meditations"
+  callback_url: "https://carsontkempf.github.io"
 
 spotify:
   client_id: "80826ef3daa547f49d843c254ad224b6"
+  callback_url: "https://carsontkempf.github.io/spotify-apple/"
 
 apple_music:
   team_id: "5S855HB895"

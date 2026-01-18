@@ -3,6 +3,10 @@ layout: page
 title: Server Controls
 permalink: /controls/
 ---
+<script src="/assets/js/role-protection.js"></script>
+
+<div id="auth-message"></div>
+
 
 <div id="controls-access-denied" style="display: none;">
     <h2>Access Denied</h2>
@@ -516,6 +520,41 @@ permalink: /controls/
 </div>
 
 <script>
+// Role-based access protection
+document.addEventListener('authReady', async () => {
+  const hasAccess = window.authService.isAuthenticated &&
+                   window.authService.hasRole(['Admin', 'Root']);
+
+  if (!hasAccess) {
+    document.getElementById('controls-dashboard').style.display = 'none';
+    const messageEl = document.getElementById('auth-message');
+
+    if (!window.authService.isAuthenticated) {
+      messageEl.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+          <h2>Authentication Required</h2>
+          <p>Please log in to access this page.</p>
+          <button onclick="window.authService.login()" style="padding: 10px 20px; margin-top: 20px; cursor: pointer;">
+            Log In
+          </button>
+        </div>
+      `;
+    } else {
+      messageEl.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+          <h2>Access Denied</h2>
+          <p>You do not have permission to access this page.</p>
+          <p>This page requires Admin or Root role.</p>
+          <p>Your roles: ${window.authService.roles.join(', ') || 'None'}</p>
+        </div>
+      `;
+    }
+    messageEl.style.display = 'block';
+  }
+});
+
+// Existing card hover effect
+
 // Command templates with JSON configurations
 const commandTemplates = {
     'system-status': {

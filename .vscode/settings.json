@@ -62,12 +62,16 @@
         "deno.lock": true,
         ".env": true,
         "_plugins/": true,
+        "_data/": true,
         "node_modules/": true,
         "generate-apple-token.js": true,
         ".well-known/appspecific/": true,
         ".well-known/": true,
         "docs/": true,
-        ".jekyll-metadata": true
+        ".jekyll-metadata": true,
+        "scripts/": true,
+        "_config-prod.yml": true,
+        "_config-dev.yml": true
     },
     "jest.shell": {
         "path": "/bin/bash",
@@ -195,11 +199,12 @@
                     ".well-known/appspecific/",
                     ".well-known/",
                     "docs/",
-                    ".jekyll-metadata"
+                    ".jekyll-metadata",
+                    "scripts/",
+                    "_config-prod.yml",
+                    "_config-dev.yml"
                 ],
-                "peek": [
-                    "_data/"
-                ]
+                "peek": []
             },
             {
                 "hidden": [

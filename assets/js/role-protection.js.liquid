@@ -1,0 +1,212 @@
+---
+permalink: /assets/js/role-protection.js
+---
+/**
+ * Client-side role-based page protection
+ *
+ * Usage in your pages:
+ *
+ * 1. Basic role check:
+ *    <script src="/assets/js/role-protection.js"></script>
+ *    <script>
+ *      protectPage(['admin', 'editor']); // Allow admin OR editor
+ *    </script>
+ *
+ * 2. Protect specific elements:
+ *    <div data-role="admin">Admin only content</div>
+ *    <div data-role="editor,author">Editor or Author content</div>
+ */
+
+/**
+ * Waits for authService to be ready
+ * @returns {Promise<Object>} The authService object
+ */
+async function waitForAuth() {
+    return new Promise((resolve) => {
+        if (window.authService && window.authService.hasRole) {
+            resolve(window.authService);
+            return;
+        }
+
+        const checkAuth = () => {
+            if (window.authService && window.authService.hasRole) {
+                document.removeEventListener('authReady', checkAuth);
+                resolve(window.authService);
+            }
+        };
+
+        document.addEventListener('authReady', checkAuth);
+
+        // Fallback timeout check
+        const interval = setInterval(() => {
+            if (window.authService && window.authService.hasRole) {
+                clearInterval(interval);
+                resolve(window.authService);
+            }
+        }, 100);
+    });
+}
+
+/**
+ * Protects entire page - redirects if user doesn't have required role
+ * @param {string|string[]} requiredRoles - Role(s) needed to access page
+ * @param {Object} options - Options: { redirectTo: '/login', showMessage: true }
+ */
+async function protectPage(requiredRoles, options = {}) {
+    const {
+        redirectTo = '/',
+        showMessage = true,
+        messageElementId = 'auth-message'
+    } = options;
+
+    const authService = await waitForAuth();
+
+    // Check authentication first
+    if (!authService.isAuthenticated) {
+        if (showMessage) {
+            displayMessage('Please log in to access this page.', 'warning', messageElementId);
+            setTimeout(() => authService.login(), 2000);
+        } else {
+            authService.login();
+        }
+        return false;
+    }
+
+    // Check roles
+    if (!authService.hasRole(requiredRoles)) {
+        if (showMessage) {
+            displayMessage('You do not have permission to access this page.', 'error', messageElementId);
+            setTimeout(() => window.location.href = redirectTo, 2000);
+        } else {
+            window.location.href = redirectTo;
+        }
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Protects page elements based on data-role attribute
+ * Elements without required role will be hidden/removed
+ * @param {Object} options - Options: { remove: false, hideClass: 'hidden' }
+ */
+async function protectElements(options = {}) {
+    const {
+        remove = false,
+        hideClass = 'hidden',
+        selector = '[data-role]'
+    } = options;
+
+    const authService = await waitForAuth();
+
+    const elements = document.querySelectorAll(selector);
+
+    elements.forEach(element => {
+        const requiredRoles = element.getAttribute('data-role').split(',').map(r => r.trim());
+
+        // Show element only if user has at least one of the required roles
+        if (!authService.isAuthenticated || !authService.hasRole(requiredRoles)) {
+            if (remove) {
+                element.remove();
+            } else {
+                element.classList.add(hideClass);
+                element.style.display = 'none';
+            }
+        } else {
+            element.classList.remove(hideClass);
+            element.style.display = '';
+        }
+    });
+}
+
+/**
+ * Shows/hides elements based on user roles (non-destructive check)
+ * @param {string} elementId - ID of element to show/hide
+ * @param {string|string[]} requiredRoles - Required role(s)
+ * @returns {Promise<boolean>} True if user has role
+ */
+async function showIfRole(elementId, requiredRoles) {
+    const authService = await waitForAuth();
+    const element = document.getElementById(elementId);
+
+    if (!element) return false;
+
+    if (authService.isAuthenticated && authService.hasRole(requiredRoles)) {
+        element.style.display = '';
+        return true;
+    } else {
+        element.style.display = 'none';
+        return false;
+    }
+}
+
+/**
+ * Displays a message to the user
+ * @param {string} message - Message text
+ * @param {string} type - Message type: 'info', 'warning', 'error', 'success'
+ * @param {string} elementId - ID of element to display message in
+ */
+function displayMessage(message, type = 'info', elementId = 'auth-message') {
+    let messageEl = document.getElementById(elementId);
+
+    if (!messageEl) {
+        messageEl = document.createElement('div');
+        messageEl.id = elementId;
+        messageEl.style.padding = '15px';
+        messageEl.style.marginBottom = '20px';
+        messageEl.style.borderRadius = '4px';
+        messageEl.style.textAlign = 'center';
+        document.body.insertBefore(messageEl, document.body.firstChild);
+    }
+
+    // Style based on type
+    const styles = {
+        info: { background: '#d1ecf1', color: '#0c5460', border: '1px solid #bee5eb' },
+        warning: { background: '#fff3cd', color: '#856404', border: '1px solid #ffeaa7' },
+        error: { background: '#f8d7da', color: '#721c24', border: '1px solid #f5c6cb' },
+        success: { background: '#d4edda', color: '#155724', border: '1px solid #c3e6cb' }
+    };
+
+    Object.assign(messageEl.style, styles[type] || styles.info);
+    messageEl.textContent = message;
+    messageEl.style.display = 'block';
+}
+
+/**
+ * Gets current user's roles
+ * @returns {Promise<string[]>} Array of user roles
+ */
+async function getCurrentRoles() {
+    const authService = await waitForAuth();
+    return authService.roles || [];
+}
+
+/**
+ * Checks if current user has a specific role
+ * @param {string|string[]} role - Role(s) to check
+ * @returns {Promise<boolean>} True if user has role
+ */
+async function checkRole(role) {
+    const authService = await waitForAuth();
+    return authService.isAuthenticated && authService.hasRole(role);
+}
+
+// Auto-protect elements on page load
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if page has auto-protect enabled
+    const autoProtect = document.querySelector('[data-auto-protect]');
+    if (autoProtect) {
+        protectElements();
+    }
+});
+
+// Export functions for use in pages
+window.roleProtection = {
+    protectPage,
+    protectElements,
+    showIfRole,
+    checkRole,
+    getCurrentRoles,
+    waitForAuth
+};

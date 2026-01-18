@@ -4,6 +4,8 @@ title: Spotify Apple Integration
 permalink: /spotify-apple/
 ---
 
+<script src="/assets/js/role-protection.js"></script>
+
 <style>
 /* Mobile-First Responsive Design */
 
@@ -516,21 +518,37 @@ function getUserFriendlyError(technicalError) {
     return 'An unexpected error occurred. Please try again or contact support if the problem persists.';
 }
 
-// Spotify OAuth Configuration
-const spotifyConfig = {
-    clientId: '{{ site.spotify.client_id }}',
-    redirectUri: window.location.origin + '/spotify-apple/',
-    scopes: [
-        'playlist-read-private',
-        'playlist-read-collaborative',
-        'user-read-private',
-        'user-read-email'
-    ]
+// Spotify OAuth Configuration - Wait for envConfig to be ready
+let spotifyConfig = null;
+
+// Initialize Spotify config when envConfig is ready
+const initSpotifyConfig = () => {
+    if (window.envConfig && window.envConfig.isReady()) {
+        const config = window.envConfig.getSpotifyConfig();
+        spotifyConfig = {
+            clientId: config.client_id,
+            redirectUri: config.callback_url || (window.location.origin + '/spotify-apple/'),
+            scopes: [
+                'playlist-read-private',
+                'playlist-read-collaborative',
+                'user-read-private',
+                'user-read-email'
+            ]
+        };
+
+        // Debug: Log the redirect URI being used
+        console.log('[SPOTIFY] Redirect URI configured:', spotifyConfig.redirectUri);
+        console.log('[SPOTIFY] Client ID configured:', spotifyConfig.clientId);
+        return true;
+    }
+    return false;
 };
 
-// Debug: Log the redirect URI being used
-console.log('[SPOTIFY] Redirect URI configured:', spotifyConfig.redirectUri);
-console.log('[SPOTIFY] Expected: https://carsontkempf.github.io/spotify-apple/');
+// Try to initialize immediately
+if (!initSpotifyConfig()) {
+    // If not ready, wait for configReady event
+    window.addEventListener('configReady', initSpotifyConfig);
+}
 
 // Spotify Service Object
 window.spotifyService = {
@@ -560,6 +578,14 @@ window.spotifyService = {
     
     // Start Spotify authorization
     authorize: async () => {
+        if (!spotifyConfig) {
+            console.error('[SPOTIFY] Configuration not loaded. Attempting to initialize...');
+            if (!initSpotifyConfig()) {
+                alert('Spotify configuration not ready. Please refresh the page.');
+                return;
+            }
+        }
+
         console.log('[SPOTIFY] ========================================');
         console.log('[SPOTIFY] Starting Spotify authorization...');
         console.log('[SPOTIFY] Client ID:', spotifyConfig.clientId);
@@ -1286,7 +1312,30 @@ document.addEventListener('configReady', () => {
 // Main initialization
 document.addEventListener('authReady', async () => {
     console.log('Auth ready event received');
-    
+
+    // Check role-based access: Spotify-Apple, Admin, or Root
+    const hasAccess = window.authService.isAuthenticated &&
+                     (window.authService.hasRole(['Spotify-Apple', 'Admin', 'Root']));
+
+    if (!hasAccess) {
+        document.getElementById('spotify-apple-login-prompt').style.display = 'block';
+        if (!window.authService.isAuthenticated) {
+            document.getElementById('spotify-apple-login-prompt').innerHTML = `
+                <h2>Access Denied</h2>
+                <p>You must be logged in to view this page.</p>
+                <button onclick="authService.login()" class="login-btn">Log In</button>
+            `;
+        } else {
+            document.getElementById('spotify-apple-login-prompt').innerHTML = `
+                <h2>Access Denied</h2>
+                <p>You do not have permission to access this page.</p>
+                <p>This page requires the Spotify-Apple, Admin, or Root role.</p>
+                <p>Your roles: ${window.authService.roles.join(', ') || 'None'}</p>
+            `;
+        }
+        return;
+    }
+
     if (window.authService.isAuthenticated) {
         document.getElementById('spotify-apple-content-wrapper').style.display = 'block';
         
