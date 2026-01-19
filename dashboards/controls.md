@@ -19,6 +19,15 @@ permalink: /controls/
 <div id="controls-content-wrapper" style="display: none;">
 
 <style>
+/* Disable all hover transforms in portrait mode (mobile) */
+@media (orientation: portrait) {
+    * {
+        &:hover {
+            transform: none !important;
+        }
+    }
+}
+
 .controls-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -64,7 +73,7 @@ permalink: /controls/
     transition: all 0.3s ease;
 }
 
-@media (min-aspect-ratio: 1/1) {
+@media (orientation: landscape) {
     .nav-btn:hover {
         background: #2980b9;
         transform: translateY(-1px);
@@ -125,7 +134,7 @@ permalink: /controls/
     gap: 8px;
 }
 
-@media (min-aspect-ratio: 1/1) {
+@media (orientation: landscape) {
     .control-btn:hover {
         background: #c0392b;
         transform: translateY(-1px);
@@ -136,7 +145,7 @@ permalink: /controls/
     background: #34495e;
 }
 
-@media (min-aspect-ratio: 1/1) {
+@media (orientation: landscape) {
     .control-btn.secondary:hover {
         background: #2c3e50;
     }
@@ -146,7 +155,7 @@ permalink: /controls/
     background: #27ae60;
 }
 
-@media (min-aspect-ratio: 1/1) {
+@media (orientation: landscape) {
     .control-btn.success:hover {
         background: #229954;
     }
@@ -156,7 +165,7 @@ permalink: /controls/
     background: #f39c12;
 }
 
-@media (min-aspect-ratio: 1/1) {
+@media (orientation: landscape) {
     .control-btn.warning:hover {
         background: #e67e22;
     }
@@ -208,7 +217,7 @@ permalink: /controls/
     line-height: 1;
 }
 
-@media (min-aspect-ratio: 1/1) {
+@media (orientation: landscape) {
     .close:hover {
         color: #e74c3c;
     }
@@ -273,7 +282,7 @@ permalink: /controls/
     color: white;
 }
 
-@media (min-aspect-ratio: 1/1) {
+@media (orientation: landscape) {
     .modal-btn.primary:hover {
         background: #c0392b;
     }
@@ -284,7 +293,7 @@ permalink: /controls/
     color: white;
 }
 
-@media (min-aspect-ratio: 1/1) {
+@media (orientation: landscape) {
     .modal-btn.secondary:hover {
         background: #7f8c8d;
     }

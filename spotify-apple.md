@@ -9,6 +9,15 @@ permalink: /spotify-apple/
 <style>
 /* Mobile-First Responsive Design */
 
+/* Disable all hover transforms in portrait mode (mobile) */
+@media (orientation: portrait) {
+    * {
+        &:hover {
+            transform: none !important;
+        }
+    }
+}
+
 /* Playlist Controls - Responsive */
 .playlist-controls {
     display: flex;
@@ -76,7 +85,7 @@ permalink: /spotify-apple/
     font-size: clamp(0.85rem, 2.2vw, 0.9rem);
 }
 
-@media (min-aspect-ratio: 1/1) {
+@media (orientation: landscape) {
     .playlist-content:hover {
         opacity: 0.8;
     }

@@ -3,6 +3,15 @@ layout: post
 ---
 
 <style>
+/* Disable all hover transforms in portrait mode (mobile) */
+@media (orientation: portrait) {
+    * {
+        &:hover {
+            transform: none !important;
+        }
+    }
+}
+
 .hero-container {
     display: flex;
     flex-direction: column;
@@ -42,7 +51,17 @@ layout: post
     letter-spacing: 0.5px;
 }
 
-@media (min-aspect-ratio: 1/1) {
+/* Portrait mode - NO hover effects */
+@media (orientation: portrait) {
+    .spotify-apple-btn:hover {
+        background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+        transform: none;
+        box-shadow: 0 8px 24px rgba(29, 185, 84, 0.3);
+    }
+}
+
+/* Landscape mode - enable hover effects */
+@media (orientation: landscape) {
     .spotify-apple-btn:hover {
         color: white;
         background: linear-gradient(135deg, #1aa34a 0%, #1bc653 100%);
@@ -85,7 +104,7 @@ layout: post
     .spotify-apple-btn {
         width: calc(100% - 2rem);
         max-width: 100%;
-        padding: clamp(10px, 1.5vh, 16px) clamp(24px, 4vw, 48px);
+        padding: 8px clamp(24px, 4vw, 48px);
         font-size: clamp(1.2rem, 2.5vw, 2rem);
     }
 }
