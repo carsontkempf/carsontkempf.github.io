@@ -291,7 +291,7 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
 @media (max-width: 768px) {
   // Adjust page content margin to prevent sidebar overlap
   .page-content {
-    margin-left: calc(var(--sidebar-width-collapsed) + var(--sidebar-offset) + 0.5rem);
+    margin-left: calc(var(--sidebar-width-collapsed) + var(--sidebar-offset) + 1.25rem);
   }
 
   // Header adjustments for mobile
@@ -317,19 +317,6 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
     flex-wrap: wrap;
     gap: 0.5rem;
     max-width: calc(100% - 5rem); // Leave space for theme switch
-  }
-
-  // Make buttons more touch-friendly
-  #auth-status a,
-  #auth-status button,
-  .login-btn {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.85rem;
-    min-height: 44px; // Touch target size
-    min-width: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
   }
 
   // Theme switch stays top-right but with adjusted spacing
@@ -368,7 +355,7 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
 @media (max-width: 480px) {
   // Further reduce page margins
   .page-content {
-    margin-left: calc(var(--sidebar-width-collapsed) + 0.25rem);
+    margin-left: calc(var(--sidebar-width-collapsed) + 1rem);
   }
 
   // Tighter spacing in header
