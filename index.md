@@ -42,12 +42,14 @@ layout: post
     letter-spacing: 0.5px;
 }
 
-.spotify-apple-btn:hover {
-    color: white;
-    background: linear-gradient(135deg, #1aa34a 0%, #1bc653 100%);
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 12px 32px rgba(29, 185, 84, 0.4);
-    text-decoration: none;
+@media (hover: hover) {
+    .spotify-apple-btn:hover {
+        color: white;
+        background: linear-gradient(135deg, #1aa34a 0%, #1bc653 100%);
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 12px 32px rgba(29, 185, 84, 0.4);
+        text-decoration: none;
+    }
 }
 
 .spotify-apple-btn:active {
@@ -61,8 +63,10 @@ layout: post
     }
 
     .spotify-apple-btn {
-        width: 90vw;
-        max-width: none;
+        width: calc(100% - 2rem);
+        max-width: 100%;
+        padding: clamp(16px, 2.5vh, 32px) clamp(24px, 4vw, 48px);
+        font-size: clamp(1.2rem, 2.5vw, 2rem);
     }
 }
 
