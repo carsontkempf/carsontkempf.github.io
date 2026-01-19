@@ -42,7 +42,7 @@ layout: post
     letter-spacing: 0.5px;
 }
 
-@media (hover: hover) {
+@media (min-aspect-ratio: 1/1) {
     .spotify-apple-btn:hover {
         color: white;
         background: linear-gradient(135deg, #1aa34a 0%, #1bc653 100%);
@@ -85,7 +85,7 @@ layout: post
     .spotify-apple-btn {
         width: calc(100% - 2rem);
         max-width: 100%;
-        padding: clamp(16px, 2.5vh, 32px) clamp(24px, 4vw, 48px);
+        padding: clamp(10px, 1.5vh, 16px) clamp(24px, 4vw, 48px);
         font-size: clamp(1.2rem, 2.5vw, 2rem);
     }
 }

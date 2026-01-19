@@ -64,7 +64,7 @@ permalink: /controls/
     transition: all 0.3s ease;
 }
 
-@media (hover: hover) {
+@media (min-aspect-ratio: 1/1) {
     .nav-btn:hover {
         background: #2980b9;
         transform: translateY(-1px);
@@ -125,7 +125,7 @@ permalink: /controls/
     gap: 8px;
 }
 
-@media (hover: hover) {
+@media (min-aspect-ratio: 1/1) {
     .control-btn:hover {
         background: #c0392b;
         transform: translateY(-1px);
@@ -136,7 +136,7 @@ permalink: /controls/
     background: #34495e;
 }
 
-@media (hover: hover) {
+@media (min-aspect-ratio: 1/1) {
     .control-btn.secondary:hover {
         background: #2c3e50;
     }
@@ -146,7 +146,7 @@ permalink: /controls/
     background: #27ae60;
 }
 
-@media (hover: hover) {
+@media (min-aspect-ratio: 1/1) {
     .control-btn.success:hover {
         background: #229954;
     }
@@ -156,7 +156,7 @@ permalink: /controls/
     background: #f39c12;
 }
 
-@media (hover: hover) {
+@media (min-aspect-ratio: 1/1) {
     .control-btn.warning:hover {
         background: #e67e22;
     }
@@ -208,7 +208,7 @@ permalink: /controls/
     line-height: 1;
 }
 
-@media (hover: hover) {
+@media (min-aspect-ratio: 1/1) {
     .close:hover {
         color: #e74c3c;
     }
@@ -273,7 +273,7 @@ permalink: /controls/
     color: white;
 }
 
-@media (hover: hover) {
+@media (min-aspect-ratio: 1/1) {
     .modal-btn.primary:hover {
         background: #c0392b;
     }
@@ -284,7 +284,7 @@ permalink: /controls/
     color: white;
 }
 
-@media (hover: hover) {
+@media (min-aspect-ratio: 1/1) {
     .modal-btn.secondary:hover {
         background: #7f8c8d;
     }

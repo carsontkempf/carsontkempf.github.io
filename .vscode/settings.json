@@ -71,7 +71,9 @@
         ".jekyll-metadata": true,
         "scripts/": true,
         "_config-prod.yml": true,
-        "_config-dev.yml": true
+        "_config-dev.yml": true,
+        ".netlify_env": true,
+        "assets/": true
     },
     "jest.shell": {
         "path": "/bin/bash",
@@ -202,7 +204,9 @@
                     ".jekyll-metadata",
                     "scripts/",
                     "_config-prod.yml",
-                    "_config-dev.yml"
+                    "_config-dev.yml",
+                    ".netlify_env",
+                    "assets/"
                 ],
                 "peek": []
             },
