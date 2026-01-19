@@ -16,7 +16,7 @@ window.githubService = {
             const auth0Token = await window.authService.client.getTokenSilently();
             console.log('[GitHub Auth] Auth0 token obtained, fetching GitHub PAT from Netlify...');
 
-            const response = await fetch('/.netlify/functions/get-github-token', {
+            const response = await fetch('https://carsontkempf.netlify.app/.netlify/functions/get-github-token', {
                 headers: {
                     'Authorization': `Bearer ${auth0Token}`
                 }

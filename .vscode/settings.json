@@ -34,7 +34,6 @@
         "404.html": true,
         ".gitignore": true,
         "Testing/": true,
-        "netlify/": true,
         "_posts/": true,
         "assets/css/": true,
         "assets/fonts/": true,
@@ -72,8 +71,7 @@
         "scripts/": true,
         "_config-prod.yml": true,
         "_config-dev.yml": true,
-        ".netlify_env": true,
-        "assets/": true
+        ".netlify_env": true
     },
     "jest.shell": {
         "path": "/bin/bash",
@@ -208,7 +206,10 @@
                     ".netlify_env",
                     "assets/"
                 ],
-                "peek": []
+                "peek": [
+                    "assets/",
+                    "netlify/"
+                ]
             },
             {
                 "hidden": [
