@@ -13,17 +13,8 @@ permalink: /admin/
 </div>
 
 <div id="admin-content-wrapper" style="display: none;">
-    <div id="github-auth-section">
-        <h3>GitHub Authentication</h3>
-        <p id="github-status">Not connected</p>
-        <div id="github-login-form">
-            <input type="password" id="github-pat" placeholder="Enter GitHub Personal Access Token" style="width: 100%; max-width: 500px; padding: 10px; margin-bottom: 10px;">
-            <button id="github-connect-btn" onclick="connectGitHub()">Connect to GitHub</button>
-            <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
-                Need a token? Create one at <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings</a> with 'repo' scope.
-            </p>
-        </div>
-        <button id="github-logout-btn" onclick="githubService.logout()" style="display: none;">Disconnect GitHub</button>
+    <div id="github-auth-section" style="background: rgba(0, 0, 0, 0.03); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: center;">
+        <p id="github-status" style="font-size: 1rem; color: #666; margin: 0;">Connecting to GitHub...</p>
     </div>
 
     <div id="admin-tabs" style="display: none;">
@@ -117,26 +108,4 @@ document.addEventListener('authReady', () => {
         });
     });
 });
-
-async function connectGitHub() {
-    const pat = document.getElementById('github-pat').value.trim();
-    if (!pat) {
-        alert('Please enter a GitHub Personal Access Token');
-        return;
-    }
-
-    try {
-        await window.githubService.login(pat);
-        document.getElementById('github-login-form').style.display = 'none';
-        document.getElementById('github-logout-btn').style.display = 'block';
-        document.getElementById('github-status').textContent = 'Connected to GitHub';
-        document.getElementById('admin-tabs').style.display = 'block';
-
-        // Load data
-        await window.videoManager.loadVideos();
-        await window.articleManager.loadArticles();
-    } catch (error) {
-        alert('Failed to connect to GitHub: ' + error.message);
-    }
-}
 </script>

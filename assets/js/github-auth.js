@@ -6,18 +6,47 @@ window.githubService = {
     repoName: 'carsontkempf.github.io',
     branch: 'gh-pages',
 
-    async login(pat) {
+    async fetchTokenFromNetlify() {
+        if (!window.authService || !window.authService.isAuthenticated) {
+            throw new Error('Must be authenticated with Auth0 first');
+        }
+
         try {
+            const auth0Token = await window.authService.client.getTokenSilently();
+            const response = await fetch('/.netlify/functions/get-github-token', {
+                headers: {
+                    'Authorization': `Bearer ${auth0Token}`
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to fetch GitHub token');
+            }
+
+            const data = await response.json();
+            return data.token;
+        } catch (error) {
+            console.error('Failed to fetch GitHub token:', error);
+            throw error;
+        }
+    },
+
+    async login(pat = null) {
+        try {
+            // If no PAT provided, fetch from Netlify function
+            const token = pat || await this.fetchTokenFromNetlify();
+
             // Initialize Octokit with the Personal Access Token
             this.octokit = new Octokit.Octokit({
-                auth: pat
+                auth: token
             });
 
             // Verify access by attempting to get repo info
             await this.verifyAccess();
 
             // Store token in sessionStorage (cleared on browser close)
-            sessionStorage.setItem('github_pat', pat);
+            sessionStorage.setItem('github_pat', token);
             this.isAuthenticated = true;
 
             console.log('GitHub authentication successful');
@@ -188,23 +217,50 @@ window.githubService = {
     }
 };
 
-// Try to restore session on page load
+// Auto-connect to GitHub when page loads (for authorized users)
 document.addEventListener('DOMContentLoaded', async () => {
+    // Try to restore from session first
     const restored = await window.githubService.restoreSession();
     if (restored) {
-        // Update UI to show connected state
-        const loginForm = document.getElementById('github-login-form');
-        const logoutBtn = document.getElementById('github-logout-btn');
-        const status = document.getElementById('github-status');
-        const tabs = document.getElementById('admin-tabs');
+        updateGitHubUI(true);
+        return;
+    }
 
-        if (loginForm) loginForm.style.display = 'none';
-        if (logoutBtn) logoutBtn.style.display = 'block';
-        if (status) status.textContent = 'Connected to GitHub';
+    // Wait for Auth0 to be ready, then auto-connect
+    document.addEventListener('authReady', async () => {
+        if (window.authService && window.authService.isAuthenticated) {
+            const hasAccess = window.authService.hasRole(['Admin', 'Writer']);
+            if (hasAccess) {
+                try {
+                    await window.githubService.login();
+                    updateGitHubUI(true);
+                } catch (error) {
+                    console.error('Auto-connect to GitHub failed:', error);
+                    updateGitHubUI(false, error.message);
+                }
+            }
+        }
+    });
+});
+
+function updateGitHubUI(connected, errorMessage = null) {
+    const authSection = document.getElementById('github-auth-section');
+    const status = document.getElementById('github-status');
+    const tabs = document.getElementById('admin-tabs');
+
+    if (!authSection) return;
+
+    if (connected) {
+        authSection.style.display = 'none';
         if (tabs) tabs.style.display = 'block';
 
         // Load data
-        if (window.videoManager) await window.videoManager.loadVideos();
-        if (window.articleManager) await window.articleManager.loadArticles();
+        if (window.videoManager) window.videoManager.loadVideos();
+        if (window.articleManager) window.articleManager.loadArticles();
+    } else {
+        if (status) {
+            status.textContent = errorMessage || 'Not connected';
+            status.style.color = '#dc3545';
+        }
     }
-});
+}
