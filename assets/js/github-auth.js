@@ -12,36 +12,51 @@ window.githubService = {
         }
 
         try {
+            console.log('[GitHub Auth] Fetching Auth0 token...');
             const auth0Token = await window.authService.client.getTokenSilently();
+            console.log('[GitHub Auth] Auth0 token obtained, fetching GitHub PAT from Netlify...');
+
             const response = await fetch('/.netlify/functions/get-github-token', {
                 headers: {
                     'Authorization': `Bearer ${auth0Token}`
                 }
             });
 
+            console.log('[GitHub Auth] Netlify function response status:', response.status);
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to fetch GitHub token');
+                const errorText = await response.text();
+                console.error('[GitHub Auth] Netlify function error response:', errorText);
+                try {
+                    const error = JSON.parse(errorText);
+                    throw new Error(error.message || 'Failed to fetch GitHub token');
+                } catch (parseError) {
+                    throw new Error(`Failed to fetch GitHub token. Status: ${response.status}, Response: ${errorText}`);
+                }
             }
 
             const data = await response.json();
+            console.log('[GitHub Auth] GitHub PAT retrieved successfully');
             return data.token;
         } catch (error) {
-            console.error('Failed to fetch GitHub token:', error);
+            console.error('[GitHub Auth] Failed to fetch GitHub token:', error);
             throw error;
         }
     },
 
     async login(pat = null) {
         try {
+            console.log('[GitHub Auth] Starting login...');
             // If no PAT provided, fetch from Netlify function
             const token = pat || await this.fetchTokenFromNetlify();
 
+            console.log('[GitHub Auth] Initializing Octokit...');
             // Initialize Octokit with the Personal Access Token
             this.octokit = new Octokit.Octokit({
                 auth: token
             });
 
+            console.log('[GitHub Auth] Verifying repository access...');
             // Verify access by attempting to get repo info
             await this.verifyAccess();
 
@@ -49,12 +64,12 @@ window.githubService = {
             sessionStorage.setItem('github_pat', token);
             this.isAuthenticated = true;
 
-            console.log('GitHub authentication successful');
+            console.log('[GitHub Auth] ✓ GitHub authentication successful');
             return true;
         } catch (error) {
             this.isAuthenticated = false;
             this.octokit = null;
-            console.error('GitHub authentication failed:', error);
+            console.error('[GitHub Auth] ✗ GitHub authentication failed:', error);
             throw new Error('Failed to authenticate with GitHub. Please check your token and permissions.');
         }
     },
@@ -70,18 +85,24 @@ window.githubService = {
 
     async verifyAccess() {
         try {
+            console.log(`[GitHub Auth] Checking access to ${this.repoOwner}/${this.repoName}...`);
             const { data } = await this.octokit.rest.repos.get({
                 owner: this.repoOwner,
                 repo: this.repoName
             });
+
+            console.log('[GitHub Auth] Repository found. Checking permissions...');
+            console.log('[GitHub Auth] Permissions:', data.permissions);
 
             // Check if we have push access
             if (!data.permissions || !data.permissions.push) {
                 throw new Error('Token does not have write access to the repository');
             }
 
+            console.log('[GitHub Auth] ✓ Repository access verified');
             return true;
         } catch (error) {
+            console.error('[GitHub Auth] ✗ Access verification failed:', error);
             if (error.status === 404) {
                 throw new Error('Repository not found or token lacks access');
             }
