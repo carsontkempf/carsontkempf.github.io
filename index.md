@@ -56,6 +56,26 @@ layout: post
     transform: translateY(-2px) scale(1.01);
 }
 
+@media (min-width: 769px) {
+    .hero-container {
+        min-height: 35vh;
+        padding: 3vh 4vw;
+        max-width: 800px;
+        margin: 2vh auto;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+        margin-bottom: 2vh;
+    }
+
+    .spotify-apple-btn {
+        padding: 18px 50px;
+        font-size: 1.8rem;
+        min-width: auto;
+    }
+}
+
 @media (max-width: 768px) {
     .hero-container {
         min-height: 60vh;
