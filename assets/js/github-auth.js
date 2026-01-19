@@ -16,6 +16,7 @@ window.githubService = {
             const auth0Token = await window.authService.client.getTokenSilently();
             console.log('[GitHub Auth] Auth0 token obtained, fetching GitHub PAT from Netlify...');
 
+            // UPDATED: Point directly to the Netlify App URL where the function lives
             const response = await fetch('https://carsontkempf.netlify.app/.netlify/functions/get-github-token', {
                 headers: {
                     'Authorization': `Bearer ${auth0Token}`
@@ -235,6 +236,26 @@ window.githubService = {
             }
         }
         return false;
+    },
+
+    // Helper to extract front matter and content
+    parseJekyllPost(content) {
+        const frontMatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+        const match = content.match(frontMatterRegex);
+        
+        if (match) {
+            return {
+                frontMatter: match[1],
+                body: match[2],
+                hasFrontMatter: true
+            };
+        }
+        
+        return {
+            frontMatter: '',
+            body: content,
+            hasFrontMatter: false
+        };
     }
 };
 

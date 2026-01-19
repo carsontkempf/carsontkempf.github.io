@@ -71,7 +71,8 @@
         "scripts/": true,
         "_config-prod.yml": true,
         "_config-dev.yml": true,
-        ".netlify_env": true
+        ".netlify_env": true,
+        "assets/": true
     },
     "jest.shell": {
         "path": "/bin/bash",
@@ -207,7 +208,6 @@
                     "assets/"
                 ],
                 "peek": [
-                    "assets/",
                     "netlify/"
                 ]
             },
