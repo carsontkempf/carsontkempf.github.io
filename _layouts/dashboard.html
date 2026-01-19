@@ -117,9 +117,7 @@ permalink: /dashboard/
   <main class="dashboard-main-content">
     <div class="dashboard-buttons">
       <a href="{{ '/spotify-apple/' | relative_url }}" class="dashboard-btn">Spotify Apple Integration</a>
-      <div id="writer-admin-button" style="display: none;">
-        <a href="{{ '/dashboards/admin/' | relative_url }}" class="dashboard-btn">Writer's Admin</a>
-      </div>
+      <a href="{{ '/admin/' | relative_url }}" class="dashboard-btn" id="writer-admin-button" style="display: none;">Writer's Admin</a>
       <div id="auth-management-buttons">
         <!-- Buttons will be dynamically loaded based on user permissions -->
       </div>
@@ -177,7 +175,9 @@ permalink: /dashboard/
 
         // Show Writer's Admin button for Admin or Writer roles
         if (hasAdminRole || hasWriterRole || isSiteOwner) {
-            writerAdminButton.style.display = 'block';
+            if (writerAdminButton) {
+                writerAdminButton.style.display = 'inline-block';
+            }
         }
 
         if (hasAdminRole || isSiteOwner) {
