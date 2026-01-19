@@ -76,3 +76,5 @@ exclude:
   - Gemfile.lock
   - node_modules
   - vendor
+  - _config-prod-env.yml
+  - scripts/
