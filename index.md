@@ -104,6 +104,21 @@ layout: post
     </a>
 </div>
 
+<!-- YouTube Videos Section -->
+<div id="homepage-videos" class="videos-container" style="margin-top: 4vh;">
+  <h2 style="font-size: clamp(1.5rem, 4vw, 2rem); text-align: center; margin-bottom: 2vh;">Latest Videos</h2>
+  <div id="videos-grid"></div>
+</div>
+
+<link rel="stylesheet" href="/assets/css/video-display.css">
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+<script src="/assets/js/homepage-videos.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    homepageVideos.loadAndDisplay();
+  });
+</script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Function to handle login redirect for non-authenticated users

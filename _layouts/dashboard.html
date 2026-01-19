@@ -117,6 +117,9 @@ permalink: /dashboard/
   <main class="dashboard-main-content">
     <div class="dashboard-buttons">
       <a href="{{ '/spotify-apple/' | relative_url }}" class="dashboard-btn">Spotify Apple Integration</a>
+      <div id="writer-admin-button" style="display: none;">
+        <a href="{{ '/dashboards/admin/' | relative_url }}" class="dashboard-btn">Writer's Admin</a>
+      </div>
       <div id="auth-management-buttons">
         <!-- Buttons will be dynamically loaded based on user permissions -->
       </div>
@@ -155,21 +158,28 @@ permalink: /dashboard/
 
     function loadDashboardButtons(user) {
         const authButtonsDiv = document.getElementById('auth-management-buttons');
-        
+        const writerAdminButton = document.getElementById('writer-admin-button');
+
         // Check user roles in multiple possible locations
         const customRoles = user['https://carsontkempf.github.io/roles'] || [];
         const auth0Roles = user['https://auth0.com/roles'] || [];
         const appMetadataRoles = user.app_metadata?.roles || [];
         const userMetadataRoles = user.user_metadata?.roles || [];
-        
+
         // Combine all possible role sources
         const allRoles = [...customRoles, ...auth0Roles, ...appMetadataRoles, ...userMetadataRoles];
-        
-        const hasAdminRole = allRoles.includes('admin');
-        const hasCodeComprehensionRole = allRoles.includes('Code-Comprehension-Project') || 
+
+        const hasAdminRole = allRoles.includes('admin') || allRoles.includes('Admin');
+        const hasWriterRole = allRoles.includes('writer') || allRoles.includes('Writer');
+        const hasCodeComprehensionRole = allRoles.includes('Code-Comprehension-Project') ||
                                         allRoles.includes('rol_XUUh9ZOhirY2yCQQ');
         const isSiteOwner = user.email === 'ctkfdp@umsystem.edu';
-        
+
+        // Show Writer's Admin button for Admin or Writer roles
+        if (hasAdminRole || hasWriterRole || isSiteOwner) {
+            writerAdminButton.style.display = 'block';
+        }
+
         if (hasAdminRole || isSiteOwner) {
             // Full admin access - show all buttons
             authButtonsDiv.innerHTML = `
