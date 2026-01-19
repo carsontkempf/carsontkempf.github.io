@@ -76,8 +76,10 @@ permalink: /spotify-apple/
     font-size: clamp(0.85rem, 2.2vw, 0.9rem);
 }
 
-.playlist-content:hover {
-    opacity: 0.8;
+@media (hover: hover) {
+    .playlist-content:hover {
+        opacity: 0.8;
+    }
 }
 
 /* Convert Selected Button - Responsive */

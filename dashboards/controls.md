@@ -64,11 +64,13 @@ permalink: /controls/
     transition: all 0.3s ease;
 }
 
-.nav-btn:hover {
-    background: #2980b9;
-    transform: translateY(-1px);
-    text-decoration: none;
-    color: white;
+@media (hover: hover) {
+    .nav-btn:hover {
+        background: #2980b9;
+        transform: translateY(-1px);
+        text-decoration: none;
+        color: white;
+    }
 }
 
 .controls-grid {
@@ -123,33 +125,41 @@ permalink: /controls/
     gap: 8px;
 }
 
-.control-btn:hover {
-    background: #c0392b;
-    transform: translateY(-1px);
+@media (hover: hover) {
+    .control-btn:hover {
+        background: #c0392b;
+        transform: translateY(-1px);
+    }
 }
 
 .control-btn.secondary {
     background: #34495e;
 }
 
-.control-btn.secondary:hover {
-    background: #2c3e50;
+@media (hover: hover) {
+    .control-btn.secondary:hover {
+        background: #2c3e50;
+    }
 }
 
 .control-btn.success {
     background: #27ae60;
 }
 
-.control-btn.success:hover {
-    background: #229954;
+@media (hover: hover) {
+    .control-btn.success:hover {
+        background: #229954;
+    }
 }
 
 .control-btn.warning {
     background: #f39c12;
 }
 
-.control-btn.warning:hover {
-    background: #e67e22;
+@media (hover: hover) {
+    .control-btn.warning:hover {
+        background: #e67e22;
+    }
 }
 
 /* Modal Styles */
@@ -198,8 +208,10 @@ permalink: /controls/
     line-height: 1;
 }
 
-.close:hover {
-    color: #e74c3c;
+@media (hover: hover) {
+    .close:hover {
+        color: #e74c3c;
+    }
 }
 
 .modal-body {
@@ -261,8 +273,10 @@ permalink: /controls/
     color: white;
 }
 
-.modal-btn.primary:hover {
-    background: #c0392b;
+@media (hover: hover) {
+    .modal-btn.primary:hover {
+        background: #c0392b;
+    }
 }
 
 .modal-btn.secondary {
@@ -270,8 +284,10 @@ permalink: /controls/
     color: white;
 }
 
-.modal-btn.secondary:hover {
-    background: #7f8c8d;
+@media (hover: hover) {
+    .modal-btn.secondary:hover {
+        background: #7f8c8d;
+    }
 }
 
 .status-section {
