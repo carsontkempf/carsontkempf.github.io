@@ -52,6 +52,7 @@ defaults:
 include:
   - assets/js/*.liquid
   - .well-known
+  - _headers
 
 # API Configuration
 # These placeholders are overridden by _config-dev.yml (local) or _config-prod.yml (Netlify)
