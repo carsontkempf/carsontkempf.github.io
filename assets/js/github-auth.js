@@ -1,10 +1,48 @@
 // GitHub Authentication Service
 window.githubService = {
-    octokit: null,
+    token: null,
     isAuthenticated: false,
     repoOwner: 'carsontkempf',
     repoName: 'carsontkempf.github.io',
     branch: 'gh-pages',
+    apiBaseUrl: 'https://api.github.com',
+
+    // Helper method to make authenticated requests to GitHub API
+    async githubRequest(endpoint, options = {}) {
+        if (!this.token) {
+            throw new Error('Not authenticated with GitHub');
+        }
+
+        const url = `${this.apiBaseUrl}${endpoint}`;
+        const headers = {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': `Bearer ${this.token}`,
+            'X-GitHub-Api-Version': '2022-11-28',
+            ...options.headers
+        };
+
+        const response = await fetch(url, {
+            ...options,
+            headers
+        });
+
+        // Handle error responses
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.message || `GitHub API error: ${response.status}`);
+            error.status = response.status;
+            error.response = { headers: response.headers, data: errorData };
+            throw error;
+        }
+
+        // Return JSON response if content exists
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return await response.json();
+        }
+
+        return null;
+    },
 
     async fetchTokenFromNetlify() {
         if (!window.authService || !window.authService.isAuthenticated) {
@@ -51,11 +89,9 @@ window.githubService = {
             // If no PAT provided, fetch from Netlify function
             const token = pat || await this.fetchTokenFromNetlify();
 
-            console.log('[GitHub Auth] Initializing Octokit...');
-            // Initialize Octokit with the Personal Access Token
-            this.octokit = new Octokit({
-                auth: token
-            });
+            console.log('[GitHub Auth] Storing GitHub token...');
+            // Store token for API requests
+            this.token = token;
 
             console.log('[GitHub Auth] Verifying repository access...');
             // Verify access by attempting to get repo info
@@ -69,7 +105,7 @@ window.githubService = {
             return true;
         } catch (error) {
             this.isAuthenticated = false;
-            this.octokit = null;
+            this.token = null;
             console.error('[GitHub Auth] ✗ GitHub authentication failed:', error);
             throw new Error('Failed to authenticate with GitHub. Please check your token and permissions.');
         }
@@ -77,7 +113,7 @@ window.githubService = {
 
     logout() {
         sessionStorage.removeItem('github_pat');
-        this.octokit = null;
+        this.token = null;
         this.isAuthenticated = false;
 
         // Reload page to reset UI
@@ -87,10 +123,7 @@ window.githubService = {
     async verifyAccess() {
         try {
             console.log(`[GitHub Auth] Checking access to ${this.repoOwner}/${this.repoName}...`);
-            const { data } = await this.octokit.rest.repos.get({
-                owner: this.repoOwner,
-                repo: this.repoName
-            });
+            const data = await this.githubRequest(`/repos/${this.repoOwner}/${this.repoName}`);
 
             console.log('[GitHub Auth] Repository found. Checking permissions...');
             console.log('[GitHub Auth] Permissions:', data.permissions);
@@ -128,12 +161,9 @@ window.githubService = {
         }
 
         try {
-            const { data } = await this.octokit.rest.repos.getContent({
-                owner: this.repoOwner,
-                repo: this.repoName,
-                path: path,
-                ref: this.branch
-            });
+            const data = await this.githubRequest(
+                `/repos/${this.repoOwner}/${this.repoName}/contents/${path}?ref=${this.branch}`
+            );
 
             return {
                 content: this.decodeBase64(data.content),
@@ -155,9 +185,6 @@ window.githubService = {
         }
 
         const payload = {
-            owner: this.repoOwner,
-            repo: this.repoName,
-            path: path,
             message: message,
             content: this.encodeBase64(content),
             branch: this.branch,
@@ -173,7 +200,13 @@ window.githubService = {
         }
 
         try {
-            const { data } = await this.octokit.rest.repos.createOrUpdateFileContents(payload);
+            const data = await this.githubRequest(
+                `/repos/${this.repoOwner}/${this.repoName}/contents/${path}`,
+                {
+                    method: 'PUT',
+                    body: JSON.stringify(payload)
+                }
+            );
             return data;
         } catch (error) {
             if (error.status === 409) {
@@ -189,14 +222,17 @@ window.githubService = {
             throw new Error('Not authenticated with GitHub');
         }
 
-        await this.octokit.rest.repos.deleteFile({
-            owner: this.repoOwner,
-            repo: this.repoName,
-            path: path,
-            message: message,
-            sha: sha,
-            branch: this.branch
-        });
+        await this.githubRequest(
+            `/repos/${this.repoOwner}/${this.repoName}/contents/${path}`,
+            {
+                method: 'DELETE',
+                body: JSON.stringify({
+                    message: message,
+                    sha: sha,
+                    branch: this.branch
+                })
+            }
+        );
     },
 
     // List files in a directory
@@ -206,12 +242,9 @@ window.githubService = {
         }
 
         try {
-            const { data } = await this.octokit.rest.repos.getContent({
-                owner: this.repoOwner,
-                repo: this.repoName,
-                path: path,
-                ref: this.branch
-            });
+            const data = await this.githubRequest(
+                `/repos/${this.repoOwner}/${this.repoName}/contents/${path}?ref=${this.branch}`
+            );
 
             // Filter to only files (not directories)
             return Array.isArray(data) ? data.filter(item => item.type === 'file') : [];
