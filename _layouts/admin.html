@@ -15,7 +15,17 @@ layout: default
 <!-- External Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@octokit/rest@18.12.0/dist/octokit-rest.min.js"></script>
+<script src="https://unpkg.com/@octokit/rest@18.12.0/dist/octokit-rest.min.js"></script>
+
+<script>
+// Debug: Check if Octokit loaded
+window.addEventListener('load', () => {
+    console.log('[Admin] Octokit loaded:', typeof Octokit !== 'undefined');
+    if (typeof Octokit === 'undefined') {
+        console.error('[Admin] Octokit library failed to load!');
+    }
+});
+</script>
 
 <!-- Admin Scripts -->
 <script src="/assets/js/github-auth.js"></script>
