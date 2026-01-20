@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Auth0 User Management
-permalink: /auth0-users/
+title: Authorization Management
+permalink: /authorization/
 ---
 
 <style>
@@ -285,15 +285,48 @@ permalink: /auth0-users/
 
 <script>
 document.addEventListener('authReady', async function() {
-  if (window.authService.isAuthenticated) {
-    await checkAdminPermissions();
-  } else {
+  console.log('[AUTH0-USERS] authReady event fired');
+
+  // Defensive check: ensure authService is fully initialized
+  if (!window.authService || !window.authService.client) {
+    console.error('[AUTH0-USERS] authReady fired but authService not fully initialized');
+    document.getElementById('auth0-login-prompt').style.display = 'block';
+    return;
+  }
+
+  // Re-verify authentication state instead of trusting cached value
+  try {
+    const isAuthenticated = await window.authService.client.isAuthenticated();
+    window.authService.isAuthenticated = isAuthenticated;
+
+    console.log('[AUTH0-USERS] Authentication verified:', isAuthenticated);
+
+    if (isAuthenticated) {
+      // Ensure user object exists before proceeding
+      if (!window.authService.user) {
+        window.authService.user = await window.authService.client.getUser();
+      }
+      console.log('[AUTH0-USERS] User object:', window.authService.user);
+      await checkAdminPermissions();
+    } else {
+      console.log('[AUTH0-USERS] User not authenticated, showing login prompt');
+      document.getElementById('auth0-login-prompt').style.display = 'block';
+    }
+  } catch (error) {
+    console.error('[AUTH0-USERS] Error checking authentication:', error);
     document.getElementById('auth0-login-prompt').style.display = 'block';
   }
 });
 
 async function checkAdminPermissions() {
+  console.log('[AUTH0-USERS] Checking admin permissions...');
   const user = window.authService.user;
+
+  if (!user) {
+    console.error('[AUTH0-USERS] No user object available');
+    document.getElementById('auth0-login-prompt').style.display = 'block';
+    return;
+  }
 
   const customRoles = user['https://carsontkempf.github.io/roles'] || [];
   const auth0Roles = user['https://auth0.com/roles'] || [];
@@ -302,14 +335,21 @@ async function checkAdminPermissions() {
 
   const allRoles = [...customRoles, ...auth0Roles, ...appMetadataRoles, ...userMetadataRoles];
 
+  console.log('[AUTH0-USERS] All roles found:', allRoles);
+
   const hasAdminRole = allRoles.includes('admin');
   const isSiteOwner = user.email === 'ctkfdp@umsystem.edu';
 
+  console.log('[AUTH0-USERS] Has admin role:', hasAdminRole);
+  console.log('[AUTH0-USERS] Is site owner:', isSiteOwner);
+
   if (hasAdminRole || isSiteOwner) {
+    console.log('[AUTH0-USERS] Access granted, loading content...');
     document.getElementById('auth0-content-wrapper').style.display = 'block';
     await loadAllUsers();
     await loadAllRoles();
   } else {
+    console.log('[AUTH0-USERS] Access denied');
     document.getElementById('auth0-login-prompt').style.display = 'block';
   }
 }

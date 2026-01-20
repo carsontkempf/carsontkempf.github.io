@@ -183,7 +183,7 @@ permalink: /dashboard/
         if (hasAdminRole || isSiteOwner) {
             // Full admin access - show all buttons
             authButtonsDiv.innerHTML = `
-                <a href="{{ '/auth0-users/' | relative_url }}" class="dashboard-btn">Auth0 User Management</a>
+                <a href="{{ '/authorization/' | relative_url }}" class="dashboard-btn">Authorization Management</a>
             `;
         }
         // If user has no special roles, no additional buttons are shown
