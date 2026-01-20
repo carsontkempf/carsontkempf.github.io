@@ -337,13 +337,16 @@ async function checkAdminPermissions() {
 
   console.log('[AUTH0-USERS] All roles found:', allRoles);
 
-  const hasAdminRole = allRoles.includes('admin');
+  // Check for admin role (case-insensitive)
+  const hasAdminRole = allRoles.some(role => role.toLowerCase() === 'admin');
+  const hasRootRole = allRoles.some(role => role.toLowerCase() === 'root');
   const isSiteOwner = user.email === 'ctkfdp@umsystem.edu';
 
   console.log('[AUTH0-USERS] Has admin role:', hasAdminRole);
+  console.log('[AUTH0-USERS] Has root role:', hasRootRole);
   console.log('[AUTH0-USERS] Is site owner:', isSiteOwner);
 
-  if (hasAdminRole || isSiteOwner) {
+  if (hasAdminRole || hasRootRole || isSiteOwner) {
     console.log('[AUTH0-USERS] Access granted, loading content...');
     document.getElementById('auth0-content-wrapper').style.display = 'block';
     await loadAllUsers();
