@@ -19,11 +19,11 @@ permalink: /admin/
 
     <div id="admin-tabs" style="display: none;">
         <div class="tab-navigation">
-            <button class="tab-btn active" data-tab="video-manager">YouTube Video Manager</button>
-            <button class="tab-btn" data-tab="markdown-editor">Markdown Editor</button>
+            <button class="tab-btn" data-tab="video-manager">YouTube Video Manager</button>
+            <button class="tab-btn active" data-tab="markdown-editor">Markdown Editor</button>
         </div>
 
-        <div id="video-manager" class="tab-content active">
+        <div id="video-manager" class="tab-content">
             <h2>YouTube Video Manager</h2>
 
             <div class="admin-section">
@@ -45,7 +45,7 @@ permalink: /admin/
             </div>
         </div>
 
-        <div id="markdown-editor" class="tab-content">
+        <div id="markdown-editor" class="tab-content active">
             <h2>Markdown Editor</h2>
 
             <div class="editor-layout">
@@ -91,6 +91,11 @@ document.addEventListener('authReady', () => {
 
     document.getElementById('admin-content-wrapper').style.display = 'block';
 
+    // Initialize markdown editor on page load since it's the default tab
+    if (window.articleManager && !window.articleManager.editor) {
+        window.articleManager.initEditor();
+    }
+
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -101,8 +106,8 @@ document.addEventListener('authReady', () => {
             const tabId = btn.getAttribute('data-tab');
             document.getElementById(tabId).classList.add('active');
 
-            // Initialize editor when markdown tab is opened
-            if (tabId === 'markdown-editor' && !window.articleManager.editor) {
+            // Initialize editor when markdown tab is opened (if not already initialized)
+            if (tabId === 'markdown-editor' && window.articleManager && !window.articleManager.editor) {
                 window.articleManager.initEditor();
             }
         });
