@@ -84,6 +84,19 @@ function hasRole(payload, requiredRoles) {
  */
 function withAuth(handler, options = {}) {
   return async (event, context) => {
+    // Handle CORS preflight (OPTIONS) requests
+    if (event.httpMethod === 'OPTIONS') {
+      return {
+        statusCode: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+        },
+        body: ''
+      };
+    }
+
     try {
       // Verify the token
       const payload = await verifyAuth0Token(event);
@@ -95,7 +108,9 @@ function withAuth(handler, options = {}) {
             statusCode: 403,
             headers: {
               'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*'
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+              'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
             },
             body: JSON.stringify({
               error: 'Forbidden',
@@ -114,7 +129,9 @@ function withAuth(handler, options = {}) {
         statusCode: 401,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
         },
         body: JSON.stringify({
           error: 'Unauthorized',
