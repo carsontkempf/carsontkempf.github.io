@@ -53,7 +53,7 @@ window.githubService = {
 
             console.log('[GitHub Auth] Initializing Octokit...');
             // Initialize Octokit with the Personal Access Token
-            this.octokit = new Octokit.Octokit({
+            this.octokit = new Octokit({
                 auth: token
             });
 
