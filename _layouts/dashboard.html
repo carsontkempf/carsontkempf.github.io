@@ -117,6 +117,7 @@ permalink: /dashboard/
   <main class="dashboard-main-content">
     <div class="dashboard-buttons">
       <a href="{{ '/spotify-apple/' | relative_url }}" class="dashboard-btn">Spotify Apple Integration</a>
+      <a href="{{ '/authorization/' | relative_url }}" class="dashboard-btn">Authorization Management</a>
       <a href="{{ '/admin/' | relative_url }}" class="dashboard-btn" id="writer-admin-button" style="display: none;">Writer's Admin</a>
       <div id="auth-management-buttons">
         <!-- Buttons will be dynamically loaded based on user permissions -->
@@ -180,12 +181,7 @@ permalink: /dashboard/
             }
         }
 
-        if (hasAdminRole || isSiteOwner) {
-            // Full admin access - show all buttons
-            authButtonsDiv.innerHTML = `
-                <a href="{{ '/authorization/' | relative_url }}" class="dashboard-btn">Authorization Management</a>
-            `;
-        }
-        // If user has no special roles, no additional buttons are shown
+        // Additional admin-specific buttons can be added here if needed
+        // Currently no additional dynamic buttons for admins
     }
 </script>
