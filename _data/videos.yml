@@ -1,3 +1,7 @@
-# YouTube Videos
-# Managed via Writer's Admin panel at /dashboards/admin/
-videos: []
+videos:
+  - id: claude-code-agents
+    title: Claude Code Agents
+    youtube_id: P60LqQg1RH8
+    description: Learning how to use agents is a big strength
+    linked_article: null
+    date_added: '2026-01-21'
