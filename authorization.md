@@ -357,30 +357,27 @@ async function checkAdminPermissions() {
   }
 }
 
-// Auth0 Management API Helper Functions
-async function getManagementToken() {
+// Helper to get user access token for API calls
+async function getUserToken() {
   try {
-    const token = await window.authService.client.getTokenSilently({
-      audience: 'https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/',
-      scope: 'read:roles read:users read:role_members create:role_members delete:role_members update:users read:users_app_metadata update:users_app_metadata'
-    });
+    const token = await window.authService.client.getTokenSilently();
     return token;
   } catch (error) {
-    console.error('Error getting management token:', error);
+    console.error('Error getting user token:', error);
     return null;
   }
 }
 
-// Load all users from Auth0
+// Load all users from Auth0 via Netlify Function
 async function loadAllUsers() {
   try {
-    const token = await getManagementToken();
+    const token = await getUserToken();
     if (!token) {
-      document.getElementById('users-list').innerHTML = '<p>Unable to get management token</p>';
+      document.getElementById('users-list').innerHTML = '<p>Unable to get access token</p>';
       return;
     }
 
-    const response = await fetch('https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/users?per_page=100', {
+    const response = await fetch('/.netlify/functions/auth0-get-users', {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
@@ -391,6 +388,8 @@ async function loadAllUsers() {
       const users = await response.json();
       displayUsers(users);
     } else {
+      const error = await response.json();
+      console.error('Error loading users:', error);
       document.getElementById('users-list').innerHTML = '<p>Error loading users</p>';
     }
   } catch (error) {
@@ -400,34 +399,16 @@ async function loadAllUsers() {
 }
 
 // Display users in the grid
-async function displayUsers(users) {
+function displayUsers(users) {
   const usersList = document.getElementById('users-list');
-  const token = await getManagementToken();
 
   if (users.length === 0) {
     usersList.innerHTML = '<p>No users found</p>';
     return;
   }
 
-  const userCardsPromises = users.map(async (user) => {
-    // Get user roles
-    let roles = [];
-    if (token) {
-      try {
-        const rolesResponse = await fetch(`https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/users/${user.user_id}/roles`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
-          }
-        });
-        if (rolesResponse.ok) {
-          roles = await rolesResponse.json();
-        }
-      } catch (error) {
-        console.error('Error loading roles for user:', error);
-      }
-    }
-
+  const userCards = users.map((user) => {
+    const roles = user.roles || [];
     const rolesHtml = roles.length > 0
       ? `<div class="user-roles">${roles.map(role => `<span class="role-badge">${role.name}</span>`).join('')}</div>`
       : '<p>No roles assigned</p>';
@@ -443,20 +424,19 @@ async function displayUsers(users) {
     `;
   });
 
-  const userCards = await Promise.all(userCardsPromises);
   usersList.innerHTML = userCards.join('');
 }
 
-// Load all roles from Auth0
+// Load all roles from Auth0 via Netlify Function
 async function loadAllRoles() {
   try {
-    const token = await getManagementToken();
+    const token = await getUserToken();
     if (!token) {
-      document.getElementById('all-roles-list').innerHTML = '<p>Unable to get management token</p>';
+      document.getElementById('all-roles-list').innerHTML = '<p>Unable to get access token</p>';
       return;
     }
 
-    const response = await fetch('https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/roles', {
+    const response = await fetch('/.netlify/functions/auth0-get-roles', {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
@@ -468,6 +448,8 @@ async function loadAllRoles() {
       displayRoles(roles);
       populateRoleSelect(roles);
     } else {
+      const error = await response.json();
+      console.error('Error loading roles:', error);
       document.getElementById('all-roles-list').innerHTML = '<p>Error loading roles</p>';
     }
   } catch (error) {
@@ -507,59 +489,36 @@ function populateRoleSelect(roles) {
 async function assignRoleToUser() {
   const email = document.getElementById('user-email-role').value;
   const roleId = document.getElementById('role-selection').value;
-  
+
   if (!email || !roleId) {
     alert('Please enter both email and select a role');
     return;
   }
 
   try {
-    const token = await getManagementToken();
+    const token = await getUserToken();
     if (!token) {
-      alert('Unable to get management token');
+      alert('Unable to get access token');
       return;
     }
 
-    // First, get user by email
-    const userResponse = await fetch(`https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/users-by-email?email=${encodeURIComponent(email)}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!userResponse.ok) {
-      alert('User not found');
-      return;
-    }
-
-    const users = await userResponse.json();
-    if (users.length === 0) {
-      alert('User not found');
-      return;
-    }
-
-    const userId = users[0].user_id;
-
-    // Assign role to user
-    const assignResponse = await fetch(`https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/users/${userId}/roles`, {
+    const response = await fetch('/.netlify/functions/auth0-assign-role', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        roles: [roleId]
-      })
+      body: JSON.stringify({ email, roleId })
     });
 
-    if (assignResponse.ok) {
-      alert(`Role successfully assigned to ${email}`);
-      // Clear form
+    const result = await response.json();
+
+    if (response.ok) {
+      alert(result.message || `Role successfully assigned to ${email}`);
       document.getElementById('user-email-role').value = '';
+      await loadAllUsers();
     } else {
-      const error = await assignResponse.text();
-      alert(`Error assigning role: ${error}`);
+      alert(`Error: ${result.error || 'Failed to assign role'}`);
     }
 
   } catch (error) {
@@ -571,59 +530,36 @@ async function assignRoleToUser() {
 async function removeRoleFromUser() {
   const email = document.getElementById('user-email-role').value;
   const roleId = document.getElementById('role-selection').value;
-  
+
   if (!email || !roleId) {
     alert('Please enter both email and select a role');
     return;
   }
 
   try {
-    const token = await getManagementToken();
+    const token = await getUserToken();
     if (!token) {
-      alert('Unable to get management token');
+      alert('Unable to get access token');
       return;
     }
 
-    // First, get user by email
-    const userResponse = await fetch(`https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/users-by-email?email=${encodeURIComponent(email)}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!userResponse.ok) {
-      alert('User not found');
-      return;
-    }
-
-    const users = await userResponse.json();
-    if (users.length === 0) {
-      alert('User not found');
-      return;
-    }
-
-    const userId = users[0].user_id;
-
-    // Remove role from user
-    const removeResponse = await fetch(`https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/users/${userId}/roles`, {
-      method: 'DELETE',
+    const response = await fetch('/.netlify/functions/auth0-remove-role', {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        roles: [roleId]
-      })
+      body: JSON.stringify({ email, roleId })
     });
 
-    if (removeResponse.ok) {
-      alert(`Role successfully removed from ${email}`);
-      // Clear form
+    const result = await response.json();
+
+    if (response.ok) {
+      alert(result.message || `Role successfully removed from ${email}`);
       document.getElementById('user-email-role').value = '';
+      await loadAllUsers();
     } else {
-      const error = await removeResponse.text();
-      alert(`Error removing role: ${error}`);
+      alert(`Error: ${result.error || 'Failed to remove role'}`);
     }
 
   } catch (error) {
@@ -640,97 +576,49 @@ async function lookupUserRoles() {
   }
 
   try {
-    const token = await getManagementToken();
+    const token = await getUserToken();
     if (!token) {
-      alert('Unable to get management token');
+      alert('Unable to get access token');
       return;
     }
 
-    // Get user by email
-    const userResponse = await fetch(`https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/users-by-email?email=${encodeURIComponent(email)}`, {
+    const response = await fetch('/.netlify/functions/auth0-get-users', {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
       }
     });
 
-    if (!userResponse.ok) {
+    if (!response.ok) {
+      document.getElementById('user-lookup-results').innerHTML = '<p>Error fetching users</p>';
+      return;
+    }
+
+    const users = await response.json();
+    const user = users.find(u => u.email === email);
+
+    if (!user) {
       document.getElementById('user-lookup-results').innerHTML = '<p>User not found</p>';
       return;
     }
 
-    const users = await userResponse.json();
-    if (users.length === 0) {
-      document.getElementById('user-lookup-results').innerHTML = '<p>User not found</p>';
-      return;
-    }
+    const roles = user.roles || [];
 
-    const user = users[0];
-
-    // Get user's roles
-    const rolesResponse = await fetch(`https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/users/${user.user_id}/roles`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
+    document.getElementById('user-lookup-results').innerHTML = `
+      <h4>User: ${user.email}</h4>
+      <p><strong>User ID:</strong> ${user.user_id}</p>
+      <p><strong>Name:</strong> ${user.name}</p>
+      <p><strong>Connection:</strong> ${user.identities[0]?.connection || 'Unknown'}</p>
+      <h5>Assigned Roles:</h5>
+      ${roles.length > 0 ?
+        `<ul>${roles.map(role => `<li>${role.name} (ID: ${role.id})</li>`).join('')}</ul>` :
+        '<p>No roles assigned</p>'
       }
-    });
-
-    if (rolesResponse.ok) {
-      const roles = await rolesResponse.json();
-      
-      document.getElementById('user-lookup-results').innerHTML = `
-        <h4>User: ${user.email}</h4>
-        <p><strong>User ID:</strong> ${user.user_id}</p>
-        <p><strong>Name:</strong> ${user.name}</p>
-        <p><strong>Connection:</strong> ${user.identities[0]?.connection || 'Unknown'}</p>
-        <h5>Assigned Roles:</h5>
-        ${roles.length > 0 ? 
-          `<ul>${roles.map(role => `<li>${role.name} (ID: ${role.id})</li>`).join('')}</ul>` : 
-          '<p>No roles assigned</p>'
-        }
-      `;
-    }
+    `;
 
   } catch (error) {
     console.error('Error looking up user roles:', error);
     document.getElementById('user-lookup-results').innerHTML = '<p>Error looking up user</p>';
-  }
-}
-
-async function getUserByEmail() {
-  const email = document.getElementById('lookup-email').value;
-  if (!email) {
-    alert('Please enter an email');
-    return;
-  }
-
-  try {
-    const token = await getManagementToken();
-    if (!token) {
-      alert('Unable to get management token');
-      return;
-    }
-
-    const response = await fetch(`https://dev-l57dcpkhob0u7ykb.us.auth0.com/api/v2/users-by-email?email=${encodeURIComponent(email)}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
-
-    if (response.ok) {
-      const users = await response.json();
-      document.getElementById('user-lookup-results').innerHTML = `
-        <h4>User Details:</h4>
-        <pre>${JSON.stringify(users, null, 2)}</pre>
-      `;
-    } else {
-      document.getElementById('user-lookup-results').innerHTML = '<p>User not found</p>';
-    }
-
-  } catch (error) {
-    console.error('Error getting user:', error);
-    document.getElementById('user-lookup-results').innerHTML = '<p>Error getting user</p>';
   }
 }
 
