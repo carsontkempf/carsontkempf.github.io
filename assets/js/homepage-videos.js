@@ -2,34 +2,45 @@
 window.homepageVideos = {
     async loadAndDisplay() {
         try {
-            const response = await fetch('/_data/videos.yml');
+            console.log('[VIDEOS] Starting to load videos...');
+            const response = await fetch('/videos.json');
+            console.log('[VIDEOS] Fetch response status:', response.status, response.statusText);
+
             if (!response.ok) {
-                console.log('Videos file not found or empty');
+                console.error('[VIDEOS] Failed to fetch videos.json:', response.status, response.statusText);
                 return;
             }
 
-            const yamlText = await response.text();
-            const data = jsyaml.load(yamlText);
+            const data = await response.json();
+            console.log('[VIDEOS] Loaded data:', data);
 
             if (!data || !data.videos || data.videos.length === 0) {
-                console.log('No videos to display');
+                console.warn('[VIDEOS] No videos to display in data');
                 return;
             }
 
+            console.log('[VIDEOS] Rendering', data.videos.length, 'videos');
             this.renderVideos(data.videos);
         } catch (error) {
-            console.error('Failed to load videos:', error);
+            console.error('[VIDEOS] Failed to load videos:', error);
         }
     },
 
     renderVideos(videos) {
         const container = document.getElementById('videos-grid');
-        if (!container) return;
+        console.log('[VIDEOS] Container element:', container);
+
+        if (!container) {
+            console.error('[VIDEOS] videos-grid container not found in DOM');
+            return;
+        }
 
         // Show latest 6 videos
         const latestVideos = videos.slice(0, 6);
+        console.log('[VIDEOS] Displaying', latestVideos.length, 'videos');
 
         container.innerHTML = latestVideos.map(video => this.renderVideo(video)).join('');
+        console.log('[VIDEOS] Videos rendered successfully');
     },
 
     renderVideo({youtube_id, title, description, linked_article}) {

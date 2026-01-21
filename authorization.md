@@ -284,8 +284,12 @@ permalink: /authorization/
 </div>
 
 <script>
+// Netlify Functions API Base URL
+const NETLIFY_API_BASE = 'https://carsontkempf.netlify.app/.netlify/functions';
+
 document.addEventListener('authReady', async function() {
   console.log('[AUTH0-USERS] authReady event fired');
+  console.log('[AUTH0-USERS] Netlify API Base URL:', NETLIFY_API_BASE);
 
   // Defensive check: ensure authService is fully initialized
   if (!window.authService || !window.authService.client) {
@@ -371,30 +375,48 @@ async function getUserToken() {
 // Load all users from Auth0 via Netlify Function
 async function loadAllUsers() {
   try {
+    console.log('[AUTH0-USERS] loadAllUsers: Getting user token...');
     const token = await getUserToken();
     if (!token) {
+      console.error('[AUTH0-USERS] loadAllUsers: Failed to get user token');
       document.getElementById('users-list').innerHTML = '<p>Unable to get access token</p>';
       return;
     }
+    console.log('[AUTH0-USERS] loadAllUsers: Token obtained, length:', token.length);
 
-    const response = await fetch('/.netlify/functions/auth0-get-users', {
+    const functionUrl = `${NETLIFY_API_BASE}/auth0-get-users`;
+    console.log('[AUTH0-USERS] loadAllUsers: Calling function:', functionUrl);
+
+    const response = await fetch(functionUrl, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
       }
     });
 
+    console.log('[AUTH0-USERS] loadAllUsers: Response status:', response.status);
+    console.log('[AUTH0-USERS] loadAllUsers: Response headers:', Object.fromEntries(response.headers.entries()));
+
     if (response.ok) {
       const users = await response.json();
+      console.log('[AUTH0-USERS] loadAllUsers: Successfully loaded', users.length, 'users');
       displayUsers(users);
     } else {
-      const error = await response.json();
-      console.error('Error loading users:', error);
-      document.getElementById('users-list').innerHTML = '<p>Error loading users</p>';
+      const contentType = response.headers.get('content-type');
+      let error;
+      if (contentType && contentType.includes('application/json')) {
+        error = await response.json();
+      } else {
+        const text = await response.text();
+        console.error('[AUTH0-USERS] loadAllUsers: Non-JSON response (first 500 chars):', text.substring(0, 500));
+        error = { message: 'Non-JSON response received', status: response.status };
+      }
+      console.error('[AUTH0-USERS] loadAllUsers: Error loading users:', error);
+      document.getElementById('users-list').innerHTML = `<p>Error loading users (Status: ${response.status})</p>`;
     }
   } catch (error) {
-    console.error('Error loading users:', error);
-    document.getElementById('users-list').innerHTML = '<p>Error loading users</p>';
+    console.error('[AUTH0-USERS] loadAllUsers: Exception:', error);
+    document.getElementById('users-list').innerHTML = '<p>Error loading users - check console</p>';
   }
 }
 
@@ -430,31 +452,47 @@ function displayUsers(users) {
 // Load all roles from Auth0 via Netlify Function
 async function loadAllRoles() {
   try {
+    console.log('[AUTH0-USERS] loadAllRoles: Getting user token...');
     const token = await getUserToken();
     if (!token) {
+      console.error('[AUTH0-USERS] loadAllRoles: Failed to get user token');
       document.getElementById('all-roles-list').innerHTML = '<p>Unable to get access token</p>';
       return;
     }
 
-    const response = await fetch('/.netlify/functions/auth0-get-roles', {
+    const functionUrl = `${NETLIFY_API_BASE}/auth0-get-roles`;
+    console.log('[AUTH0-USERS] loadAllRoles: Calling function:', functionUrl);
+
+    const response = await fetch(functionUrl, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
       }
     });
 
+    console.log('[AUTH0-USERS] loadAllRoles: Response status:', response.status);
+
     if (response.ok) {
       const roles = await response.json();
+      console.log('[AUTH0-USERS] loadAllRoles: Successfully loaded', roles.length, 'roles');
       displayRoles(roles);
       populateRoleSelect(roles);
     } else {
-      const error = await response.json();
-      console.error('Error loading roles:', error);
-      document.getElementById('all-roles-list').innerHTML = '<p>Error loading roles</p>';
+      const contentType = response.headers.get('content-type');
+      let error;
+      if (contentType && contentType.includes('application/json')) {
+        error = await response.json();
+      } else {
+        const text = await response.text();
+        console.error('[AUTH0-USERS] loadAllRoles: Non-JSON response (first 500 chars):', text.substring(0, 500));
+        error = { message: 'Non-JSON response received', status: response.status };
+      }
+      console.error('[AUTH0-USERS] loadAllRoles: Error loading roles:', error);
+      document.getElementById('all-roles-list').innerHTML = `<p>Error loading roles (Status: ${response.status})</p>`;
     }
   } catch (error) {
-    console.error('Error loading roles:', error);
-    document.getElementById('all-roles-list').innerHTML = '<p>Error loading roles</p>';
+    console.error('[AUTH0-USERS] loadAllRoles: Exception:', error);
+    document.getElementById('all-roles-list').innerHTML = '<p>Error loading roles - check console</p>';
   }
 }
 
@@ -496,13 +534,18 @@ async function assignRoleToUser() {
   }
 
   try {
+    console.log('[AUTH0-USERS] assignRoleToUser: Assigning role', roleId, 'to', email);
     const token = await getUserToken();
     if (!token) {
+      console.error('[AUTH0-USERS] assignRoleToUser: Failed to get user token');
       alert('Unable to get access token');
       return;
     }
 
-    const response = await fetch('/.netlify/functions/auth0-assign-role', {
+    const functionUrl = `${NETLIFY_API_BASE}/auth0-assign-role`;
+    console.log('[AUTH0-USERS] assignRoleToUser: Calling function:', functionUrl);
+
+    const response = await fetch(functionUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -511,19 +554,31 @@ async function assignRoleToUser() {
       body: JSON.stringify({ email, roleId })
     });
 
-    const result = await response.json();
+    console.log('[AUTH0-USERS] assignRoleToUser: Response status:', response.status);
+
+    const contentType = response.headers.get('content-type');
+    let result;
+    if (contentType && contentType.includes('application/json')) {
+      result = await response.json();
+    } else {
+      const text = await response.text();
+      console.error('[AUTH0-USERS] assignRoleToUser: Non-JSON response:', text.substring(0, 500));
+      result = { error: 'Non-JSON response received' };
+    }
 
     if (response.ok) {
+      console.log('[AUTH0-USERS] assignRoleToUser: Success');
       alert(result.message || `Role successfully assigned to ${email}`);
       document.getElementById('user-email-role').value = '';
       await loadAllUsers();
     } else {
+      console.error('[AUTH0-USERS] assignRoleToUser: Error:', result);
       alert(`Error: ${result.error || 'Failed to assign role'}`);
     }
 
   } catch (error) {
-    console.error('Error assigning role:', error);
-    alert('Error assigning role');
+    console.error('[AUTH0-USERS] assignRoleToUser: Exception:', error);
+    alert('Error assigning role - check console');
   }
 }
 
@@ -537,13 +592,18 @@ async function removeRoleFromUser() {
   }
 
   try {
+    console.log('[AUTH0-USERS] removeRoleFromUser: Removing role', roleId, 'from', email);
     const token = await getUserToken();
     if (!token) {
+      console.error('[AUTH0-USERS] removeRoleFromUser: Failed to get user token');
       alert('Unable to get access token');
       return;
     }
 
-    const response = await fetch('/.netlify/functions/auth0-remove-role', {
+    const functionUrl = `${NETLIFY_API_BASE}/auth0-remove-role`;
+    console.log('[AUTH0-USERS] removeRoleFromUser: Calling function:', functionUrl);
+
+    const response = await fetch(functionUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -552,19 +612,31 @@ async function removeRoleFromUser() {
       body: JSON.stringify({ email, roleId })
     });
 
-    const result = await response.json();
+    console.log('[AUTH0-USERS] removeRoleFromUser: Response status:', response.status);
+
+    const contentType = response.headers.get('content-type');
+    let result;
+    if (contentType && contentType.includes('application/json')) {
+      result = await response.json();
+    } else {
+      const text = await response.text();
+      console.error('[AUTH0-USERS] removeRoleFromUser: Non-JSON response:', text.substring(0, 500));
+      result = { error: 'Non-JSON response received' };
+    }
 
     if (response.ok) {
+      console.log('[AUTH0-USERS] removeRoleFromUser: Success');
       alert(result.message || `Role successfully removed from ${email}`);
       document.getElementById('user-email-role').value = '';
       await loadAllUsers();
     } else {
+      console.error('[AUTH0-USERS] removeRoleFromUser: Error:', result);
       alert(`Error: ${result.error || 'Failed to remove role'}`);
     }
 
   } catch (error) {
-    console.error('Error removing role:', error);
-    alert('Error removing role');
+    console.error('[AUTH0-USERS] removeRoleFromUser: Exception:', error);
+    alert('Error removing role - check console');
   }
 }
 
@@ -576,32 +648,43 @@ async function lookupUserRoles() {
   }
 
   try {
+    console.log('[AUTH0-USERS] lookupUserRoles: Looking up user:', email);
     const token = await getUserToken();
     if (!token) {
+      console.error('[AUTH0-USERS] lookupUserRoles: Failed to get user token');
       alert('Unable to get access token');
       return;
     }
 
-    const response = await fetch('/.netlify/functions/auth0-get-users', {
+    const functionUrl = `${NETLIFY_API_BASE}/auth0-get-users`;
+    console.log('[AUTH0-USERS] lookupUserRoles: Calling function:', functionUrl);
+
+    const response = await fetch(functionUrl, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
       }
     });
 
+    console.log('[AUTH0-USERS] lookupUserRoles: Response status:', response.status);
+
     if (!response.ok) {
+      console.error('[AUTH0-USERS] lookupUserRoles: Failed to fetch users');
       document.getElementById('user-lookup-results').innerHTML = '<p>Error fetching users</p>';
       return;
     }
 
     const users = await response.json();
+    console.log('[AUTH0-USERS] lookupUserRoles: Searching for user in', users.length, 'users');
     const user = users.find(u => u.email === email);
 
     if (!user) {
+      console.log('[AUTH0-USERS] lookupUserRoles: User not found');
       document.getElementById('user-lookup-results').innerHTML = '<p>User not found</p>';
       return;
     }
 
+    console.log('[AUTH0-USERS] lookupUserRoles: Found user with', (user.roles || []).length, 'roles');
     const roles = user.roles || [];
 
     document.getElementById('user-lookup-results').innerHTML = `
@@ -617,7 +700,7 @@ async function lookupUserRoles() {
     `;
 
   } catch (error) {
-    console.error('Error looking up user roles:', error);
+    console.error('[AUTH0-USERS] lookupUserRoles: Exception:', error);
     document.getElementById('user-lookup-results').innerHTML = '<p>Error looking up user</p>';
   }
 }
