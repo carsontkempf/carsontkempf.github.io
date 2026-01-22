@@ -246,8 +246,8 @@ window.githubService = {
                 `/repos/${this.repoOwner}/${this.repoName}/contents/${path}?ref=${this.branch}`
             );
 
-            // Filter to only files (not directories)
-            return Array.isArray(data) ? data.filter(item => item.type === 'file') : [];
+            // Return all items (both files and directories)
+            return Array.isArray(data) ? data : [];
         } catch (error) {
             if (error.status === 404) {
                 return [];
@@ -331,7 +331,7 @@ function updateGitHubUI(connected, errorMessage = null) {
 
         // Load data
         if (window.videoManager) window.videoManager.loadVideos();
-        if (window.articleManager) window.articleManager.loadArticles();
+        if (window.articleManager) window.articleManager.loadAllPosts();
     } else {
         if (status) {
             status.textContent = errorMessage || 'Not connected';

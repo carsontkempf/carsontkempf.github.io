@@ -46,22 +46,24 @@ permalink: /admin/
         </div>
 
         <div id="markdown-editor" class="tab-content active">
-            <h2>Markdown Editor</h2>
+            <h2>Post Manager</h2>
 
             <div class="editor-layout">
                 <div class="editor-sidebar">
                     <div class="editor-actions">
-                        <button onclick="createNewArticle()">New Article</button>
+                        <button onclick="createNewArticle()">New Post</button>
+                        <button onclick="createFolder()">New Folder</button>
                         <button onclick="saveArticle()">Save</button>
                         <button onclick="deleteCurrentArticle()">Delete</button>
                     </div>
-                    <h3>Articles</h3>
+                    <h3>Posts Directory</h3>
                     <div id="articles-list"></div>
                 </div>
 
                 <div class="editor-main">
                     <div id="article-meta">
-                        <input type="text" id="article-title" placeholder="Article Title">
+                        <input type="text" id="article-title" placeholder="Post Title">
+                        <input type="text" id="article-folder" placeholder="Folder (e.g., Personal/AI)" readonly>
                         <input type="text" id="article-permalink" placeholder="Permalink (e.g., /my-article/)">
                     </div>
                     <textarea id="markdown-textarea"></textarea>
