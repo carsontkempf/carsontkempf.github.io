@@ -1,0 +1,55 @@
+---
+layout: chess-game
+title: Chess Engine
+permalink: /chess/
+---
+
+<div class="chess-main-container">
+  <div class="chess-board-section">
+    <h1>Chess Engine</h1>
+    <div class="chess-board-wrapper">
+      <div id="chess-board"></div>
+    </div>
+  </div>
+
+  <div class="chess-controls-section">
+    <h2>Controls</h2>
+    <div class="chess-controls">
+      <!-- Controls will be added in Phase 8 -->
+      <button id="new-game-btn" disabled>New Game</button>
+      <button id="flip-board-btn" disabled>Flip Board</button>
+      <button id="undo-btn" disabled>Undo</button>
+    </div>
+  </div>
+
+  <div class="chess-analysis-section">
+    <h2>Analysis</h2>
+    <div class="chess-analysis">
+      <!-- Analysis panel will be added in Phase 9 -->
+      <p>Analysis features coming soon...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Test board rendering
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('[CHESS] Initializing test board...');
+
+  // Wait for Chessboard.js to load
+  if (typeof Chessboard !== 'undefined') {
+    try {
+      const board = Chessboard('chess-board', {
+        position: 'start',
+        draggable: false,
+        pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+      });
+      console.log('[CHESS] ✓ Test board rendered successfully');
+    } catch (error) {
+      console.error('[CHESS] ✗ Failed to render board:', error);
+    }
+  } else {
+    console.error('[CHESS] ✗ Chessboard.js not available');
+  }
+});
+</script>

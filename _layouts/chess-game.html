@@ -1,0 +1,77 @@
+---
+layout: default
+---
+
+<!-- Chess-specific CSS -->
+<link rel="stylesheet" href="{{ '/assets/css/vendor/chessboard-1.0.0.min.css' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/css/chess.css' | relative_url }}">
+
+<!-- Chess game container -->
+<div id="chess-game-container">
+  {{ content }}
+</div>
+
+<!-- Dependencies (loaded in order) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  // Verify jQuery loaded
+  if (typeof jQuery === 'undefined') {
+    console.error('[CHESS] jQuery failed to load from CDN');
+  } else {
+    console.log('[CHESS] jQuery loaded successfully');
+  }
+</script>
+<script src="{{ '/assets/js/vendor/chessboard-1.0.0.min.js' | relative_url }}"></script>
+
+<!-- Chess Engine Modules (ES6 modules) -->
+<script type="module">
+  // Import chess modules when needed
+  // TODO: Import modules in later phases
+  console.log('[CHESS] Chess module system ready');
+</script>
+
+<!-- Initialize on auth ready -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('[CHESS] DOM loaded, checking dependencies...');
+
+  // Check Auth0 availability
+  if (window.auth0) {
+    console.log('[CHESS] ✓ Auth0 SDK loaded');
+  } else {
+    console.error('[CHESS] ✗ Auth0 SDK not loaded');
+  }
+
+  // Check authService availability
+  if (window.authService) {
+    console.log('[CHESS] ✓ authService available');
+  } else {
+    console.error('[CHESS] ✗ authService not available');
+  }
+
+  // Check jQuery availability
+  if (window.jQuery) {
+    console.log('[CHESS] ✓ jQuery available');
+  } else {
+    console.error('[CHESS] ✗ jQuery not available');
+  }
+
+  // Check Chessboard.js availability
+  if (window.Chessboard) {
+    console.log('[CHESS] ✓ Chessboard.js available');
+  } else {
+    console.error('[CHESS] ✗ Chessboard.js not available');
+  }
+});
+
+document.addEventListener('authReady', () => {
+  console.log('[CHESS] ✓ authReady event fired');
+  if (window.authService) {
+    console.log('[CHESS] Auth status:', window.authService.isAuthenticated);
+    if (window.authService.user) {
+      console.log('[CHESS] User:', window.authService.user.email || window.authService.user.sub);
+    }
+  }
+  // Chess initialization will go here in later phases
+});
+</script>

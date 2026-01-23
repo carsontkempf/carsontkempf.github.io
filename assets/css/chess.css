@@ -1,0 +1,119 @@
+/**
+ * Chess Engine Styles
+ * Part of Carson's Chess Engine
+ */
+
+/* Main chess container */
+.chess-main-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 600px 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+/* Board section (center) */
+.chess-board-section {
+  grid-column: 2;
+}
+
+.chess-board-section h1 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.chess-board-wrapper {
+  width: 600px;
+  margin: 0 auto;
+}
+
+#chess-board {
+  width: 600px;
+}
+
+/* Controls section (left) */
+.chess-controls-section {
+  grid-column: 1;
+  background: var(--background-secondary, #f5f5f5);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.chess-controls-section h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.chess-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chess-controls button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  background: var(--button-background, #007bff);
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.chess-controls button:hover:not(:disabled) {
+  background: var(--button-hover, #0056b3);
+}
+
+.chess-controls button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Analysis section (right) */
+.chess-analysis-section {
+  grid-column: 3;
+  background: var(--background-secondary, #f5f5f5);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.chess-analysis-section h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.chess-analysis p {
+  color: var(--text-secondary, #666);
+  font-style: italic;
+}
+
+/* Responsive layout */
+@media (max-width: 1200px) {
+  .chess-main-container {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+  }
+
+  .chess-board-section,
+  .chess-controls-section,
+  .chess-analysis-section {
+    grid-column: 1;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .chess-controls-section,
+  .chess-analysis-section {
+    background: #2a2a2a;
+  }
+
+  .chess-analysis p {
+    color: #aaa;
+  }
+}
