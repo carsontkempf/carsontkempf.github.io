@@ -3,7 +3,7 @@ layout: default
 ---
 
 <!-- Chess-specific CSS -->
-<link rel="stylesheet" href="{{ '/assets/css/vendor/chessboard-1.0.0.min.css' | relative_url }}">
+<link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
 <link rel="stylesheet" href="{{ '/assets/css/chess.css' | relative_url }}">
 
 <!-- Chess game container -->
@@ -21,7 +21,15 @@ layout: default
     console.log('[CHESS] jQuery loaded successfully');
   }
 </script>
-<script src="{{ '/assets/js/vendor/chessboard-1.0.0.min.js' | relative_url }}"></script>
+<script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+<script>
+  // Verify Chessboard.js loaded
+  if (typeof Chessboard === 'undefined') {
+    console.error('[CHESS] Chessboard.js failed to load from CDN');
+  } else {
+    console.log('[CHESS] Chessboard.js loaded successfully');
+  }
+</script>
 
 <!-- Chess Engine Modules (ES6 modules) -->
 <script type="module">
