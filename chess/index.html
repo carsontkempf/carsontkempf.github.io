@@ -5,6 +5,40 @@ permalink: /chess/
 ---
 
 <div class="chess-main-container">
+  <!-- User Profile Section -->
+  <div class="chess-user-profile">
+    <div id="user-welcome" class="user-welcome">
+      <span id="user-greeting">Welcome, Guest</span>
+      <button id="profile-login-btn" class="profile-login-btn" style="display: none;">Login to Save Games</button>
+    </div>
+    <div id="user-stats" class="user-stats" style="display: none;">
+      <div class="stat-item">
+        <span class="stat-label">Elo Rating:</span>
+        <span id="user-elo" class="stat-value">1200</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Games Played:</span>
+        <span id="user-games-played" class="stat-value">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Win Rate:</span>
+        <span id="user-win-rate" class="stat-value">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Opening Information Section -->
+  <div class="chess-opening-info">
+    <div class="opening-name-container">
+      <span class="opening-label">Opening:</span>
+      <span id="opening-name" class="opening-name">Starting Position</span>
+    </div>
+    <div class="eco-code-container">
+      <span class="eco-label">ECO:</span>
+      <span id="eco-code" class="eco-code">—</span>
+    </div>
+  </div>
+
   <div class="chess-board-section">
     <h1>Chess Engine</h1>
     <div class="chess-board-wrapper">
@@ -15,10 +49,76 @@ permalink: /chess/
   <div class="chess-controls-section">
     <h2>Controls</h2>
     <div class="chess-controls">
-      <!-- Controls will be added in Phase 8 -->
       <button id="new-game-btn" disabled>New Game</button>
       <button id="flip-board-btn" disabled>Flip Board</button>
       <button id="undo-btn" disabled>Undo</button>
+      <button id="resign-btn" disabled>Resign</button>
+      <button id="draw-btn" disabled>Offer Draw</button>
+      <button id="settings-btn">Engine Settings</button>
+    </div>
+  </div>
+
+  <div class="chess-moves-section">
+    <h2>Move List</h2>
+    <div id="move-list" class="move-list"></div>
+  </div>
+
+  <!-- Engine Settings Modal -->
+  <div id="engine-settings-modal" class="chess-modal" style="display: none;">
+    <div class="chess-modal-overlay"></div>
+    <div class="chess-modal-content">
+      <div class="chess-modal-header">
+        <h2>Engine Settings</h2>
+        <button class="chess-modal-close" id="settings-close-btn">&times;</button>
+      </div>
+      <div class="chess-modal-body">
+        <div class="settings-group">
+          <label for="tt-size-select">
+            <strong>Transposition Table Size</strong>
+            <span class="setting-description">Memory allocated for position cache</span>
+          </label>
+          <select id="tt-size-select" class="setting-input">
+            <option value="20">1 MB (Fast, Low Memory)</option>
+            <option value="22" selected>4 MB (Balanced)</option>
+            <option value="24">16 MB (Better Cache)</option>
+            <option value="26">64 MB (High Performance)</option>
+            <option value="28">256 MB (Maximum)</option>
+          </select>
+        </div>
+
+        <div class="settings-group">
+          <label for="depth-priority-slider">
+            <strong>Depth Priority</strong>
+            <span class="setting-description">How much to favor deeper search results (1.0 - 3.0)</span>
+          </label>
+          <div class="slider-container">
+            <input type="range" id="depth-priority-slider" class="setting-slider"
+                   min="1.0" max="3.0" step="0.1" value="2.0">
+            <span id="depth-priority-value" class="slider-value">2.0</span>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <label for="age-priority-slider">
+            <strong>Age Priority</strong>
+            <span class="setting-description">How quickly to evict old positions (1.0 - 2.5)</span>
+          </label>
+          <div class="slider-container">
+            <input type="range" id="age-priority-slider" class="setting-slider"
+                   min="1.0" max="2.5" step="0.1" value="1.5">
+            <span id="age-priority-value" class="slider-value">1.5</span>
+          </div>
+        </div>
+
+        <div class="settings-info">
+          <strong>Note:</strong> These settings will be saved to your profile if you're logged in.
+          Changes take effect on the next game.
+        </div>
+      </div>
+      <div class="chess-modal-footer">
+        <button id="settings-save-btn" class="btn-primary">Save Settings</button>
+        <button id="settings-cancel-btn" class="btn-secondary">Cancel</button>
+      </div>
     </div>
   </div>
 
@@ -31,25 +131,187 @@ permalink: /chess/
   </div>
 </div>
 
-<script>
-// Test board rendering
+<script type="module">
+// Import UI managers
+import { initializeBoardManager, getBoardManager } from '/assets/js/chess/ui/board.js';
+import { initializeControlsManager, getControlsManager } from '/assets/js/chess/ui/controls.js';
+
+// Initialize chess board and controls
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('[CHESS] Initializing test board...');
+  console.log('[CHESS] Initializing chess UI...');
 
   // Wait for Chessboard.js to load
   if (typeof Chessboard !== 'undefined') {
     try {
-      const board = Chessboard('chess-board', {
-        position: 'start',
-        draggable: false,
-        pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
-      });
-      console.log('[CHESS] ✓ Test board rendered successfully');
+      // Initialize board manager
+      const boardManager = initializeBoardManager();
+      console.log('[CHESS] ✓ Board manager initialized');
+
+      // Initialize controls manager
+      const controlsManager = initializeControlsManager();
+      controlsManager.setBoardManager(boardManager);
+      console.log('[CHESS] ✓ Controls manager initialized');
+
+      // Make managers globally available for debugging
+      window.chessBoardManager = boardManager;
+      window.chessControlsManager = controlsManager;
+
+      console.log('[CHESS] ✓ Chess UI fully initialized');
     } catch (error) {
-      console.error('[CHESS] ✗ Failed to render board:', error);
+      console.error('[CHESS] ✗ Failed to initialize chess UI:', error);
     }
   } else {
     console.error('[CHESS] ✗ Chessboard.js not available');
   }
+});
+
+// Function to update user profile UI
+window.updateChessProfile = (profile) => {
+  const greetingEl = document.getElementById('user-greeting');
+  const loginBtnEl = document.getElementById('profile-login-btn');
+  const statsEl = document.getElementById('user-stats');
+  const eloEl = document.getElementById('user-elo');
+  const gamesPlayedEl = document.getElementById('user-games-played');
+  const winRateEl = document.getElementById('user-win-rate');
+
+  if (!profile || !window.authService.isAuthenticated) {
+    // User not authenticated
+    greetingEl.textContent = 'Welcome, Guest';
+    loginBtnEl.style.display = 'inline-block';
+    statsEl.style.display = 'none';
+
+    // Add login button handler
+    loginBtnEl.onclick = () => {
+      if (window.authService && window.authService.login) {
+        window.authService.login();
+      }
+    };
+
+    console.log('[CHESS] Profile UI updated for guest user');
+  } else {
+    // User authenticated
+    const userName = window.authService.user?.name
+      || window.authService.user?.email?.split('@')[0]
+      || 'Player';
+
+    greetingEl.textContent = `Welcome, ${userName}`;
+    loginBtnEl.style.display = 'none';
+    statsEl.style.display = 'flex';
+
+    // Update stats
+    if (profile.stats) {
+      eloEl.textContent = profile.stats.elo || 1200;
+      gamesPlayedEl.textContent = profile.stats.gamesPlayed || 0;
+
+      // Calculate win rate
+      const wins = profile.stats.wins || 0;
+      const gamesPlayed = profile.stats.gamesPlayed || 0;
+      const winRate = gamesPlayed > 0 ? Math.round((wins / gamesPlayed) * 100) : 0;
+      winRateEl.textContent = `${winRate}%`;
+    }
+
+    console.log('[CHESS] Profile UI updated for authenticated user:', userName);
+  }
+};
+
+// Engine Settings Modal Handler
+document.addEventListener('DOMContentLoaded', () => {
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsModal = document.getElementById('engine-settings-modal');
+  const settingsCloseBtn = document.getElementById('settings-close-btn');
+  const settingsCancelBtn = document.getElementById('settings-cancel-btn');
+  const settingsSaveBtn = document.getElementById('settings-save-btn');
+
+  const ttSizeSelect = document.getElementById('tt-size-select');
+  const depthPrioritySlider = document.getElementById('depth-priority-slider');
+  const depthPriorityValue = document.getElementById('depth-priority-value');
+  const agePrioritySlider = document.getElementById('age-priority-slider');
+  const agePriorityValue = document.getElementById('age-priority-value');
+
+  // Update slider value displays
+  depthPrioritySlider.addEventListener('input', () => {
+    depthPriorityValue.textContent = parseFloat(depthPrioritySlider.value).toFixed(1);
+  });
+
+  agePrioritySlider.addEventListener('input', () => {
+    agePriorityValue.textContent = parseFloat(agePrioritySlider.value).toFixed(1);
+  });
+
+  // Open modal
+  settingsBtn.addEventListener('click', () => {
+    // Load current settings from storage manager
+    if (window.chessStorageManager) {
+      const profile = window.chessStorageManager.cachedProfile;
+      if (profile && profile.engineConfig) {
+        ttSizeSelect.value = profile.engineConfig.ttSizePower || 22;
+        depthPrioritySlider.value = profile.engineConfig.depthPriority || 2.0;
+        agePrioritySlider.value = profile.engineConfig.agePriority || 1.5;
+        depthPriorityValue.textContent = parseFloat(depthPrioritySlider.value).toFixed(1);
+        agePriorityValue.textContent = parseFloat(agePrioritySlider.value).toFixed(1);
+      }
+    }
+    settingsModal.style.display = 'block';
+  });
+
+  // Close modal
+  const closeModal = () => {
+    settingsModal.style.display = 'none';
+  };
+
+  settingsCloseBtn.addEventListener('click', closeModal);
+  settingsCancelBtn.addEventListener('click', closeModal);
+
+  // Close on overlay click
+  settingsModal.querySelector('.chess-modal-overlay').addEventListener('click', closeModal);
+
+  // Save settings
+  settingsSaveBtn.addEventListener('click', async () => {
+    const newSettings = {
+      ttSizePower: parseInt(ttSizeSelect.value),
+      depthPriority: parseFloat(depthPrioritySlider.value),
+      agePriority: parseFloat(agePrioritySlider.value)
+    };
+
+    console.log('[CHESS] Saving engine settings:', newSettings);
+
+    // Save to storage manager
+    if (window.chessStorageManager) {
+      try {
+        // Update cached profile
+        if (!window.chessStorageManager.cachedProfile) {
+          window.chessStorageManager.cachedProfile = {
+            engineConfig: {},
+            stats: {}
+          };
+        }
+        window.chessStorageManager.cachedProfile.engineConfig = newSettings;
+
+        // Save to server if authenticated
+        if (window.authService && window.authService.isAuthenticated) {
+          await window.chessStorageManager.saveUserProfile(window.chessStorageManager.cachedProfile);
+          console.log('[CHESS] ✓ Settings saved to server');
+        } else {
+          // Save to localStorage for guest users
+          localStorage.setItem('chessEngineSettings', JSON.stringify(newSettings));
+          console.log('[CHESS] ✓ Settings saved to localStorage');
+        }
+
+        // Emit event for engine reinit (will be used in Phase 9)
+        window.dispatchEvent(new CustomEvent('ttConfigChanged', { detail: newSettings }));
+
+        alert('Settings saved successfully!');
+        closeModal();
+      } catch (error) {
+        console.error('[CHESS] ✗ Failed to save settings:', error);
+        alert('Failed to save settings. Please try again.');
+      }
+    } else {
+      // Fallback to localStorage
+      localStorage.setItem('chessEngineSettings', JSON.stringify(newSettings));
+      console.log('[CHESS] ✓ Settings saved to localStorage (fallback)');
+      alert('Settings saved locally!');
+      closeModal();
+    }
+  });
 });
 </script>
