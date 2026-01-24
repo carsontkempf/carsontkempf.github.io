@@ -54,6 +54,9 @@ permalink: /chess/
       <button id="undo-btn" disabled>Undo</button>
       <button id="resign-btn" disabled>Resign</button>
       <button id="draw-btn" disabled>Offer Draw</button>
+      <!-- Phase 10 buttons - disabled for now -->
+      <button id="save-game-btn" disabled style="display: none;">Save Game</button>
+      <button id="load-game-btn" style="display: none;">Load Game</button>
       <button id="settings-btn">Engine Settings</button>
     </div>
   </div>
@@ -61,6 +64,35 @@ permalink: /chess/
   <div class="chess-moves-section">
     <h2>Move List</h2>
     <div id="move-list" class="move-list"></div>
+  </div>
+
+  <!-- Import/Export Section (Phase 10 - Hidden for now) -->
+  <div class="chess-import-export-section" style="display: none;">
+    <h2>Import / Export</h2>
+
+    <div class="import-group">
+      <label for="fen-input">
+        <strong>Import FEN Position</strong>
+        <span class="input-description">Paste FEN string to load position</span>
+      </label>
+      <div class="import-controls">
+        <input type="text" id="fen-input" class="fen-input"
+               placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1">
+        <button id="import-fen-btn" class="import-btn">Load Position</button>
+      </div>
+      <div id="fen-error" class="import-error" style="display: none;"></div>
+    </div>
+
+    <div class="export-group">
+      <label>
+        <strong>Export Game</strong>
+        <span class="input-description">Download game in PGN format</span>
+      </label>
+      <div class="export-controls">
+        <button id="export-pgn-btn" class="export-btn">Export as PGN</button>
+        <button id="copy-fen-btn" class="export-btn">Copy Current FEN</button>
+      </div>
+    </div>
   </div>
 
   <!-- Engine Settings Modal -->
@@ -122,19 +154,71 @@ permalink: /chess/
     </div>
   </div>
 
-  <div class="chess-analysis-section">
+  <!-- Load Game Modal -->
+  <div id="load-game-modal" class="chess-modal" style="display: none;">
+    <div class="chess-modal-overlay"></div>
+    <div class="chess-modal-content">
+      <div class="chess-modal-header">
+        <h2>Load Saved Game</h2>
+        <button class="chess-modal-close" id="load-game-close-btn">&times;</button>
+      </div>
+      <div class="chess-modal-body">
+        <div id="saved-games-list" class="saved-games-list">
+          <div class="loading-message">Loading saved games...</div>
+        </div>
+      </div>
+      <div class="chess-modal-footer">
+        <button id="load-game-cancel-btn" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analysis Section (Phase 9 - Hidden for now) -->
+  <div class="chess-analysis-section" style="display: none;">
     <h2>Analysis</h2>
     <div class="chess-analysis">
-      <!-- Analysis panel will be added in Phase 9 -->
-      <p>Analysis features coming soon...</p>
+      <div id="analysis-panel" class="analysis-panel">
+        <div class="analysis-row">
+          <span class="analysis-label">Evaluation:</span>
+          <span id="eval-score" class="eval-score neutral">+0.00</span>
+        </div>
+
+        <div class="analysis-row">
+          <span class="analysis-label">Depth:</span>
+          <span id="search-depth" class="search-depth">0/0</span>
+        </div>
+
+        <div class="analysis-row">
+          <span class="analysis-label">Nodes/Sec:</span>
+          <span id="nodes-per-sec" class="nodes-per-sec">0</span>
+        </div>
+
+        <div class="analysis-row pv-row">
+          <span class="analysis-label">Best Line:</span>
+          <div id="principal-variation" class="principal-variation">
+            <span class="pv-placeholder">Click "Analyze" to start</span>
+          </div>
+        </div>
+
+        <div class="analysis-row">
+          <span class="analysis-label">Time:</span>
+          <span id="analysis-time" class="analysis-time">0.0s</span>
+        </div>
+
+        <div class="analysis-controls">
+          <button id="start-analysis-btn" class="analysis-btn">Analyze</button>
+          <button id="stop-analysis-btn" class="analysis-btn" disabled>Stop</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script type="module">
-// Import UI managers
+// Import UI managers (Phase 8 only for now)
 import { initializeBoardManager, getBoardManager } from '/assets/js/chess/ui/board.js';
 import { initializeControlsManager, getControlsManager } from '/assets/js/chess/ui/controls.js';
+// Phase 9 & 10 imports will be added later
 
 // Initialize chess board and controls
 document.addEventListener('DOMContentLoaded', () => {
@@ -156,9 +240,10 @@ document.addEventListener('DOMContentLoaded', () => {
       window.chessBoardManager = boardManager;
       window.chessControlsManager = controlsManager;
 
-      console.log('[CHESS] ✓ Chess UI fully initialized');
+      console.log('[CHESS] ✓ Chess UI (Phase 8) fully initialized');
     } catch (error) {
       console.error('[CHESS] ✗ Failed to initialize chess UI:', error);
+      console.error('[CHESS] Error details:', error.stack);
     }
   } else {
     console.error('[CHESS] ✗ Chessboard.js not available');
@@ -314,4 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// Save Game and Load Game Handlers (Phase 10 - Not yet implemented)
+// These will be enabled when Phase 10 is complete
 </script>

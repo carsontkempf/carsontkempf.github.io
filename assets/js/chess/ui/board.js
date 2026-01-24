@@ -50,9 +50,12 @@ export class BoardManager {
     this.isViewingHistory = false;
     this.pendingPromotion = null; // {from, to, moves}
     this.lastMoveSquares = null; // {from, to}
+    this.selectedSquare = null; // For click-to-move
+    this.highlightedSquares = []; // Legal move destinations
 
     this.initializeBoard();
     this.setupPromotionDialog();
+    this.setupClickToMove();
   }
 
   /**
@@ -70,6 +73,174 @@ export class BoardManager {
 
     this.visualBoard = Chessboard(this.boardElementId, config);
     console.log('[BoardManager] Board initialized');
+  }
+
+  /**
+   * Setup click-to-move functionality
+   */
+  setupClickToMove() {
+    // Add click event to board element
+    const boardEl = document.getElementById(this.boardElementId);
+    if (!boardEl) return;
+
+    boardEl.addEventListener('click', (e) => {
+      // Find clicked square
+      const squareEl = e.target.closest('.square-55d63');
+      if (!squareEl) return;
+
+      // Get square name from class (e.g., square-e2)
+      const squareClass = Array.from(squareEl.classList).find(c => c.startsWith('square-') && c.length === 9);
+      if (!squareClass) return;
+
+      const square = squareClass.substring(7); // Remove "square-" prefix
+
+      this.handleSquareClick(square);
+    });
+
+    console.log('[BoardManager] Click-to-move enabled');
+  }
+
+  /**
+   * Handle square click for click-to-move
+   */
+  handleSquareClick(square) {
+    // Don't allow clicks if viewing history
+    if (this.isViewingHistory) return;
+
+    const squareIndex = algebraicToSquare(square);
+
+    // If no square selected, select this one (if it has a piece of current side)
+    if (!this.selectedSquare) {
+      const piece = this.engineBoard.mailbox[squareIndex];
+      const currentSide = this.engineBoard.sideToMove;
+
+      // Check if piece belongs to current side
+      if (piece === 0) return; // Empty square
+
+      const pieceColor = piece > 0 ? WHITE : BLACK;
+      if (pieceColor !== currentSide) return; // Wrong color
+
+      // Select this square
+      this.selectedSquare = square;
+      this.highlightSelectedSquare(square);
+      this.showLegalMoves(squareIndex);
+
+      return;
+    }
+
+    // If clicking the same square, deselect
+    if (this.selectedSquare === square) {
+      this.clearSelection();
+      return;
+    }
+
+    // Try to make a move from selected square to this square
+    const fromSquare = algebraicToSquare(this.selectedSquare);
+    const toSquare = squareIndex;
+
+    // Generate legal moves
+    const legalMoves = generateLegalMoves(this.engineBoard);
+
+    // Find matching moves
+    const matchingMoves = legalMoves.filter(move =>
+      move.from === fromSquare && move.to === toSquare
+    );
+
+    if (matchingMoves.length === 0) {
+      // Not a legal move - check if clicking another piece of same color
+      const piece = this.engineBoard.mailbox[toSquare];
+      if (piece !== 0) {
+        const pieceColor = piece > 0 ? WHITE : BLACK;
+        const currentSide = this.engineBoard.sideToMove;
+
+        if (pieceColor === currentSide) {
+          // Selecting a different piece of same color
+          this.clearSelection();
+          this.selectedSquare = square;
+          this.highlightSelectedSquare(square);
+          this.showLegalMoves(toSquare);
+          return;
+        }
+      }
+
+      // Illegal move - clear selection
+      this.clearSelection();
+      return;
+    }
+
+    // Check if this is a promotion
+    const piece = this.engineBoard.mailbox[fromSquare];
+    const pieceType = Math.abs(piece) - 1;
+    const toRank = getRank(toSquare);
+
+    if (pieceType === PAWN && (toRank === 0 || toRank === 7)) {
+      // This is a promotion - show dialog
+      this.pendingPromotion = {
+        from: this.selectedSquare,
+        to: square,
+        moves: matchingMoves
+      };
+      this.showPromotionDialog(this.engineBoard.sideToMove);
+      this.clearSelection();
+      return;
+    }
+
+    // Execute the move
+    if (matchingMoves.length === 1) {
+      this.executeMove(matchingMoves[0]);
+      this.clearSelection();
+    }
+  }
+
+  /**
+   * Highlight selected square
+   */
+  highlightSelectedSquare(square) {
+    const squareEl = document.querySelector(`.square-${square}`);
+    if (squareEl) {
+      squareEl.classList.add('selected-square');
+    }
+  }
+
+  /**
+   * Show legal move destinations
+   */
+  showLegalMoves(fromSquare) {
+    const legalMoves = generateLegalMoves(this.engineBoard);
+    const movesFromSquare = legalMoves.filter(m => m.from === fromSquare);
+
+    movesFromSquare.forEach(move => {
+      const toAlgebraic = squareToAlgebraic(move.to);
+      const squareEl = document.querySelector(`.square-${toAlgebraic}`);
+      if (squareEl) {
+        squareEl.classList.add('legal-move-dest');
+        this.highlightedSquares.push(toAlgebraic);
+      }
+    });
+  }
+
+  /**
+   * Clear square selection and highlights
+   */
+  clearSelection() {
+    // Remove selected square highlight
+    if (this.selectedSquare) {
+      const squareEl = document.querySelector(`.square-${this.selectedSquare}`);
+      if (squareEl) {
+        squareEl.classList.remove('selected-square');
+      }
+    }
+
+    // Remove legal move highlights
+    this.highlightedSquares.forEach(square => {
+      const squareEl = document.querySelector(`.square-${square}`);
+      if (squareEl) {
+        squareEl.classList.remove('legal-move-dest');
+      }
+    });
+
+    this.selectedSquare = null;
+    this.highlightedSquares = [];
   }
 
   /**
@@ -315,6 +486,9 @@ export class BoardManager {
       to: squareToAlgebraic(move.to)
     };
 
+    // Clear click-to-move selection
+    this.clearSelection();
+
     // Update visual board
     this.updateVisualBoard();
     this.highlightLastMove();
@@ -329,7 +503,14 @@ export class BoardManager {
 
     // Emit event for other components
     window.dispatchEvent(new CustomEvent('chessMoveMade', {
-      detail: { move, san, fen }
+      detail: {
+        move,
+        san,
+        fen,
+        moveNumber: Math.ceil(this.moveHistory.length / 2),
+        isWhiteMove: this.moveHistory.length % 2 === 1,
+        gameInProgress: true
+      }
     }));
 
     console.log('[BoardManager] Move executed:', san);
@@ -530,6 +711,9 @@ export class BoardManager {
     this.currentMoveIndex = index;
     this.isViewingHistory = index < this.moveHistory.length - 1;
 
+    // Clear click-to-move selection
+    this.clearSelection();
+
     // Rebuild board state from start to this move
     this.engineBoard = parseFEN(STARTING_FEN);
 
@@ -573,6 +757,9 @@ export class BoardManager {
     this.lastMoveSquares = null;
     this.pendingPromotion = null;
 
+    // Clear click-to-move selection
+    this.clearSelection();
+
     this.updateVisualBoard();
     this.highlightLastMove();
     this.updateMoveList();
@@ -581,6 +768,9 @@ export class BoardManager {
     if (openingDetector) {
       openingDetector.reset();
     }
+
+    // Emit event
+    window.dispatchEvent(new CustomEvent('chessGameReset'));
 
     console.log('[BoardManager] Board reset');
   }
@@ -606,6 +796,9 @@ export class BoardManager {
     const lastMove = this.moveHistory.pop();
     this.currentMoveIndex = this.moveHistory.length - 1;
     this.isViewingHistory = false;
+
+    // Clear click-to-move selection
+    this.clearSelection();
 
     // Rebuild board state
     this.engineBoard = parseFEN(STARTING_FEN);
@@ -656,6 +849,51 @@ export class BoardManager {
    */
   getMoveHistory() {
     return this.moveHistory;
+  }
+
+  /**
+   * Load position from FEN string
+   * @param {string} fen - Valid FEN string
+   * @returns {boolean} Success status
+   */
+  loadFEN(fen) {
+    // Confirm if game in progress
+    if (this.moveHistory.length > 0) {
+      const confirmed = confirm('Load new position? Current game will be lost.');
+      if (!confirmed) return false;
+    }
+
+    // Parse FEN and create new board
+    try {
+      this.engineBoard = parseFEN(fen);
+      this.moveHistory = [];
+      this.currentMoveIndex = -1;
+      this.isViewingHistory = false;
+      this.lastMoveSquares = null;
+      this.pendingPromotion = null;
+
+      // Update visual board
+      this.updateVisualBoard();
+      this.highlightLastMove();
+      this.updateMoveList();
+
+      // Reset opening detector
+      if (openingDetector) {
+        openingDetector.reset();
+        openingDetector.update(this.engineBoard);
+      }
+
+      // Emit event
+      window.dispatchEvent(new CustomEvent('chessFENLoaded', {
+        detail: { fen }
+      }));
+
+      console.log('[BoardManager] FEN loaded:', fen);
+      return true;
+    } catch (error) {
+      console.error('[BoardManager] Failed to load FEN:', error);
+      throw error;
+    }
   }
 
   /**

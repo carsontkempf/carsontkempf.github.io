@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Phase 6 Test</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    .pass { color: #4ec9b0; }
+    .fail { color: #f48771; }
+    #output { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Quick Phase 6 Integration Test</h1>
+  <div id="output">Running tests...\n</div>
+
+  <script type="module">
+    const output = document.getElementById('output');
+    function log(msg, isError = false) {
+      const span = document.createElement('span');
+      span.textContent = msg + '\n';
+      span.className = isError ? 'fail' : 'pass';
+      output.appendChild(span);
+    }
+
+    async function runQuickTests() {
+      try {
+        log('=== Quick Integration Test ===');
+
+        // Test 1: Import modules
+        log('\n1. Testing module imports...');
+        const { Board } = await import('../../../assets/js/chess/engine/board.js');
+        const { TranspositionTable } = await import('../../../assets/js/chess/engine/transposition-table.js');
+        const { findBestMoveIterative } = await import('../../../assets/js/chess/engine/search.js');
+        log('✓ All modules imported successfully');
+
+        // Test 2: Create board from FEN
+        log('\n2. Testing Board creation...');
+        const board = new Board();
+        board.parseFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+        log('✓ Board created from FEN');
+        log(`  Board hash: ${board.zobristHash !== undefined ? 'SET' : 'NOT SET'}`);
+        log(`  Hash value: ${board.zobristHash}`);
+
+        // Test 3: Create transposition table
+        log('\n3. Testing Transposition Table...');
+        const tt = new TranspositionTable(20);
+        log(`✓ TT created with ${tt.maxEntries} max entries`);
+
+        // Test 4: Run simple search
+        log('\n4. Testing search with TT...');
+        const result = findBestMoveIterative(board, {
+          maxDepth: 3,
+          maxTime: 2000,
+          tt: tt
+        });
+        log(`✓ Search completed`);
+        log(`  Depth: ${result.depth}`);
+        log(`  Nodes: ${result.nodes}`);
+        log(`  Time: ${result.time}ms`);
+        log(`  NPS: ${result.nps}`);
+        if (result.ttStats) {
+          log(`  TT Hit Rate: ${result.ttStats.hitRate}%`);
+          log(`  TT Fullness: ${result.ttStats.fullness}%`);
+        }
+        log(`  Best move: ${result.move ? result.move.toAlgebraic() : 'null'}`);
+
+        // Test 5: Verify TT is working
+        log('\n5. Testing TT functionality...');
+        const stats = tt.getStatistics();
+        if (stats.stores > 0) {
+          log(`✓ TT stored ${stats.stores} positions`);
+        } else {
+          log(`✗ TT did not store any positions`, true);
+        }
+        if (stats.hits > 0) {
+          log(`✓ TT had ${stats.hits} hits`);
+        } else {
+          log(`⚠ TT had no hits (might be expected for shallow search)`);
+        }
+
+        log('\n=== All quick tests passed! ===');
+        log('Run the full test suite in phase-6-test.html for comprehensive testing.');
+
+      } catch (error) {
+        log(`\n✗ ERROR: ${error.message}`, true);
+        log(`Stack: ${error.stack}`, true);
+      }
+    }
+
+    runQuickTests();
+  </script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 7 Tests - Opening Book & ECO Detection</title>
+  <style>
+    body {
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    h1 {
+      color: #4ec9b0;
+      border-bottom: 2px solid #4ec9b0;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #569cd6;
+      margin-top: 30px;
+    }
+    .controls {
+      margin: 20px 0;
+      padding: 15px;
+      background: #252526;
+      border-radius: 5px;
+    }
+    button {
+      background: #0e639c;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    button:hover {
+      background: #1177bb;
+    }
+    button:disabled {
+      background: #3c3c3c;
+      cursor: not-allowed;
+    }
+    #output {
+      background: #252526;
+      padding: 20px;
+      border-radius: 5px;
+      min-height: 200px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .pass { color: #4ec9b0; }
+    .fail { color: #f48771; }
+    .info { color: #9cdcfe; }
+    .warn { color: #dcdcaa; }
+    .summary {
+      margin-top: 20px;
+      padding: 15px;
+      background: #252526;
+      border-radius: 5px;
+      border-left: 4px solid #4ec9b0;
+    }
+    .summary.has-failures {
+      border-left-color: #f48771;
+    }
+    .loading {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Phase 7 Test Suite</h1>
+  <p class="info">Tests for Opening Book Lookup and ECO Code Detection</p>
+
+  <div class="controls">
+    <button id="runBtn" onclick="runTests()">Run All Tests</button>
+    <button id="clearBtn" onclick="clearOutput()">Clear Output</button>
+    <span id="status"></span>
+  </div>
+
+  <div id="output">Ready to run tests. Click "Run All Tests" to begin.</div>
+
+  <script type="module">
+    import { runOpeningBookTests } from './opening-book-test.js';
+
+    window.runTests = async function() {
+      const runBtn = document.getElementById('runBtn');
+      const status = document.getElementById('status');
+      const output = document.getElementById('output');
+
+      runBtn.disabled = true;
+      status.innerHTML = '<span class="loading">⟳</span> Running tests...';
+      output.textContent = '';
+
+      // Redirect console to output div
+      const originalLog = console.log;
+      const originalError = console.error;
+      const originalWarn = console.warn;
+
+      const appendOutput = (text, className = '') => {
+        const span = document.createElement('span');
+        span.className = className;
+        span.textContent = text + '\n';
+        output.appendChild(span);
+      };
+
+      console.log = (...args) => {
+        const text = args.join(' ');
+        originalLog(...args);
+        appendOutput(text, text.includes('✓') ? 'pass' : text.includes('✗') ? 'fail' : 'info');
+      };
+
+      console.error = (...args) => {
+        const text = args.join(' ');
+        originalError(...args);
+        appendOutput(text, 'fail');
+      };
+
+      console.warn = (...args) => {
+        const text = args.join(' ');
+        originalWarn(...args);
+        appendOutput(text, 'warn');
+      };
+
+      try {
+        const results = await runOpeningBookTests();
+
+        // Restore console
+        console.log = originalLog;
+        console.error = originalError;
+        console.warn = originalWarn;
+
+        // Update status
+        if (results.failed === 0) {
+          status.innerHTML = '<span class="pass">✓ All tests passed!</span>';
+        } else {
+          status.innerHTML = `<span class="fail">✗ ${results.failed} test(s) failed</span>`;
+        }
+
+        runBtn.disabled = false;
+      } catch (error) {
+        console.log = originalLog;
+        console.error = originalError;
+        console.warn = originalWarn;
+
+        appendOutput(`\nFATAL ERROR: ${error.message}`, 'fail');
+        appendOutput(error.stack, 'fail');
+        status.innerHTML = '<span class="fail">✗ Test suite crashed</span>';
+        runBtn.disabled = false;
+      }
+    };
+
+    window.clearOutput = function() {
+      document.getElementById('output').textContent = 'Ready to run tests. Click "Run All Tests" to begin.';
+      document.getElementById('status').textContent = '';
+    };
+
+    // Auto-run on load (optional)
+    // window.addEventListener('load', () => setTimeout(runTests, 500));
+  </script>
+</body>
+</html>

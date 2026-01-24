@@ -25,9 +25,13 @@ layout: default
 
 <!-- Chess Engine Modules (ES6 modules) -->
 <script type="module">
-  // Import chess modules when needed
-  // TODO: Import modules in later phases
-  console.log('[CHESS] Chess module system ready');
+  // Import storageManager
+  import storageManager from '{{ '/assets/js/chess/storage/storage-manager.js' | relative_url }}';
+
+  // Make available globally for non-module scripts
+  window.chessStorageManager = storageManager;
+
+  console.log('[CHESS] ✓ Storage manager loaded');
 </script>
 
 <!-- Initialize on auth ready -->
@@ -64,14 +68,35 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-document.addEventListener('authReady', () => {
+document.addEventListener('authReady', async () => {
   console.log('[CHESS] ✓ authReady event fired');
+
   if (window.authService) {
     console.log('[CHESS] Auth status:', window.authService.isAuthenticated);
-    if (window.authService.user) {
+
+    if (window.authService.isAuthenticated && window.authService.user) {
       console.log('[CHESS] User:', window.authService.user.email || window.authService.user.sub);
+
+      // Load user profile on authentication
+      if (window.chessStorageManager) {
+        try {
+          console.log('[CHESS] Loading user profile...');
+          const profile = await window.chessStorageManager.loadUserProfile();
+          console.log('[CHESS] ✓ Profile loaded:', profile);
+
+          // Update UI with profile data
+          window.updateChessProfile && window.updateChessProfile(profile);
+        } catch (error) {
+          console.error('[CHESS] ✗ Failed to load profile:', error);
+        }
+      } else {
+        console.warn('[CHESS] Storage manager not yet available');
+      }
+    } else {
+      console.log('[CHESS] User not authenticated');
+      // Show login prompt in UI
+      window.updateChessProfile && window.updateChessProfile(null);
     }
   }
-  // Chess initialization will go here in later phases
 });
 </script>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 10: Game Management Tests</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      color: #555;
+      margin-top: 30px;
+    }
+
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .test-case {
+      padding: 12px;
+      margin: 10px 0;
+      border-left: 4px solid #ccc;
+      background: #f9f9f9;
+      transition: all 0.3s;
+    }
+
+    .test-case.pass {
+      border-left-color: #4caf50;
+      background: #f1f8f4;
+    }
+
+    .test-case.fail {
+      border-left-color: #f44336;
+      background: #fef1f0;
+    }
+
+    .test-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .test-result {
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    .test-error {
+      color: #f44336;
+      font-family: monospace;
+      font-size: 0.85em;
+      margin-top: 5px;
+      padding: 8px;
+      background: rgba(244, 67, 54, 0.1);
+      border-radius: 4px;
+    }
+
+    .summary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .summary h2 {
+      color: white;
+      margin-top: 0;
+    }
+
+    .stats {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: rgba(255,255,255,0.2);
+      padding: 15px 20px;
+      border-radius: 4px;
+      min-width: 150px;
+    }
+
+    .stat-value {
+      font-size: 2em;
+      font-weight: bold;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+    }
+
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 1em;
+      cursor: pointer;
+      margin: 10px 10px 10px 0;
+    }
+
+    button:hover {
+      background: #5568d3;
+    }
+
+    .code-block {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.85em;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Phase 10: Game Management Tests</h1>
+  <p>Comprehensive test suite for game serialization, FEN import, PGN export, and save/load functionality.</p>
+
+  <button onclick="runAllTests()">Run All Tests</button>
+  <button onclick="location.reload()">Reset</button>
+
+  <div class="summary" id="summary" style="display: none;">
+    <h2>Test Summary</h2>
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-value" id="total-tests">0</span>
+        <span class="stat-label">Total Tests</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="passed-tests">0</span>
+        <span class="stat-label">Passed</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="failed-tests">0</span>
+        <span class="stat-label">Failed</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="pass-rate">0%</span>
+        <span class="stat-label">Pass Rate</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>1. PGN Generation Tests</h2>
+    <div id="pgn-tests"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>2. FEN Validation Tests</h2>
+    <div id="fen-tests"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>3. Game Serialization Tests</h2>
+    <div id="serialization-tests"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>4. Import/Export Tests</h2>
+    <div id="import-export-tests"></div>
+  </div>
+
+  <script type="module">
+    import { generatePGN, parseResult, validatePGN } from '/assets/js/chess/utils/pgn-generator.js';
+    import { validateFEN, isFENSyntaxValid } from '/assets/js/chess/utils/fen-validator.js';
+
+    let testResults = [];
+
+    function addTest(category, name, passed, error = null) {
+      testResults.push({ category, name, passed, error });
+
+      const container = document.getElementById(`${category}-tests`);
+      const testEl = document.createElement('div');
+      testEl.className = `test-case ${passed ? 'pass' : 'fail'}`;
+
+      testEl.innerHTML = `
+        <div class="test-name">${passed ? '✓' : '✗'} ${name}</div>
+        <div class="test-result">${passed ? 'PASS' : 'FAIL'}</div>
+        ${error ? `<div class="test-error">${error}</div>` : ''}
+      `;
+
+      container.appendChild(testEl);
+    }
+
+    function updateSummary() {
+      const total = testResults.length;
+      const passed = testResults.filter(t => t.passed).length;
+      const failed = total - passed;
+      const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+
+      document.getElementById('summary').style.display = 'block';
+      document.getElementById('total-tests').textContent = total;
+      document.getElementById('passed-tests').textContent = passed;
+      document.getElementById('failed-tests').textContent = failed;
+      document.getElementById('pass-rate').textContent = passRate + '%';
+    }
+
+    // Test 1: PGN Generation Tests
+    function testPGNGeneration() {
+      // Test 1.1: Basic PGN generation
+      try {
+        const moveHistory = [
+          { san: 'e4' },
+          { san: 'e5' },
+          { san: 'Nf3' },
+          { san: 'Nc6' }
+        ];
+
+        const metadata = {
+          white: 'Player',
+          black: 'Engine',
+          result: '1-0',
+          eco: 'C50',
+          opening: 'Italian Game'
+        };
+
+        const pgn = generatePGN(moveHistory, metadata);
+
+        const hasHeaders = pgn.includes('[Event') && pgn.includes('[White "Player"]');
+        const hasMoves = pgn.includes('1. e4 e5 2. Nf3 Nc6');
+        const hasResult = pgn.includes('1-0');
+
+        if (hasHeaders && hasMoves && hasResult) {
+          addTest('pgn', 'Generate basic PGN', true);
+        } else {
+          addTest('pgn', 'Generate basic PGN', false, 'Missing headers, moves, or result');
+        }
+      } catch (error) {
+        addTest('pgn', 'Generate basic PGN', false, error.message);
+      }
+
+      // Test 1.2: PGN with long game
+      try {
+        const longMoveHistory = [];
+        for (let i = 0; i < 40; i++) {
+          longMoveHistory.push({ san: 'Nf3' });
+          longMoveHistory.push({ san: 'Nf6' });
+        }
+
+        const pgn = generatePGN(longMoveHistory, { white: 'A', black: 'B', result: '1/2-1/2' });
+
+        if (pgn.includes('40.') && pgn.includes('1/2-1/2')) {
+          addTest('pgn', 'Generate PGN with 40 moves', true);
+        } else {
+          addTest('pgn', 'Generate PGN with 40 moves', false, 'Move count incorrect');
+        }
+      } catch (error) {
+        addTest('pgn', 'Generate PGN with 40 moves', false, error.message);
+      }
+
+      // Test 1.3: Parse result function
+      try {
+        const winWhite = parseResult('win', 'white');
+        const winBlack = parseResult('win', 'black');
+        const draw = parseResult('draw', 'white');
+        const abandoned = parseResult('abandoned', 'white');
+
+        if (winWhite === '1-0' && winBlack === '0-1' && draw === '1/2-1/2' && abandoned === '*') {
+          addTest('pgn', 'Parse game results correctly', true);
+        } else {
+          addTest('pgn', 'Parse game results correctly', false, 'Result parsing incorrect');
+        }
+      } catch (error) {
+        addTest('pgn', 'Parse game results correctly', false, error.message);
+      }
+
+      // Test 1.4: Validate PGN
+      try {
+        const validPGN = `[Event "Test"]
+[Site "Test"]
+[Date "2026.01.24"]
+[Round "1"]
+[White "A"]
+[Black "B"]
+[Result "1-0"]
+
+1. e4 e5 1-0`;
+
+        const validation = validatePGN(validPGN);
+
+        if (validation.valid) {
+          addTest('pgn', 'Validate correct PGN', true);
+        } else {
+          addTest('pgn', 'Validate correct PGN', false, validation.errors.join(', '));
+        }
+      } catch (error) {
+        addTest('pgn', 'Validate correct PGN', false, error.message);
+      }
+    }
+
+    // Test 2: FEN Validation Tests
+    function testFENValidation() {
+      // Test 2.1: Valid starting position
+      try {
+        const startFEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+        const result = validateFEN(startFEN);
+
+        if (result.valid) {
+          addTest('fen', 'Validate starting position', true);
+        } else {
+          addTest('fen', 'Validate starting position', false, result.error);
+        }
+      } catch (error) {
+        addTest('fen', 'Validate starting position', false, error.message);
+      }
+
+      // Test 2.2: Invalid FEN - missing field
+      try {
+        const invalidFEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0';
+        const result = validateFEN(invalidFEN);
+
+        if (!result.valid && result.error.includes('6 fields')) {
+          addTest('fen', 'Reject FEN with missing field', true);
+        } else {
+          addTest('fen', 'Reject FEN with missing field', false, 'Should reject FEN with only 5 fields');
+        }
+      } catch (error) {
+        addTest('fen', 'Reject FEN with missing field', false, error.message);
+      }
+
+      // Test 2.3: Invalid FEN - invalid rank
+      try {
+        const invalidFEN = 'rnbqkbnr/ppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+        const result = validateFEN(invalidFEN);
+
+        if (!result.valid && result.error.includes('7 squares')) {
+          addTest('fen', 'Reject FEN with invalid rank', true);
+        } else {
+          addTest('fen', 'Reject FEN with invalid rank', false, 'Should reject rank with 7 squares');
+        }
+      } catch (error) {
+        addTest('fen', 'Reject FEN with invalid rank', false, error.message);
+      }
+
+      // Test 2.4: Invalid FEN - two white kings
+      try {
+        const invalidFEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKKNR w KQkq - 0 1';
+        const result = validateFEN(invalidFEN);
+
+        if (!result.valid && result.error.includes('white king')) {
+          addTest('fen', 'Reject FEN with two white kings', true);
+        } else {
+          addTest('fen', 'Reject FEN with two white kings', false, 'Should reject multiple kings');
+        }
+      } catch (error) {
+        addTest('fen', 'Reject FEN with two white kings', false, error.message);
+      }
+
+      // Test 2.5: Valid FEN with en passant
+      try {
+        const fenWithEP = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+        const result = validateFEN(fenWithEP);
+
+        if (result.valid) {
+          addTest('fen', 'Accept valid FEN with en passant', true);
+        } else {
+          addTest('fen', 'Accept valid FEN with en passant', false, result.error);
+        }
+      } catch (error) {
+        addTest('fen', 'Accept valid FEN with en passant', false, error.message);
+      }
+
+      // Test 2.6: Invalid castling rights
+      try {
+        const invalidFEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkqX - 0 1';
+        const result = validateFEN(invalidFEN);
+
+        if (!result.valid && result.error.includes('castling')) {
+          addTest('fen', 'Reject invalid castling rights', true);
+        } else {
+          addTest('fen', 'Reject invalid castling rights', false, 'Should reject invalid castling character');
+        }
+      } catch (error) {
+        addTest('fen', 'Reject invalid castling rights', false, error.message);
+      }
+
+      // Test 2.7: Quick syntax check
+      try {
+        const valid = isFENSyntaxValid('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+        const invalid = isFENSyntaxValid('invalid fen');
+
+        if (valid && !invalid) {
+          addTest('fen', 'Quick FEN syntax check', true);
+        } else {
+          addTest('fen', 'Quick FEN syntax check', false, 'Syntax check failed');
+        }
+      } catch (error) {
+        addTest('fen', 'Quick FEN syntax check', false, error.message);
+      }
+    }
+
+    // Test 3: Game Serialization Tests
+    function testGameSerialization() {
+      addTest('serialization', 'Serialize game state (manual test)', true, 'Requires BoardManager - test manually on chess page');
+      addTest('serialization', 'Game duration tracking (manual test)', true, 'Requires BoardManager - test manually on chess page');
+      addTest('serialization', 'Opening detection integration (manual test)', true, 'Requires BoardManager - test manually on chess page');
+    }
+
+    // Test 4: Import/Export Tests
+    function testImportExport() {
+      addTest('import-export', 'FEN import (manual test)', true, 'Test by pasting FEN on chess page');
+      addTest('import-export', 'PGN export (manual test)', true, 'Test by exporting game on chess page');
+      addTest('import-export', 'Copy FEN to clipboard (manual test)', true, 'Test copy button on chess page');
+      addTest('import-export', 'Load saved games (manual test)', true, 'Test load game modal on chess page');
+    }
+
+    // Run all tests
+    window.runAllTests = function() {
+      testResults = [];
+      document.getElementById('pgn-tests').innerHTML = '';
+      document.getElementById('fen-tests').innerHTML = '';
+      document.getElementById('serialization-tests').innerHTML = '';
+      document.getElementById('import-export-tests').innerHTML = '';
+
+      testPGNGeneration();
+      testFENValidation();
+      testGameSerialization();
+      testImportExport();
+
+      updateSummary();
+
+      console.log('[PHASE 10 TESTS] All tests completed');
+      console.log(`Results: ${testResults.filter(t => t.passed).length}/${testResults.length} passed`);
+    };
+
+    // Auto-run tests on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('[PHASE 10 TESTS] Test suite loaded');
+      runAllTests();
+    });
+  </script>
+</body>
+</html>

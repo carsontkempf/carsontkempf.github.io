@@ -231,6 +231,38 @@ class StorageManager {
   }
 
   /**
+   * Load all saved games for current user
+   * @returns {Promise<Array>} Array of game objects
+   */
+  async loadUserGames() {
+    try {
+      const token = await this.getAuthToken();
+
+      console.log('[StorageManager] Loading user games...');
+      const response = await fetch(`${this.baseUrl}/db-get-games`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to load games');
+      }
+
+      const data = await response.json();
+      console.log(`[StorageManager] Loaded ${data.count} games`);
+      return data.games;
+
+    } catch (error) {
+      console.error('[StorageManager] Error loading games:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get current profile
    * @returns {Object|null} Current user profile
    */
