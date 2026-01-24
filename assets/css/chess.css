@@ -142,6 +142,34 @@
   width: 600px;
 }
 
+/* Fix Chessboard.js piece positioning */
+.piece-417db {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Ensure pieces are centered in squares */
+.square-55d63 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fix piece image positioning */
+.square-55d63 img {
+  max-width: 85%;
+  max-height: 85%;
+  width: auto;
+  height: auto;
+  position: relative;
+  top: 0;
+  left: 0;
+}
+
 /* Controls section (left) */
 .chess-controls-section {
   grid-column: 1;
@@ -744,5 +772,433 @@
   .chess-moves-section {
     grid-column: 1;
     max-height: 300px;
+  }
+}
+
+/* ===========================
+   ANALYSIS PANEL (PHASE 9)
+   =========================== */
+
+/* Analysis Panel Container */
+.analysis-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Analysis Row */
+.analysis-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--background-tertiary, #e8e8e8);
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.analysis-row:hover {
+  background: var(--background-secondary, #f0f0f0);
+}
+
+/* Analysis Labels */
+.analysis-label {
+  font-weight: 600;
+  color: var(--text-secondary, #666);
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Evaluation Score */
+.eval-score {
+  font-size: 1.5em;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  min-width: 80px;
+  text-align: right;
+}
+
+.eval-score.positive {
+  color: #4ec9b0;
+}
+
+.eval-score.negative {
+  color: #f48771;
+}
+
+.eval-score.neutral {
+  color: var(--text-primary, #333);
+}
+
+/* Search Depth, NPS, Time */
+.search-depth,
+.nodes-per-sec,
+.analysis-time {
+  font-family: 'Courier New', monospace;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+  min-width: 80px;
+  text-align: right;
+}
+
+/* Principal Variation Row */
+.pv-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.pv-row .analysis-label {
+  align-self: flex-start;
+}
+
+/* Principal Variation Display */
+.principal-variation {
+  padding: 12px;
+  background: var(--background-primary, white);
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95em;
+  line-height: 1.6;
+  min-height: 60px;
+  max-height: 120px;
+  overflow-y: auto;
+  color: var(--text-primary, #333);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.pv-placeholder {
+  color: var(--text-secondary, #999);
+  font-style: italic;
+}
+
+/* Analysis Controls */
+.analysis-controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* Analysis Buttons */
+.analysis-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  background: var(--button-background, #007bff);
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.analysis-btn:hover:not(:disabled) {
+  background: var(--button-hover, #0056b3);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+}
+
+.analysis-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.analysis-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.analysis-btn#stop-analysis-btn {
+  background: #dc3545;
+}
+
+.analysis-btn#stop-analysis-btn:hover:not(:disabled) {
+  background: #c82333;
+  box-shadow: 0 2px 8px rgba(220,53,69,0.3);
+}
+
+/* Dark Mode Support for Analysis Panel */
+@media (prefers-color-scheme: dark) {
+  .analysis-row {
+    background: #2d2d2d;
+  }
+
+  .analysis-row:hover {
+    background: #3a3a3a;
+  }
+
+  .principal-variation {
+    background: #1e1e1e;
+    color: #d4d4d4;
+  }
+
+  .pv-placeholder {
+    color: #666;
+  }
+
+  .analysis-label {
+    color: #999;
+  }
+
+  .search-depth,
+  .nodes-per-sec,
+  .analysis-time {
+    color: #d4d4d4;
+  }
+
+  .eval-score.neutral {
+    color: #d4d4d4;
+  }
+}
+
+/* Responsive Analysis Panel */
+@media (max-width: 1200px) {
+  .analysis-panel {
+    gap: 12px;
+  }
+
+  .analysis-row {
+    padding: 10px 12px;
+  }
+
+  .eval-score {
+    font-size: 1.3em;
+  }
+
+  .search-depth,
+  .nodes-per-sec,
+  .analysis-time {
+    font-size: 1em;
+  }
+
+  .analysis-controls {
+    flex-direction: column;
+  }
+
+  .analysis-btn {
+    width: 100%;
+  }
+}
+
+/* Import/Export Section */
+.chess-import-export-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-top: 1.5rem;
+}
+
+.chess-import-export-section h2 {
+  color: white;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.import-group, .export-group {
+  margin-bottom: 1.5rem;
+}
+
+.import-group:last-child, .export-group:last-child {
+  margin-bottom: 0;
+}
+
+.chess-import-export-section label {
+  display: block;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.input-description {
+  display: block;
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-top: 0.25rem;
+  font-weight: normal;
+}
+
+.import-controls, .export-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.fen-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  background: rgba(255,255,255,0.9);
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.fen-input:focus {
+  outline: none;
+  border-color: rgba(255,255,255,0.6);
+  background: white;
+}
+
+.import-btn, .export-btn {
+  padding: 0.5rem 1rem;
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.import-btn:hover, .export-btn:hover {
+  background: #f0f0f0;
+  transform: translateY(-1px);
+}
+
+.import-btn:disabled, .export-btn:disabled {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.import-error {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(255,0,0,0.2);
+  border-left: 3px solid #ff4444;
+  color: white;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+/* Saved Games Modal */
+.saved-games-list {
+  max-height: 400px;
+  overflow-y: auto;
+  min-height: 100px;
+}
+
+.saved-game-item {
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.saved-game-item:hover {
+  background: #f5f5f5;
+  border-color: #667eea;
+  transform: translateX(2px);
+}
+
+.game-summary {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.game-date {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.game-result {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.game-result.win { color: #4caf50; }
+.game-result.loss { color: #f44336; }
+.game-result.draw { color: #ff9800; }
+.game-result.abandoned { color: #999; }
+
+.game-details {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.game-opening {
+  font-weight: 500;
+  color: #764ba2;
+}
+
+.loading-message, .no-games-message, .error-message {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+}
+
+.error-message {
+  color: #f44336;
+}
+
+/* Dark mode support for Import/Export */
+@media (prefers-color-scheme: dark) {
+  .fen-input {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .fen-input:focus {
+    background: rgba(255,255,255,0.15);
+  }
+
+  .import-btn, .export-btn {
+    background: rgba(255,255,255,0.9);
+  }
+
+  .saved-game-item {
+    background: #2a2a2a;
+    border-color: #444;
+  }
+
+  .saved-game-item:hover {
+    background: #333;
+    border-color: #667eea;
+  }
+
+  .game-date {
+    color: #e0e0e0;
+  }
+
+  .game-details {
+    color: #999;
+  }
+
+  .loading-message, .no-games-message {
+    color: #999;
+  }
+}
+
+/* Mobile responsive for Import/Export */
+@media (max-width: 768px) {
+  .import-controls, .export-controls {
+    flex-direction: column;
+  }
+
+  .import-btn, .export-btn {
+    width: 100%;
+  }
+
+  .game-summary {
+    flex-direction: column;
+    gap: 0.25rem;
   }
 }
