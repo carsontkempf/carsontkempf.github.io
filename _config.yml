@@ -41,12 +41,23 @@ plugins:
 # Explicitly disable github-metadata to prevent SSL timeout
 github: [metadata]
 
+# Collections configuration
+collections:
+  pages:
+    output: true
+    permalink: /:path/
+
 # Process .liquid files as JavaScript
 defaults:
   - scope:
       path: "assets/js"
     values:
       layout: null
+  - scope:
+      path: "_pages"
+      type: "pages"
+    values:
+      layout: "page"
 
 # Include .liquid files in processing
 include:
