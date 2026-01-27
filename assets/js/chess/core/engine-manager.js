@@ -32,10 +32,13 @@ class EngineManager {
     this.difficulty = difficulty;
 
     try {
-      console.log(`Engine thinking... (Difficulty: ${difficulty})`);
+      console.log(`[ENGINE] Engine thinking... (Difficulty: ${difficulty})`);
+      console.log(`[ENGINE] Position: ${fen}`);
 
       // Get move from Lichess API
+      console.log('[ENGINE] Calling Lichess API...');
       const result = await lichessClient.getBestMove(fen, difficulty, Math.min(difficulty, 5));
+      console.log('[ENGINE] Lichess API returned:', result);
 
       // Calculate actual think time
       const thinkTime = Date.now() - this.thinkingStartTime;

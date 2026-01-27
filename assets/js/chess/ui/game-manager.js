@@ -47,6 +47,8 @@ class GameManager {
     this.difficulty = difficulty;
     this.isGameActive = true;
 
+    console.log(`[CHESS] Starting new game: mode=${mode}, side=${side}, difficulty=${difficulty}`);
+
     // Reset chess logic and board
     chessWrapper.reset();
     boardManager.reset();
@@ -93,7 +95,10 @@ class GameManager {
       const currentTurn = chessWrapper.getTurn();
       const computerTurn = this.playerSide === 'white' ? 'b' : 'w';
 
+      console.log(`[CHESS] Move made. Current turn: ${currentTurn}, Computer turn: ${computerTurn}`);
+
       if (currentTurn === computerTurn) {
+        console.log('[CHESS] Computer should move now');
         setTimeout(() => this.makeComputerMove(), 500);
       }
     }
@@ -105,18 +110,22 @@ class GameManager {
   async makeComputerMove() {
     if (!this.isGameActive) return;
 
+    console.log('[CHESS] makeComputerMove() called');
     boardManager.setComputerThinking(true);
     controls.disableControls();
 
     try {
       // Get best move from engine manager
       if (!this.engineManager) {
+        console.log('[CHESS] Loading engine manager...');
         // Lazy load engine manager
         const { default: EngineManager } = await import('../core/engine-manager.js');
         this.engineManager = EngineManager;
+        console.log('[CHESS] Engine manager loaded');
       }
 
       const fen = chessWrapper.getFen();
+      console.log('[CHESS] Getting best move for position:', fen);
       const move = await this.engineManager.getBestMove(fen, this.difficulty);
 
       if (move) {

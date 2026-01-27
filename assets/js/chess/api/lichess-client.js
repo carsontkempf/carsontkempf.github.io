@@ -17,16 +17,21 @@ class LichessClient {
    * @returns {Promise<string>} Access token
    */
   async getAuthToken() {
+    console.log('[LICHESS] Getting auth token...');
+    console.log('[LICHESS] auth0Client available:', typeof auth0Client !== 'undefined');
+
     // Access the global auth0Client if available
     if (typeof auth0Client !== 'undefined' && auth0Client) {
       try {
         const token = await auth0Client.getTokenSilently();
+        console.log('[LICHESS] Token obtained successfully');
         return token;
       } catch (error) {
-        console.error('Error getting auth token:', error);
+        console.error('[LICHESS] Error getting auth token:', error);
         throw new Error('Authentication required. Please log in.');
       }
     }
+    console.error('[LICHESS] Auth0 client not initialized');
     throw new Error('Auth0 client not initialized');
   }
 

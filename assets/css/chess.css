@@ -22,6 +22,16 @@
   width: 100% !important;
 }
 
+/* Fix piece positioning - adjust pieces up and right */
+#chess-board img {
+  transform: translate(5px, -50px) !important;
+}
+
+/* Also adjust dragging pieces */
+.piece-417db {
+  transform: translate(5px, -50px) !important;
+}
+
 /* Sidebar */
 .chess-sidebar {
   flex: 0 0 300px;
