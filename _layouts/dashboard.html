@@ -133,31 +133,53 @@ permalink: /dashboard/
 </div>
 
 <script>
+    console.log('[LAYOUT DEBUG] dashboard.html layout script loaded');
+    console.log('[LAYOUT DEBUG] Dashboard elements check:');
+    console.log('[LAYOUT DEBUG] - dashboard-content-wrapper:', document.getElementById('dashboard-content-wrapper'));
+    console.log('[LAYOUT DEBUG] - dashboard-login-prompt:', document.getElementById('dashboard-login-prompt'));
+
     document.addEventListener('authReady', () => {
+        console.log('[LAYOUT DEBUG] authReady event received in layout');
+        console.log('[LAYOUT DEBUG] window.authService:', window.authService);
+        console.log('[LAYOUT DEBUG] isAuthenticated:', window.authService?.isAuthenticated);
+
         if (window.authService.isAuthenticated) {
+            console.log('[LAYOUT DEBUG] User authenticated - showing dashboard content');
             document.getElementById('dashboard-content-wrapper').style.display = 'block';
-            
+
             const user = window.authService.user;
+            console.log('[LAYOUT DEBUG] User object:', user);
+
             const profileDiv = document.getElementById('user-profile-details');
-            
+            console.log('[LAYOUT DEBUG] Profile div:', profileDiv);
+
             if (user && profileDiv) {
+                console.log('[LAYOUT DEBUG] Injecting user profile HTML');
                 // This injects HTML with the correct classes to match our CSS
                 profileDiv.innerHTML = `
                     <p class="welcome-message">Welcome, ${user.name}!</p>
                     <p class="login-status">Your login status is confirmed.</p>
                 `;
             }
-            
+
             // Load appropriate buttons based on user permissions
+            console.log('[LAYOUT DEBUG] Loading dashboard buttons');
             loadDashboardButtons(user);
         } else {
+            console.log('[LAYOUT DEBUG] User NOT authenticated - showing login prompt');
             document.getElementById('dashboard-login-prompt').style.display = 'block';
         }
     });
 
     function loadDashboardButtons(user) {
+        console.log('[BUTTONS DEBUG] loadDashboardButtons called with user:', user);
+
         const authButtonsDiv = document.getElementById('auth-management-buttons');
         const writerAdminButton = document.getElementById('writer-admin-button');
+
+        console.log('[BUTTONS DEBUG] Button elements:');
+        console.log('[BUTTONS DEBUG] - authButtonsDiv:', authButtonsDiv);
+        console.log('[BUTTONS DEBUG] - writerAdminButton:', writerAdminButton);
 
         // Check user roles in multiple possible locations
         const customRoles = user['https://carsontkempf.github.io/roles'] || [];
@@ -165,8 +187,15 @@ permalink: /dashboard/
         const appMetadataRoles = user.app_metadata?.roles || [];
         const userMetadataRoles = user.user_metadata?.roles || [];
 
+        console.log('[BUTTONS DEBUG] Role sources:');
+        console.log('[BUTTONS DEBUG] - customRoles:', customRoles);
+        console.log('[BUTTONS DEBUG] - auth0Roles:', auth0Roles);
+        console.log('[BUTTONS DEBUG] - appMetadataRoles:', appMetadataRoles);
+        console.log('[BUTTONS DEBUG] - userMetadataRoles:', userMetadataRoles);
+
         // Combine all possible role sources
         const allRoles = [...customRoles, ...auth0Roles, ...appMetadataRoles, ...userMetadataRoles];
+        console.log('[BUTTONS DEBUG] All combined roles:', allRoles);
 
         const hasAdminRole = allRoles.includes('admin') || allRoles.includes('Admin');
         const hasWriterRole = allRoles.includes('writer') || allRoles.includes('Writer');
@@ -174,14 +203,27 @@ permalink: /dashboard/
                                         allRoles.includes('rol_XUUh9ZOhirY2yCQQ');
         const isSiteOwner = user.email === 'ctkfdp@umsystem.edu';
 
+        console.log('[BUTTONS DEBUG] Role checks:');
+        console.log('[BUTTONS DEBUG] - hasAdminRole:', hasAdminRole);
+        console.log('[BUTTONS DEBUG] - hasWriterRole:', hasWriterRole);
+        console.log('[BUTTONS DEBUG] - hasCodeComprehensionRole:', hasCodeComprehensionRole);
+        console.log('[BUTTONS DEBUG] - isSiteOwner:', isSiteOwner);
+
         // Show Writer's Admin button for Admin or Writer roles
         if (hasAdminRole || hasWriterRole || isSiteOwner) {
+            console.log('[BUTTONS DEBUG] User has writer/admin access - showing Writer Admin button');
             if (writerAdminButton) {
                 writerAdminButton.style.display = 'inline-block';
+                console.log('[BUTTONS DEBUG] Writer Admin button display set to inline-block');
+            } else {
+                console.log('[BUTTONS DEBUG] WARNING: writerAdminButton element not found!');
             }
+        } else {
+            console.log('[BUTTONS DEBUG] User does NOT have writer/admin access');
         }
 
         // Additional admin-specific buttons can be added here if needed
         // Currently no additional dynamic buttons for admins
+        console.log('[BUTTONS DEBUG] loadDashboardButtons complete');
     }
 </script>
