@@ -1,0 +1,27 @@
+# Production Configuration - extends _config.yml
+# This file contains production-specific settings
+
+# Production Settings
+environment: production
+url: "https://carsonkempf.netlify.app"
+
+# Disable incremental builds in production
+incremental: false
+
+# Don't show future posts in production
+future: false
+
+# Optimize builds
+safe: true
+
+# Apple Music API Configuration (uses environment variables in production)
+# Environment variables should be set in Netlify:
+# - APPLE_KEY_ID
+# - APPLE_TEAM_ID  
+# - APPLE_PRIVATE_KEY_B64
+
+# Note: Actual values should be set as Netlify environment variables
+apple_music:
+  key_id: "" # Set via APPLE_KEY_ID env var
+  team_id: "" # Set via APPLE_TEAM_ID env var
+  private_key: "" # Set via APPLE_PRIVATE_KEY_B64 env var

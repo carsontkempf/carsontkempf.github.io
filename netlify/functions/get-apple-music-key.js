@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 exports.handler = async (event, context) => {
+  // CORS headers
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
@@ -8,28 +9,34 @@ exports.handler = async (event, context) => {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
   };
 
+  // Handle preflight OPTIONS request
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
+    return {
+      statusCode: 200,
+      headers,
+      body: ''
+    };
   }
 
   try {
+    // Get Apple Music credentials from environment variables
     const keyId = process.env.APPLE_KEY_ID || 'F9Q8YRKX3T';
     const teamId = process.env.APPLE_TEAM_ID || '5S855HB895';
-    
-    // Get private key from base64 environment variable
     const privateKey = process.env.APPLE_PRIVATE_KEY_B64 
       ? Buffer.from(process.env.APPLE_PRIVATE_KEY_B64, 'base64').toString('ascii')
-      : null;
+      : `-----BEGIN PRIVATE KEY-----
+MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgcl9PiirEqKTJUTIe
+JoZ9GsZoeuKnA4uZwESXe2p1UjagCgYIKoZIzj0DAQehRANCAASJmZZx1CJ4snvS
+UFDJBDw5qZC8uzGc2F4e5v1rAdBzNofWeAce76/4IX5q2TsD1fomTiRST08/TAzp
+EW2Of+Hx
+-----END PRIVATE KEY-----`;
 
-    if (!privateKey) {
-      throw new Error('Apple private key not found in environment variables');
-    }
-
+    // Generate JWT token
     const now = Math.floor(Date.now() / 1000);
     const payload = {
       iss: teamId,
       iat: now,
-      exp: now + 15777000 // ~6 months
+      exp: now + 15777000 // 6 months
     };
 
     const token = jwt.sign(payload, privateKey, {
@@ -50,6 +57,7 @@ exports.handler = async (event, context) => {
         teamId: teamId
       })
     };
+
   } catch (error) {
     console.error('Apple Music JWT generation error:', error);
     return {

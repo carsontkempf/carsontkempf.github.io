@@ -1,0 +1,50 @@
+# Development Configuration - extends _config.yml
+# This file contains development-specific settings and includes sensitive data
+
+# Apple Music API Configuration
+apple_music:
+  key_id: "F9Q8YRKX3T"
+  team_id: "5S855HB895"
+  private_key: |
+    -----BEGIN PRIVATE KEY-----
+    MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgcl9PiirEqKTJUTIe
+    JoZ9GsZoeuKnA4uZwESXe2p1UjagCgYIKoZIzj0DAQehRANCAASJmZZx1CJ4snvS
+    UFDJBDw5qZC8uzGc2F4e5v1rAdBzNofWeAce76/4IX5q2TsD1fomTiRST08/TAzp
+    EW2Of+Hx
+    -----END PRIVATE KEY-----
+
+# Spotify API Configuration  
+spotify:
+  client_id: "80826ef3daa547f49d843c254ad224b6"
+
+# Auth0 Configuration
+auth0:
+  domain: "dev-l57dcpkhob0u7ykb.us.auth0.com"
+  client_id: "ql8ttR4YSmZXZbGE30wP8foWCUuZs2jh"
+  audience_server: "https://carsontkempf.github.io/api/carsons-meditations"
+
+# User Access Control
+users:
+  code_comprehension_users:
+    - "mifqk@umsystem.edu"
+    - "carsontkempf@gmail.com"
+    - "ctkfdp@umsystem.edu"
+    - "pejbvy@umsystem.edu"
+    - "richardson.leah1@gmail.com"
+  
+  admin_users:
+    - "carsontkempf@gmail.com"
+    - "ctkfdp@umsystem.edu"
+
+# Development Settings
+environment: development
+url: "http://localhost:4000"
+
+# Enable incremental builds for faster development
+incremental: true
+
+# Show future posts in development
+future: true
+
+# Enable live reload
+livereload: true
