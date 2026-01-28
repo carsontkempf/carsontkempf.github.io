@@ -22,15 +22,14 @@
   width: 100% !important;
 }
 
-/* Piece positioning - shift up 55px and scale to 85% */
+/* Piece positioning - scale to 85% */
 #chess-board img {
-  transform: translateY(-55px) scale(0.85) !important;
+  transform: scale(0.85) !important;
 }
 
-/* Dragging pieces - remove transform to prevent jumping, only scale */
+/* Dragging pieces - maintain same transform to prevent jumping */
 .piece-417db {
   transform: scale(0.85) !important;
-  margin-top: -55px !important;
 }
 
 /* Click-to-move highlights */
