@@ -222,10 +222,18 @@ layout: post
     width: 100%;
     height: 120%;
     object-fit: cover;
-    transform: translateY(-30%);
+    transform: translateY(-45%);
     position: absolute;
     top: 0;
     left: 0;
+}
+
+/* Smaller size for Instagram */
+.social-icon-btn img[alt="Instagram"] {
+    width: 80%;
+    height: 96%;
+    left: 10%;
+    object-fit: contain;
 }
 
 /* Smaller size for Spotify and Apple Music icons */
