@@ -135,9 +135,9 @@ layout: post
 .icon-btn img {
     display: block;
     width: 100%;
-    height: 100%;
+    height: 120%;
     object-fit: cover;
-    object-position: center 20%;
+    transform: translateY(-10%);
 }
 
 /* Portrait mode - NO hover effects */
