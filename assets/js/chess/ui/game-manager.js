@@ -11,7 +11,7 @@ import controls from './controls.js';
 
 class GameManager {
   constructor() {
-    this.mode = 'human-vs-human';
+    this.mode = 'human-vs-computer';
     this.playerSide = 'white';
     this.difficulty = 5;
     this.engineManager = null;
@@ -30,7 +30,7 @@ class GameManager {
     controls.init();
 
     // Start initial game
-    this.startNewGame('human-vs-human', 'white', 5);
+    this.startNewGame('human-vs-computer', 'white', 5);
 
     console.log('Chess game initialized');
   }

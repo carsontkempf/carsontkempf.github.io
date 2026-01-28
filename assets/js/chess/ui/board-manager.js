@@ -127,8 +127,8 @@ class BoardManager {
    * Handle snap end event (after piece animation completes)
    */
   onSnapEnd() {
-    // Update board position to match game state
-    this.board.position(chessWrapper.getFen());
+    // No need to update position - drag-and-drop already updated it
+    // Removing this prevents piece flickering after moves
   }
 
   /**

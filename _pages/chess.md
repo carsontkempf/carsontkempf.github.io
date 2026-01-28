@@ -21,26 +21,26 @@ permalink: /chess/
         <div class="game-mode-selector">
           <h4>Game Mode</h4>
           <select id="game-mode-select" class="form-control">
+            <option value="human-vs-computer" selected>Human vs Computer</option>
             <option value="human-vs-human">Human vs Human</option>
-            <option value="human-vs-computer">Human vs Computer</option>
           </select>
         </div>
 
-        <div id="difficulty-selector" class="difficulty-selector" style="display: none;">
+        <div id="difficulty-selector" class="difficulty-selector">
           <h4>Difficulty</h4>
           <select id="difficulty-select" class="form-control">
             <option value="1">Beginner (Level 1)</option>
             <option value="3">Easy (Level 3)</option>
-            <option value="5">Intermediate (Level 5)</option>
+            <option value="5" selected>Intermediate (Level 5)</option>
             <option value="8">Advanced (Level 8)</option>
             <option value="10">Master (Level 10)</option>
           </select>
         </div>
 
-        <div id="side-selector" class="side-selector" style="display: none;">
+        <div id="side-selector" class="side-selector">
           <h4>Play As</h4>
           <select id="side-select" class="form-control">
-            <option value="white">White</option>
+            <option value="white" selected>White</option>
             <option value="black">Black</option>
           </select>
         </div>
