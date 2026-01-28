@@ -181,6 +181,70 @@ layout: post
         height: 150px;
     }
 }
+
+/* Social media grid styles */
+.social-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+@media (min-width: 769px) {
+    .social-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .social-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+.social-icon-btn-container {
+    width: 100%;
+}
+
+.social-icon-btn {
+    display: block;
+    width: 100%;
+    height: 180px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.social-icon-btn img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Portrait mode - NO hover effects */
+@media (orientation: portrait) {
+    .social-icon-btn:hover {
+        transform: none;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Landscape mode - enable hover effects */
+@media (orientation: landscape) {
+    .social-icon-btn:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.social-icon-btn:active {
+    transform: translateY(-2px) scale(1.01);
+}
 </style>
 
 <div class="hero-container">
@@ -296,12 +360,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
 # Check Me Out
 
-
-### [Spotify](https://open.spotify.com/user/5lfrt3edl389cewrkxf5upr88?si=30e627be14304032)
-
-### [Instagram](https://www.instagram.com/carsonthomaskempf/) 
-
-### [Linkedin](https://www.linkedin.com/in/carson-kempf)
+<div class="social-grid">
+    <div class="social-icon-btn-container">
+        <a href="https://www.instagram.com/carsonthomaskempf/" class="social-icon-btn" target="_blank" rel="noopener noreferrer">
+            <img src="/assets/img/instagram.jpeg" alt="Instagram">
+        </a>
+    </div>
+    <div class="social-icon-btn-container">
+        <a href="https://www.linkedin.com/in/carson-kempf" class="social-icon-btn" target="_blank" rel="noopener noreferrer">
+            <img src="/assets/img/linkedin.jpeg" alt="LinkedIn">
+        </a>
+    </div>
+    <div class="social-icon-btn-container">
+        <a href="https://open.spotify.com/user/5lfrt3edl389cewrkxf5upr88?si=30e627be14304032" class="social-icon-btn" target="_blank" rel="noopener noreferrer">
+            <img src="/assets/img/Spotify-Icon.png" alt="Spotify">
+        </a>
+    </div>
+    <div class="social-icon-btn-container">
+        <a href="https://music.apple.com/profile/carsontkempf" class="social-icon-btn" target="_blank" rel="noopener noreferrer">
+            <img src="/assets/img/Apple-Music-Icon.png" alt="Apple Music">
+        </a>
+    </div>
+</div>
 
 
 --- 
