@@ -30,9 +30,17 @@
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <link rel="stylesheet" href="{{ '/assets/css/chess.css' | relative_url }}">
 
-    <!-- Auth0 SDK -->
-    <script defer src="{{ '/assets/js/env-config.js' | relative_url }}"></script>
-    <script defer src="{{ '/assets/js/auth.js' | relative_url }}"></script>
+    <!-- Stockfish Engine (for local fallback) -->
+    <script src="{{ '/assets/js/chess/loadEngine.js' | relative_url }}"></script>
+    <script src="{{ '/assets/js/chess/stockfish-engine.js' | relative_url }}"></script>
+
+    <!-- Auth0 SDK (optional - for Lichess API) -->
+    <script>
+      // Initialize global auth0Client as null so code can check for it
+      window.auth0Client = null;
+      console.log('[CHESS LAYOUT] Auth0 client initialized as null (authentication disabled)');
+      console.log('[CHESS LAYOUT] Chess will use local Stockfish engine');
+    </script>
 
     <!-- Chess Modules -->
     <script type="module" src="{{ '/assets/js/chess/core/chess-wrapper.js' | relative_url }}"></script>

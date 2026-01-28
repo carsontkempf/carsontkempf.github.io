@@ -14,25 +14,32 @@ class LichessClient {
 
   /**
    * Get auth token from Auth0
-   * @returns {Promise<string>} Access token
+   * @returns {Promise<string|null>} Access token or null if not available
    */
   async getAuthToken() {
-    console.log('[LICHESS] Getting auth token...');
-    console.log('[LICHESS] auth0Client available:', typeof auth0Client !== 'undefined');
+    console.log('[LICHESS] ========== AUTH CHECK ==========');
+    console.log('[LICHESS] auth0Client exists:', typeof auth0Client !== 'undefined');
+    console.log('[LICHESS] auth0Client is null:', typeof auth0Client !== 'undefined' && auth0Client === null);
+    console.log('[LICHESS] auth0Client value:', typeof auth0Client !== 'undefined' ? auth0Client : 'undefined');
 
     // Access the global auth0Client if available
-    if (typeof auth0Client !== 'undefined' && auth0Client) {
+    if (typeof auth0Client !== 'undefined' && auth0Client !== null) {
       try {
+        console.log('[LICHESS] Attempting to get token from Auth0...');
         const token = await auth0Client.getTokenSilently();
         console.log('[LICHESS] Token obtained successfully');
+        console.log('[LICHESS] ========== AUTH SUCCESS ==========');
         return token;
       } catch (error) {
-        console.error('[LICHESS] Error getting auth token:', error);
-        throw new Error('Authentication required. Please log in.');
+        console.warn('[LICHESS] Error getting auth token:', error);
+        console.log('[LICHESS] ========== AUTH FAILED ==========');
+        return null; // Return null instead of throwing
       }
     }
-    console.error('[LICHESS] Auth0 client not initialized');
-    throw new Error('Auth0 client not initialized');
+
+    console.log('[LICHESS] Auth0 client not available - using unauthenticated mode');
+    console.log('[LICHESS] ========== AUTH NOT AVAILABLE ==========');
+    return null; // Return null instead of throwing
   }
 
   /**
@@ -42,6 +49,10 @@ class LichessClient {
    * @returns {Promise<object>} API response data
    */
   async request(endpoint, params = {}) {
+    console.log('[LICHESS] ========== API REQUEST ==========');
+    console.log('[LICHESS] Endpoint:', endpoint);
+    console.log('[LICHESS] Params:', params);
+
     // Build URL with query parameters
     const url = new URL(this.baseUrl, window.location.origin);
     url.searchParams.append('endpoint', endpoint);
@@ -52,16 +63,28 @@ class LichessClient {
       }
     });
 
+    console.log('[LICHESS] Request URL:', url.toString());
+
     // Check cache
     const cacheKey = url.toString();
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
-      console.log('Using cached result for:', endpoint);
+      console.log('[LICHESS] Using cached result for:', endpoint);
+      console.log('[LICHESS] ========== API CACHE HIT ==========');
       return cached.data;
     }
 
     // Get auth token
     const token = await this.getAuthToken();
+
+    // If no token available, throw specific error that engine-manager can catch
+    if (!token) {
+      console.log('[LICHESS] No auth token - cannot use Lichess API');
+      console.log('[LICHESS] ========== API AUTH REQUIRED ==========');
+      throw new Error('LICHESS_AUTH_REQUIRED');
+    }
+
+    console.log('[LICHESS] Making authenticated request...');
 
     // Make request
     const response = await fetch(url.toString(), {
@@ -72,12 +95,17 @@ class LichessClient {
       }
     });
 
+    console.log('[LICHESS] Response status:', response.status);
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: response.statusText }));
+      console.error('[LICHESS] Request failed:', error);
+      console.log('[LICHESS] ========== API ERROR ==========');
       throw new Error(error.message || `Request failed: ${response.status}`);
     }
 
     const result = await response.json();
+    console.log('[LICHESS] Response received:', result);
 
     // Cache successful response
     this.cache.set(cacheKey, {
@@ -85,6 +113,7 @@ class LichessClient {
       timestamp: Date.now()
     });
 
+    console.log('[LICHESS] ========== API SUCCESS ==========');
     return result.data;
   }
 
