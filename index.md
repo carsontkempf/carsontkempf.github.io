@@ -185,36 +185,32 @@ layout: post
 /* Social media grid styles */
 .social-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    max-width: 900px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    max-width: 500px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
 
-@media (min-width: 769px) {
-    .social-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
 @media (max-width: 768px) {
     .social-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        max-width: 300px;
     }
 }
 
 .social-icon-btn-container {
     width: 100%;
+    aspect-ratio: 1;
 }
 
 .social-icon-btn {
     display: block;
     width: 100%;
-    height: 180px;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    height: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
     overflow: hidden;
 }
@@ -230,20 +226,20 @@ layout: post
 @media (orientation: portrait) {
     .social-icon-btn:hover {
         transform: none;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 }
 
 /* Landscape mode - enable hover effects */
 @media (orientation: landscape) {
     .social-icon-btn:hover {
-        transform: translateY(-4px) scale(1.02);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
     }
 }
 
 .social-icon-btn:active {
-    transform: translateY(-2px) scale(1.01);
+    transform: translateY(-2px) scale(1.02);
 }
 </style>
 
