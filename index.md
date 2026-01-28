@@ -213,13 +213,28 @@ layout: post
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
     overflow: hidden;
+    background: white;
+    position: relative;
 }
 
 .social-icon-btn img {
     display: block;
     width: 100%;
-    height: 100%;
+    height: 120%;
     object-fit: cover;
+    transform: translateY(-30%);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Smaller size for Spotify and Apple Music icons */
+.social-icon-btn img[alt="Spotify"],
+.social-icon-btn img[alt="Apple Music"] {
+    width: 70%;
+    height: 84%;
+    left: 15%;
+    object-fit: contain;
 }
 
 /* Portrait mode - NO hover effects */
