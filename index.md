@@ -118,13 +118,14 @@ layout: post
 /* Icon button styles */
 .icon-btn-container {
     display: inline-block;
-    width: min(80vw, 400px);
+    width: min(60vw, 300px);
     text-align: center;
 }
 
 .icon-btn {
     display: block;
     width: 100%;
+    height: 200px;
     border-radius: 16px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
@@ -134,7 +135,9 @@ layout: post
 .icon-btn img {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
 }
 
 /* Portrait mode - NO hover effects */
@@ -160,14 +163,22 @@ layout: post
 @media (min-width: 769px) {
     .icon-btn-container {
         width: auto;
-        max-width: 400px;
+        max-width: 300px;
+    }
+
+    .icon-btn {
+        height: 180px;
     }
 }
 
 @media (max-width: 768px) {
     .icon-btn-container {
-        width: calc(100% - 2rem);
+        width: calc(100% - 4rem);
         max-width: 100%;
+    }
+
+    .icon-btn {
+        height: 150px;
     }
 }
 </style>
