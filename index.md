@@ -137,7 +137,7 @@ layout: post
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
+    object-position: center center;
 }
 
 /* Portrait mode - NO hover effects */
