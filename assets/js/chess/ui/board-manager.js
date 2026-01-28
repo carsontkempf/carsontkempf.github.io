@@ -14,6 +14,8 @@ class BoardManager {
     this.onMoveCallback = null;
     this.playerColor = 'white';
     this.isComputerThinking = false;
+    this.selectedSquare = null;
+    this.validMoves = [];
   }
 
   /**
@@ -34,6 +36,9 @@ class BoardManager {
     this.board = Chessboard(this.boardElement, config);
     this.updateBoardSize();
     window.addEventListener('resize', () => this.updateBoardSize());
+
+    // Add click handlers for click-to-move functionality
+    this.addClickHandlers();
   }
 
   /**
@@ -42,6 +47,202 @@ class BoardManager {
   updateBoardSize() {
     if (this.board) {
       this.board.resize();
+    }
+  }
+
+  /**
+   * Add click handlers for click-to-move functionality
+   */
+  addClickHandlers() {
+    const boardElement = document.getElementById(this.boardElement);
+    if (!boardElement) return;
+
+    boardElement.addEventListener('click', (e) => {
+      // Find the clicked square
+      const square = e.target.closest('.square-55d63');
+      if (!square) {
+        this.clearSelection();
+        return;
+      }
+
+      const squareId = this.getSquareFromElement(square);
+      if (!squareId) return;
+
+      this.handleSquareClick(squareId);
+    });
+  }
+
+  /**
+   * Get square notation from DOM element
+   * @param {Element} element - Square element
+   * @returns {string} Square notation (e.g., 'e4')
+   */
+  getSquareFromElement(element) {
+    const classes = element.className.split(' ');
+    for (const cls of classes) {
+      if (cls.startsWith('square-')) {
+        const match = cls.match(/square-([a-h][1-8])/);
+        if (match) return match[1];
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Handle square click for click-to-move
+   * @param {string} square - Square notation
+   */
+  handleSquareClick(square) {
+    // Don't allow moves if game is over or computer is thinking
+    if (chessWrapper.isGameOver() || this.isComputerThinking) {
+      return;
+    }
+
+    const piece = chessWrapper.getPiece(square);
+    const turn = chessWrapper.getTurn();
+
+    // If no piece is selected yet
+    if (!this.selectedSquare) {
+      // Check if clicking on a piece that can be moved
+      if (piece && this.canPlayerMovePiece(piece, turn)) {
+        this.selectSquare(square);
+      }
+    } else {
+      // A piece is already selected
+      if (square === this.selectedSquare) {
+        // Clicking the same square - deselect
+        this.clearSelection();
+      } else if (piece && this.canPlayerMovePiece(piece, turn)) {
+        // Clicking another piece of the same color - switch selection
+        this.selectSquare(square);
+      } else {
+        // Try to move to the clicked square
+        this.attemptMove(this.selectedSquare, square);
+      }
+    }
+  }
+
+  /**
+   * Check if player can move a piece
+   * @param {object} piece - Piece object
+   * @param {string} turn - Current turn ('w' or 'b')
+   * @returns {boolean}
+   */
+  canPlayerMovePiece(piece, turn) {
+    const pieceColor = piece.color;
+
+    if (this.playerColor === 'white' && turn === 'w' && pieceColor === 'w') {
+      return true;
+    }
+    if (this.playerColor === 'black' && turn === 'b' && pieceColor === 'b') {
+      return true;
+    }
+    if (this.playerColor === 'both') {
+      return (turn === 'w' && pieceColor === 'w') || (turn === 'b' && pieceColor === 'b');
+    }
+    return false;
+  }
+
+  /**
+   * Select a square and highlight valid moves
+   * @param {string} square - Square notation
+   */
+  selectSquare(square) {
+    this.clearSelection();
+    this.selectedSquare = square;
+
+    // Get valid moves for this piece
+    this.validMoves = chessWrapper.getMovesForSquare(square);
+
+    // Highlight selected square
+    this.highlightSquare(square, 'selected');
+
+    // Highlight valid move squares
+    this.validMoves.forEach(move => {
+      this.highlightSquare(move.to, 'valid-move');
+    });
+  }
+
+  /**
+   * Clear selection and highlights
+   */
+  clearSelection() {
+    if (this.selectedSquare) {
+      this.removeHighlight(this.selectedSquare);
+      this.selectedSquare = null;
+    }
+
+    this.validMoves.forEach(move => {
+      this.removeHighlight(move.to);
+    });
+    this.validMoves = [];
+  }
+
+  /**
+   * Attempt to move from selected square to target
+   * @param {string} from - Source square
+   * @param {string} to - Target square
+   */
+  attemptMove(from, to) {
+    // Check if move needs promotion
+    const piece = chessWrapper.getPiece(from);
+    const needsPromotion = piece &&
+                           piece.type === 'p' &&
+                           ((piece.color === 'w' && to.charAt(1) === '8') ||
+                            (piece.color === 'b' && to.charAt(1) === '1'));
+
+    let promotion = 'q';
+    if (needsPromotion) {
+      promotion = 'q'; // Auto-promote to queen
+    }
+
+    // Attempt the move
+    const move = chessWrapper.move({
+      from: from,
+      to: to,
+      promotion: promotion
+    });
+
+    // Clear selection
+    this.clearSelection();
+
+    if (move) {
+      // Move was successful
+      this.board.position(chessWrapper.getFen(), true);
+      this.updateStatus();
+
+      if (this.onMoveCallback) {
+        this.onMoveCallback(move);
+      }
+    }
+  }
+
+  /**
+   * Highlight a square
+   * @param {string} square - Square notation
+   * @param {string} type - Highlight type ('selected' or 'valid-move')
+   */
+  highlightSquare(square, type) {
+    const boardElement = document.getElementById(this.boardElement);
+    if (!boardElement) return;
+
+    const squareElement = boardElement.querySelector(`.square-${square}`);
+    if (squareElement) {
+      squareElement.classList.add(`highlight-${type}`);
+    }
+  }
+
+  /**
+   * Remove highlight from a square
+   * @param {string} square - Square notation
+   */
+  removeHighlight(square) {
+    const boardElement = document.getElementById(this.boardElement);
+    if (!boardElement) return;
+
+    const squareElement = boardElement.querySelector(`.square-${square}`);
+    if (squareElement) {
+      squareElement.classList.remove('highlight-selected', 'highlight-valid-move');
     }
   }
 
@@ -89,6 +290,9 @@ class BoardManager {
    * @returns {string} 'snapback' if illegal, otherwise proceed
    */
   onDrop(source, target) {
+    // Clear any click-to-move selection
+    this.clearSelection();
+
     // Check if move needs promotion
     const piece = chessWrapper.getPiece(source);
     const needsPromotion = piece &&

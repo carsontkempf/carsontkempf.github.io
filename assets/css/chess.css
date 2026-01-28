@@ -27,9 +27,33 @@
   transform: translateY(-55px) scale(0.85) !important;
 }
 
-/* Dragging pieces - match board positioning */
+/* Dragging pieces - remove transform to prevent jumping, only scale */
 .piece-417db {
-  transform: translateY(-55px) scale(0.85) !important;
+  transform: scale(0.85) !important;
+  margin-top: -55px !important;
+}
+
+/* Click-to-move highlights */
+.highlight-selected {
+  background-color: rgba(255, 255, 0, 0.4) !important;
+  box-shadow: inset 0 0 3px 3px rgba(255, 255, 0, 0.5);
+}
+
+.highlight-valid-move {
+  position: relative;
+}
+
+.highlight-valid-move::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  background-color: rgba(0, 128, 0, 0.4);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 /* Sidebar */

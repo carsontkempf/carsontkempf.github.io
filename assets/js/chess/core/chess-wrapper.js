@@ -117,6 +117,15 @@ class ChessWrapper {
   }
 
   /**
+   * Get legal moves for a specific square (alias for getLegalMoves)
+   * @param {string} square - Square in algebraic notation (e.g., 'e4')
+   * @returns {array} Array of legal moves
+   */
+  getMovesForSquare(square) {
+    return this.getLegalMoves(square);
+  }
+
+  /**
    * Check if a move is legal
    * @param {string} from - Source square
    * @param {string} to - Target square
