@@ -137,7 +137,7 @@ layout: post
     width: 100%;
     height: 120%;
     object-fit: cover;
-    transform: translateY(-10%);
+    transform: translateY(-30%);
 }
 
 /* Portrait mode - NO hover effects */
