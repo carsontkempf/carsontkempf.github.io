@@ -123,6 +123,13 @@ layout: post
     </a>
 </div>
 
+<div class="hero-container">
+    <h1 class="hero-title">Chess</h1>
+    <a href="/chess/" class="spotify-apple-btn" id="chess-btn">
+        <img src="/assets/img/chessboard.jpeg" alt="Chess" style="max-width: 100%; height: auto; border-radius: 8px;">
+    </a>
+</div>
+
 <!-- YouTube Videos Section -->
 <div id="homepage-videos" class="videos-container" style="margin-top: 4vh;">
   <h2 style="font-size: clamp(1.5rem, 4vw, 2rem); text-align: center; margin-bottom: 2vh;">Latest Videos</h2>
