@@ -114,20 +114,80 @@ layout: post
         max-width: 600px;
     }
 }
+
+/* Icon button styles */
+.icon-btn-container {
+    display: inline-block;
+    width: min(80vw, 400px);
+    text-align: center;
+}
+
+.icon-btn {
+    display: block;
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.icon-btn img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Portrait mode - NO hover effects */
+@media (orientation: portrait) {
+    .icon-btn:hover {
+        transform: none;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Landscape mode - enable hover effects */
+@media (orientation: landscape) {
+    .icon-btn:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.icon-btn:active {
+    transform: translateY(-2px) scale(1.01);
+}
+
+@media (min-width: 769px) {
+    .icon-btn-container {
+        width: auto;
+        max-width: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .icon-btn-container {
+        width: calc(100% - 2rem);
+        max-width: 100%;
+    }
+}
 </style>
 
 <div class="hero-container">
     <h1 class="hero-title">Playlist Transfer</h1>
-    <a href="/spotify-apple/" class="spotify-apple-btn" id="spotify-btn">
-        Spotify to Apple Music
-    </a>
+    <div class="icon-btn-container">
+        <a href="/spotify-apple/" class="icon-btn" id="spotify-btn">
+            <img src="/assets/img/recordplayer.jpeg" alt="Playlist Transfer" id="recordplayer-img">
+        </a>
+    </div>
 </div>
 
 <div class="hero-container">
     <h1 class="hero-title">Chess</h1>
-    <a href="/chess/" class="spotify-apple-btn" id="chess-btn">
-        <img src="/assets/img/chessboard.jpeg" alt="Chess" style="max-width: 100%; height: auto; border-radius: 8px;">
-    </a>
+    <div class="icon-btn-container">
+        <a href="/chess/" class="icon-btn" id="chess-btn">
+            <img src="/assets/img/chessboard.jpeg" alt="Chess" id="chessboard-img">
+        </a>
+    </div>
 </div>
 
 <!-- YouTube Videos Section -->
@@ -147,6 +207,44 @@ layout: post
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Debug: Check if images are loaded
+    console.log('=== Homepage Icon Debug ===');
+
+    const recordplayerImg = document.getElementById('recordplayer-img');
+    const chessboardImg = document.getElementById('chessboard-img');
+
+    if (recordplayerImg) {
+        console.log('Record player image element found');
+        console.log('Record player image src:', recordplayerImg.src);
+        recordplayerImg.addEventListener('load', function() {
+            console.log('✓ Record player image loaded successfully');
+            console.log('  Dimensions:', this.naturalWidth, 'x', this.naturalHeight);
+        });
+        recordplayerImg.addEventListener('error', function() {
+            console.error('✗ Record player image failed to load');
+            console.error('  Attempted src:', this.src);
+        });
+    } else {
+        console.error('✗ Record player image element not found');
+    }
+
+    if (chessboardImg) {
+        console.log('Chessboard image element found');
+        console.log('Chessboard image src:', chessboardImg.src);
+        chessboardImg.addEventListener('load', function() {
+            console.log('✓ Chessboard image loaded successfully');
+            console.log('  Dimensions:', this.naturalWidth, 'x', this.naturalHeight);
+        });
+        chessboardImg.addEventListener('error', function() {
+            console.error('✗ Chessboard image failed to load');
+            console.error('  Attempted src:', this.src);
+        });
+    } else {
+        console.error('✗ Chessboard image element not found');
+    }
+
+    console.log('=========================');
+
     // Function to handle login redirect for non-authenticated users
     function handleProjectClick(event, projectUrl) {
         // Check if user is authenticated
