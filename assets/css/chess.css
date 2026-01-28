@@ -22,16 +22,14 @@
   width: 100% !important;
 }
 
-/* Piece positioning - subtle upward adjustment */
+/* Piece positioning - shift up 50px to center on squares */
 #chess-board img {
-  transform: translateY(-10px) !important;
-  /* Shifts pieces up 10px to center on squares */
+  transform: translateY(-50px) !important;
 }
 
 /* Dragging pieces - match board positioning */
 .piece-417db {
-  transform: translateY(-10px) !important;
-  /* Shifts dragging pieces up 10px to match board */
+  transform: translateY(-50px) !important;
 }
 
 /* Sidebar */
