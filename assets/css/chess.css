@@ -22,18 +22,16 @@
   width: 100% !important;
 }
 
-/* Piece positioning - removed excessive transform */
-/* The default chessboard.js positioning should work correctly */
+/* Piece positioning - subtle upward adjustment */
 #chess-board img {
-  /* Previously had: transform: translate(5px, -50px) !important; */
-  /* This was causing pieces to be misaligned by 50px up */
-  /* Removed for proper piece alignment */
+  transform: translateY(-10px) !important;
+  /* Shifts pieces up 10px to center on squares */
 }
 
-/* Dragging pieces - removed transform */
+/* Dragging pieces - match board positioning */
 .piece-417db {
-  /* Previously had: transform: translate(5px, -50px) !important; */
-  /* Removed for proper piece alignment */
+  transform: translateY(-10px) !important;
+  /* Shifts dragging pieces up 10px to match board */
 }
 
 /* Sidebar */
