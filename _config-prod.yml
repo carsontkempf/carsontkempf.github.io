@@ -5,6 +5,7 @@ auth0:
   domain: "${AUTH0_DOMAIN}"
   client_id: "${AUTH0_CLIENT_ID}"
   audience: "${AUTH0_AUDIENCE_SERVER}"
+  callback_url: "${AUTH0_CALLBACK_URL}"
 
 spotify:
   client_id: "${SPOTIFY_CLIENT_ID}"

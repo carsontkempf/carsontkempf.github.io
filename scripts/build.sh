@@ -23,6 +23,7 @@ auth0:
   domain: "${AUTH0_DOMAIN:-dev-l57dcpkhob0u7ykb.us.auth0.com}"
   client_id: "${AUTH0_CLIENT_ID:-Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC}"
   audience: "${AUTH0_AUDIENCE_SERVER:-https://carsontkempf.github.io/api/carsons-meditations}"
+  callback_url: "${AUTH0_CALLBACK_URL:-https://carsontkempf.github.io}"
 
 spotify:
   client_id: "${SPOTIFY_CLIENT_ID:-80826ef3daa547f49d843c254ad224b6}"

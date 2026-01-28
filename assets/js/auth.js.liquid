@@ -27,16 +27,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('[AUTH] Current URL:', window.location.href);
     console.log('========================================');
 
-    // HARDCODED CONFIG - This is the working approach from commit b5cf944
+    // Auth0 config from Jekyll site variables (injected via build script)
     const config = {
-        domain: 'dev-l57dcpkhob0u7ykb.us.auth0.com',
-        clientId: 'Dq4tBsHjgcIGbXkVU8PPvjAq3WYmnSBC',
-        audience: 'https://carsontkempf.github.io/api/carsons-meditations',
-        callbackUrl: 'https://carsontkempf.github.io'
+        domain: '{{ site.auth0.domain }}',
+        clientId: '{{ site.auth0.client_id }}',
+        audience: '{{ site.auth0.audience }}',
+        callbackUrl: '{{ site.auth0.callback_url | default: site.url }}'
     };
 
     console.log('[AUTH] ========================================');
-    console.log('[AUTH] Using HARDCODED Auth0 Configuration:');
+    console.log('[AUTH] Auth0 Configuration:');
     console.log('[AUTH] Domain:', config.domain);
     console.log('[AUTH] Client ID:', config.clientId);
     console.log('[AUTH] Audience:', config.audience);
@@ -61,7 +61,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             clientId: config.clientId,
             authorizationParams: {
                 redirect_uri: redirectUri,
-                audience: config.audience
+                audience: config.audience,
+                scope: 'openid profile email offline_access'
             },
             useRefreshTokens: true,
             cacheLocation: 'localstorage'
