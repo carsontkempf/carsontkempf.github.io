@@ -206,7 +206,9 @@ layout: post
 }
 
 .social-icon-btn {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
     border-radius: 12px;
@@ -220,19 +222,18 @@ layout: post
 .social-icon-btn img {
     display: block;
     width: 100%;
-    height: 120%;
+    height: 100%;
     object-fit: cover;
-    transform: translateY(-45%);
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 /* Smaller size for Instagram */
 .social-icon-btn img[alt="Instagram"] {
     width: 80%;
-    height: 96%;
-    left: 10%;
+    height: 80%;
     object-fit: contain;
 }
 
@@ -240,8 +241,7 @@ layout: post
 .social-icon-btn img[alt="Spotify"],
 .social-icon-btn img[alt="Apple Music"] {
     width: 70%;
-    height: 84%;
-    left: 15%;
+    height: 70%;
     object-fit: contain;
 }
 
