@@ -1,3 +1,52 @@
+// Netlify Functions API Base URLs (primary and fallback)
+const NETLIFY_API_BASES = [
+    'https://carsontkempf.netlify.app/.netlify/functions',
+    'https://resonant-cheesecake-638dd1.netlify.app/.netlify/functions'
+];
+let currentApiBaseIndex = 0;
+
+// Helper function to make fetch requests with automatic fallback on CORS errors
+async function fetchWithFallback(endpoint, options = {}) {
+    const functionName = endpoint.split('/').pop();
+
+    for (let i = currentApiBaseIndex; i < NETLIFY_API_BASES.length; i++) {
+        const baseUrl = NETLIFY_API_BASES[i];
+        const url = `${baseUrl}/${functionName}`;
+
+        console.log(`[FETCH-FALLBACK] Attempt ${i + 1}/${NETLIFY_API_BASES.length}: ${url}`);
+
+        try {
+            const response = await fetch(url, options);
+
+            // If successful, update current index for future calls
+            if (response.ok || response.status === 401 || response.status === 403) {
+                if (i !== currentApiBaseIndex) {
+                    console.log(`[FETCH-FALLBACK] Switched to fallback URL: ${baseUrl}`);
+                    currentApiBaseIndex = i;
+                }
+                return response;
+            }
+
+            console.log(`[FETCH-FALLBACK] Response status ${response.status}, trying next URL...`);
+        } catch (error) {
+            console.error(`[FETCH-FALLBACK] Error with ${baseUrl}:`, error.message);
+
+            // Check if it's a CORS error
+            if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
+                console.log(`[FETCH-FALLBACK] CORS error detected, trying next URL...`);
+                continue;
+            }
+
+            // If it's not a CORS error and we're on the last URL, throw
+            if (i === NETLIFY_API_BASES.length - 1) {
+                throw error;
+            }
+        }
+    }
+
+    throw new Error('All Netlify API endpoints failed');
+}
+
 // GitHub Authentication Service
 window.githubService = {
     token: null,
@@ -54,10 +103,13 @@ window.githubService = {
             const auth0Token = await window.authService.client.getTokenSilently();
             console.log('[GitHub Auth] Auth0 token obtained, fetching GitHub PAT from Netlify...');
 
-            // UPDATED: Point directly to the Netlify App URL where the function lives
-            const response = await fetch('https://carsontkempf.netlify.app/.netlify/functions/get-github-token', {
+            // Use fetchWithFallback to automatically handle CORS errors
+            const response = await fetchWithFallback('get-github-token', {
+                method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${auth0Token}`
+                    'Authorization': `Bearer ${auth0Token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 }
             });
 
