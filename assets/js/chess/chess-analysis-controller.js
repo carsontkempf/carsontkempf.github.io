@@ -24,6 +24,15 @@
         this.lastAnalysisScore = null;
         this.currentReport = null;
         this.selectedSquare = null;
+
+        // Live analysis tracking
+        this.moveHistory = [];
+        this.liveStats = {
+            white: { totalMoves: 0, totalAccuracy: 0, blunders: 0, mistakes: 0, dubious: 0, inaccuracies: 0 },
+            black: { totalMoves: 0, totalAccuracy: 0, blunders: 0, mistakes: 0, dubious: 0, inaccuracies: 0 }
+        };
+        this.beforeMoveScore = null;
+        this.waitingForAnalysis = false;
     }
 
     ChessAnalysisController.prototype.init = function() {
@@ -102,6 +111,14 @@
         this.removeHighlights();
         this.selectedSquare = null;
 
+        // Store evaluation before move in analysis mode
+        if (this.mode === 'analysis' && this.lastAnalysisScore) {
+            this.beforeMoveScore = {
+                scoreType: this.lastAnalysisScore.scoreType,
+                scoreValue: this.lastAnalysisScore.scoreValue
+            };
+        }
+
         var move = this.game.move({
             from: source,
             to: target,
@@ -113,6 +130,7 @@
         this.updateStatus();
 
         if (this.mode === 'analysis') {
+            this.waitingForAnalysis = true;
             this.startAnalysis();
         } else if (!this.game.game_over()) {
             var self = this;
@@ -153,6 +171,14 @@
                 return;
             }
 
+            // Store evaluation before move in analysis mode
+            if (this.mode === 'analysis' && this.lastAnalysisScore) {
+                this.beforeMoveScore = {
+                    scoreType: this.lastAnalysisScore.scoreType,
+                    scoreValue: this.lastAnalysisScore.scoreValue
+                };
+            }
+
             var move = this.game.move({
                 from: this.selectedSquare,
                 to: square,
@@ -178,6 +204,7 @@
             this.updateStatus();
 
             if (this.mode === 'analysis') {
+                this.waitingForAnalysis = true;
                 this.startAnalysis();
             } else if (!this.game.game_over()) {
                 window.setTimeout(function() {
@@ -283,6 +310,13 @@
                 } else if (analysis.scoreType === 'mate') {
                     self.evalBar.setScore(0, analysis.scoreValue);
                 }
+
+                // Analyze move quality if we just made a move
+                if (self.waitingForAnalysis && self.beforeMoveScore && analysis.depth >= 12) {
+                    self.analyzeMoveQuality(self.beforeMoveScore, self.lastAnalysisScore);
+                    self.waitingForAnalysis = false;
+                    self.beforeMoveScore = null;
+                }
             }
 
             var multipv = analysis.multipv || 1;
@@ -299,6 +333,66 @@
                 self.displayAnalysisLines(linesByMultiPV);
             }
         }, 3);
+    };
+
+    ChessAnalysisController.prototype.analyzeMoveQuality = function(beforeScore, afterScore) {
+        if (!window.GameReportScoring) {
+            console.warn('GameReportScoring not loaded');
+            return;
+        }
+
+        var history = this.game.history({ verbose: true });
+        if (history.length === 0) return;
+
+        var lastMove = history[history.length - 1];
+        var moveColor = lastMove.color === 'w' ? 'white' : 'black';
+
+        // Convert scores to centipawns
+        var beforeCp = window.GameReportScoring.scoreToCentipawns(beforeScore.scoreType, beforeScore.scoreValue);
+        var afterCp = window.GameReportScoring.scoreToCentipawns(afterScore.scoreType, afterScore.scoreValue);
+
+        // Flip sign for black's perspective
+        if (moveColor === 'black') {
+            beforeCp = -beforeCp;
+            afterCp = -afterCp;
+        }
+
+        // Calculate win chances
+        var beforeWinChance = window.GameReportScoring.getWinChance(beforeCp);
+        var afterWinChance = window.GameReportScoring.getWinChance(afterCp);
+        var winChanceLoss = beforeWinChance - afterWinChance;
+
+        // Calculate accuracy
+        var accuracy = window.GameReportScoring.getAccuracy(winChanceLoss);
+
+        // Classify move
+        var classification = window.GameReportScoring.classifyMove(winChanceLoss);
+
+        // Update stats
+        var stats = this.liveStats[moveColor];
+        stats.totalMoves++;
+        stats.totalAccuracy += accuracy;
+
+        if (classification.class === 'blunder') stats.blunders++;
+        else if (classification.class === 'mistake') stats.mistakes++;
+        else if (classification.class === 'dubious') stats.dubious++;
+        else if (classification.class === 'inaccuracy') stats.inaccuracies++;
+
+        // Store move in history
+        this.moveHistory.push({
+            move: lastMove.san,
+            color: moveColor,
+            accuracy: accuracy,
+            classification: classification,
+            winChanceLoss: winChanceLoss
+        });
+
+        // Update display
+        this.displayLiveStats();
+    };
+
+    ChessAnalysisController.prototype.displayLiveStats = function() {
+        // This will be called from displayAnalysisLines to show stats alongside multi-PV
     };
 
     ChessAnalysisController.prototype.parseInfo = function(line) {
@@ -335,10 +429,84 @@
         var analysisPanel = document.getElementById(this.analysisElement);
         if (!analysisPanel) return;
 
-        var html = '<div class="analysis-lines">';
+        var html = '';
 
+        // Live stats section (shown first and prominently)
+        if (this.moveHistory.length > 0) {
+            html += '<div class="live-stats-section">';
+
+            // Summary stats at top
+            html += '<div class="live-stats-summary">';
+            html += '<div class="stat-column">';
+            html += '<div class="stat-header">White</div>';
+            if (this.liveStats.white.totalMoves > 0) {
+                var whiteAvg = (this.liveStats.white.totalAccuracy / this.liveStats.white.totalMoves).toFixed(1);
+                html += '<div class="stat-accuracy">' + whiteAvg + '%</div>';
+                html += '<div class="stat-detail">Blunders: <span class="blunder-count">' +
+                        this.liveStats.white.blunders + '</span></div>';
+                html += '<div class="stat-detail">Mistakes: <span class="mistake-count">' +
+                        this.liveStats.white.mistakes + '</span></div>';
+                html += '<div class="stat-detail">Dubious: <span class="dubious-count">' +
+                        this.liveStats.white.dubious + '</span></div>';
+                html += '<div class="stat-detail">Inaccuracies: <span class="inaccuracy-count">' +
+                        this.liveStats.white.inaccuracies + '</span></div>';
+            } else {
+                html += '<div class="stat-detail">No moves yet</div>';
+            }
+            html += '</div>';
+
+            html += '<div class="stat-column">';
+            html += '<div class="stat-header">Black</div>';
+            if (this.liveStats.black.totalMoves > 0) {
+                var blackAvg = (this.liveStats.black.totalAccuracy / this.liveStats.black.totalMoves).toFixed(1);
+                html += '<div class="stat-accuracy">' + blackAvg + '%</div>';
+                html += '<div class="stat-detail">Blunders: <span class="blunder-count">' +
+                        this.liveStats.black.blunders + '</span></div>';
+                html += '<div class="stat-detail">Mistakes: <span class="mistake-count">' +
+                        this.liveStats.black.mistakes + '</span></div>';
+                html += '<div class="stat-detail">Dubious: <span class="dubious-count">' +
+                        this.liveStats.black.dubious + '</span></div>';
+                html += '<div class="stat-detail">Inaccuracies: <span class="inaccuracy-count">' +
+                        this.liveStats.black.inaccuracies + '</span></div>';
+            } else {
+                html += '<div class="stat-detail">No moves yet</div>';
+            }
+            html += '</div>';
+            html += '</div>';
+
+            // Recent moves
+            html += '<div class="recent-moves-header">Recent Moves</div>';
+            html += '<div class="recent-moves">';
+            var recentMoves = this.moveHistory.slice(-10).reverse();
+            for (var j = 0; j < recentMoves.length; j++) {
+                var moveData = recentMoves[j];
+                var colorIndicator = moveData.color === 'white' ? '⚪' : '⚫';
+                var accuracyColor = moveData.accuracy >= 95 ? '#4a90e2' :
+                                  moveData.accuracy >= 80 ? '#7cb342' :
+                                  moveData.accuracy >= 60 ? '#fbc02d' : '#d32f2f';
+
+                html += '<div class="recent-move">';
+                html += '<span class="move-indicator">' + colorIndicator + '</span>';
+                html += '<span class="move-notation">' + moveData.move + '</span>';
+                html += '<span class="move-accuracy" style="color: ' + accuracyColor + '">' +
+                        moveData.accuracy.toFixed(1) + '%</span>';
+                if (moveData.classification.symbol) {
+                    html += '<span class="move-classification ' + moveData.classification.class + '">' +
+                            moveData.classification.symbol + '</span>';
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+
+            html += '</div>';
+        }
+
+        // Engine lines (shown below stats, more compact)
+        html += '<div class="analysis-lines">';
+        var hasLines = false;
         for (var i = 1; i <= 3; i++) {
             if (linesByMultiPV[i]) {
+                hasLines = true;
                 var line = linesByMultiPV[i];
                 var scoreText = '';
 
@@ -357,7 +525,12 @@
             }
         }
 
+        if (!hasLines && this.moveHistory.length === 0) {
+            html += '<div class="no-analysis">Make a move to start analysis</div>';
+        }
+
         html += '</div>';
+
         analysisPanel.innerHTML = html;
     };
 
@@ -405,7 +578,7 @@
         }
 
         if (this.mode === 'analysis') {
-            status = 'Analysis Mode - ' + status;
+            status = 'Live Analysis - ' + status;
         }
 
         this.setStatus(status);
@@ -468,6 +641,16 @@
         this.game.reset();
         this.board.start();
         this.evalBar.setScore(0, null);
+
+        // Reset live stats
+        this.moveHistory = [];
+        this.liveStats = {
+            white: { totalMoves: 0, totalAccuracy: 0, blunders: 0, mistakes: 0, dubious: 0, inaccuracies: 0 },
+            black: { totalMoves: 0, totalAccuracy: 0, blunders: 0, mistakes: 0, dubious: 0, inaccuracies: 0 }
+        };
+        this.beforeMoveScore = null;
+        this.waitingForAnalysis = false;
+
         this.updateStatus();
 
         if (this.engine) {
@@ -511,7 +694,7 @@
 
         var toggleBtn = document.getElementById('toggle-mode-btn');
         if (toggleBtn) {
-            toggleBtn.textContent = this.mode === 'play' ? 'Analysis Mode' : 'Play Mode';
+            toggleBtn.textContent = this.mode === 'play' ? 'Live Analysis' : 'Play vs Engine';
         }
     };
 

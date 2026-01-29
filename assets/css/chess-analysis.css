@@ -340,6 +340,132 @@ body .piece-417db.dragging-417db {
   font-weight: 700;
 }
 
+/* Live Stats Section */
+.live-stats-section {
+  padding: 15px;
+  background-color: var(--bg-page);
+  border-radius: 4px;
+  border: 1px solid var(--bg-accent);
+  margin-bottom: 15px;
+}
+
+.live-stats-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: var(--text-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--bg-accent);
+  padding-bottom: 8px;
+}
+
+.recent-moves-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 15px 0 10px 0;
+  padding-top: 15px;
+  border-top: 1px solid var(--bg-accent);
+}
+
+.recent-moves {
+  margin-bottom: 10px;
+}
+
+.no-analysis {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-main);
+  font-style: italic;
+}
+
+.recent-move {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  margin: 4px 0;
+  background-color: var(--bg-tile);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: monospace;
+}
+
+.move-indicator {
+  font-size: 12px;
+}
+
+.move-notation {
+  font-weight: 600;
+  min-width: 60px;
+  color: var(--text-heading);
+}
+
+.move-accuracy {
+  font-weight: 600;
+  min-width: 45px;
+}
+
+.move-classification {
+  font-size: 16px;
+  font-weight: 700;
+  margin-left: auto;
+}
+
+.move-classification.blunder {
+  color: #d32f2f;
+}
+
+.move-classification.mistake {
+  color: #f57c00;
+}
+
+.move-classification.dubious {
+  color: #fbc02d;
+}
+
+.move-classification.inaccuracy {
+  color: #7cb342;
+}
+
+.live-stats-summary {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.stat-column {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  background-color: var(--bg-tile);
+  border-radius: 4px;
+}
+
+.stat-header {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: var(--text-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-accuracy {
+  font-size: 32px;
+  font-weight: 700;
+  color: #4a90e2;
+  margin-bottom: 12px;
+}
+
+.stat-detail {
+  font-size: 12px;
+  color: var(--text-main);
+  margin: 6px 0;
+}
+
 @media (max-width: 900px) {
   .chess-analysis-container {
     flex-direction: column;
