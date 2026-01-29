@@ -145,6 +145,21 @@ permalink: /chess/
     <button id="undo-btn">Undo Move</button>
     <button id="flip-board-btn">Flip Board</button>
     <button id="toggle-mode-btn" class="secondary">Play Mode</button>
+    <button id="generate-report-btn" class="primary">Generate Report</button>
+  </div>
+
+  <div id="report-panel" style="display: none;">
+    <div class="report-panel-header">
+      <h3>Game Report</h3>
+      <button id="close-report-btn">Close</button>
+    </div>
+    <div id="report-progress" style="display: none;">
+      <div class="progress-bar-container">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+      <p id="progress-text">Analyzing moves...</p>
+    </div>
+    <div id="report-content"></div>
   </div>
 </div>
 
@@ -154,6 +169,8 @@ permalink: /chess/
 <script src="/assets/js/chess/loadEngine.js"></script>
 <script src="/assets/js/chess/stockfish-engine.js"></script>
 <script src="/assets/js/chess/eval-bar.js"></script>
+<script src="/assets/js/chess/game-report-scoring.js"></script>
+<script src="/assets/js/chess/game-report-generator.js"></script>
 <script src="/assets/js/chess/chess-analysis-controller.js"></script>
 
 <script>
@@ -205,6 +222,16 @@ permalink: /chess/
         chessController.setSkillLevel(parseInt(this.value, 10));
       }
     });
+
+    var closeReportBtn = document.getElementById('close-report-btn');
+    if (closeReportBtn) {
+      closeReportBtn.addEventListener('click', function() {
+        var reportPanel = document.getElementById('report-panel');
+        if (reportPanel) {
+          reportPanel.style.display = 'none';
+        }
+      });
+    }
 
     initChess();
   });

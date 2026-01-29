@@ -92,6 +92,38 @@
         });
     };
 
+    StockfishEngine.prototype.analyzePositionOnce = function(fen, depth, callback) {
+        var self = this;
+        if (!this.ready) {
+            console.error('Engine not ready');
+            return;
+        }
+
+        this.analyzing = true;
+        var lastAnalysis = null;
+
+        this.engine.stream = function(line) {
+            if (line.indexOf('info') === 0) {
+                var analysis = self.parseInfo(line);
+                if (analysis && analysis.scoreType) {
+                    lastAnalysis = analysis;
+                }
+            }
+        };
+
+        this.engine.send('position fen ' + fen);
+        this.engine.send('go depth ' + depth, function(result) {
+            self.analyzing = false;
+            self.engine.stream = null;
+
+            if (callback && lastAnalysis) {
+                callback(lastAnalysis);
+            } else if (callback) {
+                callback({ scoreType: 'cp', scoreValue: 0, depth: depth });
+            }
+        });
+    };
+
     StockfishEngine.prototype.startContinuousAnalysis = function(fen, streamCallback, multipv) {
         var self = this;
         if (!this.ready) {

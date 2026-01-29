@@ -21,6 +21,8 @@
         this.playerColor = this.options.playerColor || 'white';
         this.mode = this.options.mode || 'play';
         this.analysisLines = [];
+        this.lastAnalysisScore = null;
+        this.currentReport = null;
     }
 
     ChessAnalysisController.prototype.init = function() {
@@ -40,7 +42,12 @@
             onSnapEnd: function() {
                 self.board.position(self.game.fen());
             },
-            pieceTheme: this.options.pieceTheme || '/assets/img/chesspieces/wikipedia/{piece}.png'
+            pieceTheme: this.options.pieceTheme || '/assets/img/chesspieces/wikipedia/{piece}.png',
+            snapSpeed: 100,
+            moveSpeed: 200,
+            appearSpeed: 200,
+            sparePieces: false,
+            dropOffBoard: 'snapback'
         };
 
         if (this.playerColor === 'black') {
@@ -149,6 +156,11 @@
 
         this.engine.startContinuousAnalysis(this.game.fen(), function(analysis) {
             if (analysis.scoreType) {
+                self.lastAnalysisScore = {
+                    scoreType: analysis.scoreType,
+                    scoreValue: analysis.scoreValue
+                };
+
                 if (analysis.scoreType === 'cp') {
                     self.evalBar.setScore(analysis.scoreValue, null);
                 } else if (analysis.scoreType === 'mate') {
@@ -322,6 +334,13 @@
                 self.toggleMode();
             });
         }
+
+        var generateReportBtn = document.getElementById('generate-report-btn');
+        if (generateReportBtn) {
+            generateReportBtn.addEventListener('click', function() {
+                self.generateReport();
+            });
+        }
     };
 
     ChessAnalysisController.prototype.newGame = function() {
@@ -390,6 +409,143 @@
         if (this.engine) {
             this.engine.setSkillLevel(level);
         }
+    };
+
+    ChessAnalysisController.prototype.generateReport = function() {
+        var self = this;
+        var history = this.game.history();
+
+        if (history.length === 0) {
+            this.setStatus('No moves to analyze. Play some moves first.');
+            return;
+        }
+
+        if (!window.GameReportGenerator) {
+            console.error('GameReportGenerator not loaded');
+            this.setStatus('Error: Game report module not loaded');
+            return;
+        }
+
+        // Show report panel and progress
+        var reportPanel = document.getElementById('report-panel');
+        var reportContent = document.getElementById('report-content');
+        var reportProgress = document.getElementById('report-progress');
+        var progressBar = document.getElementById('progress-bar');
+        var progressText = document.getElementById('progress-text');
+
+        if (reportPanel) reportPanel.style.display = 'block';
+        if (reportContent) reportContent.innerHTML = '';
+        if (reportProgress) reportProgress.style.display = 'block';
+        if (progressBar) progressBar.style.width = '0%';
+
+        // Stop continuous analysis
+        if (this.engine && this.engine.analyzing) {
+            this.engine.stopContinuousAnalysis();
+        }
+
+        this.setStatus('Generating game report...');
+
+        // Create generator and start analysis
+        var generator = new window.GameReportGenerator(this.engine, this.game);
+
+        generator.generateReport(
+            function(current, total) {
+                // Progress callback
+                var percent = Math.round((current / total) * 100);
+                if (progressBar) progressBar.style.width = percent + '%';
+                if (progressText) {
+                    progressText.textContent = 'Analyzing move ' + current + ' of ' + total + '...';
+                }
+            },
+            function(report) {
+                // Complete callback
+                if (report.error) {
+                    self.setStatus('Error: ' + report.error);
+                    if (reportProgress) reportProgress.style.display = 'none';
+                    return;
+                }
+
+                self.currentReport = report;
+                self.displayReport(report);
+                self.setStatus('Game report complete');
+
+                if (reportProgress) reportProgress.style.display = 'none';
+
+                // Restart analysis if in analysis mode
+                if (self.mode === 'analysis') {
+                    self.startAnalysis();
+                }
+            }
+        );
+    };
+
+    ChessAnalysisController.prototype.displayReport = function(report) {
+        var reportContent = document.getElementById('report-content');
+        if (!reportContent) return;
+
+        var html = '<div class="report-stats">';
+
+        // White statistics
+        html += '<div class="player-stats-card white">';
+        html += '<h3>White</h3>';
+        html += '<div class="stat-row">';
+        html += '<span class="stat-label">Average Accuracy:</span>';
+        html += '<span class="stat-value accuracy-value">' + report.white.averageAccuracy + '%</span>';
+        html += '</div>';
+        html += '<div class="stat-row">';
+        html += '<span class="stat-label">Total Moves:</span>';
+        html += '<span class="stat-value">' + report.white.totalMoves + '</span>';
+        html += '</div>';
+        html += '<div class="stat-row">';
+        html += '<span class="stat-label">Blunders:</span>';
+        html += '<span class="stat-value blunder-count">' + report.white.blunders + '</span>';
+        html += '</div>';
+        html += '<div class="stat-row">';
+        html += '<span class="stat-label">Mistakes:</span>';
+        html += '<span class="stat-value mistake-count">' + report.white.mistakes + '</span>';
+        html += '</div>';
+        html += '<div class="stat-row">';
+        html += '<span class="stat-label">Dubious:</span>';
+        html += '<span class="stat-value dubious-count">' + report.white.dubious + '</span>';
+        html += '</div>';
+        html += '<div class="stat-row">';
+        html += '<span class="stat-label">Inaccuracies:</span>';
+        html += '<span class="stat-value inaccuracy-count">' + report.white.inaccuracies + '</span>';
+        html += '</div>';
+        html += '</div>';
+
+        // Black statistics
+        html += '<div class="player-stats-card black">';
+        html += '<h3>Black</h3>';
+        html += '<div class="stat-row">';
+        html += '<span class="stat-label">Average Accuracy:</span>';
+        html += '<span class="stat-value accuracy-value">' + report.black.averageAccuracy + '%</span>';
+        html += '</div>';
+        html += '<div class="stat-row">';
+        html += '<span class="stat-label">Total Moves:</span>';
+        html += '<span class="stat-value">' + report.black.totalMoves + '</span>';
+        html += '</div>';
+        html += '<div class="stat-row">';
+        html += '<span class="stat-label">Blunders:</span>';
+        html += '<span class="stat-value blunder-count">' + report.black.blunders + '</span>';
+        html += '</div>';
+        html += '<div class="stat-row">';
+        html += '<span class="stat-label">Mistakes:</span>';
+        html += '<span class="stat-value mistake-count">' + report.black.mistakes + '</span>';
+        html += '</div>';
+        html += '<div class="stat-row">';
+        html += '<span class="stat-label">Dubious:</span>';
+        html += '<span class="stat-value dubious-count">' + report.black.dubious + '</span>';
+        html += '</div>';
+        html += '<div class="stat-row">';
+        html += '<span class="stat-label">Inaccuracies:</span>';
+        html += '<span class="stat-value inaccuracy-count">' + report.black.inaccuracies + '</span>';
+        html += '</div>';
+        html += '</div>';
+
+        html += '</div>';
+
+        reportContent.innerHTML = html;
     };
 
     window.ChessAnalysisController = ChessAnalysisController;

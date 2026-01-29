@@ -18,6 +18,24 @@
   align-items: stretch;
 }
 
+/* Fix chessboard piece positioning */
+#chess-board {
+  position: relative;
+}
+
+/* Adjust all chess pieces down by 5px */
+#chess-board .piece-417db {
+  position: absolute;
+  top: 5px !important;
+}
+
+/* Fix draggable piece positioning to follow cursor correctly */
+body .piece-417db.dragging-417db {
+  z-index: 10000 !important;
+  cursor: grabbing !important;
+  transform: translate(-50%, -50%) !important;
+}
+
 .eval-bar-wrapper {
   width: 30px;
   min-height: 600px;
@@ -163,6 +181,173 @@
 
 .controls-panel button.secondary:hover {
   background-color: #689f38;
+}
+
+.controls-panel button.primary {
+  background-color: #2196f3;
+}
+
+.controls-panel button.primary:hover {
+  background-color: #1976d2;
+}
+
+/* Report Panel Styles */
+#report-panel {
+  max-width: 1400px;
+  margin: 30px auto;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.report-panel-header {
+  background-color: #f5f5f5;
+  padding: 15px 20px;
+  border-bottom: 2px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.report-panel-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.report-panel-header button {
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  background-color: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.report-panel-header button:hover {
+  background-color: #d0d0d0;
+}
+
+/* Progress Bar */
+#report-progress {
+  padding: 20px;
+  text-align: center;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 24px;
+  background-color: #f0f0f0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 15px 0;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4a90e2 0%, #2196f3 100%);
+  transition: width 0.4s ease;
+  width: 0%;
+  border-radius: 12px;
+}
+
+#progress-text {
+  text-align: center;
+  color: #666;
+  margin: 10px 0 0 0;
+  font-size: 14px;
+}
+
+/* Report Statistics */
+.report-stats {
+  display: flex;
+  gap: 20px;
+  padding: 25px;
+  flex-wrap: wrap;
+}
+
+.player-stats-card {
+  flex: 1;
+  min-width: 280px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 20px;
+  background: #fafafa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.player-stats-card.white {
+  border-top: 4px solid #f0f0f0;
+  background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+}
+
+.player-stats-card.black {
+  border-top: 4px solid #2c2c2c;
+  background: linear-gradient(180deg, #f5f5f5 0%, #fafafa 100%);
+}
+
+.player-stats-card h3 {
+  margin: 0 0 15px 0;
+  font-size: 20px;
+  color: #333;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #efefef;
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  font-weight: 500;
+  color: #666;
+  font-size: 14px;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.accuracy-value {
+  font-size: 28px;
+  color: #4a90e2;
+  font-weight: 700;
+}
+
+/* Move Classification Colors */
+.blunder-count {
+  color: #d32f2f;
+  font-weight: 700;
+}
+
+.mistake-count {
+  color: #f57c00;
+  font-weight: 700;
+}
+
+.dubious-count {
+  color: #fbc02d;
+  font-weight: 700;
+}
+
+.inaccuracy-count {
+  color: #7cb342;
+  font-weight: 700;
 }
 
 @media (max-width: 900px) {
