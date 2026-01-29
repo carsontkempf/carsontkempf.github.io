@@ -23,10 +23,10 @@
   position: relative;
 }
 
-/* Adjust all chess pieces down by 5px */
+/* Center chess pieces in squares */
 #chess-board .piece-417db {
   position: absolute;
-  top: 5px !important;
+  top: -50px !important;
 }
 
 /* Fix draggable piece positioning to follow cursor correctly */
