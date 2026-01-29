@@ -41,6 +41,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('[AUTH] Client ID:', config.clientId);
     console.log('[AUTH] Audience:', config.audience);
     console.log('[AUTH] Callback URL:', config.callbackUrl);
+
+    // Validate configuration
+    const hasInvalidChars = config.domain.includes('$') || config.domain.includes('{');
+    if (hasInvalidChars) {
+        console.error('[AUTH] ERROR: Config contains unprocessed template variables');
+        console.error('[AUTH] Environment variables were not substituted during build');
+    } else {
+        console.log('[AUTH] Config values properly substituted');
+    }
     console.log('[AUTH] ========================================');
 
     try {
