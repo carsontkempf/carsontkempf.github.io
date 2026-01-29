@@ -91,7 +91,7 @@ function withAuth(handler, options = {}) {
         headers: {
           'Access-Control-Allow-Origin': 'https://carsontkempf.github.io',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
         },
         body: ''
       };
@@ -110,7 +110,7 @@ function withAuth(handler, options = {}) {
               'Content-Type': 'application/json',
               'Access-Control-Allow-Origin': 'https://carsontkempf.github.io',
               'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-              'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+              'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
             },
             body: JSON.stringify({
               error: 'Forbidden',
@@ -131,7 +131,7 @@ function withAuth(handler, options = {}) {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': 'https://carsontkempf.github.io',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
         },
         body: JSON.stringify({
           error: 'Unauthorized',
