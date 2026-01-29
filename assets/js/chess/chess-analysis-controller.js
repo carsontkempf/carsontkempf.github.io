@@ -23,6 +23,7 @@
         this.analysisLines = [];
         this.lastAnalysisScore = null;
         this.currentReport = null;
+        this.selectedSquare = null;
     }
 
     ChessAnalysisController.prototype.init = function() {
@@ -41,6 +42,9 @@
             },
             onSnapEnd: function() {
                 self.board.position(self.game.fen());
+            },
+            onClick: function(square) {
+                self.onSquareClick(square);
             },
             pieceTheme: this.options.pieceTheme || '/assets/img/chesspieces/wikipedia/{piece}.png',
             snapSpeed: 100,
@@ -95,6 +99,9 @@
     };
 
     ChessAnalysisController.prototype.onDrop = function(source, target) {
+        this.removeHighlights();
+        this.selectedSquare = null;
+
         var move = this.game.move({
             from: source,
             to: target,
@@ -112,6 +119,108 @@
             window.setTimeout(function() {
                 self.makeEngineMove();
             }, 250);
+        }
+    };
+
+    ChessAnalysisController.prototype.onSquareClick = function(square) {
+        var self = this;
+
+        if (this.game.game_over()) return;
+
+        var piece = this.game.get(square);
+
+        if (!this.selectedSquare) {
+            if (!piece) return;
+
+            if (this.mode === 'play') {
+                if ((this.playerColor === 'white' && piece.color === 'b') ||
+                    (this.playerColor === 'black' && piece.color === 'w')) {
+                    return;
+                }
+            }
+
+            if ((this.game.turn() === 'w' && piece.color === 'b') ||
+                (this.game.turn() === 'b' && piece.color === 'w')) {
+                return;
+            }
+
+            this.selectedSquare = square;
+            this.highlightValidMoves(square);
+        } else {
+            if (this.selectedSquare === square) {
+                this.removeHighlights();
+                this.selectedSquare = null;
+                return;
+            }
+
+            var move = this.game.move({
+                from: this.selectedSquare,
+                to: square,
+                promotion: 'q'
+            });
+
+            if (move === null) {
+                this.removeHighlights();
+                this.selectedSquare = null;
+
+                if (piece &&
+                    ((this.game.turn() === 'w' && piece.color === 'w') ||
+                     (this.game.turn() === 'b' && piece.color === 'b'))) {
+                    this.selectedSquare = square;
+                    this.highlightValidMoves(square);
+                }
+                return;
+            }
+
+            this.board.position(this.game.fen());
+            this.removeHighlights();
+            this.selectedSquare = null;
+            this.updateStatus();
+
+            if (this.mode === 'analysis') {
+                this.startAnalysis();
+            } else if (!this.game.game_over()) {
+                window.setTimeout(function() {
+                    self.makeEngineMove();
+                }, 250);
+            }
+        }
+    };
+
+    ChessAnalysisController.prototype.highlightValidMoves = function(square) {
+        this.removeHighlights();
+
+        var moves = this.game.moves({
+            square: square,
+            verbose: true
+        });
+
+        if (moves.length === 0) return;
+
+        var boardEl = document.getElementById(this.boardElement);
+        if (!boardEl) return;
+
+        var selectedSquareEl = boardEl.querySelector('.square-' + square);
+        if (selectedSquareEl) {
+            selectedSquareEl.classList.add('highlight-selected');
+        }
+
+        for (var i = 0; i < moves.length; i++) {
+            var targetSquare = moves[i].to;
+            var targetSquareEl = boardEl.querySelector('.square-' + targetSquare);
+            if (targetSquareEl) {
+                targetSquareEl.classList.add('highlight-valid-move');
+            }
+        }
+    };
+
+    ChessAnalysisController.prototype.removeHighlights = function() {
+        var boardEl = document.getElementById(this.boardElement);
+        if (!boardEl) return;
+
+        var highlighted = boardEl.querySelectorAll('.highlight-selected, .highlight-valid-move');
+        for (var i = 0; i < highlighted.length; i++) {
+            highlighted[i].classList.remove('highlight-selected', 'highlight-valid-move');
         }
     };
 
