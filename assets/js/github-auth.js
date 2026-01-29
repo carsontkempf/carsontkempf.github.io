@@ -7,11 +7,16 @@ let currentApiBaseIndex = 0;
 
 // Helper function to make fetch requests with automatic fallback on CORS errors
 async function fetchWithFallback(endpoint, options = {}) {
-    const functionName = endpoint.split('/').pop();
+    // Handle query strings - split on ? to separate function name from params
+    const [functionName, queryString] = endpoint.includes('?')
+        ? endpoint.split('?')
+        : [endpoint, ''];
 
     for (let i = currentApiBaseIndex; i < NETLIFY_API_BASES.length; i++) {
         const baseUrl = NETLIFY_API_BASES[i];
-        const url = `${baseUrl}/${functionName}`;
+        const url = queryString
+            ? `${baseUrl}/${functionName}?${queryString}`
+            : `${baseUrl}/${functionName}`;
 
         console.log(`[FETCH-FALLBACK] Attempt ${i + 1}/${NETLIFY_API_BASES.length}: ${url}`);
 
