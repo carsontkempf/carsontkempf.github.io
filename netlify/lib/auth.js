@@ -84,15 +84,24 @@ function hasRole(payload, requiredRoles) {
  */
 function withAuth(handler, options = {}) {
   return async (event, context) => {
+    console.log('[withAuth] Request received');
+    console.log('[withAuth] HTTP Method:', event.httpMethod);
+    console.log('[withAuth] Path:', event.path);
+    console.log('[withAuth] Headers:', JSON.stringify(event.headers));
+    console.log('[withAuth] Origin:', event.headers.origin || event.headers.Origin || 'No origin header');
+
     // Handle CORS preflight (OPTIONS) requests
     if (event.httpMethod === 'OPTIONS') {
+      console.log('[withAuth] Handling OPTIONS preflight request');
+      const corsHeaders = {
+        'Access-Control-Allow-Origin': 'https://carsontkempf.github.io',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
+      };
+      console.log('[withAuth] Returning CORS headers:', JSON.stringify(corsHeaders));
       return {
         statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': 'https://carsontkempf.github.io',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
-        },
+        headers: corsHeaders,
         body: ''
       };
     }

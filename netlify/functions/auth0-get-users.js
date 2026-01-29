@@ -7,6 +7,11 @@ const { managementApiRequest } = require('../lib/management-api');
  * Method: GET
  */
 async function handler(event, context, user) {
+  console.log('[auth0-get-users] Handler called');
+  console.log('[auth0-get-users] HTTP Method:', event.httpMethod);
+  console.log('[auth0-get-users] Headers:', JSON.stringify(event.headers));
+  console.log('[auth0-get-users] User:', user ? user.email : 'No user');
+
   try {
     // Fetch all users (paginated, max 100 per page)
     const usersResponse = await managementApiRequest('/users?per_page=100');

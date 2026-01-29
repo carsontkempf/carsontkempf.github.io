@@ -7,6 +7,11 @@ const { managementApiRequest } = require('../lib/management-api');
  * Method: GET
  */
 async function handler(event, context, user) {
+  console.log('[auth0-get-roles] Handler called');
+  console.log('[auth0-get-roles] HTTP Method:', event.httpMethod);
+  console.log('[auth0-get-roles] Headers:', JSON.stringify(event.headers));
+  console.log('[auth0-get-roles] User:', user ? user.email : 'No user');
+
   try {
     const rolesResponse = await managementApiRequest('/roles');
 

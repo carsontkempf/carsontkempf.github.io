@@ -388,8 +388,10 @@ async function loadAllUsers() {
     console.log('[AUTH0-USERS] loadAllUsers: Calling function:', functionUrl);
 
     const response = await fetch(functionUrl, {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
         'Accept': 'application/json'
       }
     });
@@ -464,13 +466,16 @@ async function loadAllRoles() {
     console.log('[AUTH0-USERS] loadAllRoles: Calling function:', functionUrl);
 
     const response = await fetch(functionUrl, {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
         'Accept': 'application/json'
       }
     });
 
     console.log('[AUTH0-USERS] loadAllRoles: Response status:', response.status);
+    console.log('[AUTH0-USERS] loadAllRoles: Response headers:', Object.fromEntries(response.headers.entries()));
 
     if (response.ok) {
       const roles = await response.json();
@@ -660,8 +665,10 @@ async function lookupUserRoles() {
     console.log('[AUTH0-USERS] lookupUserRoles: Calling function:', functionUrl);
 
     const response = await fetch(functionUrl, {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
         'Accept': 'application/json'
       }
     });
