@@ -7,6 +7,11 @@
     'use strict';
 
     function StockfishEngine(options) {
+        if (window.__stockfishInstance) {
+            console.log('Returning existing Stockfish instance');
+            return window.__stockfishInstance;
+        }
+
         this.options = options || {};
         this.engine = null;
         this.ready = false;
@@ -14,10 +19,27 @@
         this.callbacks = {};
         this.skillLevel = this.options.skillLevel || 10;
         this.depth = this.options.depth || 15;
+
+        window.__stockfishInstance = this;
     }
 
     StockfishEngine.prototype.init = function(callback) {
         var self = this;
+
+        if (this.ready && this.engine) {
+            console.log('Engine already initialized');
+            if (callback) callback();
+            return;
+        }
+
+        if (this.engine && !this.ready) {
+            console.log('Engine initialization in progress, waiting...');
+            setTimeout(function() {
+                self.init(callback);
+            }, 100);
+            return;
+        }
+
         var enginePath = this.options.enginePath || '/assets/js/chess/vendor/stockfish-17.1-lite-single-03e3232.js';
 
         if (typeof loadEngine !== 'function') {
@@ -25,12 +47,15 @@
             return;
         }
 
+        console.log('Initializing Stockfish engine...');
         this.engine = loadEngine(enginePath);
 
         this.engine.send('uci', function() {
+            console.log('Engine UCI ready');
             self.ready = true;
             self.engine.send('setoption name Skill Level value ' + self.skillLevel);
             self.engine.send('isready', function() {
+                console.log('Engine fully ready');
                 if (callback) callback();
             });
         });
@@ -202,9 +227,12 @@
 
     StockfishEngine.prototype.quit = function() {
         if (this.engine) {
+            this.stop();
             this.engine.quit();
             this.engine = null;
             this.ready = false;
+            this.analyzing = false;
+            window.__stockfishInstance = null;
         }
     };
 

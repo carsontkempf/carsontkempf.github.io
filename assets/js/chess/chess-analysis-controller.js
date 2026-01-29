@@ -147,7 +147,15 @@
     ChessAnalysisController.prototype.startAnalysis = function() {
         var self = this;
 
-        if (this.engine && this.engine.analyzing) {
+        if (!this.engine || !this.engine.ready) {
+            console.log('Engine not ready, waiting to start analysis...');
+            setTimeout(function() {
+                self.startAnalysis();
+            }, 500);
+            return;
+        }
+
+        if (this.engine.analyzing) {
             this.engine.stopContinuousAnalysis();
         }
 
