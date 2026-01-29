@@ -11,6 +11,14 @@
 [functions]
   directory = "netlify/functions"
 
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "https://carsontkempf.github.io"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Max-Age = "86400"
+
 # Production context uses production environment variables
 [context.production]
   command = "bundle install && chmod +x scripts/build.sh && JEKYLL_ENV=production ./scripts/build.sh"
