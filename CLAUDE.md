@@ -38,6 +38,24 @@ Technical features:
 - Modular architecture with separate eval bar, engine, and controller components
 - Responsive design with side-by-side analysis panel
 - UCI protocol implementation with MultiPV support
+
+GAME REPORT ANALYSIS (En Croissant-style):
+- Move-by-move Stockfish analysis at depth 15
+- Win chance calculation using Lichess formula: 50 + 50 * (2 / (1 + exp(-0.00368208 * cp)) - 1)
+- Accuracy calculation: 103.1668 * exp(-0.04354 * winChanceDiff) - 3.1669 + 1
+- Move classification: Blunders (>20% loss), Mistakes (>10%), Dubious (>5%), Inaccuracies (>2%)
+- Per-player statistics: average accuracy, counts by category
+- Progress bar with real-time updates
+- Color-coded stat cards for White and Black
+- Modular scoring and generator components
+
+Implementation files:
+- game-report-scoring.js: mathematical functions for analysis
+- game-report-generator.js: async analysis iteration engine
+- Extended stockfish-engine.js with analyzePositionOnce method
+- Extended chess-analysis-controller.js with report generation
+- Report UI panel with progress tracking in chess.html
+- Complete styling in chess-analysis.css
 "
 
 
@@ -46,7 +64,7 @@ Technical features:
 Todo:
 
 "
-* Test chess page in production at /chess/
+* Deploy and test chess page in production at /chess/
 * Optional: Add Lichess OAuth integration for game import/export using LICHESS_KEY
 * Optional: Add PGN import/export functionality
 * Optional: Add opening book support
