@@ -49,8 +49,12 @@ body .piece-417db.dragging-417db {
   flex-direction: column;
   border-radius: 4px;
   overflow: hidden;
-  background-color: #f5f5f5;
+  background-color: var(--bg-tile);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .eval-bar-container {
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
 }
 
 .eval-bar-black {
@@ -93,21 +97,21 @@ body .piece-417db.dragging-417db {
 }
 
 .analysis-panel-header {
-  background-color: #f5f5f5;
+  background-color: var(--bg-accent);
   padding: 15px;
   border-radius: 4px 4px 0 0;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--bg-page);
 }
 
 .analysis-panel-header h3 {
   margin: 0;
   font-size: 16px;
-  color: #333;
+  color: var(--text-heading);
 }
 
 .analysis-lines {
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
+  background-color: var(--bg-tile);
+  border: 1px solid var(--bg-accent);
   border-radius: 0 0 4px 4px;
   padding: 10px;
   min-height: 200px;
@@ -116,7 +120,7 @@ body .piece-417db.dragging-417db {
 .analysis-line {
   padding: 10px;
   margin: 5px 0;
-  background-color: #f9f9f9;
+  background-color: var(--bg-page);
   border-radius: 4px;
   border-left: 3px solid #4a90e2;
   font-family: monospace;
@@ -140,11 +144,11 @@ body .piece-417db.dragging-417db {
 .analysis-score {
   font-weight: bold;
   min-width: 50px;
-  color: #333;
+  color: var(--text-heading);
 }
 
 .analysis-moves {
-  color: #666;
+  color: var(--text-main);
   flex: 1;
   word-break: break-word;
 }
@@ -195,17 +199,21 @@ body .piece-417db.dragging-417db {
 #report-panel {
   max-width: 1400px;
   margin: 30px auto;
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--bg-tile);
+  border: 1px solid var(--bg-accent);
   border-radius: 4px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+[data-theme="dark"] #report-panel {
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
 .report-panel-header {
-  background-color: #f5f5f5;
+  background-color: var(--bg-accent);
   padding: 15px 20px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--bg-page);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -214,22 +222,22 @@ body .piece-417db.dragging-417db {
 .report-panel-header h3 {
   margin: 0;
   font-size: 18px;
-  color: #333;
+  color: var(--text-heading);
 }
 
 .report-panel-header button {
   padding: 6px 12px;
   font-size: 13px;
   cursor: pointer;
-  background-color: #e0e0e0;
-  color: #333;
+  background-color: var(--bg-page);
+  color: var(--text-heading);
   border: none;
   border-radius: 4px;
   transition: background-color 0.3s;
 }
 
 .report-panel-header button:hover {
-  background-color: #d0d0d0;
+  background-color: var(--bg-tile);
 }
 
 /* Progress Bar */
@@ -241,11 +249,15 @@ body .piece-417db.dragging-417db {
 .progress-bar-container {
   width: 100%;
   height: 24px;
-  background-color: #f0f0f0;
+  background-color: var(--bg-page);
   border-radius: 12px;
   overflow: hidden;
   margin: 15px 0;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .progress-bar-container {
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.1);
 }
 
 .progress-bar {
@@ -258,7 +270,7 @@ body .piece-417db.dragging-417db {
 
 #progress-text {
   text-align: center;
-  color: #666;
+  color: var(--text-main);
   margin: 10px 0 0 0;
   font-size: 14px;
 }
@@ -274,37 +286,39 @@ body .piece-417db.dragging-417db {
 .player-stats-card {
   flex: 1;
   min-width: 280px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--bg-accent);
   border-radius: 6px;
   padding: 20px;
-  background: #fafafa;
+  background: var(--bg-page);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .player-stats-card {
+  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.05);
 }
 
 .player-stats-card.white {
   border-top: 4px solid #f0f0f0;
-  background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
 }
 
 .player-stats-card.black {
   border-top: 4px solid #2c2c2c;
-  background: linear-gradient(180deg, #f5f5f5 0%, #fafafa 100%);
 }
 
 .player-stats-card h3 {
   margin: 0 0 15px 0;
   font-size: 20px;
-  color: #333;
+  color: var(--text-heading);
   text-align: center;
   padding-bottom: 10px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--bg-accent);
 }
 
 .stat-row {
   display: flex;
   justify-content: space-between;
   padding: 12px 0;
-  border-bottom: 1px solid #efefef;
+  border-bottom: 1px solid var(--bg-accent);
 }
 
 .stat-row:last-child {
@@ -313,13 +327,13 @@ body .piece-417db.dragging-417db {
 
 .stat-label {
   font-weight: 500;
-  color: #666;
+  color: var(--text-main);
   font-size: 14px;
 }
 
 .stat-value {
   font-weight: 600;
-  color: #333;
+  color: var(--text-heading);
   font-size: 14px;
 }
 
