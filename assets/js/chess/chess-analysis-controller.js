@@ -64,7 +64,13 @@
             boardConfig.orientation = 'black';
         }
 
-        this.board = Chessboard(this.boardElement, boardConfig);
+        // Use Chessground for enhanced visualization with arrows
+        if (typeof ChessgroundBoard !== 'undefined') {
+            this.board = new ChessgroundBoard(this.boardElement, boardConfig);
+        } else {
+            // Fallback to Chessboard if Chessground not loaded
+            this.board = Chessboard(this.boardElement, boardConfig);
+        }
 
         this.setupBoardClickHandlers();
 
@@ -527,9 +533,12 @@
                 html += '<span class="move-notation">' + moveData.move + '</span>';
                 html += '<span class="move-accuracy" style="color: ' + accuracyColor + '">' +
                         moveData.accuracy.toFixed(1) + '%</span>';
-                if (moveData.classification.symbol) {
-                    html += '<span class="move-classification ' + moveData.classification.class + '">' +
-                            moveData.classification.symbol + '</span>';
+                if (moveData.classification) {
+                    var symbol = moveData.classification.symbol || '';
+                    var label = moveData.classification.label || '';
+                    var displayText = symbol ? symbol + ' ' + label : label;
+                    html += '<span class="move-classification ' + moveData.classification.class + '" title="' +
+                            label + '">' + displayText + '</span>';
                 }
                 html += '</div>';
             }
@@ -569,6 +578,45 @@
         html += '</div>';
 
         analysisPanel.innerHTML = html;
+
+        // Draw arrows on board for best moves (Chessground only)
+        this.drawAnalysisArrows(linesByMultiPV);
+    };
+
+    ChessAnalysisController.prototype.drawAnalysisArrows = function(linesByMultiPV) {
+        // Only draw arrows if using Chessground
+        if (!this.board || !this.board.setShapes) return;
+
+        var shapes = [];
+        var colors = ['green', 'blue', 'yellow'];
+
+        // Draw arrows for top 3 lines
+        for (var i = 1; i <= 3; i++) {
+            if (linesByMultiPV[i] && linesByMultiPV[i].pv && linesByMultiPV[i].pv.length > 0) {
+                var firstMove = linesByMultiPV[i].pv[0];
+                if (firstMove && firstMove.length >= 4) {
+                    var from = firstMove.substring(0, 2);
+                    var to = firstMove.substring(2, 4);
+
+                    shapes.push({
+                        brush: colors[i - 1],
+                        orig: from,
+                        dest: to
+                    });
+                }
+            }
+        }
+
+        // Add red arrow for blunders/mistakes if last move was bad
+        if (this.moveHistory.length > 0) {
+            var lastMove = this.moveHistory[this.moveHistory.length - 1];
+            if (lastMove.classification &&
+                (lastMove.classification.class === 'blunder' || lastMove.classification.class === 'mistake')) {
+                // Don't add red arrow, just keep best move arrows
+            }
+        }
+
+        this.board.setShapes(shapes);
     };
 
     ChessAnalysisController.prototype.formatPVMoves = function(pv) {
