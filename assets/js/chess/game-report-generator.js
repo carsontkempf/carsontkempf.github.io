@@ -1,9 +1,10 @@
 (function() {
   'use strict';
 
-  function GameReportGenerator(engine, game) {
+  function GameReportGenerator(engine, game, board) {
     this.engine = engine;
     this.game = game;
+    this.board = board;
     this.analysisDepth = 15; // Balance between speed and accuracy
   }
 
@@ -18,22 +19,32 @@
       return;
     }
 
-    // Build list of positions to analyze (starting position + all positions after each move)
-    var positions = [{
-      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    // Build list of positions to analyze
+    // Each entry includes: before FEN, after FEN, move details
+    var positions = [];
+
+    // Starting position (before first move)
+    var startFEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    positions.push({
+      fen: startFEN,
       move: null,
       moveNumber: 0,
-      color: 'white'
-    }];
+      color: 'white',
+      isStartPosition: true
+    });
 
-    var tempGame = new Chess();
+    // Each move's position (analyze position AFTER the move)
     history.forEach(function(move, index) {
-      tempGame.move(move);
       positions.push({
-        fen: tempGame.fen(),
+        fen: move.after,
+        beforeFen: move.before,
         move: move,
         moveNumber: Math.floor(index / 2) + 1,
-        color: move.color === 'w' ? 'white' : 'black'
+        color: move.color === 'w' ? 'white' : 'black',
+        from: move.from,
+        to: move.to,
+        san: move.san,
+        isStartPosition: false
       });
     });
 
@@ -53,6 +64,24 @@
         progressCallback(index, positions.length);
       }
 
+      // Visual board update
+      if (self.board) {
+        if (pos.isStartPosition) {
+          // Set to starting position
+          self.board.position(startFEN);
+        } else {
+          // Set position BEFORE move, then animate the move
+          self.board.position(pos.beforeFen);
+
+          // Small delay before animating move
+          setTimeout(function() {
+            if (pos.from && pos.to) {
+              self.board.move(pos.from + '-' + pos.to);
+            }
+          }, 100);
+        }
+      }
+
       // Analyze this position
       self.engine.analyzePositionOnce(pos.fen, self.analysisDepth, function(analysis) {
         results.push({
@@ -62,17 +91,23 @@
           color: pos.color,
           scoreType: analysis.scoreType,
           scoreValue: analysis.scoreValue,
-          depth: analysis.depth
+          depth: analysis.depth,
+          san: pos.san
         });
 
         index++;
-        // Small delay to prevent UI blocking
-        setTimeout(analyzeNext, 10);
+        // Delay for visual feedback (200ms for move animation + 300ms pause)
+        setTimeout(analyzeNext, 500);
       });
     }
 
-    // Start analysis
-    analyzeNext();
+    // Reset board to start position before beginning
+    if (this.board) {
+      this.board.position(startFEN);
+    }
+
+    // Start analysis after brief delay
+    setTimeout(analyzeNext, 500);
   };
 
   GameReportGenerator.prototype.finishReport = function(results, callback) {

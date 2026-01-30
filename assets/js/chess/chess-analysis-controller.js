@@ -783,7 +783,7 @@
         this.setStatus('Generating game report...');
 
         // Create generator and start analysis
-        var generator = new window.GameReportGenerator(this.engine, this.game);
+        var generator = new window.GameReportGenerator(this.engine, this.game, this.board);
 
         generator.generateReport(
             function(current, total) {
