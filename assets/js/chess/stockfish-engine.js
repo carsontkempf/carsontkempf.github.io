@@ -75,15 +75,17 @@
             return;
         }
 
-        this.analyzing = true;
+        this.ensureStopped().then(function() {
+            self.analyzing = true;
 
-        this.engine.send('position fen ' + fen);
-        this.engine.send('go depth ' + this.depth, function(result) {
-            self.analyzing = false;
-            var match = result.match(/bestmove ([a-h][1-8][a-h][1-8][qrbn]?)/);
-            if (match && callback) {
-                callback(match[1]);
-            }
+            self.engine.send('position fen ' + fen);
+            self.engine.send('go depth ' + self.depth, function(result) {
+                self.analyzing = false;
+                var match = result.match(/bestmove ([a-h][1-8][a-h][1-8][qrbn]?)/);
+                if (match && callback) {
+                    callback(match[1]);
+                }
+            });
         });
     };
 
@@ -94,26 +96,28 @@
             return;
         }
 
-        this.analyzing = true;
+        this.ensureStopped().then(function() {
+            self.analyzing = true;
 
-        this.engine.stream = function(line) {
-            if (streamCallback && line.indexOf('info') === 0) {
-                var analysis = self.parseInfo(line);
-                if (analysis) {
-                    streamCallback(analysis);
+            self.engine.stream = function(line) {
+                if (streamCallback && line.indexOf('info') === 0) {
+                    var analysis = self.parseInfo(line);
+                    if (analysis) {
+                        streamCallback(analysis);
+                    }
                 }
-            }
-        };
+            };
 
-        this.engine.send('position fen ' + fen);
-        this.engine.send('go depth ' + this.depth, function(result) {
-            self.analyzing = false;
-            self.engine.stream = null;
+            self.engine.send('position fen ' + fen);
+            self.engine.send('go depth ' + self.depth, function(result) {
+                self.analyzing = false;
+                self.engine.stream = null;
 
-            var match = result.match(/bestmove ([a-h][1-8][a-h][1-8][qrbn]?)/);
-            if (match && callback) {
-                callback(match[1]);
-            }
+                var match = result.match(/bestmove ([a-h][1-8][a-h][1-8][qrbn]?)/);
+                if (match && callback) {
+                    callback(match[1]);
+                }
+            });
         });
     };
 
@@ -124,28 +128,30 @@
             return;
         }
 
-        this.analyzing = true;
-        var lastAnalysis = null;
+        this.ensureStopped().then(function() {
+            self.analyzing = true;
+            var lastAnalysis = null;
 
-        this.engine.stream = function(line) {
-            if (line.indexOf('info') === 0) {
-                var analysis = self.parseInfo(line);
-                if (analysis && analysis.scoreType) {
-                    lastAnalysis = analysis;
+            self.engine.stream = function(line) {
+                if (line.indexOf('info') === 0) {
+                    var analysis = self.parseInfo(line);
+                    if (analysis && analysis.scoreType) {
+                        lastAnalysis = analysis;
+                    }
                 }
-            }
-        };
+            };
 
-        this.engine.send('position fen ' + fen);
-        this.engine.send('go depth ' + depth, function(result) {
-            self.analyzing = false;
-            self.engine.stream = null;
+            self.engine.send('position fen ' + fen);
+            self.engine.send('go depth ' + depth, function(result) {
+                self.analyzing = false;
+                self.engine.stream = null;
 
-            if (callback && lastAnalysis) {
-                callback(lastAnalysis);
-            } else if (callback) {
-                callback({ scoreType: 'cp', scoreValue: 0, depth: depth });
-            }
+                if (callback && lastAnalysis) {
+                    callback(lastAnalysis);
+                } else if (callback) {
+                    callback({ scoreType: 'cp', scoreValue: 0, depth: depth });
+                }
+            });
         });
     };
 
@@ -156,21 +162,23 @@
             return;
         }
 
-        this.analyzing = true;
-        multipv = multipv || 3;
+        this.ensureStopped().then(function() {
+            self.analyzing = true;
+            multipv = multipv || 3;
 
-        this.engine.stream = function(line) {
-            if (streamCallback && line.indexOf('info') === 0) {
-                var analysis = self.parseInfo(line);
-                if (analysis) {
-                    streamCallback(analysis);
+            self.engine.stream = function(line) {
+                if (streamCallback && line.indexOf('info') === 0) {
+                    var analysis = self.parseInfo(line);
+                    if (analysis) {
+                        streamCallback(analysis);
+                    }
                 }
-            }
-        };
+            };
 
-        this.engine.send('setoption name MultiPV value ' + multipv);
-        this.engine.send('position fen ' + fen);
-        this.engine.send('go infinite');
+            self.engine.send('setoption name MultiPV value ' + multipv);
+            self.engine.send('position fen ' + fen);
+            self.engine.send('go infinite');
+        });
     };
 
     StockfishEngine.prototype.stopContinuousAnalysis = function() {
@@ -179,6 +187,24 @@
             this.analyzing = false;
             this.engine.stream = null;
         }
+    };
+
+    StockfishEngine.prototype.ensureStopped = function() {
+        var self = this;
+        return new Promise(function(resolve) {
+            if (!self.analyzing) {
+                resolve();
+                return;
+            }
+
+            self.engine.send('stop');
+            self.analyzing = false;
+            self.engine.stream = null;
+
+            setTimeout(function() {
+                resolve();
+            }, 50);
+        });
     };
 
     StockfishEngine.prototype.parseInfo = function(line) {

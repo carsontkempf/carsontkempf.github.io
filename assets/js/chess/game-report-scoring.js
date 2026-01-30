@@ -35,9 +35,9 @@
       }
       // Good moves
       if (winChanceLoss < 0.5) {
-        return { symbol: '', label: 'Best', class: 'best' };
+        return { symbol: '!!', label: 'Brilliant', class: 'best' };
       }
-      return { symbol: '', label: 'Good', class: 'good' };
+      return { symbol: '!', label: 'Good', class: 'good' };
     },
 
     // Convert score to centipawns for win chance calculation

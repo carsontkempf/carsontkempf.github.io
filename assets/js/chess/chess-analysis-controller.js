@@ -52,9 +52,6 @@
             onSnapEnd: function() {
                 self.board.position(self.game.fen());
             },
-            onClick: function(square) {
-                self.onSquareClick(square);
-            },
             pieceTheme: this.options.pieceTheme || '/assets/img/chesspieces/wikipedia/{piece}.png',
             snapSpeed: 100,
             moveSpeed: 200,
@@ -68,6 +65,8 @@
         }
 
         this.board = Chessboard(this.boardElement, boardConfig);
+
+        this.setupBoardClickHandlers();
 
         this.evalBar = new EvalBar(this.evalBarElement, {
             orientation: this.playerColor
@@ -91,6 +90,29 @@
         this.setupControls();
     };
 
+    ChessAnalysisController.prototype.setupBoardClickHandlers = function() {
+        var self = this;
+        var boardEl = document.getElementById(this.boardElement);
+
+        if (!boardEl) return;
+
+        boardEl.addEventListener('click', function(e) {
+            var square = e.target;
+
+            while (square && square !== boardEl) {
+                var classes = square.className || '';
+                if (typeof classes === 'string' && classes.indexOf('square-') !== -1) {
+                    var squareMatch = classes.match(/square-([a-h][1-8])/);
+                    if (squareMatch) {
+                        self.onSquareClick(squareMatch[1]);
+                        return;
+                    }
+                }
+                square = square.parentNode;
+            }
+        });
+    };
+
     ChessAnalysisController.prototype.onDragStart = function(source, piece, position, orientation) {
         if (this.game.game_over()) return false;
 
@@ -111,8 +133,8 @@
         this.removeHighlights();
         this.selectedSquare = null;
 
-        // Store evaluation before move in analysis mode
-        if (this.mode === 'analysis' && this.lastAnalysisScore) {
+        // Store evaluation before move
+        if (this.lastAnalysisScore) {
             this.beforeMoveScore = {
                 scoreType: this.lastAnalysisScore.scoreType,
                 scoreValue: this.lastAnalysisScore.scoreValue
@@ -133,6 +155,10 @@
             this.waitingForAnalysis = true;
             this.startAnalysis();
         } else if (!this.game.game_over()) {
+            // In play mode, briefly analyze to capture move quality
+            this.waitingForAnalysis = true;
+            this.startAnalysis();
+
             var self = this;
             window.setTimeout(function() {
                 self.makeEngineMove();
@@ -171,8 +197,8 @@
                 return;
             }
 
-            // Store evaluation before move in analysis mode
-            if (this.mode === 'analysis' && this.lastAnalysisScore) {
+            // Store evaluation before move
+            if (this.lastAnalysisScore) {
                 this.beforeMoveScore = {
                     scoreType: this.lastAnalysisScore.scoreType,
                     scoreValue: this.lastAnalysisScore.scoreValue
@@ -207,6 +233,10 @@
                 this.waitingForAnalysis = true;
                 this.startAnalysis();
             } else if (!this.game.game_over()) {
+                // In play mode, briefly analyze to capture move quality
+                this.waitingForAnalysis = true;
+                this.startAnalysis();
+
                 window.setTimeout(function() {
                     self.makeEngineMove();
                 }, 250);
@@ -276,6 +306,13 @@
             if (move) {
                 self.board.position(self.game.fen());
                 self.updateStatus();
+
+                // Start continuous analysis after engine move to track player move quality
+                if (self.mode === 'play') {
+                    window.setTimeout(function() {
+                        self.startAnalysis();
+                    }, 100);
+                }
             }
         });
     };
