@@ -5,7 +5,7 @@ permalink: /chess/
 ---
 
 <link rel="stylesheet" href="/assets/css/vendor/chessboard-1.0.0.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chessground@8.0.0/dist/chessground.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chessground@9.1.1/dist/chessground.min.css">
 <link rel="stylesheet" href="/assets/css/chess-analysis.css">
 
 <style>
@@ -164,7 +164,11 @@ permalink: /chess/
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="/assets/js/vendor/chessboard-1.0.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chessground@8.0.0/dist/chessground.min.js"></script>
+<script type="module">
+  import { Chessground } from 'https://cdn.jsdelivr.net/npm/chessground@9.1.1/+esm';
+  window.Chessground = Chessground;
+  console.log('Chessground loaded and assigned to window');
+</script>
 <script src="/assets/js/chess/ui/chessground-wrapper.js"></script>
 <script src="/assets/js/chess/chess.min.js"></script>
 <script src="/assets/js/chess/loadEngine.js"></script>

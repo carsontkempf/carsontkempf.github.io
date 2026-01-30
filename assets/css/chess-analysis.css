@@ -490,71 +490,90 @@ body .piece-417db.dragging-417db {
   }
 }
 
-/* Chessground Styles */
+/* Chessground Core Overrides */
 .cg-wrap {
   width: 100%;
   height: 100%;
-  position: relative;
   display: block;
 }
 
 cg-board {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  user-select: none;
-  line-height: 0;
-  background-size: cover;
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiPjxnPjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiNmMGQ5YjUiLz48ZyBvcGFjaXR5PSIwLjMiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNiNTg4NjMiLz48cmVjdCB4PSIyIiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjYjU4ODYzIi8+PHJlY3QgeD0iNCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0iI2I1ODg2MyIvPjxyZWN0IHg9IjYiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNiNTg4NjMiLz48cmVjdCB5PSIxIiB4PSIxIiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjYjU4ODYzIi8+PHJlY3QgeT0iMSIgeD0iMyIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0iI2I1ODg2MyIvPjxyZWN0IHk9IjEiIHg9IjUiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNiNTg4NjMiLz48cmVjdCB5PSIxIiB4PSI3IiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjYjU4ODYzIi8+PHJlY3QgeT0iMiIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0iI2I1ODg2MyIvPjxyZWN0IHk9IjIiIHg9IjIiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNiNTg4NjMiLz48cmVjdCB5PSIyIiB4PSI0IiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjYjU4ODYzIi8+PHJlY3QgeT0iMiIgeD0iNiIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0iI2I1ODg2MyIvPjxyZWN0IHk9IjMiIHg9IjEiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNiNTg4NjMiLz48cmVjdCB5PSIzIiB4PSIzIiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjYjU4ODYzIi8+PHJlY3QgeT0iMyIgeD0iNSIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0iI2I1ODg2MyIvPjxyZWN0IHk9IjMiIHg9IjciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNiNTg4NjMiLz48cmVjdCB5PSI0IiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjYjU4ODYzIi8+PHJlY3QgeT0iNCIgeD0iMiIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0iI2I1ODg2MyIvPjxyZWN0IHk9IjQiIHg9IjQiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNiNTg4NjMiLz48cmVjdCB5PSI0IiB4PSI2IiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjYjU4ODYzIi8+PHJlY3QgeT0iNSIgeD0iMSIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0iI2I1ODg2MyIvPjxyZWN0IHk9IjUiIHg9IjMiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNiNTg4NjMiLz48cmVjdCB5PSI1IiB4PSI1IiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjYjU4ODYzIi8+PHJlY3QgeT0iNSIgeD0iNyIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0iI2I1ODg2MyIvPjxyZWN0IHk9IjYiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNiNTg4NjMiLz48cmVjdCB5PSI2IiB4PSIyIiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjYjU4ODYzIi8+PHJlY3QgeT0iNiIgeD0iNCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0iI2I1ODg2MyIvPjxyZWN0IHk9IjYiIHg9IjYiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNiNTg4NjMiLz48cmVjdCB5PSI3IiB4PSIxIiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjYjU4ODYzIi8+PHJlY3QgeT0iNyIgeD0iMyIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0iI2I1ODg2MyIvPjxyZWN0IHk9IjciIHg9IjUiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNiNTg4NjMiLz48cmVjdCB5PSI3IiB4PSI3IiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjYjU4ODYzIi8+PC9nPjwvZz48L3N2Zz4=');
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
-/* Arrow colors for analysis visualization */
-svg.cg-shapes {
-  overflow: visible;
-  pointer-events: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
+/* Analysis Arrow Colors (SVG) */
+/* These classes map to the 'brush' property in chessground-wrapper.js */
 
-svg.cg-shapes g {
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
-}
-
-/* Green arrows - Best move */
-svg.cg-shapes g[data-brush="green"] {
+/* Green: Best Move */
+.cg-shapes g[stroke="green"],
+.cg-shapes g[data-brush="green"] {
   stroke: #15781B;
+  opacity: 0.8;
+}
+.cg-shapes g[fill="green"],
+.cg-shapes g[data-brush="green"] {
   fill: #15781B;
   opacity: 0.8;
-  stroke-width: 12;
 }
 
-/* Blue arrows - Second best move */
-svg.cg-shapes g[data-brush="blue"] {
-  stroke: #003088;
-  fill: #003088;
-  opacity: 0.7;
-  stroke-width: 10;
+/* Blue: Brilliant Move */
+.cg-shapes g[stroke="blue"],
+.cg-shapes g[data-brush="blue"] {
+  stroke: #00BFFF;
+  opacity: 0.9;
+}
+.cg-shapes g[fill="blue"],
+.cg-shapes g[data-brush="blue"] {
+  fill: #00BFFF;
+  opacity: 0.9;
 }
 
-/* Red arrows - Blunder/Mistake indicator */
-svg.cg-shapes g[data-brush="red"] {
-  stroke: #882020;
-  fill: #882020;
+/* Red: Blunder */
+.cg-shapes g[stroke="red"],
+.cg-shapes g[data-brush="red"] {
+  stroke: #d32f2f;
   opacity: 0.8;
-  stroke-width: 12;
+}
+.cg-shapes g[fill="red"],
+.cg-shapes g[data-brush="red"] {
+  fill: #d32f2f;
+  opacity: 0.8;
 }
 
-/* Yellow arrows - Alternative line */
-svg.cg-shapes g[data-brush="yellow"] {
+/* Orange: Mistake */
+.cg-shapes g[stroke="orange"],
+.cg-shapes g[data-brush="orange"] {
+  stroke: #ffa000;
+  opacity: 0.8;
+}
+.cg-shapes g[fill="orange"],
+.cg-shapes g[data-brush="orange"] {
+  fill: #ffa000;
+  opacity: 0.8;
+}
+
+/* Yellow: Alternative line */
+.cg-shapes g[stroke="yellow"],
+.cg-shapes g[data-brush="yellow"] {
   stroke: #e68f00;
+  opacity: 0.7;
+}
+.cg-shapes g[fill="yellow"],
+.cg-shapes g[data-brush="yellow"] {
   fill: #e68f00;
   opacity: 0.7;
-  stroke-width: 8;
+}
+
+/* Pale Green: Good/Excellent */
+.cg-shapes g[stroke="paleGreen"],
+.cg-shapes g[data-brush="paleGreen"] {
+  stroke: #8bc34a;
+  opacity: 0.8;
+}
+.cg-shapes g[fill="paleGreen"],
+.cg-shapes g[data-brush="paleGreen"] {
+  fill: #8bc34a;
+  opacity: 0.8;
 }
 
 /* Piece theme compatibility */
