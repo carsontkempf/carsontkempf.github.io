@@ -24,6 +24,7 @@
         this.lastAnalysisScore = null;
         this.currentReport = null;
         this.selectedSquare = null;
+        this.lastMove = null;
 
         // Live analysis tracking
         this.moveHistory = [];
@@ -50,7 +51,20 @@
                 return self.onDrop(source, target);
             },
             onSnapEnd: function() {
-                self.board.position(self.game.fen());
+                // For special moves (castling, en passant), sync the board
+                // Regular moves are already visually correct from drag-and-drop
+                if (self.lastMove) {
+                    var flags = self.lastMove.flags;
+                    // k = kingside castle, q = queenside castle, e = en passant
+                    if (flags.indexOf('k') !== -1 || flags.indexOf('q') !== -1 || flags.indexOf('e') !== -1) {
+                        self.board.position(self.game.fen(), false);
+                    }
+                    self.lastMove = null;
+                }
+            },
+            onSquareClick: function(square) {
+                console.log('Square clicked:', square);
+                self.onSquareClick(square);
             },
             pieceTheme: this.options.pieceTheme || '/assets/img/chesspieces/wikipedia/{piece}.png',
             snapSpeed: 100,
@@ -64,15 +78,12 @@
             boardConfig.orientation = 'black';
         }
 
-        // Use Chessground for enhanced visualization with arrows
-        if (typeof ChessgroundBoard !== 'undefined') {
-            this.board = new ChessgroundBoard(this.boardElement, boardConfig);
-        } else {
-            // Fallback to Chessboard if Chessground not loaded
-            this.board = Chessboard(this.boardElement, boardConfig);
-        }
+        // Use Chessboard.js for the main visual board
+        console.log('Initializing Chessboard with element:', this.boardElement);
+        this.board = Chessboard(this.boardElement, boardConfig);
+        console.log('Chessboard initialized:', this.board);
 
-        this.setupBoardClickHandlers();
+        // Note: Using onSquareClick config instead of manual event listeners
 
         this.evalBar = new EvalBar(this.evalBarElement, {
             orientation: this.playerColor
@@ -136,6 +147,7 @@
     };
 
     ChessAnalysisController.prototype.onDrop = function(source, target) {
+        // Clear any click-to-select state when dragging
         this.removeHighlights();
         this.selectedSquare = null;
 
@@ -153,7 +165,11 @@
             promotion: 'q'
         });
 
+        // Snapback if illegal move
         if (move === null) return 'snapback';
+
+        // Store last move to check for special cases in onSnapEnd
+        this.lastMove = move;
 
         this.updateStatus();
 
@@ -179,9 +195,12 @@
 
         var piece = this.game.get(square);
 
-        if (!this.selectedSquare) {
+        // First click: selecting a piece to move
+        if (this.selectedSquare === null) {
+            // Must click on a piece
             if (!piece) return;
 
+            // In play mode, must be your color
             if (this.mode === 'play') {
                 if ((this.playerColor === 'white' && piece.color === 'b') ||
                     (this.playerColor === 'black' && piece.color === 'w')) {
@@ -189,64 +208,73 @@
                 }
             }
 
-            if ((this.game.turn() === 'w' && piece.color === 'b') ||
-                (this.game.turn() === 'b' && piece.color === 'w')) {
-                return;
-            }
+            // Must be current player's turn
+            if (piece.color !== this.game.turn()) return;
 
+            // Select this piece
             this.selectedSquare = square;
             this.highlightValidMoves(square);
-        } else {
-            if (this.selectedSquare === square) {
+            return;
+        }
+
+        // Second click: attempting to move selected piece
+
+        // Store evaluation before move
+        if (this.lastAnalysisScore) {
+            this.beforeMoveScore = {
+                scoreType: this.lastAnalysisScore.scoreType,
+                scoreValue: this.lastAnalysisScore.scoreValue
+            };
+        }
+
+        var move = this.game.move({
+            from: this.selectedSquare,
+            to: square,
+            promotion: 'q'
+        });
+
+        // If illegal move
+        if (move === null) {
+            // If clicked another of own pieces, switch selection
+            if (piece && piece.color === this.game.turn()) {
+                this.removeHighlights();
+                this.selectedSquare = square;
+                this.highlightValidMoves(square);
+            } else {
+                // Clicked invalid target, deselect
                 this.removeHighlights();
                 this.selectedSquare = null;
-                return;
             }
+            return;
+        }
 
-            // Store evaluation before move
-            if (this.lastAnalysisScore) {
-                this.beforeMoveScore = {
-                    scoreType: this.lastAnalysisScore.scoreType,
-                    scoreValue: this.lastAnalysisScore.scoreValue
-                };
-            }
+        // If legal move, animate the piece using move() method
+        this.board.move(this.selectedSquare + '-' + square);
 
-            var move = this.game.move({
-                from: this.selectedSquare,
-                to: square,
-                promotion: 'q'
-            });
+        // For special moves (castling, en passant), sync the full board state
+        if (move.flags.indexOf('k') !== -1 || move.flags.indexOf('q') !== -1 || move.flags.indexOf('e') !== -1) {
+            // Use setTimeout to sync after the move animation
+            var self = this;
+            setTimeout(function() {
+                self.board.position(self.game.fen(), false);
+            }, 250);
+        }
 
-            if (move === null) {
-                this.removeHighlights();
-                this.selectedSquare = null;
+        this.removeHighlights();
+        this.selectedSquare = null;
+        this.updateStatus();
 
-                if (piece &&
-                    ((this.game.turn() === 'w' && piece.color === 'w') ||
-                     (this.game.turn() === 'b' && piece.color === 'b'))) {
-                    this.selectedSquare = square;
-                    this.highlightValidMoves(square);
-                }
-                return;
-            }
+        if (this.mode === 'analysis') {
+            this.waitingForAnalysis = true;
+            this.startAnalysis();
+        } else if (!this.game.game_over()) {
+            // In play mode, briefly analyze to capture move quality
+            this.waitingForAnalysis = true;
+            this.startAnalysis();
 
-            this.board.position(this.game.fen());
-            this.removeHighlights();
-            this.selectedSquare = null;
-            this.updateStatus();
-
-            if (this.mode === 'analysis') {
-                this.waitingForAnalysis = true;
-                this.startAnalysis();
-            } else if (!this.game.game_over()) {
-                // In play mode, briefly analyze to capture move quality
-                this.waitingForAnalysis = true;
-                this.startAnalysis();
-
-                window.setTimeout(function() {
-                    self.makeEngineMove();
-                }, 250);
-            }
+            window.setTimeout(function() {
+                self.makeEngineMove();
+            }, 250);
         }
     };
 
@@ -310,6 +338,7 @@
             });
 
             if (move) {
+                // Update position WITH animation for engine moves (user should see it move)
                 self.board.position(self.game.fen());
                 self.updateStatus();
 
@@ -584,8 +613,11 @@
     };
 
     ChessAnalysisController.prototype.drawAnalysisArrows = function(linesByMultiPV) {
-        // Only draw arrows if using Chessground
-        if (!this.board || !this.board.setShapes) return;
+        // Only draw arrows if board supports setShapes (Chessground feature)
+        // Chessboard.js doesn't support arrows, so this will be skipped
+        if (!this.board || typeof this.board.setShapes !== 'function') {
+            return;
+        }
 
         var shapes = [];
         var colors = ['green', 'blue', 'yellow'];

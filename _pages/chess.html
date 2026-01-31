@@ -168,6 +168,7 @@ permalink: /chess/
   import { Chessground } from 'https://cdn.jsdelivr.net/npm/chessground@9.1.1/+esm';
   window.Chessground = Chessground;
   console.log('Chessground loaded and assigned to window');
+  window.dispatchEvent(new Event('chessground-ready'));
 </script>
 <script src="/assets/js/chess/ui/chessground-wrapper.js"></script>
 <script src="/assets/js/chess/chess.min.js"></script>
@@ -206,6 +207,18 @@ permalink: /chess/
     document.getElementById('chess-game').style.display = 'block';
   }
 
+  function waitForChessground(callback) {
+    if (typeof window.Chessground !== 'undefined') {
+      console.log('Chessground ready, initializing...');
+      callback();
+    } else {
+      console.log('Waiting for Chessground...');
+      setTimeout(function() {
+        waitForChessground(callback);
+      }, 100);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     var modeSelect = document.getElementById('mode-select');
     modeSelect.addEventListener('change', function() {
@@ -238,7 +251,7 @@ permalink: /chess/
       });
     }
 
-    initChess();
+    waitForChessground(initChess);
   });
 })();
 </script>
