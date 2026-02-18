@@ -21,23 +21,39 @@
     // Classify move based on win chance loss
     // Returns object with symbol, label, and css class
     classifyMove: function(winChanceLoss) {
+      console.log('[DEBUG] classifyMove input:', winChanceLoss);
+
+      // Bad moves (win chance loss)
       if (winChanceLoss > 20) {
+        console.log('[DEBUG] Classification: BLUNDER (loss > 20%)');
         return { symbol: '??', label: 'Blunder', class: 'blunder' };
       }
       if (winChanceLoss > 10) {
+        console.log('[DEBUG] Classification: MISTAKE (loss > 10%)');
         return { symbol: '?', label: 'Mistake', class: 'mistake' };
       }
       if (winChanceLoss > 5) {
+        console.log('[DEBUG] Classification: DUBIOUS (loss > 5%)');
         return { symbol: '?!', label: 'Dubious', class: 'dubious' };
       }
       if (winChanceLoss > 2) {
+        console.log('[DEBUG] Classification: INACCURACY (loss > 2%)');
         return { symbol: '?!', label: 'Inaccuracy', class: 'inaccuracy' };
       }
-      // Good moves
-      if (winChanceLoss < 0.5) {
+
+      // FIXED: Brilliant moves should IMPROVE position (negative loss = gain)
+      if (winChanceLoss < -2) {
+        console.log('[DEBUG] Classification: BRILLIANT (gained > 2%, loss < -2)');
         return { symbol: '!!', label: 'Brilliant', class: 'best' };
       }
-      return { symbol: '!', label: 'Good', class: 'good' };
+      if (winChanceLoss < 0) {
+        console.log('[DEBUG] Classification: EXCELLENT (gained win %, loss < 0)');
+        return { symbol: '!', label: 'Excellent', class: 'good' };
+      }
+
+      // Normal good moves (0-2% loss)
+      console.log('[DEBUG] Classification: GOOD (loss 0-2%)');
+      return { symbol: '', label: 'Good', class: 'good' };
     },
 
     // Convert score to centipawns for win chance calculation

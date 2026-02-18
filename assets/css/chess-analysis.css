@@ -34,15 +34,15 @@
   background-position: center !important;
 }
 
-/* Center chess pieces in squares */
+/* Center chess pieces in squares - let chessboard.js handle positioning */
 #chess-board .piece-417db {
   position: absolute;
-  top: -50px !important;
   width: 75% !important;
   height: 75% !important;
+  /* No transform needed - chessboard.js calculates centering automatically */
 }
 
-/* Fix draggable piece positioning to follow cursor correctly */
+/* Fix draggable piece positioning to follow cursor correctly - override the 5px offset when dragging */
 body .piece-417db.dragging-417db {
   z-index: 10000 !important;
   cursor: grabbing !important;
@@ -604,4 +604,106 @@ cg-board {
   left: 2px;
   right: 2px;
   bottom: 2px;
+}
+
+/* Move List Section */
+.move-list-section {
+  padding: 0 25px 25px 25px;
+}
+
+.move-list {
+  max-height: 400px;
+  overflow-y: auto;
+  background: var(--bg-page);
+  border: 1px solid var(--bg-accent);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.move-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  background: var(--bg-tile);
+  font-size: 14px;
+}
+
+.move-item:hover {
+  background: var(--bg-accent);
+}
+
+.move-item.white-move {
+  border-left: 3px solid #f0f0f0;
+}
+
+.move-item.black-move {
+  border-left: 3px solid #2c2c2c;
+}
+
+.move-number {
+  font-weight: 600;
+  min-width: 50px;
+  color: var(--text-main);
+}
+
+.move-san {
+  font-family: monospace;
+  font-weight: 600;
+  min-width: 70px;
+  color: var(--text-heading);
+}
+
+.move-classification {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 100px;
+  text-align: center;
+}
+
+.move-classification.blunder {
+  background-color: #d32f2f;
+  color: white;
+}
+
+.move-classification.mistake {
+  background-color: #f57c00;
+  color: white;
+}
+
+.move-classification.dubious {
+  background-color: #fbc02d;
+  color: #333;
+}
+
+.move-classification.inaccuracy {
+  background-color: #7cb342;
+  color: white;
+}
+
+.move-classification.good {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.move-classification.best {
+  background-color: #00bcd4;
+  color: white;
+}
+
+.move-accuracy {
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+}
+
+.move-loss {
+  color: var(--text-muted);
+  font-size: 12px;
+  min-width: 60px;
+  text-align: right;
 }

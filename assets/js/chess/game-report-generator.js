@@ -123,6 +123,8 @@
     var whiteMoves = { blunders: 0, mistakes: 0, dubious: 0, inaccuracies: 0 };
     var blackMoves = { blunders: 0, mistakes: 0, dubious: 0, inaccuracies: 0 };
 
+    console.log('[DEBUG] Starting move analysis. Total positions:', results.length);
+
     // Analyze each move by comparing position before and after
     for (var i = 0; i < results.length - 1; i++) {
       var beforePos = results[i];
@@ -130,9 +132,15 @@
 
       if (!afterPos.move) continue;
 
+      console.log('[DEBUG] ========================================');
+      console.log('[DEBUG] Analyzing move', i, ':', afterPos.san, '(', afterPos.color, ')');
+
       // Convert scores to centipawns
       var beforeCP = scoring.scoreToCentipawns(beforePos.scoreType, beforePos.scoreValue);
       var afterCP = scoring.scoreToCentipawns(afterPos.scoreType, afterPos.scoreValue);
+
+      console.log('[DEBUG]   Before position:', beforePos.scoreType, beforePos.scoreValue, '=', beforeCP, 'cp');
+      console.log('[DEBUG]   After position:', afterPos.scoreType, afterPos.scoreValue, '=', afterCP, 'cp');
 
       // Adjust scores for player perspective
       // If it was white's turn, positive is good for white
@@ -141,18 +149,28 @@
       if (!isWhiteTurn) {
         beforeCP = -beforeCP;
         afterCP = -afterCP;
+        console.log('[DEBUG]   (Black move - flipped signs)');
       }
+
+      console.log('[DEBUG]   Adjusted: beforeCP =', beforeCP, ', afterCP =', afterCP);
 
       // Calculate win chances
       var winChanceBefore = scoring.getWinChance(beforeCP);
       var winChanceAfter = scoring.getWinChance(afterCP);
-      var winChanceLoss = Math.max(0, winChanceBefore - winChanceAfter);
+      // Allow negative values for brilliant moves (when position improves)
+      var winChanceLoss = winChanceBefore - winChanceAfter;
+
+      console.log('[DEBUG]   Win chance before:', winChanceBefore.toFixed(2), '%');
+      console.log('[DEBUG]   Win chance after:', winChanceAfter.toFixed(2), '%');
+      console.log('[DEBUG]   Win chance loss:', winChanceLoss.toFixed(2), '%');
 
       // Calculate accuracy
       var accuracy = scoring.getAccuracy(winChanceLoss);
+      console.log('[DEBUG]   Accuracy:', accuracy.toFixed(1), '%');
 
       // Classify move
       var classification = scoring.classifyMove(winChanceLoss);
+      console.log('[DEBUG]   Final classification:', classification.label);
 
       // Store per-player statistics
       if (isWhiteTurn) {

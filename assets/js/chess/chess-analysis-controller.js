@@ -321,6 +321,14 @@
 
         this.setStatus('Engine thinking...');
 
+        // CRITICAL: Capture score before engine move for analysis
+        if (this.lastAnalysisScore) {
+            this.beforeMoveScore = {
+                scoreType: this.lastAnalysisScore.scoreType,
+                scoreValue: this.lastAnalysisScore.scoreValue
+            };
+        }
+
         this.engine.getBestMove(this.game.fen(), function(bestMove) {
             if (!bestMove) {
                 self.updateStatus();
@@ -341,6 +349,9 @@
                 // Update position WITH animation for engine moves (user should see it move)
                 self.board.position(self.game.fen());
                 self.updateStatus();
+
+                // Start analysis after engine move to track engine move quality
+                self.waitingForAnalysis = true;
 
                 // Start continuous analysis after engine move to track player move quality
                 if (self.mode === 'play') {
@@ -408,6 +419,10 @@
     };
 
     ChessAnalysisController.prototype.analyzeMoveQuality = function(beforeScore, afterScore) {
+        console.log('[DEBUG] analyzeMoveQuality called');
+        console.log('[DEBUG]   beforeScore:', beforeScore);
+        console.log('[DEBUG]   afterScore:', afterScore);
+
         if (!window.GameReportScoring) {
             console.warn('GameReportScoring not loaded');
             return;
@@ -419,26 +434,39 @@
         var lastMove = history[history.length - 1];
         var moveColor = lastMove.color === 'w' ? 'white' : 'black';
 
+        console.log('[DEBUG]   Move:', lastMove.san, '(' + moveColor + ')');
+
         // Convert scores to centipawns
         var beforeCp = window.GameReportScoring.scoreToCentipawns(beforeScore.scoreType, beforeScore.scoreValue);
         var afterCp = window.GameReportScoring.scoreToCentipawns(afterScore.scoreType, afterScore.scoreValue);
+
+        console.log('[DEBUG]   beforeCp:', beforeCp, 'afterCp:', afterCp);
 
         // Flip sign for black's perspective
         if (moveColor === 'black') {
             beforeCp = -beforeCp;
             afterCp = -afterCp;
+            console.log('[DEBUG]   (Flipped for black perspective)');
         }
+
+        console.log('[DEBUG]   Adjusted beforeCp:', beforeCp, 'afterCp:', afterCp);
 
         // Calculate win chances
         var beforeWinChance = window.GameReportScoring.getWinChance(beforeCp);
         var afterWinChance = window.GameReportScoring.getWinChance(afterCp);
         var winChanceLoss = beforeWinChance - afterWinChance;
 
+        console.log('[DEBUG]   winChanceLoss:', winChanceLoss.toFixed(2), '%');
+
         // Calculate accuracy
         var accuracy = window.GameReportScoring.getAccuracy(winChanceLoss);
 
+        console.log('[DEBUG]   accuracy:', accuracy.toFixed(1), '%');
+
         // Classify move
         var classification = window.GameReportScoring.classifyMove(winChanceLoss);
+
+        console.log('[DEBUG]   classification:', classification.label);
 
         // Update stats
         var stats = this.liveStats[moveColor];
@@ -960,6 +988,47 @@
         html += '</div>';
         html += '</div>';
 
+        html += '</div>';
+
+        // Add move-by-move list showing both white and black moves
+        html += '<div class="move-list-section">';
+        html += '<h3 style="margin: 20px 0 10px 0; color: var(--text-main);">Move Analysis</h3>';
+        html += '<div class="move-list">';
+
+        // Group moves by full move number (white + black move = 1 full move)
+        for (var i = 1; i < report.moves.length; i++) {
+            var moveData = report.moves[i];
+            if (!moveData.move) continue;
+
+            var isWhite = moveData.color === 'white';
+            var moveNumber = moveData.moveNumber;
+            var classification = moveData.classification || { label: 'Good', class: 'good', symbol: '' };
+            var accuracy = moveData.accuracy !== undefined ? moveData.accuracy.toFixed(1) : '100.0';
+            var winChanceLoss = moveData.winChanceLoss !== undefined ? moveData.winChanceLoss.toFixed(1) : '0.0';
+
+            // Color indicator
+            var colorIndicator = isWhite ? '⚪' : '⚫';
+            var colorClass = isWhite ? 'white-move' : 'black-move';
+
+            // Accuracy color coding
+            var accuracyColor = accuracy >= 95 ? '#4a90e2' :
+                              accuracy >= 80 ? '#7cb342' :
+                              accuracy >= 60 ? '#fbc02d' : '#d32f2f';
+
+            html += '<div class="move-item ' + colorClass + '">';
+            html += '<span class="move-number">' + colorIndicator + ' ' + moveNumber + '.</span>';
+            html += '<span class="move-san">' + moveData.san + '</span>';
+            html += '<span class="move-classification ' + classification.class + '">';
+            if (classification.symbol) {
+                html += classification.symbol + ' ';
+            }
+            html += classification.label + '</span>';
+            html += '<span class="move-accuracy" style="color: ' + accuracyColor + ';">' + accuracy + '%</span>';
+            html += '<span class="move-loss">(-' + winChanceLoss + '%)</span>';
+            html += '</div>';
+        }
+
+        html += '</div>';
         html += '</div>';
 
         reportContent.innerHTML = html;

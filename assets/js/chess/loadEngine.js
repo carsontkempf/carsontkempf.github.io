@@ -76,11 +76,29 @@ var loadEngine = (function ()
         if (typeof global !== "undefined" && Object.prototype.toString.call(global.process) === "[object process]") {
             return spawn_worker(path || require("path").join(__dirname, "src", "stockfish.js"), options);
         }
-        
+
         path = path || "stockfish.js";
-        
+
+        console.log('[DEBUG] Creating Web Worker with path:', path);
+
         if (typeof Worker === "function") {
-            return new Worker(path);
+            try {
+                var worker = new Worker(path);
+                console.log('[DEBUG] Worker created successfully');
+
+                worker.onerror = function(e) {
+                    console.error('[ERROR] Worker error event:', e);
+                    console.error('[ERROR] Message:', e.message);
+                    console.error('[ERROR] Filename:', e.filename);
+                    console.error('[ERROR] Line:', e.lineno);
+                    console.error('[ERROR] This usually means the WASM file failed to load or had a runtime error');
+                };
+
+                return worker;
+            } catch (e) {
+                console.error('[ERROR] Failed to create Worker:', e);
+                throw e;
+            }
         }
     }
     

@@ -41,21 +41,42 @@
         }
 
         var enginePath = this.options.enginePath || '/assets/js/chess/vendor/stockfish-17.1-lite-single-03e3232.js';
+        console.log('[DEBUG] Loading Stockfish engine from:', enginePath);
+        console.log('[DEBUG] Expected WASM file:', enginePath.replace('.js', '.wasm'));
 
         if (typeof loadEngine !== 'function') {
-            console.error('loadEngine function not found. Make sure loadEngine.js is loaded first.');
+            console.error('[ERROR] loadEngine function not found. Make sure loadEngine.js is loaded first.');
             return;
         }
 
-        console.log('Initializing Stockfish engine...');
-        this.engine = loadEngine(enginePath);
+        console.log('[DEBUG] Initializing Stockfish engine...');
+
+        try {
+            this.engine = loadEngine(enginePath);
+            console.log('[DEBUG] Engine object created:', this.engine);
+
+            // Add error handler for Worker
+            if (this.engine && this.engine.worker) {
+                console.log('[DEBUG] Adding error handler to Worker');
+                this.engine.worker.onerror = function(error) {
+                    console.error('[ERROR] Stockfish Worker error:', error);
+                    console.error('[ERROR] Error message:', error.message);
+                    console.error('[ERROR] Error filename:', error.filename);
+                    console.error('[ERROR] Error line:', error.lineno);
+                };
+            }
+        } catch (e) {
+            console.error('[ERROR] Failed to create engine:', e);
+            return;
+        }
 
         this.engine.send('uci', function() {
-            console.log('Engine UCI ready');
+            console.log('[DEBUG] Engine UCI ready - engine is communicating');
             self.ready = true;
             self.engine.send('setoption name Skill Level value ' + self.skillLevel);
+            console.log('[DEBUG] Set skill level to:', self.skillLevel);
             self.engine.send('isready', function() {
-                console.log('Engine fully ready');
+                console.log('[DEBUG] Engine fully ready and initialized');
                 if (callback) callback();
             });
         });
