@@ -1,0 +1,197 @@
+---
+layout: page
+title: Practice Tests
+permalink: /practice-tests/
+---
+
+<link rel="stylesheet" href="/assets/css/practice-tests.css">
+
+<script>
+  var QUIZ_DATA = {
+    "cloudPractitioner1": {{ site.data['practice-tests']['cloudPractitioner1'] | jsonify }},
+    "cloudPractitioner2": {{ site.data['practice-tests']['cloudPractitioner2'] | jsonify }},
+    "cloudPractitioner3": {{ site.data['practice-tests']['cloudPractitioner3'] | jsonify }},
+    "cloudPractitioner4": {{ site.data['practice-tests']['cloudPractitioner4'] | jsonify }},
+    "cloudPractitioner5": {{ site.data['practice-tests']['cloudPractitioner5'] | jsonify }},
+    "awsCcpIntro":        {{ site.data['practice-tests']['aws-ccp-intro-questions'] | jsonify }}
+  };
+
+  var QUIZ_SETS = [
+    { key: "cloudPractitioner1", label: "AWS CCP - Practice Set 1", category: "aws-ccp" },
+    { key: "cloudPractitioner2", label: "AWS CCP - Practice Set 2", category: "aws-ccp" },
+    { key: "cloudPractitioner3", label: "AWS CCP - Practice Set 3", category: "aws-ccp" },
+    { key: "cloudPractitioner4", label: "AWS CCP - Practice Set 4", category: "aws-ccp" },
+    { key: "cloudPractitioner5", label: "AWS CCP - Practice Set 5", category: "aws-ccp" },
+    { key: "awsCcpIntro",        label: "AWS CCP - Intro Questions", category: "aws-ccp" }
+  ];
+</script>
+
+<!-- STATE: landing -->
+<div id="pt-landing" class="pt-container">
+  <div class="pt-landing-card">
+    <h2 class="pt-landing-title">AWS Practice Tests</h2>
+    <p class="pt-landing-subtitle">Select a test set and start practicing</p>
+
+    <div class="pt-landing-category">
+      <label for="pt-category-select">Category</label>
+      <select id="pt-category-select" class="pt-select">
+        <option value="aws-ccp">AWS Certified Cloud Practitioner</option>
+      </select>
+    </div>
+
+    <div class="pt-landing-category">
+      <label for="pt-set-select">Test Set</label>
+      <select id="pt-set-select" class="pt-select">
+        <!-- populated by JS -->
+      </select>
+    </div>
+
+    <div class="pt-landing-options">
+      <label class="pt-toggle-wrap" for="pt-randomize">
+        <span>Randomize questions</span>
+        <span class="pt-toggle-switch">
+          <input type="checkbox" id="pt-randomize" checked>
+          <span class="pt-toggle-slider"></span>
+        </span>
+      </label>
+    </div>
+
+    <button id="pt-start-btn" class="pt-btn pt-btn-primary">Start Quiz</button>
+  </div>
+</div>
+
+<!-- STATE: question -->
+<div id="pt-question" class="pt-container" style="display:none;">
+  <div class="pt-question-header">
+    <span id="pt-progress-text" class="pt-progress-text">Question 1 of 1</span>
+    <span id="pt-timer" class="pt-timer">0:00</span>
+    <button id="pt-quit-btn" class="pt-btn pt-btn-ghost">Quit</button>
+  </div>
+  <div class="pt-progress-bar-wrap">
+    <div id="pt-progress-bar" class="pt-progress-bar"></div>
+  </div>
+
+  <div class="pt-question-card">
+    <p id="pt-type-badge" class="pt-type-badge"></p>
+    <span id="pt-domain-badge" class="pt-domain-badge" style="display:none;"></span>
+    <p id="pt-question-text" class="pt-question-text"></p>
+    <div id="pt-choices" class="pt-choices"></div>
+    <div id="pt-result-banner" class="pt-result-banner" style="display:none;"></div>
+    <div id="pt-explanation" class="pt-explanation" style="display:none;"></div>
+    <div class="pt-question-actions">
+      <button id="pt-submit-btn" class="pt-btn pt-btn-primary" disabled>Submit</button>
+      <button id="pt-next-btn" class="pt-btn pt-btn-secondary" style="display:none;">Next</button>
+    </div>
+  </div>
+
+  <p class="pt-keyboard-hint">
+    <kbd>1</kbd>-<kbd>5</kbd> select &bull;
+    <kbd>Enter</kbd> submit / next &bull;
+    <kbd>&rarr;</kbd> next &bull;
+    <kbd>Esc</kbd> quit
+  </p>
+</div>
+
+<!-- STATE: summary -->
+<div id="pt-summary" class="pt-container" style="display:none;">
+  <div class="pt-summary-card">
+    <h2 id="pt-summary-title" class="pt-summary-title">Quiz Complete</h2>
+    <p id="pt-summary-set-label" class="pt-summary-set-label"></p>
+    <div class="pt-summary-stats">
+      <div class="pt-stat-block">
+        <span id="pt-stat-accuracy" class="pt-stat-value">0%</span>
+        <span class="pt-stat-label">Accuracy</span>
+      </div>
+      <div class="pt-stat-block">
+        <span id="pt-stat-correct" class="pt-stat-value">0/0</span>
+        <span class="pt-stat-label">Correct</span>
+      </div>
+      <div class="pt-stat-block">
+        <span id="pt-stat-time" class="pt-stat-value">0:00</span>
+        <span class="pt-stat-label">Time</span>
+      </div>
+    </div>
+    <div class="pt-summary-actions">
+      <button id="pt-restart-btn" class="pt-btn pt-btn-primary">Try Again</button>
+      <button id="pt-home-btn" class="pt-btn pt-btn-ghost">Choose Another Set</button>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/js/practice-tests/quiz-engine.js"></script>
+<script src="/assets/js/practice-tests/question-renderer.js"></script>
+<script src="/assets/js/practice-tests/keyboard-handler.js"></script>
+
+<script>
+(function() {
+  'use strict';
+
+  function startQuiz() {
+    var sel = document.getElementById('pt-set-select');
+    var randomize = document.getElementById('pt-randomize').checked;
+    var key = sel.value;
+    var label = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : key;
+
+    QuizEngine.startQuiz(key, randomize, label);
+
+    if (QuizEngine.state.total === 0) {
+      alert('No questions found for this set.');
+      return;
+    }
+
+    QuestionRenderer.showState('question');
+    KeyboardHandler.enable();
+    QuestionRenderer.render(QuizEngine.currentQuestion(), 0, QuizEngine.state.total);
+  }
+
+  function handleSubmit() {
+    var result = QuizEngine.submitAnswer();
+    if (!result) return;
+    QuestionRenderer.showResult(result.question, result.isCorrect, result.selected);
+  }
+
+  function handleNext() {
+    var hasMore = QuizEngine.nextQuestion();
+    if (hasMore) {
+      QuestionRenderer.render(
+        QuizEngine.currentQuestion(),
+        QuizEngine.state.currentIndex,
+        QuizEngine.state.total
+      );
+    } else {
+      QuizEngine.stopTimer();
+      var summary = QuizEngine.getSummary();
+      QuestionRenderer.renderSummary(summary);
+      QuestionRenderer.showState('summary');
+      KeyboardHandler.disable();
+    }
+  }
+
+  function quit() {
+    QuizEngine.stopTimer();
+    KeyboardHandler.disable();
+    QuestionRenderer.showState('landing');
+  }
+
+  function init() {
+    QuestionRenderer.populateSelect(QUIZ_SETS);
+    QuestionRenderer.showState('landing');
+
+    document.getElementById('pt-start-btn').addEventListener('click', startQuiz);
+    document.getElementById('pt-submit-btn').addEventListener('click', handleSubmit);
+    document.getElementById('pt-next-btn').addEventListener('click', handleNext);
+    document.getElementById('pt-quit-btn').addEventListener('click', function() { quit(); });
+    document.getElementById('pt-restart-btn').addEventListener('click', function() {
+      QuestionRenderer.showState('landing');
+    });
+    document.getElementById('pt-home-btn').addEventListener('click', function() {
+      QuestionRenderer.showState('landing');
+    });
+  }
+
+  // Expose quit for keyboard handler
+  window.QuizApp = { quit: quit };
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
+</script>

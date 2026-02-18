@@ -1,0 +1,2828 @@
+[
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 1,
+    "question": "What does the AWS Shared Responsibility Model state?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS manages all security for customer applications",
+      "B": "Customers manage all security including physical hardware",
+      "C": "AWS manages security OF the cloud; customers manage security IN the cloud",
+      "D": "Security responsibilities are split 50/50 by contract"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Core Concepts",
+    "explanation": "AWS secures the physical infrastructure; customers secure their data, identities, and configurations running on it."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 2,
+    "question": "Which of the following are pillars of the AWS Well-Architected Framework? (Select THREE)",
+    "type": "multiple-select",
+    "choices": {
+      "A": "Operational Excellence",
+      "B": "Cost Optimization",
+      "C": "Profitability",
+      "D": "Reliability",
+      "E": "Marketability"
+    },
+    "correct": [
+      "A",
+      "B",
+      "D"
+    ],
+    "incorrect": [
+      "C",
+      "E"
+    ],
+    "section": "Core Concepts",
+    "explanation": "The six pillars are: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, and Sustainability."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 3,
+    "question": "What is an AWS Region?",
+    "type": "single-select",
+    "choices": {
+      "A": "A single data center",
+      "B": "A group of Availability Zones in a geographic area",
+      "C": "A network of edge locations",
+      "D": "A virtual private cloud"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Core Concepts",
+    "explanation": "A Region is a geographic cluster of multiple Availability Zones used for deploying resources globally."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 4,
+    "question": "What is an AWS Availability Zone (AZ)?",
+    "type": "single-select",
+    "choices": {
+      "A": "A physical data center in a single location",
+      "B": "One or more discrete data centers with redundant power and networking within a Region",
+      "C": "A global content delivery node",
+      "D": "A virtual machine instance"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Core Concepts",
+    "explanation": "AZs are isolated locations within a Region, designed to provide fault tolerance and high availability."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 5,
+    "question": "What is Infrastructure as Code (IaC)?",
+    "type": "single-select",
+    "choices": {
+      "A": "Writing code that runs on physical servers",
+      "B": "Managing and provisioning infrastructure through machine-readable configuration files",
+      "C": "Hosting source code on AWS servers",
+      "D": "A method to auto-scale EC2 instances"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Core Concepts",
+    "explanation": "IaC lets you define and deploy infrastructure using code instead of manual processes."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 6,
+    "question": "Which AWS concept means automatically scaling resources up or down based on demand?",
+    "type": "single-select",
+    "choices": {
+      "A": "High Availability",
+      "B": "Fault Tolerance",
+      "C": "Elasticity",
+      "D": "Durability"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Core Concepts",
+    "explanation": "Elasticity means AWS resources can automatically scale in or out to match workload changes."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 7,
+    "question": "Which AWS pricing model charges based on actual usage with no upfront commitment?",
+    "type": "single-select",
+    "choices": {
+      "A": "Reserved pricing",
+      "B": "Spot pricing",
+      "C": "Pay-as-you-go",
+      "D": "Dedicated pricing"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Core Concepts",
+    "explanation": "Pay-as-you-go means you only pay for services you consume, with no minimum fees or upfront costs."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 8,
+    "question": "Which of the following are benefits of migrating to the AWS Cloud? (Select THREE)",
+    "type": "multiple-select",
+    "choices": {
+      "A": "Fixed monthly pricing regardless of usage",
+      "B": "Increased speed and agility",
+      "C": "Elimination of capital expenses for data centers",
+      "D": "Guaranteed reduction of all IT staff",
+      "E": "Pay-as-you-go pricing model"
+    },
+    "correct": [
+      "B",
+      "C",
+      "E"
+    ],
+    "incorrect": [
+      "A",
+      "D"
+    ],
+    "section": "Core Concepts",
+    "explanation": "AWS lets you trade CapEx for OpEx, deploy globally in minutes, and pay only for what you use."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 9,
+    "question": "What does the AWS Cloud Adoption Framework (AWS CAF) help organizations do?",
+    "type": "single-select",
+    "choices": {
+      "A": "Calculate AWS pricing estimates",
+      "B": "Build and implement a cloud migration strategy",
+      "C": "Monitor EC2 instance performance",
+      "D": "Configure VPC networking rules"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Core Concepts",
+    "explanation": "AWS CAF provides guidance and best practices organized into perspectives to accelerate cloud migration."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 10,
+    "question": "Which of the following are AWS CAF perspectives? (Select TWO)",
+    "type": "multiple-select",
+    "choices": {
+      "A": "Business",
+      "B": "Compute",
+      "C": "People",
+      "D": "Storage",
+      "E": "Networking"
+    },
+    "correct": [
+      "A",
+      "C"
+    ],
+    "incorrect": [
+      "B",
+      "D",
+      "E"
+    ],
+    "section": "Core Concepts",
+    "explanation": "AWS CAF has six perspectives: Business, People, Governance, Platform, Security, and Operations."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 11,
+    "question": "Which EC2 instance pricing model is best for unpredictable, short-term workloads?",
+    "type": "single-select",
+    "choices": {
+      "A": "Reserved Instances",
+      "B": "Spot Instances",
+      "C": "On-Demand Instances",
+      "D": "Dedicated Hosts"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Compute",
+    "explanation": "On-Demand Instances charge by the hour/second with no upfront commitment, ideal for variable workloads."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 12,
+    "question": "Which EC2 pricing model offers the largest discount in exchange for a 1 or 3 year commitment?",
+    "type": "single-select",
+    "choices": {
+      "A": "On-Demand Instances",
+      "B": "Spot Instances",
+      "C": "Reserved Instances",
+      "D": "Dedicated Instances"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Compute",
+    "explanation": "Reserved Instances offer up to 75% savings compared to On-Demand pricing for committed usage."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 13,
+    "question": "Which EC2 pricing model can be interrupted by AWS but offers the lowest cost?",
+    "type": "single-select",
+    "choices": {
+      "A": "On-Demand Instances",
+      "B": "Spot Instances",
+      "C": "Reserved Instances",
+      "D": "Savings Plans"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Compute",
+    "explanation": "Spot Instances use spare AWS capacity at up to 90% discount but can be reclaimed by AWS with a 2-minute warning."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 14,
+    "question": "Which AWS service runs code without provisioning or managing servers?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon EC2",
+      "B": "AWS Elastic Beanstalk",
+      "C": "AWS Lambda",
+      "D": "Amazon Lightsail"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Compute",
+    "explanation": "Lambda is serverless — you upload code and AWS runs it in response to events with no server management."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 15,
+    "question": "Which AWS service automatically deploys and manages web applications without requiring you to manage infrastructure?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Lambda",
+      "B": "AWS Elastic Beanstalk",
+      "C": "Amazon EC2",
+      "D": "AWS Fargate"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Compute",
+    "explanation": "Elastic Beanstalk automatically handles deployment, scaling, load balancing, and health monitoring."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 16,
+    "question": "Which AWS service provides simplified virtual servers for smaller workloads with predictable pricing?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon EC2",
+      "B": "AWS Outposts",
+      "C": "Amazon Lightsail",
+      "D": "AWS Fargate"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Compute",
+    "explanation": "Lightsail is a simplified compute service designed for developers who need easy-to-use virtual private servers at low cost."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 17,
+    "question": "Which service lets you run AWS infrastructure on-premises?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Direct Connect",
+      "B": "AWS Outposts",
+      "C": "AWS Local Zones",
+      "D": "AWS VPN"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Compute",
+    "explanation": "AWS Outposts brings AWS hardware and services to your on-premises data center."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 18,
+    "question": "Which AWS service runs containers without managing servers or clusters?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon ECS",
+      "B": "Amazon EKS",
+      "C": "AWS Fargate",
+      "D": "Amazon ECR"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Compute",
+    "explanation": "Fargate is a serverless compute engine for containers — no EC2 instance management required."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 19,
+    "question": "Which service is used to run batch computing workloads on AWS?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Lambda",
+      "B": "AWS Batch",
+      "C": "AWS Step Functions",
+      "D": "Amazon EMR"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Compute",
+    "explanation": "AWS Batch dynamically provisions optimal compute resources and runs batch jobs at any scale."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 20,
+    "question": "Which AWS storage service provides scalable object storage accessible via the internet?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon EBS",
+      "B": "Amazon EFS",
+      "C": "Amazon S3",
+      "D": "AWS Storage Gateway"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Storage",
+    "explanation": "S3 stores objects (files) in buckets and is accessible from anywhere via HTTP/HTTPS."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 21,
+    "question": "Which Amazon S3 storage class is lowest cost for long-term archival with retrieval times of hours?",
+    "type": "single-select",
+    "choices": {
+      "A": "S3 Standard",
+      "B": "S3 Intelligent-Tiering",
+      "C": "S3 Glacier Deep Archive",
+      "D": "S3 One Zone-IA"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Storage",
+    "explanation": "S3 Glacier Deep Archive is the cheapest S3 tier, designed for data retained 7-10+ years with retrieval times of 12 hours."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 22,
+    "question": "Which AWS storage service provides block storage volumes that attach to EC2 instances?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon S3",
+      "B": "Amazon EFS",
+      "C": "Amazon EBS",
+      "D": "Amazon FSx"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Storage",
+    "explanation": "EBS provides persistent block storage volumes that attach to a single EC2 instance like a virtual hard drive."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 23,
+    "question": "Which AWS storage service provides a managed file system shared across multiple EC2 instances?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon EBS",
+      "B": "Amazon EFS",
+      "C": "Amazon S3",
+      "D": "AWS Storage Gateway"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Storage",
+    "explanation": "EFS is a shared NFS-based file system that scales automatically and can be mounted by multiple instances simultaneously."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 24,
+    "question": "Which AWS service connects on-premises environments to AWS cloud storage?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon S3",
+      "B": "AWS Snowball",
+      "C": "AWS Storage Gateway",
+      "D": "AWS Direct Connect"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Storage",
+    "explanation": "Storage Gateway bridges on-premises environments with AWS cloud storage for hybrid workloads."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 25,
+    "question": "Which AWS service provides centralized backup management across AWS services?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon S3 Glacier",
+      "B": "AWS Backup",
+      "C": "AWS Storage Gateway",
+      "D": "Amazon EBS snapshots"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Storage",
+    "explanation": "AWS Backup provides a centralized console to automate and manage backups across AWS services."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 26,
+    "question": "Which AWS service replicates on-premises servers to AWS for disaster recovery with fast failover?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Backup",
+      "B": "AWS Storage Gateway",
+      "C": "AWS Elastic Disaster Recovery",
+      "D": "Amazon S3 Glacier"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Storage",
+    "explanation": "Elastic Disaster Recovery replicates servers to AWS for cost-effective disaster recovery with low RPO and RTO."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 27,
+    "question": "Which AWS service is a fully managed relational database supporting MySQL, PostgreSQL, and others?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon DynamoDB",
+      "B": "Amazon RDS",
+      "C": "Amazon Redshift",
+      "D": "Amazon DocumentDB"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Databases",
+    "explanation": "RDS manages relational databases including MySQL, PostgreSQL, MariaDB, Oracle, and SQL Server."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 28,
+    "question": "Which AWS database service is a fully managed NoSQL key-value and document database?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon RDS",
+      "B": "Amazon Aurora",
+      "C": "Amazon DynamoDB",
+      "D": "Amazon DocumentDB"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Databases",
+    "explanation": "DynamoDB is AWS's serverless NoSQL database with single-digit millisecond performance at any scale."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 29,
+    "question": "Which AWS database is a MySQL/PostgreSQL-compatible relational database with higher performance than standard RDS?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon RDS",
+      "B": "Amazon Aurora",
+      "C": "Amazon Redshift",
+      "D": "Amazon ElastiCache"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Databases",
+    "explanation": "Aurora is cloud-native, fully compatible with MySQL and PostgreSQL, with up to 5x MySQL and 3x PostgreSQL performance."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 30,
+    "question": "Which AWS service is a managed data warehouse for analytics on petabyte-scale data?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon RDS",
+      "B": "Amazon DynamoDB",
+      "C": "Amazon Redshift",
+      "D": "Amazon Aurora"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Databases",
+    "explanation": "Redshift is AWS's managed data warehouse service for running complex analytical queries on large datasets."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 31,
+    "question": "Which AWS service provides in-memory caching to improve database performance?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon RDS",
+      "B": "Amazon DynamoDB",
+      "C": "Amazon ElastiCache",
+      "D": "Amazon Aurora"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Databases",
+    "explanation": "ElastiCache supports Redis and Memcached to cache frequently accessed data and reduce database load."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 32,
+    "question": "Which AWS database service is designed for graph data like social networks and fraud detection?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon DocumentDB",
+      "B": "Amazon Neptune",
+      "C": "Amazon DynamoDB",
+      "D": "Amazon RDS"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Databases",
+    "explanation": "Neptune is AWS's managed graph database service supporting property graphs and RDF."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 33,
+    "question": "Which AWS database service is MongoDB-compatible?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon DynamoDB",
+      "B": "Amazon Neptune",
+      "C": "Amazon DocumentDB",
+      "D": "Amazon RDS"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Databases",
+    "explanation": "DocumentDB is a fully managed document database service compatible with MongoDB workloads."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 34,
+    "question": "Which AWS service provides a virtual network within AWS, logically isolated from other accounts?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Route 53",
+      "B": "Amazon VPC",
+      "C": "AWS Direct Connect",
+      "D": "Amazon CloudFront"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Networking",
+    "explanation": "A VPC (Virtual Private Cloud) is your own isolated section of the AWS cloud where you launch resources."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 35,
+    "question": "Which AWS service is a global Content Delivery Network (CDN)?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Route 53",
+      "B": "AWS Global Accelerator",
+      "C": "Amazon CloudFront",
+      "D": "AWS Transit Gateway"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Networking",
+    "explanation": "CloudFront caches and delivers content from edge locations close to end users for low latency."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 36,
+    "question": "Which AWS service provides managed DNS, domain registration, and health checking?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon CloudFront",
+      "B": "Amazon Route 53",
+      "C": "AWS Global Accelerator",
+      "D": "AWS PrivateLink"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Networking",
+    "explanation": "Route 53 is AWS's scalable DNS service for routing users to applications."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 37,
+    "question": "Which AWS service establishes a dedicated private network connection from on-premises to AWS?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS VPN",
+      "B": "AWS Direct Connect",
+      "C": "AWS PrivateLink",
+      "D": "AWS Transit Gateway"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Networking",
+    "explanation": "Direct Connect provides a dedicated physical connection between your data center and AWS, bypassing the internet."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 38,
+    "question": "Which AWS service connects multiple VPCs and on-premises networks through a central hub?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS PrivateLink",
+      "B": "VPC Peering",
+      "C": "AWS Transit Gateway",
+      "D": "AWS Direct Connect"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Networking",
+    "explanation": "Transit Gateway acts as a central hub to connect thousands of VPCs and on-premises networks."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 39,
+    "question": "Which AWS service allows private connectivity to AWS services without exposing traffic to the public internet?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS VPN",
+      "B": "AWS PrivateLink",
+      "C": "AWS Direct Connect",
+      "D": "VPC Peering"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Networking",
+    "explanation": "PrivateLink provides private connectivity between VPCs and AWS services using the AWS network."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 40,
+    "question": "Which AWS service creates managed API endpoints for backend services?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon CloudFront",
+      "B": "Amazon Route 53",
+      "C": "Amazon API Gateway",
+      "D": "AWS AppSync"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Networking",
+    "explanation": "API Gateway lets you create, publish, and manage REST, HTTP, and WebSocket APIs at scale."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 41,
+    "question": "Which AWS service improves the availability and performance of global applications by routing traffic over the AWS network?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon CloudFront",
+      "B": "AWS Global Accelerator",
+      "C": "Amazon Route 53",
+      "D": "AWS Direct Connect"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Networking",
+    "explanation": "Global Accelerator routes traffic over the AWS global network backbone for improved latency and availability."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 42,
+    "question": "Which of the following are AWS Site-to-Site VPN use cases? (Select TWO)",
+    "type": "multiple-select",
+    "choices": {
+      "A": "Connecting an on-premises network to AWS over the internet securely",
+      "B": "Replacing AWS Direct Connect for dedicated fiber connections",
+      "C": "Creating an encrypted tunnel between a customer network and AWS VPC",
+      "D": "Caching content at edge locations globally"
+    },
+    "correct": [
+      "A",
+      "C"
+    ],
+    "incorrect": [
+      "B",
+      "D"
+    ],
+    "section": "Networking",
+    "explanation": "Site-to-Site VPN creates an encrypted IPsec connection between your on-premises network and AWS over the internet."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 43,
+    "question": "Which AWS service manages user identities and permissions for AWS resources?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Cognito",
+      "B": "AWS IAM",
+      "C": "AWS Secrets Manager",
+      "D": "AWS Directory Service"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "IAM (Identity and Access Management) controls who can access what in your AWS account using policies."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 44,
+    "question": "Which AWS service provides a web application firewall to protect against common web exploits?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Shield",
+      "B": "Amazon GuardDuty",
+      "C": "AWS WAF",
+      "D": "AWS Firewall Manager"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "WAF filters web traffic based on customizable rules to block SQL injection, XSS, and other common attacks."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 45,
+    "question": "Which AWS service provides DDoS protection for AWS applications?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS WAF",
+      "B": "AWS Shield",
+      "C": "Amazon GuardDuty",
+      "D": "AWS Firewall Manager"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "AWS Shield Standard is free for all customers; Shield Advanced adds enhanced DDoS protection and 24/7 support."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 46,
+    "question": "Which AWS service uses machine learning to detect threats and suspicious activity in your AWS account?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Inspector",
+      "B": "Amazon Macie",
+      "C": "Amazon GuardDuty",
+      "D": "AWS Security Hub"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "GuardDuty continuously monitors for malicious activity and unauthorized behavior using ML and threat intelligence."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 47,
+    "question": "Which AWS service automatically discovers and protects sensitive data stored in Amazon S3?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon GuardDuty",
+      "B": "Amazon Macie",
+      "C": "AWS Inspector",
+      "D": "Amazon Detective"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "Macie uses ML to automatically discover, classify, and protect sensitive data like PII in S3."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 48,
+    "question": "Which AWS service manages encryption keys for your AWS services and data?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Secrets Manager",
+      "B": "AWS Certificate Manager",
+      "C": "AWS CloudHSM",
+      "D": "AWS KMS"
+    },
+    "correct": [
+      "D"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "C"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "KMS (Key Management Service) creates and manages cryptographic keys for encrypting your data across AWS services."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 49,
+    "question": "Which AWS service provides dedicated hardware security modules for key storage and regulatory compliance?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS KMS",
+      "B": "AWS Secrets Manager",
+      "C": "AWS CloudHSM",
+      "D": "AWS Certificate Manager"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "CloudHSM provides dedicated hardware security modules (HSMs) in the AWS cloud for strict compliance requirements."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 50,
+    "question": "Which AWS service stores and automatically rotates application secrets like API keys and passwords?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS KMS",
+      "B": "AWS Systems Manager Parameter Store",
+      "C": "AWS Secrets Manager",
+      "D": "AWS CloudHSM"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "Secrets Manager automatically rotates, manages, and retrieves secrets like database credentials and API keys."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 51,
+    "question": "Which AWS service provisions free SSL/TLS certificates for use with AWS services?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS KMS",
+      "B": "AWS Secrets Manager",
+      "C": "AWS Certificate Manager (ACM)",
+      "D": "AWS CloudHSM"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "ACM provisions, manages, and deploys SSL/TLS certificates for use with services like CloudFront and ALB."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 52,
+    "question": "Which AWS service provides user sign-up, sign-in, and access control for web and mobile apps?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS IAM",
+      "B": "Amazon Cognito",
+      "C": "AWS Directory Service",
+      "D": "AWS IAM Identity Center"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "Cognito provides authentication, authorization, and user management for customer-facing applications."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 53,
+    "question": "Which AWS service scans EC2 instances and container images for software vulnerabilities?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon GuardDuty",
+      "B": "AWS Security Hub",
+      "C": "Amazon Inspector",
+      "D": "Amazon Macie"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "Inspector automatically assesses applications for software vulnerabilities and unintended network exposure."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 54,
+    "question": "Which AWS service provides on-demand access to AWS compliance reports and agreements?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Security Hub",
+      "B": "AWS Audit Manager",
+      "C": "AWS Artifact",
+      "D": "AWS Config"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "Artifact is a self-service portal for accessing AWS compliance documentation like SOC reports and PCI DSS."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 55,
+    "question": "Which AWS service provides a centralized view of security alerts across multiple AWS accounts?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon GuardDuty",
+      "B": "AWS Security Hub",
+      "C": "AWS Audit Manager",
+      "D": "Amazon Detective"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "Security Hub aggregates, organizes, and prioritizes security alerts from multiple AWS security services."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 56,
+    "question": "Which AWS service investigates the root cause of security findings using graph analysis?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon GuardDuty",
+      "B": "AWS Security Hub",
+      "C": "Amazon Inspector",
+      "D": "Amazon Detective"
+    },
+    "correct": [
+      "D"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "C"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "Detective automatically collects log data and uses ML to analyze and visualize security issue root causes."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 57,
+    "question": "Which AWS service provides single sign-on (SSO) access to multiple AWS accounts and business applications?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS IAM",
+      "B": "Amazon Cognito",
+      "C": "AWS IAM Identity Center",
+      "D": "AWS Directory Service"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "IAM Identity Center (formerly AWS SSO) provides one-click access to multiple AWS accounts and applications."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 58,
+    "question": "Which AWS service allows sharing AWS resources like subnets across multiple accounts?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Organizations",
+      "B": "AWS IAM Identity Center",
+      "C": "AWS Resource Access Manager (RAM)",
+      "D": "AWS Control Tower"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Security, Identity, and Compliance",
+    "explanation": "RAM lets you share AWS resources like subnets, transit gateways, and Route 53 rules across accounts."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 59,
+    "question": "Which AWS service monitors AWS infrastructure and applications by collecting metrics and logs?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS CloudTrail",
+      "B": "Amazon CloudWatch",
+      "C": "AWS Config",
+      "D": "AWS Trusted Advisor"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "CloudWatch collects and tracks metrics, monitors log files, and sends alarms for AWS resources and applications."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 60,
+    "question": "Which AWS service records all API calls made in your AWS account for auditing purposes?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon CloudWatch",
+      "B": "AWS Config",
+      "C": "AWS CloudTrail",
+      "D": "AWS Audit Manager"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "CloudTrail logs every API call in your account — who did what, when, and from where."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 61,
+    "question": "Which AWS service evaluates your AWS resource configurations against compliance rules?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS CloudTrail",
+      "B": "Amazon CloudWatch",
+      "C": "AWS Config",
+      "D": "AWS Trusted Advisor"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "Config continuously monitors and records AWS resource configurations and evaluates them against desired rules."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 62,
+    "question": "Which AWS service provides automated recommendations for cost, performance, security, and fault tolerance?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Config",
+      "B": "AWS Trusted Advisor",
+      "C": "AWS Compute Optimizer",
+      "D": "AWS Well-Architected Tool"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "Trusted Advisor inspects your account and provides real-time recommendations across five categories."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 63,
+    "question": "Which AWS service recommends optimal EC2 instance types and sizes based on your actual usage?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Trusted Advisor",
+      "B": "AWS Cost Explorer",
+      "C": "AWS Compute Optimizer",
+      "D": "AWS Budgets"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "Compute Optimizer analyzes workload patterns and recommends optimal resource configurations for cost and performance."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 64,
+    "question": "Which AWS service lets you manage multiple AWS accounts centrally?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Control Tower",
+      "B": "AWS IAM Identity Center",
+      "C": "AWS Organizations",
+      "D": "AWS Service Catalog"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "Organizations lets you centrally manage billing, access, compliance, and resources across multiple AWS accounts."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 65,
+    "question": "Which AWS service automates the setup of a secure multi-account AWS environment?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Organizations",
+      "B": "AWS Control Tower",
+      "C": "AWS Service Catalog",
+      "D": "AWS Config"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "Control Tower provides a landing zone to set up and govern a secure, compliant multi-account AWS environment."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 66,
+    "question": "Which AWS service automatically adjusts capacity across multiple AWS services to maintain performance?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon EC2 Auto Scaling",
+      "B": "AWS Lambda",
+      "C": "AWS Elastic Beanstalk",
+      "D": "AWS Auto Scaling"
+    },
+    "correct": [
+      "D"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "C"
+    ],
+    "section": "Management and Governance",
+    "explanation": "AWS Auto Scaling monitors applications and automatically adjusts capacity across EC2, DynamoDB, ECS, and more."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 67,
+    "question": "Which AWS service provides a unified interface to view and automate operational tasks across AWS resources?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS CloudFormation",
+      "B": "AWS Systems Manager",
+      "C": "AWS Config",
+      "D": "AWS CloudTrail"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "Systems Manager gives visibility and control of your infrastructure across EC2, on-premises, and hybrid environments."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 68,
+    "question": "Which AWS service is used to review your architecture against AWS best practices?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Trusted Advisor",
+      "B": "AWS Compute Optimizer",
+      "C": "AWS Well-Architected Tool",
+      "D": "AWS Config"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "The Well-Architected Tool measures your architecture against the six pillars of the Well-Architected Framework."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 69,
+    "question": "Which AWS service provisions and manages infrastructure using templates (IaC)?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS CLI",
+      "B": "AWS CloudFormation",
+      "C": "AWS CodeBuild",
+      "D": "AWS Config"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "CloudFormation uses JSON/YAML templates to model and provision AWS resources automatically and repeatably."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 70,
+    "question": "Which AWS service monitors your AWS account for health events affecting your resources?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon CloudWatch",
+      "B": "AWS Health Dashboard",
+      "C": "AWS Trusted Advisor",
+      "D": "Amazon Inspector"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "Health Dashboard provides personalized alerts and guidance when AWS events might impact your resources."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 71,
+    "question": "Which AWS service helps manage software licenses from vendors like Microsoft and Oracle on AWS?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Service Catalog",
+      "B": "AWS Systems Manager",
+      "C": "AWS License Manager",
+      "D": "AWS Config"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "License Manager tracks and manages software licenses to control usage and reduce over-licensing costs."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 72,
+    "question": "Which AWS service provides a central place to view and manage your AWS service limits?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Config",
+      "B": "Service Quotas",
+      "C": "AWS Trusted Advisor",
+      "D": "AWS Organizations"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "Service Quotas provides a central location to view, manage, and request increases for AWS service limits."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 73,
+    "question": "Which AWS service continuously audits AWS usage to simplify risk and compliance management?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Config",
+      "B": "AWS CloudTrail",
+      "C": "AWS Audit Manager",
+      "D": "AWS Security Hub"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Management and Governance",
+    "explanation": "Audit Manager continuously audits AWS usage to simplify how you manage risk and regulatory compliance."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 74,
+    "question": "Which AWS service lets you query data in S3 using SQL without loading it into a database?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Redshift",
+      "B": "Amazon Athena",
+      "C": "Amazon EMR",
+      "D": "AWS Glue"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Analytics",
+    "explanation": "Athena is serverless — you pay per query and analyze data directly in S3 using standard SQL."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 75,
+    "question": "Which AWS service provides managed Hadoop and Spark clusters for big data processing?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Redshift",
+      "B": "Amazon Athena",
+      "C": "Amazon EMR",
+      "D": "Amazon Kinesis"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Analytics",
+    "explanation": "EMR (Elastic MapReduce) is a managed cluster platform for big data frameworks like Hadoop and Spark."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 76,
+    "question": "Which AWS service is a fully managed ETL (extract, transform, load) service?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Athena",
+      "B": "AWS Glue",
+      "C": "Amazon EMR",
+      "D": "Amazon Kinesis"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Analytics",
+    "explanation": "Glue is a serverless data integration service for discovering, preparing, and combining data for analytics."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 77,
+    "question": "Which AWS service collects and processes real-time streaming data?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon SQS",
+      "B": "Amazon EMR",
+      "C": "Amazon Kinesis",
+      "D": "Amazon SNS"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Analytics",
+    "explanation": "Kinesis enables real-time collection, processing, and analysis of streaming data at any scale."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 78,
+    "question": "Which AWS service provides business intelligence dashboards and visualizations?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Athena",
+      "B": "Amazon Redshift",
+      "C": "Amazon QuickSight",
+      "D": "AWS Glue"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Analytics",
+    "explanation": "QuickSight is AWS's managed BI service for creating interactive dashboards and visualizations."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 79,
+    "question": "Which AWS service provides managed search and analytics using OpenSearch (Elasticsearch)?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Athena",
+      "B": "Amazon Kinesis",
+      "C": "Amazon OpenSearch Service",
+      "D": "Amazon QuickSight"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Analytics",
+    "explanation": "OpenSearch Service lets you search, analyze, and visualize data in real time at scale."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 80,
+    "question": "Which AWS service enables pub/sub messaging to broadcast notifications to multiple subscribers?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon SQS",
+      "B": "Amazon SNS",
+      "C": "Amazon EventBridge",
+      "D": "AWS Step Functions"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Application Integration",
+    "explanation": "SNS (Simple Notification Service) sends messages to many subscribers simultaneously via email, SMS, Lambda, and more."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 81,
+    "question": "Which AWS service provides a fully managed message queue to decouple application components?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon SNS",
+      "B": "Amazon SQS",
+      "C": "Amazon EventBridge",
+      "D": "AWS Step Functions"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Application Integration",
+    "explanation": "SQS (Simple Queue Service) stores messages in a queue so components can process them independently and at their own pace."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 82,
+    "question": "Which AWS service is a serverless event bus that connects applications using events?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon SNS",
+      "B": "Amazon SQS",
+      "C": "Amazon EventBridge",
+      "D": "AWS Step Functions"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Application Integration",
+    "explanation": "EventBridge routes events from AWS services, SaaS apps, and custom apps to target services."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 83,
+    "question": "Which AWS service orchestrates multiple AWS services into serverless workflows?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon EventBridge",
+      "B": "Amazon SQS",
+      "C": "AWS Step Functions",
+      "D": "AWS Lambda"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Application Integration",
+    "explanation": "Step Functions coordinates distributed applications using visual state machine workflows."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 84,
+    "question": "Which AWS service is the fully managed platform for building, training, and deploying ML models?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Rekognition",
+      "B": "Amazon Comprehend",
+      "C": "Amazon SageMaker AI",
+      "D": "Amazon Lex"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Machine Learning",
+    "explanation": "SageMaker is AWS's fully managed ML platform covering the entire machine learning workflow end to end."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 85,
+    "question": "Which AWS service analyzes images and videos using computer vision?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Textract",
+      "B": "Amazon Rekognition",
+      "C": "Amazon Comprehend",
+      "D": "Amazon Polly"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Machine Learning",
+    "explanation": "Rekognition detects objects, faces, text, scenes, and activities in images and videos."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 86,
+    "question": "Which AWS service extracts text and structured data from scanned documents?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Transcribe",
+      "B": "Amazon Rekognition",
+      "C": "Amazon Textract",
+      "D": "Amazon Comprehend"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Machine Learning",
+    "explanation": "Textract uses ML to automatically extract text, handwriting, and tabular data from documents."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 87,
+    "question": "Which AWS service converts text to natural-sounding speech?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Transcribe",
+      "B": "Amazon Translate",
+      "C": "Amazon Polly",
+      "D": "Amazon Lex"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Machine Learning",
+    "explanation": "Polly turns text into lifelike speech using deep learning in dozens of languages and voices."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 88,
+    "question": "Which AWS service converts speech to text?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Polly",
+      "B": "Amazon Transcribe",
+      "C": "Amazon Lex",
+      "D": "Amazon Translate"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Machine Learning",
+    "explanation": "Transcribe automatically converts audio speech to text using automatic speech recognition (ASR)."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 89,
+    "question": "Which AWS service provides NLP to extract insights like sentiment and entities from text?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Lex",
+      "B": "Amazon Translate",
+      "C": "Amazon Comprehend",
+      "D": "Amazon Textract"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Machine Learning",
+    "explanation": "Comprehend uses ML to find insights like sentiment, entities, and key phrases in unstructured text."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 90,
+    "question": "Which AWS service builds conversational chatbots using voice and text?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Polly",
+      "B": "Amazon Lex",
+      "C": "Amazon Comprehend",
+      "D": "Amazon Transcribe"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Machine Learning",
+    "explanation": "Lex provides speech recognition and natural language understanding to build chatbots (the same tech that powers Alexa)."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 91,
+    "question": "Which AWS service translates text between languages?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Comprehend",
+      "B": "Amazon Polly",
+      "C": "Amazon Transcribe",
+      "D": "Amazon Translate"
+    },
+    "correct": [
+      "D"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "C"
+    ],
+    "section": "Machine Learning",
+    "explanation": "Translate provides fast, high-quality language translation for content localization and communication."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 92,
+    "question": "Which AWS service is an intelligent enterprise search service powered by ML?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon OpenSearch Service",
+      "B": "Amazon Kendra",
+      "C": "Amazon Comprehend",
+      "D": "Amazon QuickSight"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Machine Learning",
+    "explanation": "Kendra is an intelligent enterprise search service that uses ML to find accurate answers from your documents."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 93,
+    "question": "Which AWS service is a generative AI assistant for business productivity?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Lex",
+      "B": "Amazon Comprehend",
+      "C": "Amazon Q",
+      "D": "Amazon Kendra"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Machine Learning",
+    "explanation": "Amazon Q is a generative AI assistant that answers questions and takes actions based on your company's data."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 94,
+    "question": "Which AWS service migrates databases to AWS with minimal downtime?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Migration Hub",
+      "B": "AWS Application Migration Service",
+      "C": "AWS Database Migration Service (DMS)",
+      "D": "AWS Schema Conversion Tool"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Migration and Transfer",
+    "explanation": "DMS migrates databases to AWS while keeping the source database operational during migration."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 95,
+    "question": "Which AWS service converts database schemas from one engine to another (e.g., Oracle to PostgreSQL)?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS DMS",
+      "B": "AWS Schema Conversion Tool (SCT)",
+      "C": "AWS Application Discovery Service",
+      "D": "Migration Evaluator"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Migration and Transfer",
+    "explanation": "SCT converts your database schema and stored procedures to the target database engine format."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 96,
+    "question": "Which AWS service provides a central hub to track migration project progress?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Application Discovery Service",
+      "B": "AWS Migration Hub",
+      "C": "Migration Evaluator",
+      "D": "AWS DMS"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Migration and Transfer",
+    "explanation": "Migration Hub provides a single location to track the progress of application migrations across AWS tools."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 97,
+    "question": "Which AWS service discovers on-premises server inventory and performance data to plan migrations?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Migration Hub",
+      "B": "Migration Evaluator",
+      "C": "AWS Application Discovery Service",
+      "D": "AWS DMS"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Migration and Transfer",
+    "explanation": "Application Discovery Service gathers server configuration and performance data to help plan cloud migrations."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 98,
+    "question": "Which AWS device physically transfers up to 80 TB of data to AWS?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Snowball Edge",
+      "B": "AWS Snowmobile",
+      "C": "AWS DataSync",
+      "D": "AWS Transfer Family"
+    },
+    "correct": [
+      "A"
+    ],
+    "incorrect": [
+      "B",
+      "C",
+      "D"
+    ],
+    "section": "Migration and Transfer",
+    "explanation": "Snowball Edge is a physical rugged device for transferring large amounts of data into and out of AWS."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 99,
+    "question": "Which AWS tool estimates the business case and total cost of ownership (TCO) for migrating to AWS?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Application Discovery Service",
+      "B": "AWS Migration Hub",
+      "C": "Migration Evaluator",
+      "D": "AWS Pricing Calculator"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Migration and Transfer",
+    "explanation": "Migration Evaluator provides a data-driven business case analysis for cloud migration."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 100,
+    "question": "Which tool lets you interact with AWS services directly from the command line?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS SDKs",
+      "B": "AWS CLI",
+      "C": "AWS CloudShell",
+      "D": "AWS Management Console"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Developer Tools",
+    "explanation": "The AWS CLI lets you control AWS services from your terminal with simple commands and scripts."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 101,
+    "question": "Which AWS service provides a fully managed continuous integration build service?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS CodePipeline",
+      "B": "AWS CodeBuild",
+      "C": "AWS CodeDeploy",
+      "D": "AWS X-Ray"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Developer Tools",
+    "explanation": "CodeBuild compiles source code, runs tests, and produces build artifacts without managing build servers."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 102,
+    "question": "Which AWS service automates the release pipeline for continuous delivery?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS CodeBuild",
+      "B": "AWS CodeDeploy",
+      "C": "AWS CodePipeline",
+      "D": "AWS X-Ray"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Developer Tools",
+    "explanation": "CodePipeline automates the build, test, and deploy phases of your release process."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 103,
+    "question": "Which AWS service traces requests through distributed applications for debugging and analysis?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon CloudWatch",
+      "B": "AWS CloudTrail",
+      "C": "AWS X-Ray",
+      "D": "AWS Config"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Developer Tools",
+    "explanation": "X-Ray traces requests through your application showing a visual map of how services interact and where delays occur."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 104,
+    "question": "Which AWS service stores Docker container images?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon ECS",
+      "B": "Amazon EKS",
+      "C": "Amazon ECR",
+      "D": "AWS Fargate"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Containers",
+    "explanation": "ECR (Elastic Container Registry) is a managed Docker container image registry for storing and deploying images."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 105,
+    "question": "Which AWS service provides managed Kubernetes clusters?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon ECS",
+      "B": "Amazon ECR",
+      "C": "AWS Fargate",
+      "D": "Amazon EKS"
+    },
+    "correct": [
+      "D"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "C"
+    ],
+    "section": "Containers",
+    "explanation": "EKS (Elastic Kubernetes Service) runs Kubernetes without managing your own Kubernetes control plane."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 106,
+    "question": "Which AWS service is AWS's native container orchestration service?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon EKS",
+      "B": "Amazon ECR",
+      "C": "Amazon ECS",
+      "D": "AWS Fargate"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Containers",
+    "explanation": "ECS (Elastic Container Service) is AWS's native service for running and managing Docker containers at scale."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 107,
+    "question": "Which AWS service is a managed cloud-based contact center?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon SES",
+      "B": "Amazon SNS",
+      "C": "Amazon Connect",
+      "D": "Amazon Chime"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Business Applications",
+    "explanation": "Connect is a cloud-based contact center service for omnichannel customer support operations."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 108,
+    "question": "Which AWS service sends bulk marketing and transactional emails?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon SNS",
+      "B": "Amazon SES",
+      "C": "Amazon Connect",
+      "D": "Amazon Pinpoint"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Business Applications",
+    "explanation": "SES (Simple Email Service) is a cloud-based email sending service for marketing and transactional emails."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 109,
+    "question": "Which AWS service streams desktop applications from the cloud to any device?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon WorkSpaces",
+      "B": "Amazon AppStream 2.0",
+      "C": "Amazon WorkSpaces Secure Browser",
+      "D": "AWS Amplify"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "End User Computing",
+    "explanation": "AppStream 2.0 streams desktop applications from AWS to any device without rewriting the applications."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 110,
+    "question": "Which AWS service provides fully managed virtual cloud desktops?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon AppStream 2.0",
+      "B": "Amazon WorkSpaces Secure Browser",
+      "C": "Amazon WorkSpaces",
+      "D": "Amazon Connect"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "End User Computing",
+    "explanation": "WorkSpaces provides fully managed, cloud-based Windows or Linux desktops accessible from anywhere."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 111,
+    "question": "Which AWS service is used to build and deploy full-stack web and mobile apps?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS AppSync",
+      "B": "AWS Amplify",
+      "C": "Amazon API Gateway",
+      "D": "AWS AppRunner"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Frontend Web and Mobile",
+    "explanation": "Amplify is a set of tools and services for building and deploying scalable full-stack web and mobile applications."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 112,
+    "question": "Which AWS service provides managed GraphQL APIs?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon API Gateway",
+      "B": "AWS Amplify",
+      "C": "AWS AppSync",
+      "D": "AWS Lambda"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Frontend Web and Mobile",
+    "explanation": "AppSync creates serverless GraphQL and Pub/Sub APIs that simplify data access and real-time updates."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 113,
+    "question": "Which AWS service connects IoT devices to the AWS cloud?",
+    "type": "single-select",
+    "choices": {
+      "A": "Amazon Kinesis",
+      "B": "AWS IoT Core",
+      "C": "AWS Greengrass",
+      "D": "Amazon EventBridge"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "IoT",
+    "explanation": "IoT Core lets connected devices interact with AWS cloud applications and other devices securely at scale."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 114,
+    "question": "Which AWS tool estimates the cost of AWS services before you deploy?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Cost Explorer",
+      "B": "AWS Budgets",
+      "C": "AWS Pricing Calculator",
+      "D": "AWS Cost and Usage Report"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "The Pricing Calculator lets you estimate monthly AWS service costs before building your solution."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 115,
+    "question": "Which AWS service visualizes and analyzes your AWS costs over time?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Budgets",
+      "B": "AWS Cost Explorer",
+      "C": "AWS Pricing Calculator",
+      "D": "AWS Cost and Usage Report"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "Cost Explorer provides interactive graphs and reports to analyze and forecast your AWS spending."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 116,
+    "question": "Which AWS service alerts you when costs or usage exceed a defined threshold?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Cost Explorer",
+      "B": "AWS Cost and Usage Report",
+      "C": "AWS Budgets",
+      "D": "AWS Trusted Advisor"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "Budgets lets you set custom cost and usage alerts and notifies you when thresholds are exceeded."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 117,
+    "question": "Which AWS support plan includes a dedicated Technical Account Manager (TAM)?",
+    "type": "single-select",
+    "choices": {
+      "A": "Basic",
+      "B": "Developer",
+      "C": "Business",
+      "D": "Enterprise"
+    },
+    "correct": [
+      "D"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "C"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "Only the Enterprise support plan includes a dedicated TAM for proactive guidance and operational reviews."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 118,
+    "question": "Which AWS support plan is free for all AWS customers?",
+    "type": "single-select",
+    "choices": {
+      "A": "Developer",
+      "B": "Basic",
+      "C": "Business",
+      "D": "Enterprise"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "Basic support is free and includes access to documentation, whitepapers, and AWS re:Post."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 119,
+    "question": "Which AWS support plan provides 24/7 phone, email, and chat access to Cloud Support Engineers?",
+    "type": "single-select",
+    "choices": {
+      "A": "Basic",
+      "B": "Developer",
+      "C": "Business",
+      "D": "Enterprise"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "Business plan (and above) provides 24/7 access to Cloud Support Engineers via phone, email, and chat."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 120,
+    "question": "Which AWS resource is a community Q&A forum for technical questions?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Knowledge Center",
+      "B": "AWS re:Post",
+      "C": "AWS Support Center",
+      "D": "AWS Professional Services"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "re:Post is a community-based Q&A service where AWS customers and experts share knowledge and solutions."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 121,
+    "question": "Which AWS resource contains a searchable database of common support questions and answers?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS re:Post",
+      "B": "AWS Knowledge Center",
+      "C": "AWS Support Center",
+      "D": "AWS Documentation"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "The Knowledge Center contains FAQs and articles addressing the most common AWS support questions."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 122,
+    "question": "Which program connects customers with AWS-certified consulting and technology partners?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Professional Services",
+      "B": "AWS re:Post",
+      "C": "AWS Partner Network (APN)",
+      "D": "AWS solutions architects"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "APN is the global program for AWS technology and consulting partners who build solutions and services for customers."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 123,
+    "question": "Which AWS team provides hands-on engagement to help enterprise customers achieve business outcomes?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Partner Network",
+      "B": "AWS re:Post",
+      "C": "AWS Professional Services",
+      "D": "AWS Support"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "AWS Professional Services is a global team of AWS experts that work alongside customer teams on engagements."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 124,
+    "question": "Which AWS resource provides expert-written strategies and patterns for common migration and modernization tasks?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Knowledge Center",
+      "B": "AWS Prescriptive Guidance",
+      "C": "AWS re:Post",
+      "D": "AWS Professional Services"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "AWS Prescriptive Guidance provides step-by-step strategies, guides, and patterns from AWS experts."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 125,
+    "question": "Which AWS service lets you find and purchase third-party software and data products?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Service Catalog",
+      "B": "AWS Partner Network",
+      "C": "AWS Marketplace",
+      "D": "AWS re:Post"
+    },
+    "correct": [
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "B",
+      "D"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "AWS Marketplace is a digital catalog with thousands of software listings from independent software vendors."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 126,
+    "question": "Which AWS service allows organizations to create approved catalogs of cloud products for their users?",
+    "type": "single-select",
+    "choices": {
+      "A": "AWS Marketplace",
+      "B": "AWS Service Catalog",
+      "C": "AWS Control Tower",
+      "D": "AWS Organizations"
+    },
+    "correct": [
+      "B"
+    ],
+    "incorrect": [
+      "A",
+      "C",
+      "D"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "Service Catalog allows organizations to create and manage portfolios of approved AWS products for self-service."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 127,
+    "question": "Which of the following are examples of AWS global infrastructure components? (Select TWO)",
+    "type": "multiple-select",
+    "choices": {
+      "A": "Availability Zones",
+      "B": "VPCs",
+      "C": "Edge Locations",
+      "D": "Security Groups",
+      "E": "IAM Roles"
+    },
+    "correct": [
+      "A",
+      "C"
+    ],
+    "incorrect": [
+      "B",
+      "D",
+      "E"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "AWS global infrastructure includes Regions, Availability Zones, and Edge Locations (used by CloudFront and Route 53)."
+  },
+  {
+    "source_file": "aws-ccp-intro-questions.md",
+    "question_number": 128,
+    "question": "Which of the following are correct examples of the AWS Shared Responsibility Model? (Select TWO)",
+    "type": "multiple-select",
+    "choices": {
+      "A": "AWS is responsible for patching EC2 operating systems",
+      "B": "AWS is responsible for the physical security of data centers",
+      "C": "Customers are responsible for managing IAM users and permissions",
+      "D": "AWS is responsible for encrypting customer application data",
+      "E": "Customers are responsible for replacing failed network hardware"
+    },
+    "correct": [
+      "B",
+      "C"
+    ],
+    "incorrect": [
+      "A",
+      "D",
+      "E"
+    ],
+    "section": "Pricing and Support",
+    "explanation": "AWS owns physical security; customers own their identity configuration, data, and application-layer security."
+  }
+]
