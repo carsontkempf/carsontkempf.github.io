@@ -288,7 +288,7 @@ layout: post
     <h1 class="hero-title">Practice Tests</h1>
     <div class="icon-btn-container">
         <a href="/practice-tests/" class="icon-btn" id="practice-tests-btn">
-            <img src="/assets/img/aws.jpeg" alt="Practice Tests" id="aws-img">
+            <img src="/assets/img/test.png" alt="Practice Tests" id="test-img">
         </a>
     </div>
 </div>

@@ -1,23 +1,44 @@
 (function() {
   'use strict';
 
+  var DIFF_META = {
+    easy:   { label: 'Easy',   color: '#27ae60', cls: 'easy' },
+    medium: { label: 'Medium', color: '#e67e22', cls: 'medium' },
+    hard:   { label: 'Hard',   color: '#c0392b', cls: 'hard' }
+  };
+
   function showState(name) {
-    var states = ['landing', 'question', 'summary'];
+    var states = ['subject', 'select', 'question', 'summary'];
     states.forEach(function(s) {
       var el = document.getElementById('pt-' + s);
       if (el) el.style.display = (s === name) ? '' : 'none';
     });
   }
 
-  function populateSelect(sets) {
-    var sel = document.getElementById('pt-set-select');
-    if (!sel) return;
-    sel.innerHTML = '';
-    var difficultyMeta = {
-      easy:   { label: 'Easy',   color: '#27ae60' },
-      medium: { label: 'Medium', color: '#e67e22' },
-      hard:   { label: 'Hard',   color: '#c0392b' }
-    };
+  function renderSubjects(subjects, onSelect) {
+    var grid = document.getElementById('pt-subject-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    subjects.forEach(function(subject) {
+      var btn = document.createElement('button');
+      btn.className = 'pt-subject-btn';
+      var img = document.createElement('img');
+      img.src = subject.image;
+      img.alt = subject.label;
+      var lbl = document.createElement('span');
+      lbl.className = 'pt-subject-label';
+      lbl.textContent = subject.label;
+      btn.appendChild(img);
+      btn.appendChild(lbl);
+      btn.addEventListener('click', function() { onSelect(subject); });
+      grid.appendChild(btn);
+    });
+  }
+
+  function renderRadioButtons(sets) {
+    var container = document.getElementById('pt-radio-group');
+    if (!container) return;
+    container.innerHTML = '';
     var groups = {};
     var order = ['easy', 'medium', 'hard'];
     sets.forEach(function(s) {
@@ -27,18 +48,32 @@
     });
     order.forEach(function(d) {
       if (!groups[d]) return;
-      var meta = difficultyMeta[d];
-      var grp = document.createElement('optgroup');
-      grp.label = meta.label;
-      grp.style.color = meta.color;
+      var meta = DIFF_META[d];
+      var section = document.createElement('div');
+      section.className = 'pt-radio-section pt-section-' + d;
+      var heading = document.createElement('span');
+      heading.className = 'pt-section-label';
+      heading.textContent = meta.label;
+      section.appendChild(heading);
       groups[d].forEach(function(s) {
-        var opt = document.createElement('option');
-        opt.value = s.key;
-        opt.textContent = s.label;
-        opt.style.color = meta.color;
-        grp.appendChild(opt);
+        var label = document.createElement('label');
+        label.className = 'pt-radio-option';
+        var input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'pt-set';
+        input.value = s.key;
+        input.addEventListener('change', function() {
+          var startBtn = document.getElementById('pt-start-btn');
+          if (startBtn) startBtn.disabled = false;
+        });
+        var span = document.createElement('span');
+        span.className = 'pt-radio-label';
+        span.textContent = s.label;
+        label.appendChild(input);
+        label.appendChild(span);
+        section.appendChild(label);
       });
-      sel.appendChild(grp);
+      container.appendChild(section);
     });
   }
 
@@ -292,7 +327,8 @@
 
   window.QuestionRenderer = {
     showState: showState,
-    populateSelect: populateSelect,
+    renderSubjects: renderSubjects,
+    renderRadioButtons: renderRadioButtons,
     updateTimer: updateTimer,
     updateProgressBar: updateProgressBar,
     render: render,

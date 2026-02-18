@@ -17,38 +17,47 @@ permalink: /practice-tests/
     "cloudPractitioner5": {{ site.data['practice-tests']['cloudPractitioner5'] | jsonify }}
   };
 
-  var QUIZ_SETS = [
-    { key: "awsServiceDefs",     label: "AWS Service Definitions", difficulty: "easy" },
-    { key: "awsCcpIntro",        label: "Intro Questions",         difficulty: "medium" },
-    { key: "cloudPractitioner1", label: "Practice Test 1",         difficulty: "hard" },
-    { key: "cloudPractitioner2", label: "Practice Test 2",         difficulty: "hard" },
-    { key: "cloudPractitioner3", label: "Practice Test 3",         difficulty: "hard" },
-    { key: "cloudPractitioner4", label: "Practice Test 4",         difficulty: "hard" },
-    { key: "cloudPractitioner5", label: "Practice Test 5",         difficulty: "hard" }
+  var QUIZ_SUBJECTS = [
+    {
+      key: "aws-ccp",
+      label: "AWS Certified Cloud Practitioner",
+      image: "/assets/img/aws.jpeg",
+      sets: [
+        { key: "awsServiceDefs",     label: "AWS Service Definitions", difficulty: "easy" },
+        { key: "awsCcpIntro",        label: "Intro Questions",         difficulty: "medium" },
+        { key: "cloudPractitioner1", label: "Practice Test 1",         difficulty: "hard" },
+        { key: "cloudPractitioner2", label: "Practice Test 2",         difficulty: "hard" },
+        { key: "cloudPractitioner3", label: "Practice Test 3",         difficulty: "hard" },
+        { key: "cloudPractitioner4", label: "Practice Test 4",         difficulty: "hard" },
+        { key: "cloudPractitioner5", label: "Practice Test 5",         difficulty: "hard" }
+      ]
+    }
   ];
 </script>
 
-<!-- STATE: landing -->
-<div id="pt-landing" class="pt-container">
-  <div class="pt-landing-card">
-    <h2 class="pt-landing-title">AWS Practice Tests</h2>
-    <p class="pt-landing-subtitle">Select a test set and start practicing</p>
+<!-- STATE: subject selection -->
+<div id="pt-subject" class="pt-container">
+  <div class="pt-subject-card">
+    <h2 class="pt-landing-title">Practice Tests</h2>
+    <p class="pt-landing-subtitle">Choose a subject</p>
+    <div id="pt-subject-grid" class="pt-subject-grid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</div>
 
-    <div class="pt-landing-category">
-      <label for="pt-category-select">Category</label>
-      <select id="pt-category-select" class="pt-select">
-        <option value="aws-ccp">AWS Certified Cloud Practitioner</option>
-      </select>
+<!-- STATE: test set selection -->
+<div id="pt-select" class="pt-container" style="display:none;">
+  <div class="pt-select-card">
+    <button id="pt-back-btn" class="pt-btn pt-btn-ghost pt-back-btn">&larr; Back</button>
+    <h2 id="pt-select-title" class="pt-landing-title"></h2>
+    <p class="pt-landing-subtitle">Select a test</p>
+
+    <div id="pt-radio-group" class="pt-radio-group">
+      <!-- populated by JS -->
     </div>
 
-    <div class="pt-landing-category">
-      <label for="pt-set-select">Test Set</label>
-      <select id="pt-set-select" class="pt-select">
-        <!-- populated by JS -->
-      </select>
-    </div>
-
-    <div class="pt-landing-options">
+    <div class="pt-select-footer">
       <label class="pt-toggle-wrap" for="pt-randomize">
         <span>Randomize questions</span>
         <span class="pt-toggle-switch">
@@ -56,9 +65,8 @@ permalink: /practice-tests/
           <span class="pt-toggle-slider"></span>
         </span>
       </label>
+      <button id="pt-start-btn" class="pt-btn pt-btn-primary" disabled>Start</button>
     </div>
-
-    <button id="pt-start-btn" class="pt-btn pt-btn-primary">Start Quiz</button>
   </div>
 </div>
 
@@ -115,7 +123,7 @@ permalink: /practice-tests/
     </div>
     <div class="pt-summary-actions">
       <button id="pt-restart-btn" class="pt-btn pt-btn-primary">Try Again</button>
-      <button id="pt-home-btn" class="pt-btn pt-btn-ghost">Choose Another Set</button>
+      <button id="pt-home-btn" class="pt-btn pt-btn-ghost">Choose Another Test</button>
     </div>
   </div>
 </div>
@@ -128,11 +136,23 @@ permalink: /practice-tests/
 (function() {
   'use strict';
 
+  var activeSubject = null;
+
+  function selectSubject(subject) {
+    activeSubject = subject;
+    document.getElementById('pt-select-title').textContent = subject.label;
+    QuestionRenderer.renderRadioButtons(subject.sets);
+    document.getElementById('pt-start-btn').disabled = true;
+    QuestionRenderer.showState('select');
+  }
+
   function startQuiz() {
-    var sel = document.getElementById('pt-set-select');
+    var checked = document.querySelector('input[name="pt-set"]:checked');
+    if (!checked) return;
+    var key = checked.value;
     var randomize = document.getElementById('pt-randomize').checked;
-    var key = sel.value;
-    var label = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : key;
+    var labelEl = checked.closest('label');
+    var label = labelEl ? labelEl.querySelector('.pt-radio-label').textContent : key;
 
     QuizEngine.startQuiz(key, randomize, label);
 
@@ -172,26 +192,29 @@ permalink: /practice-tests/
   function quit() {
     QuizEngine.stopTimer();
     KeyboardHandler.disable();
-    QuestionRenderer.showState('landing');
+    QuestionRenderer.showState('select');
   }
 
   function init() {
-    QuestionRenderer.populateSelect(QUIZ_SETS);
-    QuestionRenderer.showState('landing');
+    QuestionRenderer.renderSubjects(QUIZ_SUBJECTS, selectSubject);
+    QuestionRenderer.showState('subject');
 
+    document.getElementById('pt-back-btn').addEventListener('click', function() {
+      QuestionRenderer.showState('subject');
+    });
     document.getElementById('pt-start-btn').addEventListener('click', startQuiz);
     document.getElementById('pt-submit-btn').addEventListener('click', handleSubmit);
     document.getElementById('pt-next-btn').addEventListener('click', handleNext);
     document.getElementById('pt-quit-btn').addEventListener('click', function() { quit(); });
     document.getElementById('pt-restart-btn').addEventListener('click', function() {
-      QuestionRenderer.showState('landing');
+      if (activeSubject) selectSubject(activeSubject);
+      else QuestionRenderer.showState('select');
     });
     document.getElementById('pt-home-btn').addEventListener('click', function() {
-      QuestionRenderer.showState('landing');
+      QuestionRenderer.showState('subject');
     });
   }
 
-  // Expose quit for keyboard handler
   window.QuizApp = { quit: quit };
 
   document.addEventListener('DOMContentLoaded', init);
