@@ -61,6 +61,23 @@
   outline-offset: 1px;
 }
 
+/* Difficulty badge shown next to selected set name */
+.pt-difficulty-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.pt-difficulty-badge.easy   { background: rgba(39,174,96,0.15);  color: #27ae60; }
+.pt-difficulty-badge.medium { background: rgba(230,126,34,0.15); color: #e67e22; }
+.pt-difficulty-badge.hard   { background: rgba(192,57,43,0.15);  color: #c0392b; }
+
 .pt-landing-options {
   margin: 20px auto;
   display: flex;

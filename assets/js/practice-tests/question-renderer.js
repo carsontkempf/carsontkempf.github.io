@@ -13,11 +13,32 @@
     var sel = document.getElementById('pt-set-select');
     if (!sel) return;
     sel.innerHTML = '';
+    var difficultyMeta = {
+      easy:   { label: 'Easy',   color: '#27ae60' },
+      medium: { label: 'Medium', color: '#e67e22' },
+      hard:   { label: 'Hard',   color: '#c0392b' }
+    };
+    var groups = {};
+    var order = ['easy', 'medium', 'hard'];
     sets.forEach(function(s) {
-      var opt = document.createElement('option');
-      opt.value = s.key;
-      opt.textContent = s.label;
-      sel.appendChild(opt);
+      var d = s.difficulty || 'hard';
+      if (!groups[d]) groups[d] = [];
+      groups[d].push(s);
+    });
+    order.forEach(function(d) {
+      if (!groups[d]) return;
+      var meta = difficultyMeta[d];
+      var grp = document.createElement('optgroup');
+      grp.label = meta.label;
+      grp.style.color = meta.color;
+      groups[d].forEach(function(s) {
+        var opt = document.createElement('option');
+        opt.value = s.key;
+        opt.textContent = s.label;
+        opt.style.color = meta.color;
+        grp.appendChild(opt);
+      });
+      sel.appendChild(grp);
     });
   }
 

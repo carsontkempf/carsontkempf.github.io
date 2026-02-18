@@ -24,11 +24,44 @@
     return a;
   }
 
+  function convertDefinitionsToMC(defs) {
+    var pool = defs.filter(function(d) { return d.type === 'definition' && d.answer; });
+    var keys = ['A', 'B', 'C', 'D'];
+    return pool.map(function(def, i) {
+      // Pick 3 wrong answers from the rest of the pool
+      var others = pool.filter(function(d, j) { return j !== i; });
+      var wrong = shuffle(others).slice(0, 3).map(function(d) { return d.answer; });
+      // Shuffle correct + wrong into 4 slots
+      var slots = shuffle([def.answer].concat(wrong));
+      var choices = {}, correct = [], incorrect = [];
+      slots.forEach(function(text, idx) {
+        var k = keys[idx];
+        choices[k] = text;
+        if (text === def.answer) correct.push(k);
+        else incorrect.push(k);
+      });
+      var correctExplanation = {};
+      correctExplanation[correct[0]] = def.answer;
+      return {
+        question_number: i + 1,
+        question: def.question,
+        type: 'single-select',
+        choices: choices,
+        correct: correct,
+        incorrect: incorrect,
+        domain: def.domain || null,
+        explanations: { correct: correctExplanation, incorrect: {} }
+      };
+    });
+  }
+
   function loadSet(dataKey) {
     var raw = window.QUIZ_DATA[dataKey];
     if (!raw) return [];
-    // Support both array directly or object with array wrapper
     var arr = Array.isArray(raw) ? raw : (raw.questions || []);
+    // If all entries are definitions, convert to multiple choice
+    var allDefs = arr.length > 0 && arr.every(function(q) { return q.type === 'definition'; });
+    if (allDefs) return convertDefinitionsToMC(arr);
     return arr.filter(function(q) {
       return q.type !== 'definition' && q.choices && q.correct && q.correct.length > 0;
     });

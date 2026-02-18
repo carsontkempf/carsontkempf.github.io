@@ -8,21 +8,23 @@ permalink: /practice-tests/
 
 <script>
   var QUIZ_DATA = {
+    "awsServiceDefs":     {{ site.data['practice-tests']['aws-ccp-service-definitions'] | jsonify }},
+    "awsCcpIntro":        {{ site.data['practice-tests']['aws-ccp-intro-questions'] | jsonify }},
     "cloudPractitioner1": {{ site.data['practice-tests']['cloudPractitioner1'] | jsonify }},
     "cloudPractitioner2": {{ site.data['practice-tests']['cloudPractitioner2'] | jsonify }},
     "cloudPractitioner3": {{ site.data['practice-tests']['cloudPractitioner3'] | jsonify }},
     "cloudPractitioner4": {{ site.data['practice-tests']['cloudPractitioner4'] | jsonify }},
-    "cloudPractitioner5": {{ site.data['practice-tests']['cloudPractitioner5'] | jsonify }},
-    "awsCcpIntro":        {{ site.data['practice-tests']['aws-ccp-intro-questions'] | jsonify }}
+    "cloudPractitioner5": {{ site.data['practice-tests']['cloudPractitioner5'] | jsonify }}
   };
 
   var QUIZ_SETS = [
-    { key: "cloudPractitioner1", label: "AWS CCP - Practice Set 1", category: "aws-ccp" },
-    { key: "cloudPractitioner2", label: "AWS CCP - Practice Set 2", category: "aws-ccp" },
-    { key: "cloudPractitioner3", label: "AWS CCP - Practice Set 3", category: "aws-ccp" },
-    { key: "cloudPractitioner4", label: "AWS CCP - Practice Set 4", category: "aws-ccp" },
-    { key: "cloudPractitioner5", label: "AWS CCP - Practice Set 5", category: "aws-ccp" },
-    { key: "awsCcpIntro",        label: "AWS CCP - Intro Questions", category: "aws-ccp" }
+    { key: "awsServiceDefs",     label: "AWS Service Definitions", difficulty: "easy" },
+    { key: "awsCcpIntro",        label: "Intro Questions",         difficulty: "medium" },
+    { key: "cloudPractitioner1", label: "Practice Test 1",         difficulty: "hard" },
+    { key: "cloudPractitioner2", label: "Practice Test 2",         difficulty: "hard" },
+    { key: "cloudPractitioner3", label: "Practice Test 3",         difficulty: "hard" },
+    { key: "cloudPractitioner4", label: "Practice Test 4",         difficulty: "hard" },
+    { key: "cloudPractitioner5", label: "Practice Test 5",         difficulty: "hard" }
   ];
 </script>
 

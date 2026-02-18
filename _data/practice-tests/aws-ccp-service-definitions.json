@@ -1,0 +1,807 @@
+[
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Athena?",
+    "type": "definition",
+    "answer": "Serverless SQL query service that analyzes data directly in S3 with no infrastructure to manage.",
+    "domain": "Analytics"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon EMR?",
+    "type": "definition",
+    "answer": "Managed big data platform for running distributed frameworks like Hadoop and Spark at scale.",
+    "domain": "Analytics"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Glue?",
+    "type": "definition",
+    "answer": "Serverless ETL service for discovering, preparing, and combining data for analytics and ML.",
+    "domain": "Analytics"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Kinesis?",
+    "type": "definition",
+    "answer": "Real-time streaming data service for collecting, processing, and analyzing data as it arrives.",
+    "domain": "Analytics"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon OpenSearch Service?",
+    "type": "definition",
+    "answer": "Managed search and analytics engine for real-time log analysis, full-text search, and visualization.",
+    "domain": "Analytics"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon QuickSight?",
+    "type": "definition",
+    "answer": "Cloud-native business intelligence service for creating interactive dashboards and visualizations.",
+    "domain": "Analytics"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Redshift?",
+    "type": "definition",
+    "answer": "Managed petabyte-scale data warehouse designed for running complex analytical queries on large datasets.",
+    "domain": "Analytics"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon EventBridge?",
+    "type": "definition",
+    "answer": "Serverless event bus that routes events between AWS services, SaaS apps, and custom applications.",
+    "domain": "Application Integration"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Simple Notification Service (Amazon SNS)?",
+    "type": "definition",
+    "answer": "Pub/sub messaging service that broadcasts notifications to multiple subscribers simultaneously via email, SMS, or HTTP.",
+    "domain": "Application Integration"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Simple Queue Service (Amazon SQS)?",
+    "type": "definition",
+    "answer": "Managed message queue service for decoupling and scaling distributed application components.",
+    "domain": "Application Integration"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Step Functions?",
+    "type": "definition",
+    "answer": "Serverless workflow orchestration service for coordinating multiple AWS services into visual state machine workflows.",
+    "domain": "Application Integration"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Connect?",
+    "type": "definition",
+    "answer": "Cloud-based omnichannel contact center service for customer support operations.",
+    "domain": "Business Applications"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Simple Email Service (Amazon SES)?",
+    "type": "definition",
+    "answer": "Cloud-based email sending service for high-volume marketing and transactional emails.",
+    "domain": "Business Applications"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Budgets?",
+    "type": "definition",
+    "answer": "Cost management tool for setting custom spending and usage thresholds with automated alerts.",
+    "domain": "Cloud Financial Management"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Cost and Usage Reports?",
+    "type": "definition",
+    "answer": "Detailed billing reports that provide the most granular breakdown of AWS costs and usage data.",
+    "domain": "Cloud Financial Management"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Cost Explorer?",
+    "type": "definition",
+    "answer": "Interactive tool for visualizing, analyzing, and forecasting your AWS costs and usage over time.",
+    "domain": "Cloud Financial Management"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Marketplace?",
+    "type": "definition",
+    "answer": "Digital catalog for discovering and purchasing third-party software, data products, and services on AWS.",
+    "domain": "Cloud Financial Management"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Batch?",
+    "type": "definition",
+    "answer": "Managed service that dynamically provisions compute resources to run batch computing jobs at any scale.",
+    "domain": "Compute"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon EC2?",
+    "type": "definition",
+    "answer": "Scalable virtual server instances in the cloud with flexible compute, memory, and storage options.",
+    "domain": "Compute"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Elastic Beanstalk?",
+    "type": "definition",
+    "answer": "Platform as a service that automatically deploys, scales, and manages web applications without infrastructure management.",
+    "domain": "Compute"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Lightsail?",
+    "type": "definition",
+    "answer": "Simplified virtual private server service with bundled compute, storage, and networking at predictable low cost.",
+    "domain": "Compute"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Outposts?",
+    "type": "definition",
+    "answer": "AWS-managed hardware and software deployed on-premises to run AWS infrastructure in your own data center.",
+    "domain": "Compute"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Elastic Container Registry (Amazon ECR)?",
+    "type": "definition",
+    "answer": "Managed Docker container image registry for storing, managing, and deploying container images.",
+    "domain": "Containers"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Elastic Container Service (Amazon ECS)?",
+    "type": "definition",
+    "answer": "AWS-native container orchestration service for running and managing Docker containers at scale.",
+    "domain": "Containers"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Elastic Kubernetes Service (Amazon EKS)?",
+    "type": "definition",
+    "answer": "Managed Kubernetes service for running containerized workloads without managing the Kubernetes control plane.",
+    "domain": "Containers"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Support?",
+    "type": "definition",
+    "answer": "Tiered technical support service providing access to AWS experts, tools, and guidance (Basic, Developer, Business, Enterprise).",
+    "domain": "Customer Enablement"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Aurora?",
+    "type": "definition",
+    "answer": "Cloud-native relational database compatible with MySQL and PostgreSQL, offering up to 5x MySQL performance.",
+    "domain": "Database"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon DocumentDB?",
+    "type": "definition",
+    "answer": "Fully managed document database service compatible with MongoDB workloads.",
+    "domain": "Database"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon DynamoDB?",
+    "type": "definition",
+    "answer": "Fully managed serverless NoSQL key-value and document database with single-digit millisecond performance at any scale.",
+    "domain": "Database"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon ElastiCache?",
+    "type": "definition",
+    "answer": "In-memory caching service supporting Redis and Memcached to reduce database load and improve application speed.",
+    "domain": "Database"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Neptune?",
+    "type": "definition",
+    "answer": "Managed graph database service for applications with highly connected data like social networks and fraud detection.",
+    "domain": "Database"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon RDS?",
+    "type": "definition",
+    "answer": "Managed relational database service supporting MySQL, PostgreSQL, MariaDB, Oracle, and SQL Server.",
+    "domain": "Database"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS CLI?",
+    "type": "definition",
+    "answer": "Command-line tool for interacting with and automating AWS services directly from a terminal.",
+    "domain": "Developer Tools"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS CodeBuild?",
+    "type": "definition",
+    "answer": "Managed continuous integration service that compiles source code, runs tests, and produces build artifacts.",
+    "domain": "Developer Tools"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS CodePipeline?",
+    "type": "definition",
+    "answer": "Managed continuous delivery service that automates the build, test, and deploy phases of a release process.",
+    "domain": "Developer Tools"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS X-Ray?",
+    "type": "definition",
+    "answer": "Distributed tracing service for debugging, analyzing, and visualizing requests across distributed applications.",
+    "domain": "Developer Tools"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon AppStream 2.0?",
+    "type": "definition",
+    "answer": "Managed application streaming service that delivers desktop applications from AWS to any device without rewriting them.",
+    "domain": "End User Computing"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon WorkSpaces?",
+    "type": "definition",
+    "answer": "Managed cloud desktop service (VDI) providing persistent Windows or Linux virtual desktops accessible from anywhere.",
+    "domain": "End User Computing"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon WorkSpaces Secure Browser?",
+    "type": "definition",
+    "answer": "Managed secure browser service for providing remote workers access to internal web applications without client software.",
+    "domain": "End User Computing"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Amplify?",
+    "type": "definition",
+    "answer": "Development platform for building, deploying, and hosting scalable full-stack web and mobile applications.",
+    "domain": "Frontend Web and Mobile"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS AppSync?",
+    "type": "definition",
+    "answer": "Managed GraphQL API service with real-time data synchronization and offline capabilities.",
+    "domain": "Frontend Web and Mobile"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS IoT Core?",
+    "type": "definition",
+    "answer": "Managed service for securely connecting and managing IoT devices to AWS cloud applications at scale.",
+    "domain": "Internet of Things (IoT)"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Comprehend?",
+    "type": "definition",
+    "answer": "NLP service that uses ML to extract insights like sentiment, entities, and key phrases from unstructured text.",
+    "domain": "Machine Learning"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Kendra?",
+    "type": "definition",
+    "answer": "ML-powered intelligent enterprise search service that finds accurate answers from your documents and data sources.",
+    "domain": "Machine Learning"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Lex?",
+    "type": "definition",
+    "answer": "Conversational AI service for building voice and text chatbots using the same technology that powers Alexa.",
+    "domain": "Machine Learning"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Polly?",
+    "type": "definition",
+    "answer": "Text-to-speech service that converts text into natural-sounding speech in dozens of languages and voices.",
+    "domain": "Machine Learning"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Q?",
+    "type": "definition",
+    "answer": "Generative AI assistant for business that answers questions and takes actions using your company's data.",
+    "domain": "Machine Learning"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Rekognition?",
+    "type": "definition",
+    "answer": "Computer vision service for analyzing images and videos to detect objects, faces, text, and activities.",
+    "domain": "Machine Learning"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon SageMaker AI?",
+    "type": "definition",
+    "answer": "Fully managed platform covering the entire ML workflow: data preparation, model building, training, and deployment.",
+    "domain": "Machine Learning"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Textract?",
+    "type": "definition",
+    "answer": "ML service that automatically extracts text, handwriting, and structured data from scanned documents.",
+    "domain": "Machine Learning"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Transcribe?",
+    "type": "definition",
+    "answer": "Automatic speech recognition service that converts audio recordings to text.",
+    "domain": "Machine Learning"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Translate?",
+    "type": "definition",
+    "answer": "Neural machine translation service for fast, high-quality text translation between languages.",
+    "domain": "Machine Learning"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Auto Scaling?",
+    "type": "definition",
+    "answer": "Automatically adjusts resource capacity across multiple AWS services to maintain performance and minimize cost.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS CloudFormation?",
+    "type": "definition",
+    "answer": "Infrastructure as code service that provisions and manages AWS resources using JSON/YAML templates.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS CloudTrail?",
+    "type": "definition",
+    "answer": "Service that logs and audits every API call made in your AWS account for security and compliance.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon CloudWatch?",
+    "type": "definition",
+    "answer": "Monitoring and observability service for collecting metrics, monitoring logs, and setting alarms on AWS resources.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Compute Optimizer?",
+    "type": "definition",
+    "answer": "Analyzes workload usage patterns and recommends optimal AWS compute resources for cost and performance.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Config?",
+    "type": "definition",
+    "answer": "Continuously records AWS resource configurations and evaluates them against desired compliance rules.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Control Tower?",
+    "type": "definition",
+    "answer": "Automates the setup and ongoing governance of a secure, compliant multi-account AWS environment (landing zone).",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Health Dashboard?",
+    "type": "definition",
+    "answer": "Provides personalized alerts and remediation guidance when AWS events impact your specific resources.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS License Manager?",
+    "type": "definition",
+    "answer": "Manages and tracks software licenses from vendors like Microsoft, SAP, and Oracle across AWS and on-premises.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Management Console?",
+    "type": "definition",
+    "answer": "Web-based graphical interface for accessing, managing, and configuring all AWS services.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Organizations?",
+    "type": "definition",
+    "answer": "Centrally manages multiple AWS accounts for consolidated billing, access control, and policy enforcement.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Service Catalog?",
+    "type": "definition",
+    "answer": "Allows organizations to create and manage approved portfolios of IT products for user self-service deployment.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Service Quotas?",
+    "type": "definition",
+    "answer": "Central service for viewing, managing, and requesting increases for AWS service limits across your account.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Systems Manager?",
+    "type": "definition",
+    "answer": "Unified operations hub for managing, patching, and automating AWS and on-premises infrastructure.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Trusted Advisor?",
+    "type": "definition",
+    "answer": "Provides automated best-practice recommendations across cost optimization, security, performance, and fault tolerance.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Well-Architected Tool?",
+    "type": "definition",
+    "answer": "Reviews workloads against the six pillars of the AWS Well-Architected Framework and provides improvement recommendations.",
+    "domain": "Management and Governance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Application Discovery Service?",
+    "type": "definition",
+    "answer": "Discovers on-premises server inventory, dependencies, and performance data to plan cloud migrations.",
+    "domain": "Migration and Transfer"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Application Migration Service?",
+    "type": "definition",
+    "answer": "Lifts and shifts on-premises and cloud servers to AWS with minimal downtime and no application changes.",
+    "domain": "Migration and Transfer"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Database Migration Service (AWS DMS)?",
+    "type": "definition",
+    "answer": "Migrates databases to AWS while keeping the source database operational during migration.",
+    "domain": "Migration and Transfer"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Migration Evaluator?",
+    "type": "definition",
+    "answer": "Provides a data-driven business case and TCO analysis for migrating on-premises workloads to AWS.",
+    "domain": "Migration and Transfer"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Migration Hub?",
+    "type": "definition",
+    "answer": "Central location for tracking the progress of application migrations across multiple AWS migration tools.",
+    "domain": "Migration and Transfer"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Schema Conversion Tool (AWS SCT)?",
+    "type": "definition",
+    "answer": "Converts database schemas and stored procedures from one database engine to another (e.g., Oracle to PostgreSQL).",
+    "domain": "Migration and Transfer"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Snow Family?",
+    "type": "definition",
+    "answer": "Physical devices (Snowcone, Snowball, Snowmobile) for offline large-scale data transfer to AWS and edge computing.",
+    "domain": "Migration and Transfer"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon API Gateway?",
+    "type": "definition",
+    "answer": "Managed service for creating, publishing, securing, and managing REST, HTTP, and WebSocket APIs at scale.",
+    "domain": "Networking and Content Delivery"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon CloudFront?",
+    "type": "definition",
+    "answer": "Global CDN that caches and delivers content from edge locations close to users for low latency.",
+    "domain": "Networking and Content Delivery"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Direct Connect?",
+    "type": "definition",
+    "answer": "Dedicated private physical network connection between your on-premises data center and AWS, bypassing the internet.",
+    "domain": "Networking and Content Delivery"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Global Accelerator?",
+    "type": "definition",
+    "answer": "Improves global application availability and performance by routing traffic over the AWS backbone network.",
+    "domain": "Networking and Content Delivery"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS PrivateLink?",
+    "type": "definition",
+    "answer": "Provides private connectivity between VPCs and AWS services over the AWS network without internet exposure.",
+    "domain": "Networking and Content Delivery"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Route 53?",
+    "type": "definition",
+    "answer": "Scalable DNS, domain registration, and health checking service for routing users to applications.",
+    "domain": "Networking and Content Delivery"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Transit Gateway?",
+    "type": "definition",
+    "answer": "Hub-and-spoke network service that connects thousands of VPCs and on-premises networks through a central gateway.",
+    "domain": "Networking and Content Delivery"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon VPC?",
+    "type": "definition",
+    "answer": "Isolated virtual network within AWS where you launch and control resources in a logically separate environment.",
+    "domain": "Networking and Content Delivery"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS VPN?",
+    "type": "definition",
+    "answer": "Encrypted tunnel connecting on-premises networks or remote users to AWS over the public internet.",
+    "domain": "Networking and Content Delivery"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Site-to-Site VPN?",
+    "type": "definition",
+    "answer": "Encrypted IPsec connection between your on-premises network and an AWS VPC over the internet.",
+    "domain": "Networking and Content Delivery"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Client VPN?",
+    "type": "definition",
+    "answer": "Managed VPN service that allows remote users to securely connect to AWS and on-premises resources from anywhere.",
+    "domain": "Networking and Content Delivery"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Artifact?",
+    "type": "definition",
+    "answer": "Self-service portal for on-demand access to AWS compliance reports, certifications, and agreements (e.g., SOC, PCI DSS).",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Audit Manager?",
+    "type": "definition",
+    "answer": "Continuously audits AWS usage to simplify risk assessment and evidence collection for compliance frameworks.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Certificate Manager (ACM)?",
+    "type": "definition",
+    "answer": "Provisions, manages, and auto-renews free SSL/TLS certificates for use with AWS services like CloudFront and ALB.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS CloudHSM?",
+    "type": "definition",
+    "answer": "Dedicated hardware security modules (HSMs) in the AWS cloud for storing cryptographic keys under strict compliance requirements.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Cognito?",
+    "type": "definition",
+    "answer": "User authentication, authorization, and user management service for web and mobile applications.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Detective?",
+    "type": "definition",
+    "answer": "Investigates the root cause of security findings using ML and graph analysis across AWS log data.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Directory Service?",
+    "type": "definition",
+    "answer": "Managed Microsoft Active Directory service for connecting AWS resources with an on-premises AD or cloud-only directory.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Firewall Manager?",
+    "type": "definition",
+    "answer": "Centrally manages and enforces WAF rules, Shield protections, and security group policies across multiple accounts.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon GuardDuty?",
+    "type": "definition",
+    "answer": "Threat detection service that uses ML and threat intelligence to monitor for malicious activity in your AWS account.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Identity and Access Management (IAM)?",
+    "type": "definition",
+    "answer": "Controls who can authenticate and what actions they can perform on AWS resources using policies and roles.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS IAM Identity Center?",
+    "type": "definition",
+    "answer": "Centralized single sign-on (SSO) service providing one-click access to multiple AWS accounts and business applications.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Inspector?",
+    "type": "definition",
+    "answer": "Automated vulnerability assessment service that scans EC2 instances and container images for software vulnerabilities.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Key Management Service (AWS KMS)?",
+    "type": "definition",
+    "answer": "Creates, manages, and controls encryption keys used to encrypt data across AWS services.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Macie?",
+    "type": "definition",
+    "answer": "Uses ML to automatically discover, classify, and protect sensitive data (like PII) stored in Amazon S3.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Resource Access Manager (AWS RAM)?",
+    "type": "definition",
+    "answer": "Shares AWS resources such as subnets and Transit Gateways across multiple AWS accounts within an organization.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Secrets Manager?",
+    "type": "definition",
+    "answer": "Manages, retrieves, and automatically rotates secrets like database credentials and API keys.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Security Hub?",
+    "type": "definition",
+    "answer": "Aggregates, organizes, and prioritizes security alerts from multiple AWS security services into a single view.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Shield?",
+    "type": "definition",
+    "answer": "DDoS protection service; Standard is free for all customers, Advanced adds enhanced protection and 24/7 response.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS WAF?",
+    "type": "definition",
+    "answer": "Web application firewall that filters malicious web traffic based on customizable rules to block common attacks.",
+    "domain": "Security, Identity, and Compliance"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Fargate?",
+    "type": "definition",
+    "answer": "Serverless compute engine for containers that removes the need to provision or manage EC2 instances.",
+    "domain": "Serverless"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Lambda?",
+    "type": "definition",
+    "answer": "Serverless compute service that runs your code in response to events without provisioning or managing servers.",
+    "domain": "Serverless"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Backup?",
+    "type": "definition",
+    "answer": "Centralized service for automating and managing backups across multiple AWS services from a single console.",
+    "domain": "Storage"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Elastic Block Store (Amazon EBS)?",
+    "type": "definition",
+    "answer": "Persistent block storage volumes that attach to EC2 instances like a virtual hard drive.",
+    "domain": "Storage"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon Elastic File System (Amazon EFS)?",
+    "type": "definition",
+    "answer": "Managed, scalable NFS file system that can be mounted simultaneously by multiple EC2 instances.",
+    "domain": "Storage"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Elastic Disaster Recovery?",
+    "type": "definition",
+    "answer": "Continuously replicates on-premises and cloud servers to AWS for fast, cost-effective disaster recovery failover.",
+    "domain": "Storage"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon FSx?",
+    "type": "definition",
+    "answer": "Managed file system service supporting high-performance options including Windows File Server, Lustre, and NetApp ONTAP.",
+    "domain": "Storage"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon S3?",
+    "type": "definition",
+    "answer": "Scalable object storage service for storing and retrieving any type of data via HTTP/HTTPS from anywhere.",
+    "domain": "Storage"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is Amazon S3 Glacier?",
+    "type": "definition",
+    "answer": "Low-cost archival storage for data that is infrequently accessed, with retrieval times from minutes to hours.",
+    "domain": "Storage"
+  },
+  {
+    "source_file": "aws-ccp-service-definitions.md",
+    "question": "What is AWS Storage Gateway?",
+    "type": "definition",
+    "answer": "Hybrid cloud storage service that connects on-premises environments to AWS storage for backup and tiering.",
+    "domain": "Storage"
+  }
+]
