@@ -5,22 +5,53 @@
 
   var numMap = { '1': 0, '2': 1, '3': 2, '4': 3, '5': 4 };
 
+  function getChoiceLabels() {
+    return document.querySelectorAll('#pt-choices .pt-choice');
+  }
+
+  // Returns the index of the currently selected choice (-1 if none)
+  function selectedIndex() {
+    var labels = getChoiceLabels();
+    var selected = QuizEngine.state.selectedChoices;
+    if (selected.length === 0) return -1;
+    for (var i = 0; i < labels.length; i++) {
+      if (selected.indexOf(labels[i].dataset.key) !== -1) return i;
+    }
+    return -1;
+  }
+
   function onKeyDown(e) {
     // Don't intercept when focus is on a select/input/button
     var tag = document.activeElement && document.activeElement.tagName;
     if (tag === 'SELECT' || tag === 'TEXTAREA') return;
-    // Allow button clicks via enter when button is focused
     if (tag === 'BUTTON') return;
 
     var state = QuizEngine.state;
 
     if (state.submitted) {
-      // After answer submitted: Enter or ArrowRight advances
       if (e.key === 'Enter' || e.key === 'ArrowRight') {
         e.preventDefault();
         var nextBtn = document.getElementById('pt-next-btn');
         if (nextBtn && nextBtn.style.display !== 'none') nextBtn.click();
       }
+      return;
+    }
+
+    // Up/Down arrows: navigate choices (single-select only)
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      var q = QuizEngine.currentQuestion();
+      if (!q || q.type === 'multiple-select') return;
+      var labels = getChoiceLabels();
+      if (!labels.length) return;
+      var cur = selectedIndex();
+      var next;
+      if (e.key === 'ArrowDown') {
+        next = cur < 0 ? 0 : Math.min(cur + 1, labels.length - 1);
+      } else {
+        next = cur <= 0 ? 0 : cur - 1;
+      }
+      QuestionRenderer.toggleChoiceByIndex(next);
       return;
     }
 
