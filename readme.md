@@ -1,8 +1,1 @@
----
-layout: default
-title: README
----
-
-# Notes
-
-Welcome
+https://carsontkempf.github.io/
