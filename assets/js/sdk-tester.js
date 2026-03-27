@@ -94,6 +94,44 @@
   }
 
   /**
+   * Export debug log as plaintext
+   */
+  function getPlaintextLog() {
+    const entries = document.querySelectorAll('#debug-log .debug-entry');
+    let output = '=== SDK TESTER DEBUG LOG ===\n';
+    output += 'Generated: ' + new Date().toISOString() + '\n';
+    output += 'URL: ' + window.location.href + '\n';
+    output += '================================\n\n';
+
+    entries.forEach(entry => {
+      const timestamp = entry.querySelector('.debug-timestamp')?.textContent || '';
+      const message = entry.querySelector('.debug-message')?.textContent || '';
+      const data = entry.querySelector('.debug-data pre')?.textContent || '';
+
+      output += timestamp + '\n';
+      output += message + '\n';
+      if (data) {
+        output += data + '\n';
+      }
+      output += '---\n';
+    });
+
+    return output;
+  }
+
+  /**
+   * Copy debug log to clipboard
+   */
+  function copyLogToClipboard() {
+    const text = getPlaintextLog();
+    navigator.clipboard.writeText(text).then(() => {
+      log('Log copied to clipboard', { chars: text.length }, 'success');
+    }).catch(err => {
+      log('Failed to copy log', { error: err.message }, 'error');
+    });
+  }
+
+  /**
    * Decode JWT token without verification (for inspection only)
    */
   function decodeJWT(token) {
@@ -166,6 +204,13 @@
     log('=== STARTING CONNECTION TEST ===', null, 'info');
     log('Testing connection to learn site', { url: CONFIG.LEARN_SITE_URL }, 'info');
 
+    // Check cookie status
+    log('Cookie check', {
+      hasCookies: document.cookie.length > 0,
+      cookieEnabled: navigator.cookieEnabled,
+      thirdPartyCookiesNote: 'Cross-origin credentials require SameSite=None; Secure'
+    }, 'info');
+
     const startTime = performance.now();
 
     try {
@@ -176,6 +221,14 @@
         method: 'GET',
         credentials: 'include',
         headers: 'default'
+      }, 'verbose');
+
+      log('Browser will send OPTIONS preflight for cross-origin GET with credentials', null, 'info');
+      log('Request details', {
+        url: requestUrl,
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include'
       }, 'verbose');
 
       log('Sending request...', null, 'info');
@@ -191,13 +244,16 @@
         status: response.status,
         statusText: response.statusText,
         ok: response.ok,
-        duration: `${duration}ms`,
-        headers: {
-          contentType: response.headers.get('content-type'),
-          server: response.headers.get('server'),
-          date: response.headers.get('date')
-        }
+        duration: `${duration}ms`
       }, response.ok ? 'success' : 'error');
+
+      // Inspect CORS and other headers
+      log('Response headers', {
+        'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
+        'access-control-allow-credentials': response.headers.get('access-control-allow-credentials'),
+        'content-type': response.headers.get('content-type'),
+        'server': response.headers.get('server')
+      }, 'verbose');
 
       if (response.ok) {
         log('Parsing response body...', null, 'verbose');
@@ -227,6 +283,25 @@
         error: e.message,
         type: e.name,
         duration: `${duration}ms`
+      }, 'error');
+
+      // Detailed error diagnostics
+      log('Fetch error diagnostics', {
+        errorName: e.name,
+        errorMessage: e.message,
+        possibleCauses: [
+          'CORS: Server did not return Access-Control-Allow-Origin',
+          'CORS: Preflight OPTIONS request failed (404/405/500)',
+          'CORS: Credentials mode requires explicit origin (not *)',
+          'Network: DNS resolution failed',
+          'Network: Connection refused',
+          'SSL: Certificate error'
+        ],
+        troubleshooting: [
+          'Check browser DevTools Network tab for failed requests',
+          'Look for red "CORS error" in console',
+          'Verify server is deployed with latest CORS fixes'
+        ]
       }, 'error');
 
       updateConnectionStatus('disconnected', `Error: ${e.message}`);
@@ -264,6 +339,13 @@
       return { success: false, error: 'No APP_ID configured' };
     }
 
+    // Check cookie status
+    log('Cookie check', {
+      hasCookies: document.cookie.length > 0,
+      cookieEnabled: navigator.cookieEnabled,
+      thirdPartyCookiesNote: 'Cross-origin credentials require SameSite=None; Secure'
+    }, 'info');
+
     // Build endpoint with query params
     const queryString = new URLSearchParams(params).toString();
     const fullEndpoint = queryString ? `/${endpoint}?${queryString}` : `/${endpoint}`;
@@ -287,6 +369,16 @@
     const startTime = performance.now();
 
     try {
+      log('Browser will send OPTIONS preflight for cross-origin POST with credentials', null, 'info');
+      log('Request details', {
+        url: proxyUrl,
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        bodyLength: JSON.stringify(requestBody).length
+      }, 'verbose');
+
       log('Sending request to SDK proxy...', null, 'info');
       const response = await fetch(proxyUrl, {
         method: 'POST',
@@ -304,13 +396,16 @@
         status: response.status,
         statusText: response.statusText,
         ok: response.ok,
-        duration: `${duration}ms`,
-        headers: {
-          contentType: response.headers.get('content-type'),
-          rateLimit: response.headers.get('x-ratelimit-remaining'),
-          date: response.headers.get('date')
-        }
+        duration: `${duration}ms`
       }, response.ok ? 'success' : 'error');
+
+      // Inspect CORS and other headers
+      log('Response headers', {
+        'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
+        'access-control-allow-credentials': response.headers.get('access-control-allow-credentials'),
+        'content-type': response.headers.get('content-type'),
+        'x-ratelimit-remaining': response.headers.get('x-ratelimit-remaining')
+      }, 'verbose');
 
       log('Parsing SDK proxy response...', null, 'verbose');
       const data = await response.json();
@@ -367,6 +462,25 @@
         type: e.name,
         stack: e.stack,
         duration: `${duration}ms`
+      }, 'error');
+
+      // Detailed error diagnostics
+      log('Fetch error diagnostics', {
+        errorName: e.name,
+        errorMessage: e.message,
+        possibleCauses: [
+          'CORS: Server did not return Access-Control-Allow-Origin',
+          'CORS: Preflight OPTIONS request failed (404/405/500)',
+          'CORS: Credentials mode requires explicit origin (not *)',
+          'Network: DNS resolution failed',
+          'Network: Connection refused',
+          'SSL: Certificate error'
+        ],
+        troubleshooting: [
+          'Check browser DevTools Network tab for failed requests',
+          'Look for red "CORS error" in console',
+          'Verify server is deployed with latest CORS fixes'
+        ]
       }, 'error');
 
       log('=== NEWSAPI REQUEST FAILED ===', null, 'error');
@@ -525,6 +639,13 @@
       clearLogBtn.addEventListener('click', clearLog);
     }
 
+    // Wire up copy log button
+    const copyLogBtn = document.getElementById('copy-log-btn');
+    if (copyLogBtn) {
+      log('Wiring up copy log button', null, 'verbose');
+      copyLogBtn.addEventListener('click', copyLogToClipboard);
+    }
+
     // Wire up inspect token button
     const inspectTokenBtn = document.getElementById('inspect-token-btn');
     if (inspectTokenBtn) {
@@ -553,6 +674,8 @@
     decodeJWT,
     log,
     clearLog,
+    getPlaintextLog,
+    copyLogToClipboard,
     updateTokenInspector,
     config: CONFIG
   };

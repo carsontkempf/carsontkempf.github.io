@@ -319,6 +319,7 @@
 .debug-controls {
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
   padding: 0.5rem 1rem;
   background: #2d2d2d;
   border-top: 1px solid #3e3e3e;
