@@ -8,34 +8,37 @@ permalink: /testing/
 
 <div id="testing-content">
   <p style="margin-bottom: 2rem; color: #666;">
-    Test the learn site's SDK proxy functionality with NewsAPI integration.
+    Test the learn-secrets-sdk npm package with NewsAPI integration.
     All requests are logged with verbose debug output below.
   </p>
 
-  <!-- Connection Status Panel -->
+  <!-- SDK Info Panel -->
   <div class="test-panel">
-    <h3>Learn Site Connection</h3>
+    <h3>SDK Configuration</h3>
     <div class="config-display">
       <div class="config-item">
-        <span class="config-key">Learn Site URL:</span>
+        <span class="config-key">Package:</span>
+        <span class="config-value">learn-secrets-sdk@1.0.0</span>
+      </div>
+      <div class="config-item">
+        <span class="config-key">Proxy URL:</span>
         <span class="config-value">https://ctklearn.workers.dev</span>
       </div>
       <div class="config-item">
-        <span class="config-key">API Endpoint:</span>
-        <span class="config-value">/api/sdk/[appid]/proxy</span>
+        <span class="config-key">Auth Method:</span>
+        <span class="config-value">Bearer Token</span>
       </div>
       <div class="config-item">
         <span class="config-key">Rate Limit:</span>
         <span class="config-value">100 requests/minute</span>
       </div>
     </div>
-    <div id="connection-status" class="checking">Not tested yet</div>
-    <button id="test-connection-btn" class="btn btn-primary">Test Connection</button>
+    <div id="sdk-status" class="checking">SDK not initialized</div>
   </div>
 
   <!-- Configuration Panel -->
   <div class="test-panel">
-    <h3>Configuration</h3>
+    <h3>Credentials</h3>
     <div class="api-test-form">
       <div class="form-group">
         <label for="app-id-input">Project App ID (required)</label>
@@ -47,6 +50,17 @@ permalink: /testing/
         >
         <small style="color: #666;">Get this from your learn site project dashboard at ctklearn.workers.dev</small>
       </div>
+      <div class="form-group">
+        <label for="session-token-input">Session Token (required)</label>
+        <input
+          type="password"
+          id="session-token-input"
+          placeholder="Enter your session token or paste JWT"
+          autocomplete="off"
+        >
+        <small style="color: #666;">Get this by logging into learn site and copying from session storage or /api/session</small>
+      </div>
+      <button id="init-sdk-btn" class="btn btn-primary">Initialize SDK</button>
     </div>
   </div>
 
@@ -54,11 +68,11 @@ permalink: /testing/
   <div class="test-panel">
     <h3>Token Inspector</h3>
     <p style="color: #666; margin-bottom: 1rem;">
-      Decode and inspect your learn site session token. You must be logged in to the learn site first.
+      Decode and inspect your session token JWT claims without verification.
     </p>
-    <button id="inspect-token-btn" class="btn btn-secondary">Inspect Token</button>
+    <button id="inspect-token-btn" class="btn btn-secondary">Decode Token</button>
     <div id="token-claims-display" style="margin-top: 1rem;">
-      <p style="color: #999;">Click "Inspect Token" to decode your session token</p>
+      <p style="color: #999;">Enter a token above and click "Decode Token" to inspect JWT claims</p>
     </div>
   </div>
 
@@ -101,12 +115,9 @@ permalink: /testing/
     <h3>Debug Output (Verbose)</h3>
     <div id="debug-log">
       <div class="debug-entry info">
-        <div class="debug-timestamp">2026-03-27T00:00:00.000Z</div>
+        <div class="debug-timestamp">--</div>
         <div class="debug-message">
-          <span class="debug-prefix">[SDK-TEST]</span> SDK Tester module loaded
-        </div>
-        <div class="debug-data">
-          <pre>{ "version": "1.0.0" }</pre>
+          <span class="debug-prefix">[SDK-TEST]</span> Waiting for module initialization...
         </div>
       </div>
     </div>
@@ -117,6 +128,7 @@ permalink: /testing/
   </div>
 </div>
 
+<script src="/assets/js/learn-secrets-sdk.js"></script>
 <script src="/assets/js/sdk-tester.js"></script>
 
 <style>

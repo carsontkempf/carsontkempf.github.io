@@ -1,22 +1,19 @@
 /**
  * SDK Proxy Testing Module
- * Verbose logging for debugging SDK and API wrapper functionality
+ * Tests learn-secrets-sdk package functionality
  */
 (function() {
   'use strict';
 
-  // Configuration - UPDATE THESE VALUES
+  // SDK instance
+  let sdk = null;
+
+  // Configuration
   const CONFIG = {
     LEARN_SITE_URL: 'https://ctklearn.workers.dev',
-    APP_ID: '', // Will be set via UI input
-    LOG_LEVEL: 'VERBOSE' // VERBOSE, INFO, ERROR
-  };
-
-  // Log levels
-  const LOG_LEVELS = {
-    VERBOSE: 0,
-    INFO: 1,
-    ERROR: 2
+    APP_ID: '',
+    SESSION_TOKEN: '',
+    LOG_LEVEL: 'VERBOSE'
   };
 
   /**
@@ -26,7 +23,6 @@
     const timestamp = new Date().toISOString();
     const prefix = '[SDK-TEST]';
 
-    // Console output
     const consoleMessage = `${prefix} ${timestamp} - ${message}`;
     if (data !== null) {
       console.log(consoleMessage, data);
@@ -34,7 +30,6 @@
       console.log(consoleMessage);
     }
 
-    // Visual debug panel output
     appendToDebugPanel(timestamp, message, data, level);
   }
 
@@ -48,31 +43,25 @@
     const entry = document.createElement('div');
     entry.className = `debug-entry ${level}`;
 
-    // Timestamp
     const timestampEl = document.createElement('div');
     timestampEl.className = 'debug-timestamp';
     timestampEl.textContent = timestamp;
     entry.appendChild(timestampEl);
 
-    // Message
     const messageEl = document.createElement('div');
     messageEl.className = 'debug-message';
     messageEl.innerHTML = `<span class="debug-prefix">[SDK-TEST]</span> ${message}`;
     entry.appendChild(messageEl);
 
-    // Data
     if (data !== null) {
       const dataEl = document.createElement('div');
       dataEl.className = 'debug-data';
       const pre = document.createElement('pre');
-
-      // Pretty print JSON
       if (typeof data === 'object') {
         pre.textContent = JSON.stringify(data, null, 2);
       } else {
         pre.textContent = String(data);
       }
-
       dataEl.appendChild(pre);
       entry.appendChild(dataEl);
     }
@@ -101,6 +90,7 @@
     let output = '=== SDK TESTER DEBUG LOG ===\n';
     output += 'Generated: ' + new Date().toISOString() + '\n';
     output += 'URL: ' + window.location.href + '\n';
+    output += 'SDK Version: learn-secrets-sdk@1.0.0\n';
     output += '================================\n\n';
 
     entries.forEach(entry => {
@@ -154,17 +144,14 @@
         return null;
       }
 
-      // Decode header
       log('Decoding JWT header...', null, 'verbose');
       const header = JSON.parse(atob(parts[0]));
       log('JWT header decoded', header, 'verbose');
 
-      // Decode payload
       log('Decoding JWT payload...', null, 'verbose');
       const payload = JSON.parse(atob(parts[1]));
       log('JWT payload decoded', payload, 'verbose');
 
-      // Extract expiry
       const expiry = payload.exp ? new Date(payload.exp * 1000) : null;
       const isExpired = payload.exp ? Date.now() > payload.exp * 1000 : false;
 
@@ -198,297 +185,170 @@
   }
 
   /**
-   * Test connection to learn site
+   * Initialize SDK with credentials
    */
-  async function testConnection() {
-    log('=== STARTING CONNECTION TEST ===', null, 'info');
-    log('Testing connection to learn site', { url: CONFIG.LEARN_SITE_URL }, 'info');
+  function initializeSDK() {
+    log('=== INITIALIZING SDK ===', null, 'info');
 
-    // Check cookie status
-    log('Cookie check', {
-      hasCookies: document.cookie.length > 0,
-      cookieEnabled: navigator.cookieEnabled,
-      thirdPartyCookiesNote: 'Cross-origin credentials require SameSite=None; Secure'
+    const appId = document.getElementById('app-id-input')?.value?.trim();
+    const sessionToken = document.getElementById('session-token-input')?.value?.trim();
+
+    if (!appId) {
+      log('Missing App ID', null, 'error');
+      updateSDKStatus('error', 'App ID is required');
+      return false;
+    }
+
+    if (!sessionToken) {
+      log('Missing Session Token', null, 'error');
+      updateSDKStatus('error', 'Session Token is required');
+      return false;
+    }
+
+    CONFIG.APP_ID = appId;
+    CONFIG.SESSION_TOKEN = sessionToken;
+
+    log('Creating SecretsSDK instance', {
+      appId: appId,
+      baseUrl: CONFIG.LEARN_SITE_URL,
+      tokenLength: sessionToken.length
     }, 'info');
 
-    const startTime = performance.now();
-
     try {
-      // Build request
-      const requestUrl = `${CONFIG.LEARN_SITE_URL}/api/session`;
-      log('Building request', {
-        url: requestUrl,
-        method: 'GET',
-        credentials: 'include',
-        headers: 'default'
-      }, 'verbose');
+      if (typeof SecretsSDK === 'undefined') {
+        throw new Error('SecretsSDK not loaded - check script order');
+      }
 
-      log('Browser will send OPTIONS preflight for cross-origin GET with credentials', null, 'info');
-      log('Request details', {
-        url: requestUrl,
-        method: 'GET',
-        mode: 'cors',
-        credentials: 'include'
-      }, 'verbose');
-
-      log('Sending request...', null, 'info');
-      const response = await fetch(requestUrl, {
-        method: 'GET',
-        credentials: 'include'
+      sdk = new SecretsSDK({
+        appId: appId,
+        sessionToken: sessionToken,
+        baseUrl: CONFIG.LEARN_SITE_URL
       });
 
-      const endTime = performance.now();
-      const duration = Math.round(endTime - startTime);
+      log('SDK initialized successfully', {
+        appId: sdk.appId,
+        baseUrl: sdk.baseUrl
+      }, 'success');
 
-      log('Response received', {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-        duration: `${duration}ms`
-      }, response.ok ? 'success' : 'error');
-
-      // Inspect CORS and other headers
-      log('Response headers', {
-        'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
-        'access-control-allow-credentials': response.headers.get('access-control-allow-credentials'),
-        'content-type': response.headers.get('content-type'),
-        'server': response.headers.get('server')
-      }, 'verbose');
-
-      if (response.ok) {
-        log('Parsing response body...', null, 'verbose');
-        const data = await response.json();
-        log('Session data received', data, 'success');
-
-        updateConnectionStatus('connected', `Connected (${duration}ms)`);
-
-        log('=== CONNECTION TEST SUCCESSFUL ===', null, 'success');
-        return { success: true, data, duration };
-      } else {
-        log('Connection failed', {
-          status: response.status,
-          statusText: response.statusText
-        }, 'error');
-
-        updateConnectionStatus('disconnected', `Failed (${response.status})`);
-
-        log('=== CONNECTION TEST FAILED ===', null, 'error');
-        return { success: false, status: response.status, duration };
-      }
+      updateSDKStatus('success', 'SDK initialized');
+      return true;
     } catch (e) {
-      const endTime = performance.now();
-      const duration = Math.round(endTime - startTime);
-
-      log('Connection error', {
-        error: e.message,
-        type: e.name,
-        duration: `${duration}ms`
+      log('SDK initialization failed', {
+        error: e.message
       }, 'error');
-
-      // Detailed error diagnostics
-      log('Fetch error diagnostics', {
-        errorName: e.name,
-        errorMessage: e.message,
-        possibleCauses: [
-          'CORS: Server did not return Access-Control-Allow-Origin',
-          'CORS: Preflight OPTIONS request failed (404/405/500)',
-          'CORS: Credentials mode requires explicit origin (not *)',
-          'Network: DNS resolution failed',
-          'Network: Connection refused',
-          'SSL: Certificate error'
-        ],
-        troubleshooting: [
-          'Check browser DevTools Network tab for failed requests',
-          'Look for red "CORS error" in console',
-          'Verify server is deployed with latest CORS fixes'
-        ]
-      }, 'error');
-
-      updateConnectionStatus('disconnected', `Error: ${e.message}`);
-
-      log('=== CONNECTION TEST FAILED ===', null, 'error');
-      return { success: false, error: e.message, duration };
+      updateSDKStatus('error', `Init failed: ${e.message}`);
+      return false;
     }
   }
 
   /**
-   * Update connection status UI
+   * Update SDK status UI
    */
-  function updateConnectionStatus(status, message) {
-    const statusEl = document.getElementById('connection-status');
+  function updateSDKStatus(status, message) {
+    const statusEl = document.getElementById('sdk-status');
     if (statusEl) {
-      statusEl.className = status;
+      statusEl.className = status === 'success' ? 'connected' :
+                          status === 'error' ? 'disconnected' : 'checking';
       statusEl.textContent = message;
     }
   }
 
   /**
-   * Call NewsAPI through SDK proxy
+   * Call NewsAPI through SDK
    */
   async function callNewsAPI(endpoint, params = {}) {
     log('=== STARTING NEWSAPI REQUEST ===', null, 'info');
-    log('Preparing NewsAPI request', {
-      endpoint,
-      params,
-      appId: CONFIG.APP_ID
-    }, 'info');
 
-    if (!CONFIG.APP_ID) {
-      log('No APP_ID configured', null, 'error');
-      alert('Please enter your project App ID first');
-      return { success: false, error: 'No APP_ID configured' };
+    if (!sdk) {
+      log('SDK not initialized', null, 'error');
+      alert('Please initialize the SDK first with your credentials');
+      return { success: false, error: 'SDK not initialized' };
     }
-
-    // Check cookie status
-    log('Cookie check', {
-      hasCookies: document.cookie.length > 0,
-      cookieEnabled: navigator.cookieEnabled,
-      thirdPartyCookiesNote: 'Cross-origin credentials require SameSite=None; Secure'
-    }, 'info');
 
     // Build endpoint with query params
     const queryString = new URLSearchParams(params).toString();
     const fullEndpoint = queryString ? `/${endpoint}?${queryString}` : `/${endpoint}`;
 
-    log('Built full endpoint', { fullEndpoint }, 'verbose');
-
-    // Build request body
-    const requestBody = {
+    log('Request details', {
       keyName: 'newsapi',
       endpoint: fullEndpoint,
       method: 'GET',
-      body: null,
-      headers: {}
-    };
-
-    log('SDK Proxy request body', requestBody, 'verbose');
-
-    const proxyUrl = `${CONFIG.LEARN_SITE_URL}/api/sdk/${CONFIG.APP_ID}/proxy`;
-    log('SDK Proxy URL', { url: proxyUrl }, 'verbose');
+      sdkAppId: sdk.appId,
+      sdkBaseUrl: sdk.baseUrl
+    }, 'info');
 
     const startTime = performance.now();
 
     try {
-      log('Browser will send OPTIONS preflight for cross-origin POST with credentials', null, 'info');
-      log('Request details', {
-        url: proxyUrl,
-        method: 'POST',
-        mode: 'cors',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        bodyLength: JSON.stringify(requestBody).length
-      }, 'verbose');
+      log('Calling SDK.get()...', null, 'info');
 
-      log('Sending request to SDK proxy...', null, 'info');
-      const response = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(requestBody)
-      });
+      const data = await sdk.get('newsapi', fullEndpoint);
 
       const endTime = performance.now();
       const duration = Math.round(endTime - startTime);
 
-      log('SDK Proxy response received', {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-        duration: `${duration}ms`
-      }, response.ok ? 'success' : 'error');
+      log('SDK request successful', {
+        duration: `${duration}ms`,
+        status: data?.status || 'ok',
+        totalResults: data?.totalResults || 0,
+        articlesCount: data?.articles?.length || 0,
+        sourcesCount: data?.sources?.length || 0
+      }, 'success');
 
-      // Inspect CORS and other headers
-      log('Response headers', {
-        'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
-        'access-control-allow-credentials': response.headers.get('access-control-allow-credentials'),
-        'content-type': response.headers.get('content-type'),
-        'x-ratelimit-remaining': response.headers.get('x-ratelimit-remaining')
-      }, 'verbose');
-
-      log('Parsing SDK proxy response...', null, 'verbose');
-      const data = await response.json();
-
-      log('SDK Proxy response data', data, response.ok ? 'success' : 'error');
-
-      if (data.success) {
-        log('NewsAPI response data', {
-          status: data.status,
-          totalResults: data.data?.totalResults || 0,
-          articlesCount: data.data?.articles?.length || 0,
-          sourcesCount: data.data?.sources?.length || 0
-        }, 'success');
-
-        if (data.data?.articles && data.data.articles.length > 0) {
-          log('First article preview', {
-            title: data.data.articles[0].title,
-            source: data.data.articles[0].source?.name,
-            author: data.data.articles[0].author,
-            publishedAt: data.data.articles[0].publishedAt,
-            url: data.data.articles[0].url
-          }, 'info');
-        }
-
-        if (data.data?.sources && data.data.sources.length > 0) {
-          log('First source preview', {
-            id: data.data.sources[0].id,
-            name: data.data.sources[0].name,
-            category: data.data.sources[0].category,
-            country: data.data.sources[0].country,
-            language: data.data.sources[0].language
-          }, 'info');
-        }
-
-        log('=== NEWSAPI REQUEST SUCCESSFUL ===', null, 'success');
-      } else {
-        log('NewsAPI request failed', {
-          error: data.error || 'Unknown error',
-          status: data.status
-        }, 'error');
-
-        log('=== NEWSAPI REQUEST FAILED ===', null, 'error');
+      if (data?.articles && data.articles.length > 0) {
+        log('First article preview', {
+          title: data.articles[0].title,
+          source: data.articles[0].source?.name,
+          author: data.articles[0].author,
+          publishedAt: data.articles[0].publishedAt
+        }, 'info');
       }
 
-      displayAPIResult(data, requestBody, duration);
+      if (data?.sources && data.sources.length > 0) {
+        log('First source preview', {
+          id: data.sources[0].id,
+          name: data.sources[0].name,
+          category: data.sources[0].category
+        }, 'info');
+      }
 
-      return data;
+      log('=== NEWSAPI REQUEST SUCCESSFUL ===', null, 'success');
+
+      const result = { success: true, data };
+      displayAPIResult(result, { keyName: 'newsapi', endpoint: fullEndpoint }, duration);
+
+      return result;
     } catch (e) {
       const endTime = performance.now();
       const duration = Math.round(endTime - startTime);
 
-      log('NewsAPI request error', {
+      const isSDKError = typeof SecretsSDKError !== 'undefined' && e instanceof SecretsSDKError;
+
+      log('NewsAPI request failed', {
         error: e.message,
-        type: e.name,
-        stack: e.stack,
+        status: isSDKError ? e.status : 'unknown',
+        response: isSDKError ? e.response : null,
         duration: `${duration}ms`
       }, 'error');
 
-      // Detailed error diagnostics
-      log('Fetch error diagnostics', {
-        errorName: e.name,
-        errorMessage: e.message,
-        possibleCauses: [
-          'CORS: Server did not return Access-Control-Allow-Origin',
-          'CORS: Preflight OPTIONS request failed (404/405/500)',
-          'CORS: Credentials mode requires explicit origin (not *)',
-          'Network: DNS resolution failed',
-          'Network: Connection refused',
-          'SSL: Certificate error'
-        ],
-        troubleshooting: [
-          'Check browser DevTools Network tab for failed requests',
-          'Look for red "CORS error" in console',
-          'Verify server is deployed with latest CORS fixes'
-        ]
-      }, 'error');
+      if (isSDKError) {
+        log('SecretsSDKError details', {
+          status: e.status,
+          message: e.message,
+          response: e.response
+        }, 'error');
+      }
 
       log('=== NEWSAPI REQUEST FAILED ===', null, 'error');
 
-      const errorResult = { success: false, error: e.message };
-      displayAPIResult(errorResult, requestBody, duration);
+      const result = {
+        success: false,
+        error: e.message,
+        status: isSDKError ? e.status : 500
+      };
+      displayAPIResult(result, { keyName: 'newsapi', endpoint: fullEndpoint }, duration);
 
-      return errorResult;
+      return result;
     }
   }
 
@@ -506,11 +366,9 @@
 
     resultPanel.innerHTML = '';
 
-    // Create result display
     const resultDiv = document.createElement('div');
     resultDiv.className = 'request-response-display';
 
-    // Request box
     const requestBox = document.createElement('div');
     requestBox.className = 'request-box';
     requestBox.innerHTML = `
@@ -518,7 +376,6 @@
       <pre>${JSON.stringify(request, null, 2)}</pre>
     `;
 
-    // Response box
     const responseBox = document.createElement('div');
     responseBox.className = 'response-box';
     responseBox.innerHTML = `
@@ -537,40 +394,25 @@
   function updateTokenInspector() {
     log('Updating token inspector...', null, 'verbose');
 
-    // Try to get token from learn site session cookie
-    const cookies = document.cookie.split(';');
-    log('Checking cookies', { count: cookies.length }, 'verbose');
+    const tokenInput = document.getElementById('session-token-input');
+    const token = tokenInput?.value?.trim();
 
-    const sessionCookie = cookies.find(c => c.trim().startsWith('learn_session='));
-
-    if (sessionCookie) {
-      const token = sessionCookie.split('=')[1];
-      log('Found learn_session cookie', {
-        exists: true,
-        length: token.length
-      }, 'info');
-
-      const decoded = decodeJWT(token);
-
-      const claimsEl = document.getElementById('token-claims-display');
-      if (claimsEl && decoded) {
-        claimsEl.innerHTML = `
-          <pre>${JSON.stringify(decoded, null, 2)}</pre>
-        `;
-      }
-    } else {
-      log('No learn_session cookie found', {
-        message: 'User may not be logged into learn site',
-        availableCookies: cookies.map(c => c.split('=')[0].trim())
-      }, 'warning');
-
+    if (!token) {
+      log('No token to inspect', null, 'warning');
       const claimsEl = document.getElementById('token-claims-display');
       if (claimsEl) {
-        claimsEl.innerHTML = `
-          <p>No session token found. You may need to log in to the learn site first.</p>
-          <p>Available cookies: ${cookies.map(c => c.split('=')[0].trim()).join(', ') || 'None'}</p>
-        `;
+        claimsEl.innerHTML = '<p style="color: #e74c3c;">Enter a session token above first</p>';
       }
+      return;
+    }
+
+    const decoded = decodeJWT(token);
+
+    const claimsEl = document.getElementById('token-claims-display');
+    if (claimsEl && decoded) {
+      claimsEl.innerHTML = `<pre>${JSON.stringify(decoded, null, 2)}</pre>`;
+    } else if (claimsEl) {
+      claimsEl.innerHTML = '<p style="color: #e74c3c;">Failed to decode token - invalid JWT format</p>';
     }
   }
 
@@ -579,20 +421,20 @@
    */
   function init() {
     log('SDK Tester module initializing...', null, 'info');
-    log('Configuration', CONFIG, 'verbose');
+    log('Checking for SecretsSDK...', null, 'verbose');
 
-    // Wire up test connection button
-    const testConnBtn = document.getElementById('test-connection-btn');
-    if (testConnBtn) {
-      log('Wiring up test connection button', null, 'verbose');
-      testConnBtn.addEventListener('click', async () => {
-        testConnBtn.disabled = true;
-        testConnBtn.innerHTML = 'Testing... <span class="loading-spinner"></span>';
+    if (typeof SecretsSDK !== 'undefined') {
+      log('SecretsSDK class found', { available: true }, 'success');
+    } else {
+      log('SecretsSDK class NOT found - SDK not loaded', null, 'error');
+    }
 
-        await testConnection();
-
-        testConnBtn.disabled = false;
-        testConnBtn.textContent = 'Test Connection';
+    // Wire up init SDK button
+    const initSDKBtn = document.getElementById('init-sdk-btn');
+    if (initSDKBtn) {
+      log('Wiring up init SDK button', null, 'verbose');
+      initSDKBtn.addEventListener('click', () => {
+        initializeSDK();
       });
     }
 
@@ -603,12 +445,6 @@
       testApiBtn.addEventListener('click', async () => {
         const endpoint = document.getElementById('endpoint-select').value;
         const query = document.getElementById('query-input').value;
-        const appId = document.getElementById('app-id-input').value;
-
-        if (appId) {
-          CONFIG.APP_ID = appId;
-          log('App ID updated', { appId: CONFIG.APP_ID }, 'info');
-        }
 
         const params = {};
         if (endpoint === 'top-headlines') {
@@ -654,9 +490,9 @@
     }
 
     log('SDK Tester module initialized successfully', null, 'success');
-    log('Ready to test SDK proxy functionality', {
-      learnSiteUrl: CONFIG.LEARN_SITE_URL,
-      appIdConfigured: !!CONFIG.APP_ID
+    log('Ready to test SDK functionality', {
+      sdkAvailable: typeof SecretsSDK !== 'undefined',
+      baseUrl: CONFIG.LEARN_SITE_URL
     }, 'info');
   }
 
@@ -669,7 +505,7 @@
 
   // Expose API for external access
   window.sdkTester = {
-    testConnection,
+    initializeSDK,
     callNewsAPI,
     decodeJWT,
     log,
@@ -677,8 +513,9 @@
     getPlaintextLog,
     copyLogToClipboard,
     updateTokenInspector,
+    getSDK: () => sdk,
     config: CONFIG
   };
 
-  log('SDK Tester module loaded', { version: '1.0.0' }, 'info');
+  log('SDK Tester module loaded', { version: '2.0.0' }, 'info');
 })();
