@@ -88,6 +88,28 @@ permalink: /testing/
     </div>
   </div>
 
+  <!-- CORS Diagnostics Panel -->
+  <div class="test-panel">
+    <h3>CORS Diagnostics</h3>
+    <p style="color: #666; margin-bottom: 1rem;">
+      Test CORS preflight and analyze network communication issues. Run this if you see CORS errors in the console.
+    </p>
+    <button id="diagnose-cors-btn" class="btn btn-primary">Run CORS Diagnostics</button>
+    <div style="margin-top: 1rem;">
+      <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">What This Tests:</h4>
+      <ul style="color: #666; font-size: 0.9rem; line-height: 1.8; margin-left: 1.5rem;">
+        <li>OPTIONS preflight request to proxy endpoint</li>
+        <li>Access-Control-Allow-Origin header presence</li>
+        <li>Access-Control-Allow-Headers validation</li>
+        <li>Simple GET request (no preflight)</li>
+        <li>Network connectivity to learn.pages.dev</li>
+      </ul>
+      <p style="color: #e67e22; font-size: 0.9rem; margin-top: 0.5rem;">
+        Note: Results appear in the Debug Output panel below and browser console (F12).
+      </p>
+    </div>
+  </div>
+
   <!-- API Test Console Panel -->
   <div class="test-panel">
     <h3>NewsAPI Test Console</h3>

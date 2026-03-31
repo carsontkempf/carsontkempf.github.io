@@ -510,6 +510,143 @@
   }
 
   /**
+   * Log CORS-specific details
+   */
+  function logCORS(phase, data) {
+    log(`[CORS: ${phase}]`, data, 'verbose');
+
+    // Also log to console with special formatting
+    console.group(`%c[CORS] ${phase}`, 'color: #e74c3c; font-weight: bold');
+    console.log(JSON.stringify(data, null, 2));
+    console.groupEnd();
+  }
+
+  /**
+   * Test CORS preflight directly
+   */
+  async function testCORSPreflight() {
+    log('=== TESTING CORS PREFLIGHT ===', null, 'info');
+
+    const url = `${CONFIG.LEARN_SITE_URL}/api/sdk/${CONFIG.APP_ID}/proxy`;
+
+    log('Testing OPTIONS preflight request', { url }, 'info');
+
+    try {
+      // Manual OPTIONS request
+      const response = await fetch(url, {
+        method: 'OPTIONS',
+        headers: {
+          'Origin': window.location.origin,
+          'Access-Control-Request-Method': 'POST',
+          'Access-Control-Request-Headers': 'content-type,authorization'
+        }
+      });
+
+      log('OPTIONS Response Status', {
+        status: response.status,
+        statusText: response.statusText
+      }, 'info');
+
+      // Log all response headers
+      const headers = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+
+      log('OPTIONS Response Headers', headers, 'verbose');
+
+      // Check specific CORS headers
+      const corsHeaders = {
+        'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
+        'access-control-allow-methods': response.headers.get('access-control-allow-methods'),
+        'access-control-allow-headers': response.headers.get('access-control-allow-headers'),
+        'access-control-max-age': response.headers.get('access-control-max-age')
+      };
+
+      log('CORS Headers Analysis', corsHeaders, 'info');
+
+      if (!corsHeaders['access-control-allow-origin']) {
+        log('CORS ISSUE FOUND', {
+          issue: 'Missing Access-Control-Allow-Origin header',
+          hint: 'Server must return this header on OPTIONS request'
+        }, 'error');
+      }
+
+      if (!corsHeaders['access-control-allow-headers']?.includes('authorization')) {
+        log('CORS ISSUE FOUND', {
+          issue: 'Authorization header not in Access-Control-Allow-Headers',
+          hint: 'Server must allow Authorization header'
+        }, 'error');
+      }
+
+    } catch (err) {
+      log('OPTIONS Request Failed', {
+        error: err.message,
+        name: err.name
+      }, 'error');
+    }
+  }
+
+  /**
+   * Test simple GET request (no preflight)
+   */
+  async function testSimpleRequest() {
+    log('=== TESTING SIMPLE REQUEST (NO PREFLIGHT) ===', null, 'info');
+
+    const url = `${CONFIG.LEARN_SITE_URL}/api/sdk/${CONFIG.APP_ID}/proxy`;
+
+    try {
+      // Simple GET without custom headers - should not trigger preflight
+      const response = await fetch(url, {
+        method: 'GET'
+      });
+
+      log('Simple GET Response', {
+        status: response.status,
+        statusText: response.statusText
+      }, 'info');
+
+      const headers = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+
+      log('Simple GET Response Headers', headers, 'verbose');
+
+    } catch (err) {
+      log('Simple GET Failed', {
+        error: err.message
+      }, 'error');
+    }
+  }
+
+  /**
+   * Diagnose CORS issues
+   */
+  async function diagnoseCORS() {
+    if (!CONFIG.APP_ID) {
+      log('Cannot run diagnostics - App ID not set', null, 'error');
+      alert('Please enter an App ID first');
+      return;
+    }
+
+    log('=== RUNNING CORS DIAGNOSTICS ===', null, 'info');
+
+    log('Current Origin', { origin: window.location.origin }, 'info');
+    log('Target Base URL', { baseUrl: CONFIG.LEARN_SITE_URL }, 'info');
+    log('App ID', { appId: CONFIG.APP_ID }, 'info');
+
+    // Test 1: Simple request
+    await testSimpleRequest();
+
+    // Test 2: OPTIONS preflight
+    await testCORSPreflight();
+
+    log('=== CORS DIAGNOSTICS COMPLETE ===', null, 'info');
+    log('Review the logs above to identify the CORS issue', null, 'info');
+  }
+
+  /**
    * Initialize on DOM ready
    */
   function init() {
@@ -582,6 +719,19 @@
       inspectTokenBtn.addEventListener('click', updateTokenInspector);
     }
 
+    // Wire up CORS diagnostics button
+    const diagnoseCorsBtn = document.getElementById('diagnose-cors-btn');
+    if (diagnoseCorsBtn) {
+      log('Wiring up CORS diagnostics button', null, 'verbose');
+      diagnoseCorsBtn.addEventListener('click', async () => {
+        diagnoseCorsBtn.disabled = true;
+        diagnoseCorsBtn.textContent = 'Running diagnostics...';
+        await diagnoseCORS();
+        diagnoseCorsBtn.disabled = false;
+        diagnoseCorsBtn.textContent = 'Run CORS Diagnostics';
+      });
+    }
+
     log('SDK Tester module initialized successfully', null, 'success');
     log('Ready to test SDK functionality', {
       sdkAvailable: typeof SecretsSDK !== 'undefined',
@@ -606,6 +756,10 @@
     getPlaintextLog,
     copyLogToClipboard,
     updateTokenInspector,
+    logCORS,
+    diagnoseCORS,
+    testCORSPreflight,
+    testSimpleRequest,
     getSDK: () => sdk,
     config: CONFIG
   };

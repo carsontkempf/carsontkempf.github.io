@@ -125,6 +125,23 @@
 
       while (true) {
         try {
+          // Log outgoing request details for CORS debugging
+          const requestDetails = {
+            url: `${this.baseUrl}/api/sdk/${this.appId}/proxy`,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.token.substring(0, 10)}...${this.token.substring(this.token.length - 2)}`
+            },
+            body: { keyName, endpoint, method: options.method || 'GET' },
+            origin: typeof window !== 'undefined' ? window.location.origin : 'unknown',
+            timestamp: new Date().toISOString()
+          };
+
+          if (typeof window !== 'undefined' && window.sdkTester?.logCORS) {
+            window.sdkTester.logCORS('REQUEST_DETAILS', requestDetails);
+          }
+
           const response = await this.fetchWithTimeout(
             `${this.baseUrl}/api/sdk/${this.appId}/proxy`,
             {
@@ -143,6 +160,21 @@
             },
             this.timeout
           );
+
+          // Log response details for CORS debugging
+          const responseDetails = {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries()),
+            ok: response.ok,
+            type: response.type,
+            url: response.url,
+            timestamp: new Date().toISOString()
+          };
+
+          if (typeof window !== 'undefined' && window.sdkTester?.logCORS) {
+            window.sdkTester.logCORS('RESPONSE_DETAILS', responseDetails);
+          }
 
           this.parseRateLimitHeaders(response.headers);
 
@@ -190,6 +222,16 @@
 
           return result.data;
         } catch (err) {
+          // Log network error details for CORS debugging
+          if (typeof window !== 'undefined' && window.sdkTester?.logCORS) {
+            window.sdkTester.logCORS('FETCH_ERROR', {
+              name: err.name,
+              message: err.message,
+              stack: err.stack,
+              timestamp: new Date().toISOString()
+            });
+          }
+
           if (err instanceof SecretsSDKError) {
             throw err;
           }
