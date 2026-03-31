@@ -1,12 +1,12 @@
 /**
- * learn-secrets-sdk v1.0.0
+ * learn-secrets-sdk v1.2.0
  * Browser bundle for static sites
  * Secure API proxy SDK - keys never exposed to client
  */
 (function(global) {
   'use strict';
 
-  // SecretsSDKError class
+  // Base SecretsSDKError class
   class SecretsSDKError extends Error {
     constructor(message, status, response) {
       super(message);
@@ -16,18 +16,100 @@
     }
   }
 
+  // OriginMismatchError - thrown when domain not authorized
+  class OriginMismatchError extends SecretsSDKError {
+    constructor(message = 'Origin not allowed for this token') {
+      super(message, 403);
+      this.name = 'OriginMismatchError';
+    }
+  }
+
+  // RateLimitError - thrown when rate limit exceeded
+  class RateLimitError extends SecretsSDKError {
+    constructor(message = 'Rate limit exceeded', retryAfter = 60, remaining = 0, limit = 100) {
+      super(message, 429);
+      this.name = 'RateLimitError';
+      this.retryAfter = retryAfter;
+      this.remaining = remaining;
+      this.limit = limit;
+    }
+  }
+
+  // InvalidTokenError - thrown when token is invalid or expired
+  class InvalidTokenError extends SecretsSDKError {
+    constructor(message = 'Invalid or expired token') {
+      super(message, 401);
+      this.name = 'InvalidTokenError';
+    }
+  }
+
   // SecretsSDK class
   class SecretsSDK {
     constructor(options) {
       if (!options.appId) {
         throw new Error('appId is required');
       }
-      if (!options.sessionToken) {
-        throw new Error('sessionToken is required');
+
+      // Support both 'token' and 'sessionToken' (deprecated)
+      this.token = options.token || options.sessionToken;
+      if (!this.token) {
+        throw new Error('token is required');
       }
+
       this.appId = options.appId;
-      this.sessionToken = options.sessionToken;
-      this.baseUrl = options.baseUrl || 'https://ctklearn.workers.dev';
+      this.baseUrl = options.baseUrl || 'https://learn.pages.dev';
+      this.timeout = options.timeout || 30000;
+      this.retryOn429 = options.retryOn429 !== undefined ? options.retryOn429 : true;
+      this.rateLimitInfo = null;
+    }
+
+    /**
+     * Get current rate limit information
+     */
+    getUsage() {
+      return this.rateLimitInfo;
+    }
+
+    /**
+     * Parse rate limit headers from response
+     */
+    parseRateLimitHeaders(headers) {
+      const limit = headers.get('X-RateLimit-Limit');
+      const remaining = headers.get('X-RateLimit-Remaining');
+      const reset = headers.get('X-RateLimit-Reset');
+
+      if (limit && remaining && reset) {
+        this.rateLimitInfo = {
+          limit: parseInt(limit),
+          remaining: parseInt(remaining),
+          reset: parseInt(reset)
+        };
+      }
+    }
+
+    /**
+     * Sleep utility for retry backoff
+     */
+    sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /**
+     * Make fetch request with timeout
+     */
+    async fetchWithTimeout(url, options, timeout) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal
+        });
+        return response;
+      } finally {
+        clearTimeout(timeoutId);
+      }
     }
 
     /**
@@ -38,40 +120,89 @@
      * @returns {Promise<any>} Promise with the API response
      */
     async call(keyName, endpoint, options = {}) {
-      try {
-        const response = await fetch(`${this.baseUrl}/api/sdk/${this.appId}/proxy`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.sessionToken}`
-          },
-          body: JSON.stringify({
-            keyName,
-            endpoint,
-            method: options.method || 'GET',
-            body: options.body,
-            headers: options.headers
-          })
-        });
+      let retries = 0;
+      const maxRetries = this.retryOn429 ? 3 : 0;
 
-        const result = await response.json();
+      while (true) {
+        try {
+          const response = await this.fetchWithTimeout(
+            `${this.baseUrl}/api/sdk/${this.appId}/proxy`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.token}`
+              },
+              body: JSON.stringify({
+                keyName,
+                endpoint,
+                method: options.method || 'GET',
+                body: options.body,
+                headers: options.headers
+              })
+            },
+            this.timeout
+          );
 
-        if (!response.ok) {
-          const errorMessage = result.data?.message ||
-            result?.message ||
-            `Request failed with status ${response.status}`;
-          throw new SecretsSDKError(errorMessage, response.status, result);
+          this.parseRateLimitHeaders(response.headers);
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            const errorMessage = result.data?.message ||
+              result?.message ||
+              `Request failed with status ${response.status}`;
+
+            // Check for specific error types
+            if (response.status === 403 && errorMessage.includes('Origin')) {
+              throw new OriginMismatchError(errorMessage);
+            }
+
+            if (response.status === 401) {
+              throw new InvalidTokenError(errorMessage);
+            }
+
+            if (response.status === 429) {
+              const retryAfter = this.rateLimitInfo
+                ? this.rateLimitInfo.reset - Math.floor(Date.now() / 1000)
+                : 60;
+
+              const error = new RateLimitError(
+                errorMessage,
+                retryAfter,
+                this.rateLimitInfo?.remaining || 0,
+                this.rateLimitInfo?.limit || 100
+              );
+
+              // Retry logic with exponential backoff
+              if (this.retryOn429 && retries < maxRetries) {
+                retries++;
+                const backoffMs = Math.min(1000 * Math.pow(2, retries - 1), 8000);
+                await this.sleep(backoffMs);
+                continue;
+              }
+
+              throw error;
+            }
+
+            throw new SecretsSDKError(errorMessage, response.status, result);
+          }
+
+          return result.data;
+        } catch (err) {
+          if (err instanceof SecretsSDKError) {
+            throw err;
+          }
+
+          if (err instanceof Error && err.name === 'AbortError') {
+            throw new SecretsSDKError('Request timeout', 408);
+          }
+
+          throw new SecretsSDKError(
+            err instanceof Error ? err.message : 'Unknown error occurred',
+            500
+          );
         }
-
-        return result.data;
-      } catch (err) {
-        if (err instanceof SecretsSDKError) {
-          throw err;
-        }
-        throw new SecretsSDKError(
-          err instanceof Error ? err.message : 'Unknown error occurred',
-          500
-        );
       }
     }
 
@@ -114,5 +245,8 @@
   // Export to global namespace
   global.SecretsSDK = SecretsSDK;
   global.SecretsSDKError = SecretsSDKError;
+  global.OriginMismatchError = OriginMismatchError;
+  global.RateLimitError = RateLimitError;
+  global.InvalidTokenError = InvalidTokenError;
 
 })(typeof window !== 'undefined' ? window : this);

@@ -10,9 +10,9 @@
 
   // Configuration
   const CONFIG = {
-    LEARN_SITE_URL: 'https://ctklearn.workers.dev',
+    LEARN_SITE_URL: 'https://learn.pages.dev',
     APP_ID: '',
-    SESSION_TOKEN: '',
+    TOKEN: '',
     LOG_LEVEL: 'VERBOSE'
   };
 
@@ -31,6 +31,22 @@
     }
 
     appendToDebugPanel(timestamp, message, data, level);
+  }
+
+  /**
+   * Log request phase for micro-communication tracking
+   */
+  function logRequestPhase(phase, data) {
+    const phases = {
+      'prepare': 'Preparing request parameters',
+      'serialize': 'Serializing request body',
+      'fetch-start': 'Initiating fetch to proxy',
+      'fetch-sent': 'Request sent, awaiting response',
+      'headers-received': 'Response headers received',
+      'body-parse': 'Parsing response body',
+      'complete': 'Request cycle complete'
+    };
+    log(`[PHASE: ${phase}] ${phases[phase] || phase}`, data, 'verbose');
   }
 
   /**
@@ -191,7 +207,7 @@
     log('=== INITIALIZING SDK ===', null, 'info');
 
     const appId = document.getElementById('app-id-input')?.value?.trim();
-    const sessionToken = document.getElementById('session-token-input')?.value?.trim();
+    const token = document.getElementById('sdk-token-input')?.value?.trim();
 
     if (!appId) {
       log('Missing App ID', null, 'error');
@@ -199,20 +215,27 @@
       return false;
     }
 
-    if (!sessionToken) {
-      log('Missing Session Token', null, 'error');
-      updateSDKStatus('error', 'Session Token is required');
+    if (!token) {
+      log('Missing SDK Token', null, 'error');
+      updateSDKStatus('error', 'SDK Token is required');
       return false;
     }
 
     CONFIG.APP_ID = appId;
-    CONFIG.SESSION_TOKEN = sessionToken;
+    CONFIG.TOKEN = token;
+
+    // Mask token for logging
+    const maskedToken = token.length > 10
+      ? `${token.substring(0, 8)}****${token.substring(token.length - 2)}`
+      : '****';
 
     log('Creating SecretsSDK instance', {
       appId: appId,
+      token: maskedToken,
       baseUrl: CONFIG.LEARN_SITE_URL,
-      tokenLength: sessionToken.length
-    }, 'info');
+      timeout: 30000,
+      retryOn429: true
+    }, 'verbose');
 
     try {
       if (typeof SecretsSDK === 'undefined') {
@@ -221,13 +244,17 @@
 
       sdk = new SecretsSDK({
         appId: appId,
-        sessionToken: sessionToken,
-        baseUrl: CONFIG.LEARN_SITE_URL
+        token: token,
+        baseUrl: CONFIG.LEARN_SITE_URL,
+        timeout: 30000,
+        retryOn429: true
       });
 
       log('SDK initialized successfully', {
         appId: sdk.appId,
-        baseUrl: sdk.baseUrl
+        baseUrl: sdk.baseUrl,
+        timeout: sdk.timeout,
+        retryOn429: sdk.retryOn429
       }, 'success');
 
       updateSDKStatus('success', 'SDK initialized');
@@ -254,6 +281,22 @@
   }
 
   /**
+   * Update rate limit display UI
+   */
+  function updateRateLimitDisplay(usage) {
+    const remainingEl = document.querySelector('.rate-remaining');
+    const limitEl = document.querySelector('.rate-limit');
+    const resetEl = document.querySelector('.rate-reset');
+
+    if (remainingEl && limitEl && resetEl && usage) {
+      const resetsIn = usage.reset - Math.floor(Date.now() / 1000);
+      remainingEl.textContent = usage.remaining;
+      limitEl.textContent = usage.limit;
+      resetEl.textContent = `Resets in ${resetsIn}s`;
+    }
+  }
+
+  /**
    * Call NewsAPI through SDK
    */
   async function callNewsAPI(endpoint, params = {}) {
@@ -266,8 +309,10 @@
     }
 
     // Build endpoint with query params
+    logRequestPhase('prepare', { endpoint, params });
+
     const queryString = new URLSearchParams(params).toString();
-    const fullEndpoint = queryString ? `/${endpoint}?${queryString}` : `/${endpoint}`;
+    const fullEndpoint = queryString ? `/v2/${endpoint}?${queryString}` : `/v2/${endpoint}`;
 
     log('Request details', {
       keyName: 'newsapi',
@@ -277,15 +322,37 @@
       sdkBaseUrl: sdk.baseUrl
     }, 'info');
 
+    logRequestPhase('fetch-start', {
+      url: `${sdk.baseUrl}/api/sdk/${sdk.appId}/proxy`,
+      headers: ['Content-Type', 'Authorization']
+    });
+
     const startTime = performance.now();
 
     try {
-      log('Calling SDK.get()...', null, 'info');
+      log('Calling SDK.get()...', null, 'verbose');
+      logRequestPhase('fetch-sent', { timestamp: new Date().toISOString() });
 
       const data = await sdk.get('newsapi', fullEndpoint);
 
       const endTime = performance.now();
       const duration = Math.round(endTime - startTime);
+
+      logRequestPhase('body-parse', { status: 'complete' });
+
+      // Get rate limit info
+      const usage = sdk.getUsage();
+      if (usage) {
+        const resetsIn = usage.reset - Math.floor(Date.now() / 1000);
+        log('Rate Limit Status', {
+          remaining: usage.remaining,
+          limit: usage.limit,
+          resetsIn: `${resetsIn}s`
+        }, 'info');
+
+        // Update UI rate limit display
+        updateRateLimitDisplay(usage);
+      }
 
       log('SDK request successful', {
         duration: `${duration}ms`,
@@ -312,6 +379,7 @@
         }, 'info');
       }
 
+      logRequestPhase('complete', { duration: `${duration}ms`, success: true });
       log('=== NEWSAPI REQUEST SUCCESSFUL ===', null, 'success');
 
       const result = { success: true, data };
@@ -322,29 +390,54 @@
       const endTime = performance.now();
       const duration = Math.round(endTime - startTime);
 
-      const isSDKError = typeof SecretsSDKError !== 'undefined' && e instanceof SecretsSDKError;
-
-      log('NewsAPI request failed', {
-        error: e.message,
-        status: isSDKError ? e.status : 'unknown',
-        response: isSDKError ? e.response : null,
-        duration: `${duration}ms`
-      }, 'error');
-
-      if (isSDKError) {
-        log('SecretsSDKError details', {
-          status: e.status,
+      // Error type specific handling
+      if (typeof OriginMismatchError !== 'undefined' && e instanceof OriginMismatchError) {
+        log('ORIGIN MISMATCH ERROR', {
           message: e.message,
+          status: e.status,
+          hint: 'Token not authorized for this domain'
+        }, 'error');
+      } else if (typeof RateLimitError !== 'undefined' && e instanceof RateLimitError) {
+        log('RATE LIMIT ERROR', {
+          message: e.message,
+          status: e.status,
+          retryAfter: e.retryAfter,
+          remaining: e.remaining,
+          limit: e.limit,
+          hint: `Retry after ${e.retryAfter}s`
+        }, 'error');
+      } else if (typeof InvalidTokenError !== 'undefined' && e instanceof InvalidTokenError) {
+        log('INVALID TOKEN ERROR', {
+          message: e.message,
+          status: e.status,
+          hint: 'Check token is correct and not expired'
+        }, 'error');
+      } else if (typeof SecretsSDKError !== 'undefined' && e instanceof SecretsSDKError) {
+        log('SECRETS SDK ERROR', {
+          message: e.message,
+          status: e.status,
           response: e.response
+        }, 'error');
+      } else {
+        log('UNKNOWN ERROR', {
+          message: e.message,
+          error: e.toString()
         }, 'error');
       }
 
+      log('NewsAPI request failed', {
+        error: e.message,
+        status: e.status || 'unknown',
+        duration: `${duration}ms`
+      }, 'error');
+
+      logRequestPhase('complete', { duration: `${duration}ms`, success: false });
       log('=== NEWSAPI REQUEST FAILED ===', null, 'error');
 
       const result = {
         success: false,
         error: e.message,
-        status: isSDKError ? e.status : 500
+        status: e.status || 500
       };
       displayAPIResult(result, { keyName: 'newsapi', endpoint: fullEndpoint }, duration);
 
@@ -394,14 +487,14 @@
   function updateTokenInspector() {
     log('Updating token inspector...', null, 'verbose');
 
-    const tokenInput = document.getElementById('session-token-input');
+    const tokenInput = document.getElementById('sdk-token-input');
     const token = tokenInput?.value?.trim();
 
     if (!token) {
       log('No token to inspect', null, 'warning');
       const claimsEl = document.getElementById('token-claims-display');
       if (claimsEl) {
-        claimsEl.innerHTML = '<p style="color: #e74c3c;">Enter a session token above first</p>';
+        claimsEl.innerHTML = '<p style="color: #e74c3c;">Enter an SDK token above first</p>';
       }
       return;
     }

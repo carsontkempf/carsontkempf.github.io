@@ -18,11 +18,11 @@ permalink: /testing/
     <div class="config-display">
       <div class="config-item">
         <span class="config-key">Package:</span>
-        <span class="config-value">learn-secrets-sdk@1.0.0</span>
+        <span class="config-value">learn-secrets-sdk@1.2.0</span>
       </div>
       <div class="config-item">
         <span class="config-key">Proxy URL:</span>
-        <span class="config-value">https://ctklearn.workers.dev</span>
+        <span class="config-value">https://learn.pages.dev</span>
       </div>
       <div class="config-item">
         <span class="config-key">Auth Method:</span>
@@ -48,17 +48,17 @@ permalink: /testing/
           placeholder="Enter your learn site project app ID"
           autocomplete="off"
         >
-        <small style="color: #666;">Get this from your learn site project dashboard at ctklearn.workers.dev</small>
+        <small style="color: #666;">Get this from your learn site project dashboard at learn.pages.dev</small>
       </div>
       <div class="form-group">
-        <label for="session-token-input">Session Token (required)</label>
+        <label for="sdk-token-input">SDK Token (required)</label>
         <input
           type="password"
-          id="session-token-input"
-          placeholder="Enter your session token or paste JWT"
+          id="sdk-token-input"
+          placeholder="sk_live_... or sk_test_..."
           autocomplete="off"
         >
-        <small style="color: #666;">Get this by logging into learn site and copying from session storage or /api/session</small>
+        <small style="color: #666;">Get this from Settings → SDK Tokens at learn.pages.dev</small>
       </div>
       <button id="init-sdk-btn" class="btn btn-primary">Initialize SDK</button>
     </div>
@@ -68,11 +68,23 @@ permalink: /testing/
   <div class="test-panel">
     <h3>Token Inspector</h3>
     <p style="color: #666; margin-bottom: 1rem;">
-      Decode and inspect your session token JWT claims without verification.
+      Decode and inspect your SDK token JWT claims without verification.
     </p>
     <button id="inspect-token-btn" class="btn btn-secondary">Decode Token</button>
     <div id="token-claims-display" style="margin-top: 1rem;">
       <p style="color: #999;">Enter a token above and click "Decode Token" to inspect JWT claims</p>
+    </div>
+  </div>
+
+  <!-- Rate Limit Panel -->
+  <div class="test-panel">
+    <h3>Rate Limit Status</h3>
+    <div class="rate-limit-panel">
+      <div id="rate-limit-display">
+        <span class="rate-remaining">--</span> / <span class="rate-limit">--</span> requests remaining
+        <br>
+        <span class="rate-reset">Resets: --</span>
+      </div>
     </div>
   </div>
 
@@ -142,5 +154,37 @@ permalink: /testing/
 
 #testing-content p {
   line-height: 1.6;
+}
+
+.rate-limit-panel {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  text-align: center;
+}
+
+#rate-limit-display {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.rate-remaining {
+  color: #27ae60;
+  font-weight: bold;
+  font-size: 1.3rem;
+}
+
+.rate-limit {
+  color: #333;
+  font-weight: bold;
+  font-size: 1.3rem;
+}
+
+.rate-reset {
+  display: block;
+  margin-top: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
 }
 </style>
