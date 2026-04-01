@@ -57,7 +57,7 @@
       }
 
       this.appId = options.appId;
-      this.baseUrl = options.baseUrl || 'https://learn.pages.dev';
+      this.baseUrl = options.baseUrl || 'https://ctklearn.carsontkempf.workers.dev';
       this.timeout = options.timeout || 30000;
       this.retryOn429 = options.retryOn429 !== undefined ? options.retryOn429 : true;
       this.rateLimitInfo = null;

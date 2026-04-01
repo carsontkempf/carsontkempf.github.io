@@ -10,7 +10,7 @@
 
   // Configuration
   const CONFIG = {
-    LEARN_SITE_URL: 'https://learn.pages.dev',
+    LEARN_SITE_URL: 'https://ctklearn.carsontkempf.workers.dev',
     APP_ID: '',
     TOKEN: '',
     LOG_LEVEL: 'VERBOSE'
