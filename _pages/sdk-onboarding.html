@@ -1,0 +1,319 @@
+---
+layout: page
+title: SDK Onboarding Test
+permalink: /sdk-onboarding/
+---
+
+<style>
+  .sdk-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .sdk-header {
+    margin-bottom: 2rem;
+  }
+
+  .sdk-header h1 {
+    margin: 0 0 0.5rem 0;
+  }
+
+  .sdk-header p {
+    color: var(--text-muted, #666);
+    margin: 0;
+  }
+
+  .config-section {
+    background: var(--bg-tile, #f5f5f5);
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .config-section h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+  }
+
+  .config-row {
+    margin-bottom: 1rem;
+  }
+
+  .config-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .config-row label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  .config-row input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+  }
+
+  .test-section {
+    background: var(--bg-tile, #f5f5f5);
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .test-section h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+  }
+
+  .test-button {
+    padding: 0.75rem 1.5rem;
+    background: #4a90a4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .test-button:hover:not(:disabled) {
+    background: #3a7a94;
+  }
+
+  .test-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .result-area {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--bg-code, #1a1a2e);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--text-code, #e0e0e0);
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 100px;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-right: 0.5rem;
+  }
+
+  .status-idle { background: #6c757d33; color: #6c757d; }
+  .status-loading { background: #ffc10733; color: #ffc107; }
+  .status-success { background: #28a74533; color: #28a745; }
+  .status-error { background: #dc354533; color: #dc3545; }
+
+  .log-section {
+    background: var(--bg-tile, #f5f5f5);
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+
+  .log-section h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+  }
+
+  .log-entry {
+    border-bottom: 1px solid var(--border-color, #ddd);
+    padding: 0.75rem 0;
+    font-size: 0.9rem;
+  }
+
+  .log-entry:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .log-time {
+    color: var(--text-muted, #666);
+    font-family: monospace;
+    font-size: 0.8rem;
+  }
+
+  .log-message {
+    margin-top: 0.25rem;
+  }
+
+  .log-message.error {
+    color: #dc3545;
+  }
+
+  .log-message.success {
+    color: #28a745;
+  }
+</style>
+
+<div class="sdk-container">
+  <div class="sdk-header">
+    <h1>SDK Onboarding Test</h1>
+    <p>Testing learn-secrets-sdk integration on a static site</p>
+  </div>
+
+  <div class="config-section">
+    <h2>Configuration</h2>
+    <div class="config-row">
+      <label for="appId">App ID</label>
+      <input type="text" id="appId" placeholder="your-app-id" />
+    </div>
+    <div class="config-row">
+      <label for="sdkToken">SDK Token</label>
+      <input type="text" id="sdkToken" placeholder="sk_live_..." />
+    </div>
+    <div class="config-row">
+      <label for="keyName">API Key Name</label>
+      <input type="text" id="keyName" value="test-echo" />
+    </div>
+    <div class="config-row">
+      <label for="endpoint">Endpoint</label>
+      <input type="text" id="endpoint" value="/get" />
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test SDK</h2>
+    <button class="test-button" id="runTest" onclick="runSDKTest()">
+      Run Test
+    </button>
+    <div class="result-area" id="resultArea">
+      <span class="status-badge status-idle">IDLE</span>
+      Waiting for test...
+    </div>
+  </div>
+
+  <div class="log-section">
+    <h2>Onboarding Log</h2>
+    <div id="logContainer">
+      <div class="log-entry">
+        <div class="log-time">--:--:--</div>
+        <div class="log-message">Ready to test SDK integration</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { SecretsSDK } from 'https://unpkg.com/learn-secrets-sdk';
+
+  function addLog(message, type = 'info') {
+    const container = document.getElementById('logContainer');
+    const time = new Date().toLocaleTimeString();
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `
+      <div class="log-time">${time}</div>
+      <div class="log-message ${type}">${message}</div>
+    `;
+    container.insertBefore(entry, container.firstChild);
+  }
+
+  function setResult(status, message) {
+    const area = document.getElementById('resultArea');
+    const statusClass = {
+      idle: 'status-idle',
+      loading: 'status-loading',
+      success: 'status-success',
+      error: 'status-error'
+    }[status] || 'status-idle';
+
+    area.innerHTML = `<span class="status-badge ${statusClass}">${status.toUpperCase()}</span>\n${message}`;
+  }
+
+  window.runSDKTest = async function() {
+    const appId = document.getElementById('appId').value.trim();
+    const token = document.getElementById('sdkToken').value.trim();
+    const keyName = document.getElementById('keyName').value.trim();
+    const endpoint = document.getElementById('endpoint').value.trim();
+
+    // Validation
+    if (!appId) {
+      addLog('Error: App ID is required', 'error');
+      setResult('error', 'App ID is required');
+      return;
+    }
+
+    if (!token) {
+      addLog('Error: SDK Token is required', 'error');
+      setResult('error', 'SDK Token is required');
+      return;
+    }
+
+    if (!token.startsWith('sk_live_')) {
+      addLog('Warning: Token should start with sk_live_', 'error');
+    }
+
+    addLog(`Initializing SDK with appId: ${appId.substring(0, 8)}...`);
+    setResult('loading', 'Initializing SDK...');
+
+    try {
+      const sdk = new SecretsSDK({
+        appId: appId,
+        token: token
+      });
+
+      addLog('SDK initialized successfully', 'success');
+      addLog(`Making GET request to ${keyName}${endpoint}`);
+      setResult('loading', `Calling ${keyName}${endpoint}...`);
+
+      const result = await sdk.get(keyName, endpoint);
+
+      addLog('API call successful!', 'success');
+      setResult('success', JSON.stringify(result, null, 2));
+
+      // Log rate limit info
+      const usage = sdk.getUsage();
+      if (usage) {
+        addLog(`Rate limit: ${usage.remaining}/${usage.limit} remaining`);
+      }
+
+    } catch (error) {
+      addLog(`Error: ${error.message}`, 'error');
+
+      let errorDetails = error.message;
+      if (error.status) {
+        errorDetails = `Status ${error.status}: ${error.message}`;
+      }
+      if (error.response) {
+        errorDetails += '\n\nResponse:\n' + JSON.stringify(error.response, null, 2);
+      }
+
+      setResult('error', errorDetails);
+
+      // Specific error guidance
+      if (error.message.includes('Origin')) {
+        addLog('Tip: Add this domain to allowed origins in SDK token settings', 'error');
+      }
+      if (error.status === 401) {
+        addLog('Tip: Check your SDK token is valid and not revoked', 'error');
+      }
+      if (error.status === 404) {
+        addLog('Tip: Verify the API key name exists in your project', 'error');
+      }
+    }
+  };
+
+  // Log page load
+  addLog('Page loaded, SDK module imported from unpkg CDN', 'success');
+  addLog(`Origin: ${window.location.origin}`);
+</script>
