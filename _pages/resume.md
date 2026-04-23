@@ -4,75 +4,56 @@ title: Resume
 permalink: /resume/
 ---
 
-# Resume
+# Carson Kempf
+
+[carsontkempf@gmail.com](mailto:carsontkempf@gmail.com) | (660) 254-4140
 
 ---
-
-Carson Kempf
-
-ctkfdp@umsystem.edu
-
-(660)  254 - 4140
-
----
-
 
 ## Summary
-Enthusiastic computer science student with strong skills in database design, application development, cloud services (AWS), and full-stack development. Seeking an internship to leverage my expertise in optimal database systems and robust applications through cloud services. Eager to contribute to innovative and interesting projects.
+Software Engineer bridging the gap between optimized enterprise systems and scalable applications. Combining a rigorous Computer Science foundation with hands-on experience in scripting, automation, and cloud deployments to deliver clean, secure, and scalable code.
 
---- 
+---
+
+## Technical Skills
+- **Programming:** Python, Java, JavaScript, Bash, C, C++, Rust, Golang
+- **Cloud & Infrastructure:** AWS, Cloudflare, Oracle, Azure
+- **Web Development:** Django, Flask, SvelteKit, Node.js
+- **DevOps:** CI/CD, Containerization, VM maintenance, Apache Kafka
+- **Systems:** Linux Server Management, High Availability Clusters, PostgreSQL, Patroni, Oracle, MongoDB
+
+---
+
+## Professional Experience
+
+### Associate Database Administrator | Charter Communications
+**Aug 2025 – Present**
+- Architect and maintain high-availability database solutions, ensuring strict uptime requirements and secure data access.
+- Develop and optimize automated maintenance scripts using Python and Bash to streamline complex database operations.
+- Collaborate cross-functionally with engineering teams to tune SQL queries and deploy scalable cloud infrastructure.
+
+### Database Administrator Intern | Charter Communications
+**May 2025 – Jul 2025**
+- Reduced server maintenance time by 70% through automation of 15+ recurring tasks.
+- Managed multi-server cluster deployment across 12 nodes spanning dev, pre-prod, and production.
+- Finalist in company-wide innovation competition for data visualization application supporting parts optimization.
+
+### Freelance Full-Stack Developer | RootsInn LLC
+**May 2024 – Dec 2024**
+- Reduced cloud costs by 31.8% through strategic database optimization and AWS server scheduling.
+- Developed modular Django applications for booking, payment processing, and treehouse library management.
+- Implemented custom image storage and compression algorithm to optimize performance and reduce costs.
+
+---
 
 ## Education
-B.S. in Computer Science, Minor in Philosophy
-
-Missouri University of Science and Technology
-
+**B.S. in Computer Science, Minor Philosophy** | Missouri S&T
+*Dec 2025*
 **GPA:** 3.747
-
-**Expected Graduation:** December 2025
-
---- 
-
-## Relevant Coursework:
-Intro to AI, Evolutionary Computing, Database Systems (2300, 5300),  Operating Systems, Computer Networking, Technical Writing
-
---- 
-
-## Technologies & Skills:
-* Programming Languages: Python, Bash, C, C++, Rust
-* Databases: PostgreSQL, SQLite, NOSQL
-* Cloud Services: AWS (EC2, RDS, Elastic Beanstalk, VPC, App Runner), Microsoft Azure
-* Web Development: Django, Flask, JavaScript
-* Computer Networking: API Programming, HTTP Programming
-* Dev Ops: CI/CD, Unit Test Design, Containers, Virtual Machines
-
-
---- 
-
-## Projects
+**Relevant Coursework:** Intro to AI, Evolutionary Computing, Database Systems, Operating Systems, Computer Networking
 
 ---
 
-### Treehouse Booking Application
-
-#### May 2024 - Present
-
-#### (In Development, Deployment Stage)
-
-* Reduced Cloud Costs by 31.8% After:
-* Leveraging database normalization forms while ensuring data integrity.
-* Utilizing AWS server scheduling.
-* Created and implemented an image storage and compression algorithm.
-* Developed modular Django applications for booking, payment, and a treehouse library.
-* Configured and utilized AWS RDS and App Runner Services.
-* Insured optimal database performance through normalization forms. 
-
----
-
-### [Workout Database Application](https://github.com/carsontkempf/WorkoutDatabase)
-
-### January 2024 - May 2024
-
-* Designed a web application interface for an SQLite database using Flask. 
-* Developed relational database schema utilizing entity relation modeling, schema design, and normalization forms.
-* Leveraged accessibility testing and industry research to ensure best practices while designing an intuitive user interface.
+<div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
+  <a href="https://github.com/carsontkempf" target="_blank">github.com/carsontkempf</a>
+</div>
