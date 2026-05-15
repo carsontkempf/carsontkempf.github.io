@@ -1,0 +1,465 @@
+---
+layout: page
+title: RBAC Testing
+permalink: /rbac-testing/
+---
+
+<script src="/assets/js/rbac-protection.js"></script>
+<script src="/assets/js/tier-manager.js"></script>
+
+<style>
+.test-panel {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.test-panel h3 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 10px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.status-badge.success {
+  background: #28a745;
+  color: white;
+}
+
+.status-badge.error {
+  background: #dc3545;
+  color: white;
+}
+
+.status-badge.pending {
+  background: #ffc107;
+  color: #333;
+}
+
+.status-badge.info {
+  background: #17a2b8;
+  color: white;
+}
+
+.role-list {
+  list-style: none;
+  padding: 0;
+}
+
+.role-list li {
+  padding: 10px;
+  margin: 5px 0;
+  background: white;
+  border-left: 4px solid #007bff;
+  border-radius: 4px;
+}
+
+.tier-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.tier-free {
+  background: #6c757d;
+  color: white;
+}
+
+.tier-premium {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.test-result {
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border-left: 4px solid;
+}
+
+.test-result.pass {
+  background: #d4edda;
+  border-left-color: #28a745;
+}
+
+.test-result.fail {
+  background: #f8d7da;
+  border-left-color: #dc3545;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin: 5px;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+}
+
+.btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.premium-only {
+  display: none;
+}
+
+.upgrade-prompt {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  padding: 15px;
+  border-radius: 5px;
+  margin: 15px 0;
+  display: none;
+}
+
+.feature-list {
+  columns: 2;
+  list-style: none;
+  padding: 0;
+}
+
+.feature-list li {
+  padding: 5px;
+  margin: 3px 0;
+}
+
+.feature-list li::before {
+  content: "✓ ";
+  color: #28a745;
+  font-weight: bold;
+  margin-right: 5px;
+}
+</style>
+
+<div id="testing-content">
+  <p style="margin-bottom: 2rem; color: #666;">
+    Test role-based access control (RBAC) and user tier features.
+    This page demonstrates admin-only sections, premium features, and custom roles.
+  </p>
+
+  <!-- User Info Panel -->
+  <div class="test-panel">
+    <h3>Current User Info</h3>
+    <div id="user-info">
+      <p><strong>Status:</strong> <span id="auth-status" class="status-badge pending">Checking...</span></p>
+      <p><strong>Email:</strong> <span id="user-email">--</span></p>
+      <p><strong>Name:</strong> <span id="user-name">--</span></p>
+      <p><strong>Tier:</strong> <span id="user-tier" class="tier-badge">--</span></p>
+      <p><strong>Roles:</strong></p>
+      <ul id="user-roles" class="role-list">
+        <li>Loading...</li>
+      </ul>
+    </div>
+    <button id="refresh-user-btn" class="btn btn-primary">Refresh User Info</button>
+  </div>
+
+  <!-- Role Testing Panel -->
+  <div class="test-panel">
+    <h3>Role Checks</h3>
+    <p style="color: #666;">Test whether the current user has specific roles:</p>
+
+    <div style="margin: 20px 0;">
+      <button class="btn btn-primary" onclick="testRole('admin')">Test Admin Role</button>
+      <button class="btn btn-primary" onclick="testRole('premium')">Test Premium Role</button>
+      <button class="btn btn-primary" onclick="testRole('writer')">Test Writer Role</button>
+      <button class="btn btn-primary" onclick="testRole('editor')">Test Editor Role</button>
+      <button class="btn btn-primary" onclick="testRole('viewer')">Test Viewer Role</button>
+    </div>
+
+    <div id="role-test-results"></div>
+  </div>
+
+  <!-- Admin-Only Section -->
+  <div class="test-panel">
+    <h3>Admin-Only Content</h3>
+    <p style="color: #666;">This section should only be visible to users with the <strong>admin</strong> role:</p>
+
+    <div class="premium-only" data-tier="admin">
+      <div class="test-result pass">
+        <strong>✓ Admin Access Granted</strong><br>
+        You can see this content because you have the admin role.
+        <br><br>
+        <button class="btn btn-danger">Delete User</button>
+        <button class="btn btn-danger">Ban User</button>
+        <button class="btn btn-success">Manage Roles</button>
+      </div>
+    </div>
+
+    <div class="upgrade-prompt">
+      <strong>⚠️ Admin Access Required</strong><br>
+      You need admin privileges to view this content.
+    </div>
+  </div>
+
+  <!-- Premium Tier Section -->
+  <div class="test-panel">
+    <h3>Premium Tier Features</h3>
+    <p style="color: #666;">Features available only to premium users:</p>
+
+    <div class="premium-only">
+      <div class="test-result pass">
+        <strong>✓ Premium Access Granted</strong><br>
+        You have access to all premium features:
+        <ul class="feature-list">
+          <li>Advanced Search</li>
+          <li>Download Content</li>
+          <li>API Access</li>
+          <li>Offline Mode</li>
+          <li>Priority Support</li>
+          <li>Custom Themes</li>
+          <li>Export Data</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="upgrade-prompt">
+      <strong>🌟 Upgrade to Premium</strong><br>
+      Get access to advanced features, offline mode, priority support, and more!
+      <br><br>
+      <button class="btn btn-success" onclick="window.location.href='#upgrade'">Upgrade Now</button>
+    </div>
+  </div>
+
+  <!-- Feature Access Testing -->
+  <div class="test-panel">
+    <h3>Feature Access Testing</h3>
+    <p style="color: #666;">Test access to individual features:</p>
+
+    <div style="margin: 20px 0;">
+      <button class="btn btn-primary" onclick="testFeature('read-articles')">Read Articles</button>
+      <button class="btn btn-primary" onclick="testFeature('basic-search')">Basic Search</button>
+      <button class="btn btn-primary" onclick="testFeature('advanced-search')">Advanced Search</button>
+      <button class="btn btn-primary" onclick="testFeature('download-content')">Download Content</button>
+      <button class="btn btn-primary" onclick="testFeature('api-access')">API Access</button>
+      <button class="btn btn-primary" onclick="testFeature('priority-support')">Priority Support</button>
+    </div>
+
+    <div id="feature-test-results"></div>
+  </div>
+
+  <!-- Multi-Role Testing -->
+  <div class="test-panel">
+    <h3>Multi-Role Scenarios</h3>
+    <p style="color: #666;">Test complex role requirements:</p>
+
+    <div style="margin: 20px 0;">
+      <button class="btn btn-success" onclick="testAnyRole(['admin', 'editor'])">
+        Test: Admin OR Editor
+      </button>
+      <button class="btn btn-success" onclick="testAllRoles(['premium', 'writer'])">
+        Test: Premium AND Writer
+      </button>
+      <button class="btn btn-success" onclick="testAnyRole(['viewer', 'writer', 'editor'])">
+        Test: Any Content Role
+      </button>
+    </div>
+
+    <div id="multi-role-test-results"></div>
+  </div>
+
+  <!-- Session Persistence Testing -->
+  <div class="test-panel">
+    <h3>Session Persistence</h3>
+    <p style="color: #666;">Verify that session and roles persist across page reloads:</p>
+
+    <button class="btn btn-primary" onclick="location.reload()">Reload Page</button>
+    <button class="btn btn-danger" onclick="testLogout()">Test Logout</button>
+
+    <div id="session-test-results" style="margin-top: 15px;"></div>
+  </div>
+
+  <!-- Available Features List -->
+  <div class="test-panel">
+    <h3>Your Available Features</h3>
+    <p style="color: #666;">Features available to your current tier:</p>
+
+    <ul id="available-features-list" class="feature-list">
+      <li>Loading...</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+// Test functions
+async function refreshUserInfo() {
+  console.log('[RBAC Testing] Refreshing user info...');
+
+  try {
+    const isAuthed = await authService.isAuthenticated();
+    const authStatusEl = document.getElementById('auth-status');
+
+    if (!isAuthed) {
+      authStatusEl.textContent = 'Not Authenticated';
+      authStatusEl.className = 'status-badge error';
+      document.getElementById('user-email').textContent = '--';
+      document.getElementById('user-name').textContent = '--';
+      document.getElementById('user-tier').textContent = '--';
+      document.getElementById('user-roles').innerHTML = '<li>Not logged in</li>';
+      return;
+    }
+
+    authStatusEl.textContent = 'Authenticated';
+    authStatusEl.className = 'status-badge success';
+
+    const user = await authService.getUser();
+    const roles = await authService.getRoles();
+    const tier = await tierManager.getUserTier();
+
+    document.getElementById('user-email').textContent = user?.email || '--';
+    document.getElementById('user-name').textContent = user?.name || '--';
+
+    const tierEl = document.getElementById('user-tier');
+    tierEl.textContent = tier.toUpperCase();
+    tierEl.className = `tier-badge tier-${tier}`;
+
+    const rolesEl = document.getElementById('user-roles');
+    if (roles.length > 0) {
+      rolesEl.innerHTML = roles.map(role => `<li>${role}</li>`).join('');
+    } else {
+      rolesEl.innerHTML = '<li>No roles assigned</li>';
+    }
+
+    // Update available features
+    const features = await tierManager.getAvailableFeatures();
+    const featuresEl = document.getElementById('available-features-list');
+    featuresEl.innerHTML = features.map(f => `<li>${f}</li>`).join('');
+
+  } catch (err) {
+    console.error('[RBAC Testing] Error refreshing user info:', err);
+  }
+}
+
+async function testRole(role) {
+  console.log(`[RBAC Testing] Testing role: ${role}`);
+
+  try {
+    const hasRole = await authService.hasRole(role);
+    const resultsEl = document.getElementById('role-test-results');
+
+    const resultDiv = document.createElement('div');
+    resultDiv.className = `test-result ${hasRole ? 'pass' : 'fail'}`;
+    resultDiv.innerHTML = `
+      <strong>${hasRole ? '✓' : '✗'} Role: ${role}</strong><br>
+      Result: ${hasRole ? 'User has this role' : 'User does not have this role'}
+    `;
+
+    resultsEl.insertBefore(resultDiv, resultsEl.firstChild);
+  } catch (err) {
+    console.error('[RBAC Testing] Error testing role:', err);
+  }
+}
+
+async function testFeature(feature) {
+  console.log(`[RBAC Testing] Testing feature: ${feature}`);
+
+  try {
+    const hasAccess = await tierManager.hasFeature(feature);
+    const resultsEl = document.getElementById('feature-test-results');
+
+    const resultDiv = document.createElement('div');
+    resultDiv.className = `test-result ${hasAccess ? 'pass' : 'fail'}`;
+    resultDiv.innerHTML = `
+      <strong>${hasAccess ? '✓' : '✗'} Feature: ${feature}</strong><br>
+      Result: ${hasAccess ? 'Access granted' : 'Access denied - upgrade required'}
+    `;
+
+    resultsEl.insertBefore(resultDiv, resultsEl.firstChild);
+  } catch (err) {
+    console.error('[RBAC Testing] Error testing feature:', err);
+  }
+}
+
+async function testAnyRole(roles) {
+  console.log(`[RBAC Testing] Testing any of roles:`, roles);
+
+  try {
+    const userRoles = await authService.getRoles();
+    const hasAccess = roles.some(role => userRoles.includes(role));
+    const resultsEl = document.getElementById('multi-role-test-results');
+
+    const resultDiv = document.createElement('div');
+    resultDiv.className = `test-result ${hasAccess ? 'pass' : 'fail'}`;
+    resultDiv.innerHTML = `
+      <strong>${hasAccess ? '✓' : '✗'} Any of: ${roles.join(', ')}</strong><br>
+      Your roles: ${userRoles.join(', ')}<br>
+      Result: ${hasAccess ? 'Access granted' : 'Access denied'}
+    `;
+
+    resultsEl.insertBefore(resultDiv, resultsEl.firstChild);
+  } catch (err) {
+    console.error('[RBAC Testing] Error testing any role:', err);
+  }
+}
+
+async function testAllRoles(roles) {
+  console.log(`[RBAC Testing] Testing all roles:`, roles);
+
+  try {
+    const userRoles = await authService.getRoles();
+    const hasAccess = roles.every(role => userRoles.includes(role));
+    const resultsEl = document.getElementById('multi-role-test-results');
+
+    const resultDiv = document.createElement('div');
+    resultDiv.className = `test-result ${hasAccess ? 'pass' : 'fail'}`;
+    resultDiv.innerHTML = `
+      <strong>${hasAccess ? '✓' : '✗'} All of: ${roles.join(', ')}</strong><br>
+      Your roles: ${userRoles.join(', ')}<br>
+      Result: ${hasAccess ? 'Access granted' : 'Access denied - missing required roles'}
+    `;
+
+    resultsEl.insertBefore(resultDiv, resultsEl.firstChild);
+  } catch (err) {
+    console.error('[RBAC Testing] Error testing all roles:', err);
+  }
+}
+
+async function testLogout() {
+  if (confirm('Are you sure you want to log out? This will end your session.')) {
+    await authService.logout();
+  }
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('[RBAC Testing] Page loaded, initializing...');
+
+  // Wire up refresh button
+  document.getElementById('refresh-user-btn').addEventListener('click', refreshUserInfo);
+
+  // Initial load
+  await refreshUserInfo();
+
+  // Update tier-based content
+  await tierManager.updateAllTierContent();
+  await rbac.showIfRole('admin', '.premium-only[data-tier="admin"]');
+});
+</script>

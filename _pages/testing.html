@@ -41,28 +41,60 @@ permalink: /testing/
     <h3>Credentials</h3>
     <div class="api-test-form">
       <div class="form-group">
-        <label for="app-id-input">Project App ID (required)</label>
-        <input
-          type="text"
-          id="app-id-input"
-          placeholder="Enter your learn site project app ID"
-          autocomplete="off"
-        >
-        <small style="color: #666;">Get this from your learn site project dashboard at ctklearn.carsontkempf.workers.dev</small>
+        <label>
+          <input type="checkbox" id="zero-config-checkbox" checked>
+          <strong>Use Zero-Config Mode (Recommended)</strong>
+        </label>
+        <small style="color: #666; display: block; margin-top: 5px;">
+          Zero-config uses your browser's Origin header for authentication. No app ID or token needed!
+        </small>
       </div>
-      <div class="form-group">
-        <label for="sdk-token-input">SDK Token (required)</label>
-        <input
-          type="password"
-          id="sdk-token-input"
-          placeholder="sk_live_... or sk_test_..."
-          autocomplete="off"
-        >
-        <small style="color: #666;">Get this from Settings → SDK Tokens at ctklearn.carsontkempf.workers.dev</small>
+
+      <div id="token-mode-inputs">
+        <div class="form-group">
+          <label for="app-id-input">Project App ID</label>
+          <input
+            type="text"
+            id="app-id-input"
+            placeholder="Enter your learn site project app ID"
+            autocomplete="off"
+          >
+          <small style="color: #666;">Get this from your learn site project dashboard at ctklearn.carsontkempf.workers.dev</small>
+        </div>
+        <div class="form-group">
+          <label for="sdk-token-input">SDK Token</label>
+          <input
+            type="password"
+            id="sdk-token-input"
+            placeholder="sk_live_... or sk_test_..."
+            autocomplete="off"
+          >
+          <small style="color: #666;">Get this from Settings → SDK Tokens at ctklearn.carsontkempf.workers.dev</small>
+        </div>
       </div>
+
       <button id="init-sdk-btn" class="btn btn-primary">Initialize SDK</button>
     </div>
   </div>
+
+  <script>
+    // Toggle token inputs visibility based on zero-config checkbox
+    document.addEventListener('DOMContentLoaded', () => {
+      const checkbox = document.getElementById('zero-config-checkbox');
+      const tokenInputs = document.getElementById('token-mode-inputs');
+
+      function updateInputsVisibility() {
+        if (checkbox.checked) {
+          tokenInputs.style.display = 'none';
+        } else {
+          tokenInputs.style.display = 'block';
+        }
+      }
+
+      checkbox.addEventListener('change', updateInputsVisibility);
+      updateInputsVisibility();
+    });
+  </script>
 
   <!-- Token Inspector Panel -->
   <div class="test-panel">

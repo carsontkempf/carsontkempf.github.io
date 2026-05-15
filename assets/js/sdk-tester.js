@@ -201,23 +201,62 @@
   }
 
   /**
-   * Initialize SDK with credentials
+   * Initialize SDK with credentials (supports zero-config mode)
    */
   function initializeSDK() {
     log('=== INITIALIZING SDK ===', null, 'info');
 
     const appId = document.getElementById('app-id-input')?.value?.trim();
     const token = document.getElementById('sdk-token-input')?.value?.trim();
+    const useZeroConfig = document.getElementById('zero-config-checkbox')?.checked;
 
+    // Zero-config mode: uses browser Origin header for authentication
+    if (useZeroConfig) {
+      log('Using ZERO-CONFIG MODE (Origin-based authentication)', {
+        origin: window.location.origin,
+        baseUrl: CONFIG.LEARN_SITE_URL,
+        note: 'No appId or token required - uses browser Origin header'
+      }, 'info');
+
+      try {
+        if (typeof SecretsSDK === 'undefined') {
+          throw new Error('SecretsSDK not loaded - check script order');
+        }
+
+        sdk = new SecretsSDK({
+          baseUrl: CONFIG.LEARN_SITE_URL,
+          timeout: 30000,
+          retryOn429: true
+        });
+
+        log('SDK initialized successfully (zero-config)', {
+          mode: 'zero-config',
+          origin: window.location.origin,
+          baseUrl: sdk.baseUrl,
+          timeout: sdk.timeout
+        }, 'success');
+
+        updateSDKStatus('success', 'SDK initialized (zero-config)');
+        return true;
+      } catch (e) {
+        log('SDK initialization failed', {
+          error: e.message
+        }, 'error');
+        updateSDKStatus('error', `Init failed: ${e.message}`);
+        return false;
+      }
+    }
+
+    // Token mode: requires appId and token
     if (!appId) {
       log('Missing App ID', null, 'error');
-      updateSDKStatus('error', 'App ID is required');
+      updateSDKStatus('error', 'App ID is required (or use zero-config mode)');
       return false;
     }
 
     if (!token) {
       log('Missing SDK Token', null, 'error');
-      updateSDKStatus('error', 'SDK Token is required');
+      updateSDKStatus('error', 'SDK Token is required (or use zero-config mode)');
       return false;
     }
 
@@ -229,7 +268,8 @@
       ? `${token.substring(0, 8)}****${token.substring(token.length - 2)}`
       : '****';
 
-    log('Creating SecretsSDK instance', {
+    log('Creating SecretsSDK instance (token mode)', {
+      mode: 'token',
       appId: appId,
       token: maskedToken,
       baseUrl: CONFIG.LEARN_SITE_URL,
@@ -250,14 +290,14 @@
         retryOn429: true
       });
 
-      log('SDK initialized successfully', {
+      log('SDK initialized successfully (token mode)', {
         appId: sdk.appId,
         baseUrl: sdk.baseUrl,
         timeout: sdk.timeout,
         retryOn429: sdk.retryOn429
       }, 'success');
 
-      updateSDKStatus('success', 'SDK initialized');
+      updateSDKStatus('success', 'SDK initialized (token mode)');
       return true;
     } catch (e) {
       log('SDK initialization failed', {
