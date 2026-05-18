@@ -12,6 +12,8 @@ node_modules/*
 .env
 .env.local
 .env.production
+.env.learn
+.env.test
 _config-prod-env.yml
 
 # Apple Music sensitive data
