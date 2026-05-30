@@ -34,19 +34,17 @@
   background-position: center !important;
 }
 
-/* Center chess pieces in squares - apply upward shift to match chess.css */
+/* Center chess pieces in squares - align with chess.css */
 #chess-board .piece-417db {
   position: absolute;
-  width: 75% !important;
-  height: 75% !important;
-  transform: translateY(-60px) scale(0.85) !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: translateY(-5px) !important;
 }
-
-/* Fix draggable piece positioning to follow cursor correctly - override the 5px offset when dragging */
+/* Fix draggable piece positioning to follow cursor correctly */
 body .piece-417db.dragging-417db {
   z-index: 10000 !important;
-  cursor: grabbing !important;
-  transform: translate(-50%, -50%) !important;
+  transform: none !important; /* No shift while dragging to keep it under cursor */
 }
 
 .eval-bar-wrapper {

@@ -94,6 +94,15 @@
             depth: this.options.depth || 15
         });
 
+        var self = this;
+        this.engine.onEngineError = function(error) {
+            console.error('[CONTROLLER] Engine error detected:', error);
+            self.updateStatus('Engine Error: The chess engine (Stockfish) failed to load. This usually means your browser does not support WASM SIMD, or the engine file was blocked.');
+            if (self.evalBar) {
+                self.evalBar.setScore(0);
+            }
+        };
+
         this.engine.init(function() {
             self.updateStatus();
 
@@ -845,9 +854,38 @@
 
     ChessAnalysisController.prototype.setPlayerColor = function(color) {
         this.playerColor = color;
-        this.board.orientation(color);
-        this.evalBar.setOrientation(color);
-        this.newGame();
+        if (this.board) {
+            this.board.orientation(color);
+        }
+        if (this.evalBar) {
+            this.evalBar.setOrientation(color);
+        }
+    };
+
+    ChessAnalysisController.prototype.setMode = function(mode) {
+        this.mode = mode;
+        console.log('[CONTROLLER] Mode set to:', mode);
+        
+        if (mode === 'analysis') {
+            this.startAnalysis();
+        } else {
+            this.stopAnalysis();
+        }
+        
+        this.updateStatus();
+    };
+
+    ChessAnalysisController.prototype.stopAnalysis = function() {
+        if (this.engine) {
+            this.engine.stopContinuousAnalysis();
+        }
+        if (this.evalBar) {
+            this.evalBar.setScore(0);
+        }
+        var analysisPanel = document.getElementById(this.analysisElement);
+        if (analysisPanel) {
+            analysisPanel.innerHTML = '<p>Analysis disabled</p>';
+        }
     };
 
     ChessAnalysisController.prototype.setSkillLevel = function(level) {

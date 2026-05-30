@@ -13,6 +13,7 @@
     // winChanceDiff: difference in win % before and after move (positive = worse position)
     // Returns value between 0-100
     getAccuracy: function(winChanceDiff) {
+      if (winChanceDiff === null || isNaN(winChanceDiff)) return 0;
       if (winChanceDiff < 0) winChanceDiff = 0;
       var accuracy = 103.1668 * Math.exp(-0.04354 * winChanceDiff) - 3.1669 + 1;
       return Math.min(100, Math.max(0, accuracy));

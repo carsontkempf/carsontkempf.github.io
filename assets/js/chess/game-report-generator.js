@@ -84,6 +84,12 @@
 
       // Analyze this position
       self.engine.analyzePositionOnce(pos.fen, self.analysisDepth, function(analysis) {
+        if (analysis.scoreType === 'error') {
+          console.error('[ERROR] Analysis failed at position', index, ':', analysis.error);
+          self.finishReport(results, completeCallback, analysis.error);
+          return;
+        }
+
         results.push({
           fen: pos.fen,
           move: pos.move,
@@ -110,7 +116,7 @@
     setTimeout(analyzeNext, 500);
   };
 
-  GameReportGenerator.prototype.finishReport = function(results, callback) {
+  GameReportGenerator.prototype.finishReport = function(results, callback, errorMsg) {
     if (!window.GameReportScoring) {
       console.error('GameReportScoring not loaded');
       if (callback) callback({ error: 'GameReportScoring not loaded' });
@@ -124,6 +130,9 @@
     var blackMoves = { blunders: 0, mistakes: 0, dubious: 0, inaccuracies: 0 };
 
     console.log('[DEBUG] Starting move analysis. Total positions:', results.length);
+    if (errorMsg) {
+      console.warn('[WARN] Analysis finished with error:', errorMsg);
+    }
 
     // Analyze each move by comparing position before and after
     for (var i = 0; i < results.length - 1; i++) {
@@ -217,7 +226,8 @@
         inaccuracies: blackMoves.inaccuracies,
         totalMoves: blackAccuracies.length
       },
-      moves: results
+      moves: results,
+      error: errorMsg || null
     };
 
     if (callback) {

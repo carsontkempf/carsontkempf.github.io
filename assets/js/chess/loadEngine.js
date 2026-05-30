@@ -92,6 +92,10 @@ var loadEngine = (function ()
                     console.error('[ERROR] Filename:', e.filename);
                     console.error('[ERROR] Line:', e.lineno);
                     console.error('[ERROR] This usually means the WASM file failed to load or had a runtime error');
+                    
+                    if (engine.onerror) {
+                        engine.onerror(e);
+                    }
                 };
 
                 return worker;

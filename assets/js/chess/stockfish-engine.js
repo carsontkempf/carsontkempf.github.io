@@ -32,6 +32,22 @@
             return;
         }
 
+        // Detection for WASM SIMD support
+        var hasSimd = (function() {
+            try {
+                if (typeof WebAssembly !== 'object' || typeof WebAssembly.validate !== 'function') return false;
+                // SIMD-specific instruction: v128.load
+                return WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 15, 11]));
+            } catch (e) {
+                return false;
+            }
+        })();
+
+        if (!hasSimd) {
+            console.warn('[WARN] Browser does not support WASM SIMD. Stockfish 17+ might fail.');
+            // We'll proceed anyway, but we've logged it for debugging
+        }
+
         if (this.engine && !this.ready) {
             console.log('Engine initialization in progress, waiting...');
             setTimeout(function() {
@@ -55,16 +71,14 @@
             this.engine = loadEngine(enginePath);
             console.log('[DEBUG] Engine object created:', this.engine);
 
-            // Add error handler for Worker
-            if (this.engine && this.engine.worker) {
-                console.log('[DEBUG] Adding error handler to Worker');
-                this.engine.worker.onerror = function(error) {
-                    console.error('[ERROR] Stockfish Worker error:', error);
-                    console.error('[ERROR] Error message:', error.message);
-                    console.error('[ERROR] Error filename:', error.filename);
-                    console.error('[ERROR] Error line:', error.lineno);
-                };
-            }
+            this.engine.onerror = function(error) {
+                console.error('[ERROR] Stockfish Engine reported error:', error);
+                self.ready = false;
+                self.error = true;
+                if (self.onEngineError) {
+                    self.onEngineError(error);
+                }
+            };
         } catch (e) {
             console.error('[ERROR] Failed to create engine:', e);
             return;
@@ -144,14 +158,24 @@
 
     StockfishEngine.prototype.analyzePositionOnce = function(fen, depth, callback) {
         var self = this;
-        if (!this.ready) {
-            console.error('Engine not ready');
+        if (!this.ready || this.error) {
+            console.error('Engine not ready or in error state');
+            if (callback) {
+                callback({ scoreType: 'error', scoreValue: 0, depth: 0, error: 'Engine unavailable' });
+            }
             return;
         }
 
         this.ensureStopped().then(function() {
             self.analyzing = true;
             var lastAnalysis = null;
+            var timeoutId = setTimeout(function() {
+                if (self.analyzing) {
+                    console.warn('[WARN] Analysis timeout for FEN:', fen);
+                    self.analyzing = false;
+                    if (callback) callback({ scoreType: 'error', scoreValue: 0, depth: depth, error: 'Timeout' });
+                }
+            }, 10000); // 10s timeout
 
             self.engine.stream = function(line) {
                 if (line.indexOf('info') === 0) {
@@ -164,13 +188,16 @@
 
             self.engine.send('position fen ' + fen);
             self.engine.send('go depth ' + depth, function(result) {
+                clearTimeout(timeoutId);
+                if (!self.analyzing) return; // Already timed out
+
                 self.analyzing = false;
                 self.engine.stream = null;
 
                 if (callback && lastAnalysis) {
                     callback(lastAnalysis);
                 } else if (callback) {
-                    callback({ scoreType: 'cp', scoreValue: 0, depth: depth });
+                    callback({ scoreType: 'error', scoreValue: 0, depth: depth, error: 'No analysis returned' });
                 }
             });
         });

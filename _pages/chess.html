@@ -98,28 +98,28 @@ permalink: /chess/
 
 <div id="loading-message">
   <p>Loading chess engine...</p>
+  <p id="engine-status-detail" style="font-size: 14px; color: #666; margin-top: 10px;"></p>
+</div>
+
+<div id="engine-error-notice" style="display: none; max-width: 1400px; margin: 20px auto; padding: 20px; background-color: #fee; border: 1px solid #fcc; border-radius: 4px; color: #c00; text-align: center;">
+  <h3>Chess Engine Error</h3>
+  <p id="engine-error-message"></p>
+  <p style="margin-top: 10px;">Try using a modern browser like Chrome or Firefox, or check if WASM SIMD is enabled in your settings.</p>
 </div>
 
 <div id="chess-game" style="display: none;">
   <div class="settings-panel">
     <div class="settings-row">
       <div class="setting-item">
-        <label for="mode-select">Mode:</label>
-        <select id="mode-select">
-          <option value="play" selected>Play vs Engine</option>
-          <option value="analysis">Live Analysis</option>
-        </select>
-      </div>
-      <div class="setting-item">
-        <label for="color-select">Board Orientation:</label>
+        <label for="color-select">Play as:</label>
         <select id="color-select">
-          <option value="white" selected>White</option>
+          <option value="white">White</option>
           <option value="black">Black</option>
         </select>
       </div>
       <div class="setting-item">
-        <label for="skill-level">Engine Strength:</label>
-        <input type="range" id="skill-level" min="0" max="20" value="15" style="width: 150px;">
+        <label for="skill-level">Bot Difficulty:</label>
+        <input type="range" id="skill-level" min="1" max="20" value="15">
         <span id="skill-level-value">15</span>
       </div>
     </div>
@@ -186,25 +186,60 @@ permalink: /chess/
   var chessController;
 
   function initChess() {
-    var modeSelect = document.getElementById('mode-select');
-    var mode = modeSelect.value;
+    // Load settings from localStorage
+    var savedSettings = JSON.parse(localStorage.getItem('chessSettings') || '{}');
+    var savedColor = savedSettings.playerColor || 'white';
+    var savedSkill = savedSettings.skillLevel || 15;
+    var savedAnalysis = savedSettings.analysisEnabled || false;
+
+    // Update UI to match saved settings
+    document.getElementById('color-select').value = savedColor;
+    document.getElementById('skill-level').value = savedSkill;
+    document.getElementById('skill-level-value').textContent = savedSkill;
+    
+    var toggleBtn = document.getElementById('toggle-mode-btn');
+    if (savedAnalysis) {
+        toggleBtn.textContent = 'Disable Analysis';
+        toggleBtn.classList.remove('secondary');
+        toggleBtn.classList.add('primary');
+    }
 
     chessController = new ChessAnalysisController({
       boardElement: 'chess-board',
       statusElement: 'game-status',
       evalBarElement: 'eval-bar',
       analysisElement: 'analysis-panel',
-      playerColor: 'white',
-      mode: mode,
-      skillLevel: 15,
+      playerColor: savedColor,
+      mode: savedAnalysis ? 'analysis' : 'play',
+      skillLevel: savedSkill,
       depth: 20,
       pieceTheme: '/assets/img/chesspieces/wikipedia/{piece}.png'
     });
 
     chessController.init();
 
+    // Hook into engine error to show notice
+    if (chessController.engine) {
+      chessController.engine.onEngineError = function(error) {
+        document.getElementById('loading-message').style.display = 'none';
+        document.getElementById('engine-error-notice').style.display = 'block';
+        document.getElementById('engine-error-message').textContent = 'The chess engine (Stockfish) failed to initialize: ' + (error.message || 'WASM RuntimeError');
+      };
+    }
+
     document.getElementById('loading-message').style.display = 'none';
     document.getElementById('chess-game').style.display = 'block';
+  }
+
+  function saveSettings() {
+    if (!chessController) return;
+    
+    var settings = {
+        playerColor: chessController.playerColor,
+        skillLevel: chessController.options.skillLevel,
+        analysisEnabled: chessController.mode === 'analysis'
+    };
+    localStorage.setItem('chessSettings', JSON.stringify(settings));
   }
 
   function waitForChessground(callback) {
@@ -220,15 +255,11 @@ permalink: /chess/
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    var modeSelect = document.getElementById('mode-select');
-    modeSelect.addEventListener('change', function() {
-      location.reload();
-    });
-
     var colorSelect = document.getElementById('color-select');
     colorSelect.addEventListener('change', function() {
       if (chessController) {
         chessController.setPlayerColor(this.value);
+        saveSettings();
       }
     });
 
@@ -238,7 +269,33 @@ permalink: /chess/
       skillLevelValue.textContent = this.value;
       if (chessController) {
         chessController.setSkillLevel(parseInt(this.value, 10));
+        saveSettings();
       }
+    });
+
+    var toggleModeBtn = document.getElementById('toggle-mode-btn');
+    toggleModeBtn.addEventListener('click', function() {
+      if (!chessController) return;
+      
+      if (chessController.mode === 'play') {
+          chessController.setMode('analysis');
+          this.textContent = 'Disable Analysis';
+          this.classList.remove('secondary');
+          this.classList.add('primary');
+      } else {
+          chessController.setMode('play');
+          this.textContent = 'Live Analysis';
+          this.classList.remove('primary');
+          this.classList.add('secondary');
+      }
+      saveSettings();
+    });
+
+    var flipBoardBtn = document.getElementById('flip-board-btn');
+    flipBoardBtn.addEventListener('click', function() {
+        if (chessController && chessController.board) {
+            chessController.board.flip();
+        }
     });
 
     var closeReportBtn = document.getElementById('close-report-btn');
