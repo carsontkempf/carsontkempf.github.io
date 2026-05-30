@@ -97,7 +97,13 @@
         var self = this;
         this.engine.onEngineError = function(error) {
             console.error('[CONTROLLER] Engine error detected:', error);
-            self.updateStatus('Engine Error: The chess engine (Stockfish) failed to load. This usually means your browser does not support WASM SIMD, or the engine file was blocked.');
+            var msg = 'The chess engine (Stockfish) failed to load. ';
+            if (error && error.message && error.message.indexOf('unreachable') !== -1) {
+                msg += 'This is likely due to WASM SIMD incompatibility or a memory limit in your browser. Try using the latest version of Chrome or Firefox.';
+            } else {
+                msg += 'This usually means your browser does not support WASM SIMD, or the engine file was blocked.';
+            }
+            self.updateStatus('Engine Error: ' + msg);
             if (self.evalBar) {
                 self.evalBar.setScore(0);
             }

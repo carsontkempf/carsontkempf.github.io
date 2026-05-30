@@ -24,12 +24,12 @@
 
 /* Piece positioning - centered with no scaling */
 #chess-board img {
-  transform: translateY(-5px) !important;
+  transform: translateY(-52px) !important;
 }
 
 /* Dragging pieces - match positioning */
 .piece-417db {
-  transform: translateY(-5px) !important;
+  transform: translateY(-52px) !important;
 }
 
 /* Click-to-move highlights */

@@ -25,9 +25,10 @@
 
     StockfishEngine.prototype.init = function(callback) {
         var self = this;
+        console.log('[ENGINE-DIAGNOSTIC] [INIT-START] Initializing StockfishEngine wrapper');
 
         if (this.ready && this.engine) {
-            console.log('Engine already initialized');
+            console.log('[ENGINE-DIAGNOSTIC] [INIT-SKIP] Engine already initialized and ready');
             if (callback) callback();
             return;
         }
@@ -37,19 +38,21 @@
             try {
                 if (typeof WebAssembly !== 'object' || typeof WebAssembly.validate !== 'function') return false;
                 // SIMD-specific instruction: v128.load
-                return WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 15, 11]));
+                var result = WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 15, 11]));
+                console.log('[ENGINE-DIAGNOSTIC] [FEATURE-CHECK] WASM SIMD Support:', result);
+                return result;
             } catch (e) {
+                console.error('[ENGINE-DIAGNOSTIC] [FEATURE-CHECK] Error checking SIMD:', e);
                 return false;
             }
         })();
 
         if (!hasSimd) {
-            console.warn('[WARN] Browser does not support WASM SIMD. Stockfish 17+ might fail.');
-            // We'll proceed anyway, but we've logged it for debugging
+            console.warn('[ENGINE-DIAGNOSTIC] [WARN] Browser does not support WASM SIMD. Stockfish 17.1 (lite-single) requires SIMD.');
         }
 
         if (this.engine && !this.ready) {
-            console.log('Engine initialization in progress, waiting...');
+            console.log('[ENGINE-DIAGNOSTIC] [INIT-WAIT] Engine initialization in progress, waiting...');
             setTimeout(function() {
                 self.init(callback);
             }, 100);
@@ -57,22 +60,20 @@
         }
 
         var enginePath = this.options.enginePath || '/assets/js/chess/vendor/stockfish-17.1-lite-single-03e3232.js';
-        console.log('[DEBUG] Loading Stockfish engine from:', enginePath);
-        console.log('[DEBUG] Expected WASM file:', enginePath.replace('.js', '.wasm'));
+        console.log('[ENGINE-DIAGNOSTIC] [LOAD] Loading Stockfish engine from:', enginePath);
 
         if (typeof loadEngine !== 'function') {
-            console.error('[ERROR] loadEngine function not found. Make sure loadEngine.js is loaded first.');
+            console.error('[ENGINE-DIAGNOSTIC] [FATAL] loadEngine function not found. Verify loadEngine.js is loaded before stockfish-engine.js.');
             return;
         }
 
-        console.log('[DEBUG] Initializing Stockfish engine...');
-
         try {
+            console.log('[ENGINE-DIAGNOSTIC] [CREATING] Calling loadEngine()...');
             this.engine = loadEngine(enginePath);
-            console.log('[DEBUG] Engine object created:', this.engine);
+            console.log('[ENGINE-DIAGNOSTIC] [CREATED] Engine instance created successfully');
 
             this.engine.onerror = function(error) {
-                console.error('[ERROR] Stockfish Engine reported error:', error);
+                console.error('[ENGINE-DIAGNOSTIC] [RUNTIME-ERROR] Engine reported error:', error);
                 self.ready = false;
                 self.error = true;
                 if (self.onEngineError) {
@@ -80,17 +81,18 @@
                 }
             };
         } catch (e) {
-            console.error('[ERROR] Failed to create engine:', e);
+            console.error('[ENGINE-DIAGNOSTIC] [FATAL] Exception during engine creation:', e);
             return;
         }
 
+        console.log('[ENGINE-DIAGNOSTIC] [UCI-INIT] Sending "uci" command');
         this.engine.send('uci', function() {
-            console.log('[DEBUG] Engine UCI ready - engine is communicating');
+            console.log('[ENGINE-DIAGNOSTIC] [UCI-READY] Engine responded to "uci"');
             self.ready = true;
             self.engine.send('setoption name Skill Level value ' + self.skillLevel);
-            console.log('[DEBUG] Set skill level to:', self.skillLevel);
+            console.log('[ENGINE-DIAGNOSTIC] [CONFIG] Set skill level to:', self.skillLevel);
             self.engine.send('isready', function() {
-                console.log('[DEBUG] Engine fully ready and initialized');
+                console.log('[ENGINE-DIAGNOSTIC] [READY] Engine fully initialized and ready for commands');
                 if (callback) callback();
             });
         });
