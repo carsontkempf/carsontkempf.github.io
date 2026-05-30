@@ -61,7 +61,6 @@ async function fetchWithFallbackLichess(endpoint, options = {}) {
 
 class LichessClient {
   constructor() {
-    this.baseUrl = 'chess-lichess-proxy'; // Just the function name, fetchWithFallback handles the base URL
     this.cache = new Map();
     this.cacheExpiry = 3600000; // 1 hour in milliseconds
   }
@@ -97,7 +96,7 @@ class LichessClient {
   }
 
   /**
-   * Make request to Lichess proxy
+   * Make request to Lichess proxy via Worker
    * @param {string} endpoint - API endpoint ('eval', 'opening')
    * @param {object} params - Query parameters
    * @returns {Promise<object>} API response data
@@ -106,6 +105,11 @@ class LichessClient {
     console.log('[LICHESS] ========== API REQUEST ==========');
     console.log('[LICHESS] Endpoint:', endpoint);
     console.log('[LICHESS] Params:', params);
+
+    // Check Worker config
+    if (!window.learnWorkerConfig) {
+      throw new Error('Worker configuration not loaded. Include worker-config.js before this script.');
+    }
 
     // Build query string
     const queryParams = new URLSearchParams();
@@ -118,12 +122,12 @@ class LichessClient {
     });
 
     const queryString = queryParams.toString();
-    const functionNameWithQuery = `${this.baseUrl}?${queryString}`;
+    const workerUrl = `${window.learnWorkerConfig.getEndpoint('/proxy/lichess')}?${queryString}`;
 
-    console.log('[LICHESS] Function with query:', functionNameWithQuery);
+    console.log('[LICHESS] Worker URL:', workerUrl);
 
     // Check cache
-    const cacheKey = functionNameWithQuery;
+    const cacheKey = workerUrl;
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
       console.log('[LICHESS] Using cached result for:', endpoint);
@@ -141,10 +145,10 @@ class LichessClient {
       throw new Error('LICHESS_AUTH_REQUIRED');
     }
 
-    console.log('[LICHESS] Making authenticated request...');
+    console.log('[LICHESS] Making authenticated request to Worker...');
 
-    // Make request using fetchWithFallback
-    const response = await fetchWithFallbackLichess(functionNameWithQuery, {
+    // Make request to Worker
+    const response = await fetch(workerUrl, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

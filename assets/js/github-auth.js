@@ -98,18 +98,21 @@ window.githubService = {
         return null;
     },
 
-    async fetchTokenFromNetlify() {
+    async fetchTokenFromWorker() {
         if (!window.authService || !window.authService.isAuthenticated) {
             throw new Error('Must be authenticated with Auth0 first');
         }
 
         try {
+            if (!window.learnWorkerConfig) {
+                throw new Error('Worker configuration not loaded. Include worker-config.js before this script.');
+            }
+
             console.log('[GitHub Auth] Fetching Auth0 token...');
             const auth0Token = await window.authService.client.getTokenSilently();
-            console.log('[GitHub Auth] Auth0 token obtained, fetching GitHub PAT from Netlify...');
+            console.log('[GitHub Auth] Auth0 token obtained, fetching GitHub PAT from Worker...');
 
-            // Use fetchWithFallback to automatically handle CORS errors
-            const response = await fetchWithFallback('get-github-token', {
+            const response = await fetch(window.learnWorkerConfig.getEndpoint('/proxy/github-token'), {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${auth0Token}`,
@@ -118,11 +121,11 @@ window.githubService = {
                 }
             });
 
-            console.log('[GitHub Auth] Netlify function response status:', response.status);
+            console.log('[GitHub Auth] Worker response status:', response.status);
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('[GitHub Auth] Netlify function error response:', errorText);
+                console.error('[GitHub Auth] Worker error response:', errorText);
                 try {
                     const error = JSON.parse(errorText);
                     throw new Error(error.message || 'Failed to fetch GitHub token');
@@ -132,7 +135,7 @@ window.githubService = {
             }
 
             const data = await response.json();
-            console.log('[GitHub Auth] GitHub PAT retrieved successfully');
+            console.log('[GitHub Auth] GitHub PAT retrieved successfully from Worker');
             return data.token;
         } catch (error) {
             console.error('[GitHub Auth] Failed to fetch GitHub token:', error);
@@ -143,8 +146,8 @@ window.githubService = {
     async login(pat = null) {
         try {
             console.log('[GitHub Auth] Starting login...');
-            // If no PAT provided, fetch from Netlify function
-            const token = pat || await this.fetchTokenFromNetlify();
+            // If no PAT provided, fetch from Worker
+            const token = pat || await this.fetchTokenFromWorker();
 
             console.log('[GitHub Auth] Storing GitHub token...');
             // Store token for API requests
