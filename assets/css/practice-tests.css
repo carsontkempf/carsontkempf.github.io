@@ -47,7 +47,6 @@
 }
 
 .pt-subject-btn:hover img {
-  transform: translateY(-3px) scale(1.02);
   box-shadow: 0 10px 28px rgba(0,0,0,0.26);
 }
 

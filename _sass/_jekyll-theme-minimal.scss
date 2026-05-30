@@ -234,7 +234,6 @@ header #auth-status, #auth-status {
   #auth-status a:hover,
   #auth-status button:hover,
   .login-btn:hover {
-    transform: translateY(-2px);
     filter: brightness(0.9); /* This darkens the button */
   }
 }
@@ -488,7 +487,6 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
 
 @media (orientation: landscape) {
   .post-card:hover, .essay-card:hover {
-    transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     border-color: var(--bg-accent);
   }
@@ -626,7 +624,6 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
 
 @media (orientation: landscape) {
   .dashboard-btn:hover {
-    transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     filter: brightness(0.9);
     text-decoration: none;
@@ -688,7 +685,6 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
 @media (orientation: landscape) {
   .service-logo:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    transform: scale(1.05);
   }
 }
 
@@ -716,7 +712,6 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
 @media (orientation: landscape) {
   .apple-music-logo:hover {
     filter: brightness(2.2) contrast(0.7) saturate(0.1);
-    transform: scale(1.05);
   }
 }
 
@@ -741,11 +736,9 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
 @keyframes pulse {
   0%, 100% {
     opacity: 0.7;
-    transform: scale(1);
   }
   50% {
     opacity: 1;
-    transform: scale(1.1);
   }
 }
 
@@ -863,7 +856,6 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
 
 @media (orientation: landscape) {
   .playlist-item:hover {
-    transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     border-color: var(--bg-accent);
   }
@@ -922,7 +914,6 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
 @media (orientation: landscape) {
   .track-item:hover {
     background-color: var(--bg-accent);
-    transform: translateX(5px);
   }
 }
 

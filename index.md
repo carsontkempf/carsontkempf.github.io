@@ -65,14 +65,13 @@ layout: post
     .spotify-apple-btn:hover {
         color: white;
         background: linear-gradient(135deg, #1aa34a 0%, #1bc653 100%);
-        transform: translateY(-4px) scale(1.02);
         box-shadow: 0 12px 32px rgba(29, 185, 84, 0.4);
         text-decoration: none;
     }
 }
 
 .spotify-apple-btn:active {
-    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 4px 12px rgba(29, 185, 84, 0.2);
 }
 
 @media (min-width: 769px) {
@@ -151,13 +150,12 @@ layout: post
 /* Landscape mode - enable hover effects */
 @media (orientation: landscape) {
     .icon-btn:hover {
-        transform: translateY(-4px) scale(1.02);
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
     }
 }
 
 .icon-btn:active {
-    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 @media (min-width: 769px) {
@@ -252,13 +250,12 @@ layout: post
 /* Landscape mode - enable hover effects */
 @media (orientation: landscape) {
     .social-icon-btn:hover {
-        transform: translateY(-4px) scale(1.05);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
     }
 }
 
 .social-icon-btn:active {
-    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 </style>
 
