@@ -102,12 +102,12 @@ class LichessClient {
    * @returns {Promise<object>} API response data
    */
   async request(endpoint, params = {}) {
-    console.log('[LICHESS] ========== API REQUEST ==========');
-    console.log('[LICHESS] Endpoint:', endpoint);
-    console.log('[LICHESS] Params:', params);
+    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-START] Lichess API Request:', endpoint);
+    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-PARAMS]:', params);
 
     // Check Worker config
     if (!window.learnWorkerConfig) {
+      console.error('[ENGINE-DIAGNOSTIC] [NETWORK-ERROR] Worker configuration NOT LOADED');
       throw new Error('Worker configuration not loaded. Include worker-config.js before this script.');
     }
 
@@ -124,59 +124,64 @@ class LichessClient {
     const queryString = queryParams.toString();
     const workerUrl = `${window.learnWorkerConfig.getEndpoint('/proxy/lichess')}?${queryString}`;
 
-    console.log('[LICHESS] Worker URL:', workerUrl);
+    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-URL]:', workerUrl);
 
     // Check cache
     const cacheKey = workerUrl;
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
-      console.log('[LICHESS] Using cached result for:', endpoint);
-      console.log('[LICHESS] ========== API CACHE HIT ==========');
+      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-CACHE-HIT] Using cached result for:', endpoint);
       return cached.data;
     }
 
     // Get auth token
+    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-AUTH-START] Fetching Auth0 Token...');
     const token = await this.getAuthToken();
 
     // If no token available, throw specific error that engine-manager can catch
     if (!token) {
-      console.log('[LICHESS] No auth token - cannot use Lichess API');
-      console.log('[LICHESS] ========== API AUTH REQUIRED ==========');
+      console.warn('[ENGINE-DIAGNOSTIC] [NETWORK-AUTH-FAILED] No auth token available - falling back to local engine');
       throw new Error('LICHESS_AUTH_REQUIRED');
     }
 
-    console.log('[LICHESS] Making authenticated request to Worker...');
+    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-FETCH-START] Initiating fetch to proxy...');
+    const startTime = performance.now();
 
-    // Make request to Worker
-    const response = await fetch(workerUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
+    try {
+      // Make request to Worker
+      const response = await fetch(workerUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      const endTime = performance.now();
+      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-RESPONSE] Received in', Math.round(endTime - startTime), 'ms');
+      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-STATUS]:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[ENGINE-DIAGNOSTIC] [NETWORK-ERROR-BODY]:', errorText);
+        throw new Error(`Request failed with status ${response.status}`);
       }
-    });
 
-    console.log('[LICHESS] Response status:', response.status);
+      const result = await response.json();
+      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SUCCESS] Data received:', result);
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: response.statusText }));
-      console.error('[LICHESS] Request failed:', error);
-      console.log('[LICHESS] ========== API ERROR ==========');
-      throw new Error(error.message || `Request failed: ${response.status}`);
+      // Cache successful response
+      this.cache.set(cacheKey, {
+        data: result.data,
+        timestamp: Date.now()
+      });
+
+      return result.data;
+    } catch (error) {
+      console.error('[ENGINE-DIAGNOSTIC] [NETWORK-FETCH-ERROR]:', error.message);
+      throw error;
     }
-
-    const result = await response.json();
-    console.log('[LICHESS] Response received:', result);
-
-    // Cache successful response
-    this.cache.set(cacheKey, {
-      data: result.data,
-      timestamp: Date.now()
-    });
-
-    console.log('[LICHESS] ========== API SUCCESS ==========');
-    return result.data;
   }
 
   /**
