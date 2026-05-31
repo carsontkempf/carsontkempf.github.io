@@ -39,7 +39,7 @@
   position: absolute;
   width: 100% !important;
   height: 100% !important;
-  transform: translateY(-52px) !important;
+  transform: translateY(-56px) !important;
 }
 /* Fix draggable piece positioning to follow cursor correctly */
 body .piece-417db.dragging-417db {

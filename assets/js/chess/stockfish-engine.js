@@ -25,7 +25,23 @@
 
     StockfishEngine.prototype.init = function(callback) {
         var self = this;
-        console.log('[ENGINE-DIAGNOSTIC] [INIT-START] Initializing StockfishEngine wrapper');
+        console.log('[ENGINE-DIAGNOSTIC] [INIT-START] StockfishEngine Setup');
+
+        // Verify WASM file availability and headers
+        var wasmPath = '/assets/js/chess/vendor/stockfish.wasm';
+        fetch(wasmPath, { method: 'HEAD' })
+            .then(function(response) {
+                console.log('[ENGINE-DIAGNOSTIC] [NETWORK-CHECK] WASM File:', wasmPath);
+                console.log('  - Status:', response.status, response.statusText);
+                console.log('  - Content-Type:', response.headers.get('Content-Type'));
+                var size = response.headers.get('Content-Length');
+                if (size) {
+                    console.log('  - Content-Length:', (parseInt(size) / 1048576).toFixed(2) + ' MB');
+                }
+            })
+            .catch(function(err) {
+                console.warn('[ENGINE-DIAGNOSTIC] [NETWORK-CHECK] Could not probe WASM headers:', err.message);
+            });
 
         if (this.ready && this.engine) {
             console.log('[ENGINE-DIAGNOSTIC] [INIT-SKIP] Engine already initialized and ready');
@@ -73,7 +89,15 @@
             console.log('[ENGINE-DIAGNOSTIC] [CREATED] Engine instance created successfully');
 
             this.engine.onerror = function(error) {
-                console.error('[ENGINE-DIAGNOSTIC] [RUNTIME-ERROR] Engine reported error:', error);
+                // Sliced log to avoid massive object serialization (like the Window dump)
+                console.error('[ENGINE-DIAGNOSTIC] [RUNTIME-ERROR] Stockfish reported a failure.');
+                if (error && error.message) {
+                    console.error('  - Error Message:', error.message);
+                    if (error.message.includes('unreachable')) {
+                        console.error('  - Analysis: This is a WASM trap. Likely out-of-memory or incompatible instruction.');
+                    }
+                }
+                
                 self.ready = false;
                 self.error = true;
                 if (self.onEngineError) {
@@ -89,10 +113,15 @@
         this.engine.send('uci', function() {
             console.log('[ENGINE-DIAGNOSTIC] [UCI-READY] Engine responded to "uci"');
             self.ready = true;
+            
+            // Apply memory-safe defaults immediately
+            console.log('[ENGINE-DIAGNOSTIC] [CONFIG] Applying memory-safe defaults (Hash=16, Threads=1)');
+            self.engine.send('setoption name Hash value 16');
+            self.engine.send('setoption name Threads value 1');
             self.engine.send('setoption name Skill Level value ' + self.skillLevel);
-            console.log('[ENGINE-DIAGNOSTIC] [CONFIG] Set skill level to:', self.skillLevel);
+            
             self.engine.send('isready', function() {
-                console.log('[ENGINE-DIAGNOSTIC] [READY] Engine fully initialized and ready for commands');
+                console.log('[ENGINE-DIAGNOSTIC] [READY] Engine fully initialized and ready');
                 if (callback) callback();
             });
         });

@@ -80,22 +80,40 @@ var loadEngine = (function ()
 
         path = path || "stockfish.js";
 
-        // Environment Diagnostics
-        console.log('[ENGINE-DIAGNOSTIC] --- Environment Diagnostics ---');
-        console.log('[ENGINE-DIAGNOSTIC] User Agent:', navigator.userAgent);
-        console.log('[ENGINE-DIAGNOSTIC] Worker Support:', typeof Worker === "function");
-        console.log('[ENGINE-DIAGNOSTIC] WebAssembly Support:', typeof WebAssembly === "object");
+        // Advanced Environment Diagnostics
+        console.group('[ENGINE-DIAGNOSTIC] --- Advanced Environment Audit ---');
+        console.log('User Agent:', navigator.userAgent);
+        console.log('Platform:', navigator.platform);
+        console.log('Device Memory (GB):', navigator.deviceMemory || 'Unknown');
+        console.log('Hardware Concurrency (Cores):', navigator.hardwareConcurrency || 'Unknown');
+        
+        if (window.performance && window.performance.memory) {
+            console.log('Memory Usage (MB):', {
+                used: Math.round(performance.memory.usedJSHeapSize / 1048576),
+                total: Math.round(performance.memory.totalJSHeapSize / 1048576),
+                limit: Math.round(performance.memory.jsHeapSizeLimit / 1048576)
+            });
+        }
+
+        console.log('Worker Support:', typeof Worker === "function");
+        console.log('WebAssembly Support:', typeof WebAssembly === "object");
+        
         if (typeof WebAssembly === "object") {
-            console.log('[ENGINE-DIAGNOSTIC] WASM SIMD Support:', WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 15, 11])));
+            const simdCheck = WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 15, 11]));
+            console.log('WASM SIMD Support:', simdCheck);
+            
             try {
-                const sab = new SharedArrayBuffer(1024);
-                console.log('[ENGINE-DIAGNOSTIC] SharedArrayBuffer Support: true');
+                // Check for SharedArrayBuffer (Requires COOP/COEP headers)
+                const sabSupported = typeof SharedArrayBuffer !== 'undefined';
+                console.log('SharedArrayBuffer Support:', sabSupported);
+                console.log('Cross-Origin Isolated:', window.crossOriginIsolated);
             } catch (e) {
-                console.log('[ENGINE-DIAGNOSTIC] SharedArrayBuffer Support: false (Cross-Origin Isolation might be missing)');
+                console.log('SharedArrayBuffer Check Error:', e.message);
             }
         }
-        console.log('[ENGINE-DIAGNOSTIC] Path:', path);
-        console.log('[ENGINE-DIAGNOSTIC] -------------------------------');
+        
+        console.log('Engine Path:', path);
+        console.groupEnd();
 
         if (typeof Worker === "function") {
             try {
@@ -103,26 +121,22 @@ var loadEngine = (function ()
                 console.log('[ENGINE-DIAGNOSTIC] Worker instance created successfully');
 
                 worker.onerror = function(e) {
-                    console.error('[ENGINE-DIAGNOSTIC] [CRITICAL] Worker Error Event Detected');
-                    console.error('[ENGINE-DIAGNOSTIC] Error Message:', e.message);
-                    console.error('[ENGINE-DIAGNOSTIC] Filename:', e.filename);
-                    console.error('[ENGINE-DIAGNOSTIC] Line:', e.lineno, 'Col:', e.colno);
-                    console.error('[ENGINE-DIAGNOSTIC] Error Object:', e.error);
+                    // Surgical error logging to avoid massive object dumps
+                    console.error('[ENGINE-DIAGNOSTIC] [CRITICAL] Worker Error Event');
+                    console.error('  - Message:', e.message);
+                    console.error('  - Source:', e.filename);
+                    console.error('  - Position:', 'Line ' + e.lineno + ', Col ' + e.colno);
                     
                     if (e.message && e.message.includes('unreachable')) {
-                        console.error('[ENGINE-DIAGNOSTIC] [ANALYSIS] "unreachable" usually indicates a WASM trap. Possible causes: SIMD mismatch, Memory OOB, or Stack Overflow.');
+                        console.error('[ENGINE-DIAGNOSTIC] [ANALYSIS] "unreachable" trap hit at runtime.');
+                        console.error('  Possible Root Cause: The WASM module attempted to execute an illegal instruction (likely SIMD) or accessed out-of-bounds memory.');
+                        console.error('  Recommendation: Check if browser supports WASM SIMD and has sufficient memory.');
                     }
-                };
-
-                worker.onmessage = function(e) {
-                    // This is a temporary diagnostic listener, will be overridden by loadEngine closure
-                    // but it's useful to see if anything comes back before the override
-                    console.log('[ENGINE-DIAGNOSTIC] [EARLY-MSG]:', e.data);
                 };
 
                 return worker;
             } catch (e) {
-                console.error('[ENGINE-DIAGNOSTIC] [FATAL] Failed to create Worker:', e);
+                console.error('[ENGINE-DIAGNOSTIC] [FATAL] Failed to create Worker:', e.message);
                 throw e;
             }
         }
