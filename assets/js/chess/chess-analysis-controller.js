@@ -80,6 +80,10 @@
 
         // Use Chessboard.js for the main visual board
         console.log('Initializing Chessboard with element:', this.boardElement);
+        if (typeof Chessboard === 'undefined') {
+            console.error('[FATAL] Chessboard.js not loaded');
+            return;
+        }
         this.board = Chessboard(this.boardElement, boardConfig);
         console.log('Chessboard initialized:', this.board);
 
@@ -94,7 +98,6 @@
             depth: this.options.depth || 15
         });
 
-        var self = this;
         this.engine.onEngineError = function(error) {
             console.error('[CONTROLLER] Engine error detected:', error);
             var msg = 'The chess engine (Stockfish) failed to load. ';
@@ -114,7 +117,8 @@
 
             if (self.mode === 'analysis') {
                 self.startAnalysis();
-            } else if (self.playerColor === 'black') {
+            } else if (self.playerColor === 'black' && self.game.turn() === 'w') {
+                // If it's the beginning of a game and engine is white (player is black)
                 self.makeEngineMove();
             }
         });
@@ -336,14 +340,6 @@
 
         this.setStatus('Engine thinking...');
 
-        // CRITICAL: Capture score before engine move for analysis
-        if (this.lastAnalysisScore) {
-            this.beforeMoveScore = {
-                scoreType: this.lastAnalysisScore.scoreType,
-                scoreValue: this.lastAnalysisScore.scoreValue
-            };
-        }
-
         this.engine.getBestMove(this.game.fen(), function(bestMove) {
             if (!bestMove) {
                 self.updateStatus();
@@ -365,9 +361,6 @@
                 self.board.position(self.game.fen());
                 self.updateStatus();
 
-                // Start analysis after engine move to track engine move quality
-                self.waitingForAnalysis = true;
-
                 // Start continuous analysis after engine move to track player move quality
                 if (self.mode === 'play') {
                     window.setTimeout(function() {
@@ -383,7 +376,6 @@
         var currentFen = this.game.fen();
         
         console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-START] FEN:', currentFen);
-        console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-STATE] Mode:', this.mode, 'Engine Ready:', this.engine ? this.engine.ready : 'No Engine');
 
         // Try Lichess API via SecretsSDK first (Auth-free proxy)
         (async function() {
@@ -424,7 +416,6 @@
             var linesByMultiPV = {};
 
             self.engine.startContinuousAnalysis(currentFen, function(analysis) {
-                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-STREAM]:', analysis);
                 if (analysis.scoreType) {
                     self.lastAnalysisScore = {
                         scoreType: analysis.scoreType,
@@ -506,27 +497,7 @@
         this.displayAnalysisLines(linesByMultiPV);
     };
 
-    ChessAnalysisController.prototype.setMode = function(mode) {
-        this.mode = mode;
-        console.log('[CONTROLLER] Mode set to:', mode);
-        
-        if (this.mode === 'analysis') {
-            this.startAnalysis();
-        } else {
-            // Stop continuous analysis if switching to play mode
-            if (this.engine && this.engine.analyzing) {
-                this.engine.stopContinuousAnalysis();
-            }
-        }
-        
-        this.updateStatus();
-    };
-
     ChessAnalysisController.prototype.analyzeMoveQuality = function(beforeScore, afterScore) {
-        console.log('[DEBUG] analyzeMoveQuality called');
-        console.log('[DEBUG]   beforeScore:', beforeScore);
-        console.log('[DEBUG]   afterScore:', afterScore);
-
         if (!window.GameReportScoring) {
             console.warn('GameReportScoring not loaded');
             return;
@@ -538,39 +509,26 @@
         var lastMove = history[history.length - 1];
         var moveColor = lastMove.color === 'w' ? 'white' : 'black';
 
-        console.log('[DEBUG]   Move:', lastMove.san, '(' + moveColor + ')');
-
         // Convert scores to centipawns
         var beforeCp = window.GameReportScoring.scoreToCentipawns(beforeScore.scoreType, beforeScore.scoreValue);
         var afterCp = window.GameReportScoring.scoreToCentipawns(afterScore.scoreType, afterScore.scoreValue);
-
-        console.log('[DEBUG]   beforeCp:', beforeCp, 'afterCp:', afterCp);
 
         // Flip sign for black's perspective
         if (moveColor === 'black') {
             beforeCp = -beforeCp;
             afterCp = -afterCp;
-            console.log('[DEBUG]   (Flipped for black perspective)');
         }
-
-        console.log('[DEBUG]   Adjusted beforeCp:', beforeCp, 'afterCp:', afterCp);
 
         // Calculate win chances
         var beforeWinChance = window.GameReportScoring.getWinChance(beforeCp);
         var afterWinChance = window.GameReportScoring.getWinChance(afterCp);
         var winChanceLoss = beforeWinChance - afterWinChance;
 
-        console.log('[DEBUG]   winChanceLoss:', winChanceLoss.toFixed(2), '%');
-
         // Calculate accuracy
         var accuracy = window.GameReportScoring.getAccuracy(winChanceLoss);
 
-        console.log('[DEBUG]   accuracy:', accuracy.toFixed(1), '%');
-
         // Classify move
         var classification = window.GameReportScoring.classifyMove(winChanceLoss);
-
-        console.log('[DEBUG]   classification:', classification.label);
 
         // Update stats
         var stats = this.liveStats[moveColor];
@@ -590,43 +548,6 @@
             classification: classification,
             winChanceLoss: winChanceLoss
         });
-
-        // Update display
-        this.displayLiveStats();
-    };
-
-    ChessAnalysisController.prototype.displayLiveStats = function() {
-        // This will be called from displayAnalysisLines to show stats alongside multi-PV
-    };
-
-    ChessAnalysisController.prototype.parseInfo = function(line) {
-        var analysis = {multipv: 1};
-
-        var multipvMatch = line.match(/multipv (\d+)/);
-        if (multipvMatch) analysis.multipv = parseInt(multipvMatch[1], 10);
-
-        var depthMatch = line.match(/depth (\d+)/);
-        if (depthMatch) analysis.depth = parseInt(depthMatch[1], 10);
-
-        var scoreMatch = line.match(/score (cp|mate) (-?\d+)/);
-        if (scoreMatch) {
-            analysis.scoreType = scoreMatch[1];
-            analysis.scoreValue = parseInt(scoreMatch[2], 10);
-
-            if (scoreMatch[1] === 'cp') {
-                analysis.score = scoreMatch[2] / 100.0;
-            } else {
-                analysis.score = 'M' + Math.abs(scoreMatch[2]);
-            }
-        }
-
-        var pvMatch = line.match(/pv (.+)/);
-        if (pvMatch) analysis.pv = pvMatch[1].split(' ');
-
-        var nodesMatch = line.match(/nodes (\d+)/);
-        if (nodesMatch) analysis.nodes = parseInt(nodesMatch[1], 10);
-
-        return Object.keys(analysis).length > 1 ? analysis : null;
     };
 
     ChessAnalysisController.prototype.displayAnalysisLines = function(linesByMultiPV) {
@@ -743,48 +664,6 @@
         html += '</div>';
 
         analysisPanel.innerHTML = html;
-
-        // Draw arrows on board for best moves (Chessground only)
-        this.drawAnalysisArrows(linesByMultiPV);
-    };
-
-    ChessAnalysisController.prototype.drawAnalysisArrows = function(linesByMultiPV) {
-        // Only draw arrows if board supports setShapes (Chessground feature)
-        // Chessboard.js doesn't support arrows, so this will be skipped
-        if (!this.board || typeof this.board.setShapes !== 'function') {
-            return;
-        }
-
-        var shapes = [];
-        var colors = ['green', 'blue', 'yellow'];
-
-        // Draw arrows for top 3 lines
-        for (var i = 1; i <= 3; i++) {
-            if (linesByMultiPV[i] && linesByMultiPV[i].pv && linesByMultiPV[i].pv.length > 0) {
-                var firstMove = linesByMultiPV[i].pv[0];
-                if (firstMove && firstMove.length >= 4) {
-                    var from = firstMove.substring(0, 2);
-                    var to = firstMove.substring(2, 4);
-
-                    shapes.push({
-                        brush: colors[i - 1],
-                        orig: from,
-                        dest: to
-                    });
-                }
-            }
-        }
-
-        // Add red arrow for blunders/mistakes if last move was bad
-        if (this.moveHistory.length > 0) {
-            var lastMove = this.moveHistory[this.moveHistory.length - 1];
-            if (lastMove.classification &&
-                (lastMove.classification.class === 'blunder' || lastMove.classification.class === 'mistake')) {
-                // Don't add red arrow, just keep best move arrows
-            }
-        }
-
-        this.board.setShapes(shapes);
     };
 
     ChessAnalysisController.prototype.formatPVMoves = function(pv) {
@@ -871,13 +750,6 @@
             });
         }
 
-        var toggleModeBtn = document.getElementById('toggle-mode-btn');
-        if (toggleModeBtn) {
-            toggleModeBtn.addEventListener('click', function() {
-                self.toggleMode();
-            });
-        }
-
         var generateReportBtn = document.getElementById('generate-report-btn');
         if (generateReportBtn) {
             generateReportBtn.addEventListener('click', function() {
@@ -933,76 +805,31 @@
     };
 
     ChessAnalysisController.prototype.toggleMode = function() {
+        var container = document.getElementById('main-container');
+        var toggle = document.getElementById('analysis-toggle');
+
         if (this.mode === 'play') {
             this.mode = 'analysis';
+            if (container) container.classList.add('analysis-enabled');
+            if (toggle) toggle.checked = true;
             this.startAnalysis();
         } else {
             this.mode = 'play';
+            if (container) container.classList.remove('analysis-enabled');
+            if (toggle) toggle.checked = false;
             if (this.engine && this.engine.analyzing) {
                 this.engine.stopContinuousAnalysis();
             }
         }
 
         this.updateStatus();
-
-        var toggleBtn = document.getElementById('toggle-mode-btn');
-        if (toggleBtn) {
-            toggleBtn.textContent = this.mode === 'play' ? 'Live Analysis' : 'Play vs Engine';
-        }
     };
 
     ChessAnalysisController.prototype.setPlayerColor = function(color) {
         this.playerColor = color;
-        if (this.board) {
-            this.board.orientation(color);
-        }
-        if (this.evalBar) {
-            this.evalBar.setOrientation(color);
-        }
-    };
-
-    ChessAnalysisController.prototype.setMode = function(mode) {
-        this.mode = mode;
-        console.log('[CONTROLLER] Mode set to:', mode);
-        
-        if (mode === 'analysis') {
-            this.startAnalysis();
-        } else {
-            this.stopAnalysis();
-        }
-        
-        this.updateStatus();
-    };
-
-    ChessAnalysisController.prototype.stopAnalysis = function() {
-        if (this.engine) {
-            this.engine.stopContinuousAnalysis();
-        }
-        if (this.evalBar) {
-            this.evalBar.setScore(0);
-        }
-        var analysisPanel = document.getElementById(this.analysisElement);
-        if (analysisPanel) {
-            analysisPanel.innerHTML = '<p>Analysis disabled</p>';
-        }
-    };
-
-    ChessAnalysisController.prototype.setPlayerColor = function(color) {
-        this.playerColor = color;
-        if (this.board) {
-            this.board.orientation(color);
-        }
-        if (this.evalBar) {
-            this.evalBar.setOrientation(color);
-        }
-        
-        // If it's the engine's turn after switching sides, trigger move
-        if (this.mode === 'play') {
-            var turn = this.game.turn();
-            if ((turn === 'w' && color === 'black') || (turn === 'b' && color === 'white')) {
-                this.makeEngineMove();
-            }
-        }
+        this.board.orientation(color);
+        this.evalBar.setOrientation(color);
+        this.newGame();
     };
 
     ChessAnalysisController.prototype.setSkillLevel = function(level) {
@@ -1029,14 +856,9 @@
         // Show report panel and progress
         var reportPanel = document.getElementById('report-panel');
         var reportContent = document.getElementById('report-content');
-        var reportProgress = document.getElementById('report-progress');
-        var progressBar = document.getElementById('progress-bar');
-        var progressText = document.getElementById('progress-text');
 
         if (reportPanel) reportPanel.style.display = 'block';
-        if (reportContent) reportContent.innerHTML = '';
-        if (reportProgress) reportProgress.style.display = 'block';
-        if (progressBar) progressBar.style.width = '0%';
+        if (reportContent) reportContent.innerHTML = '<p>Generating game report...</p>';
 
         // Stop continuous analysis
         if (this.engine && this.engine.analyzing) {
@@ -1050,26 +872,20 @@
 
         generator.generateReport(
             function(current, total) {
-                // Progress callback
-                var percent = Math.round((current / total) * 100);
-                if (progressBar) progressBar.style.width = percent + '%';
-                if (progressText) {
-                    progressText.textContent = 'Analyzing move ' + current + ' of ' + total + '...';
+                if (reportContent) {
+                    reportContent.innerHTML = '<p>Analyzing move ' + current + ' of ' + total + '...</p>';
                 }
             },
             function(report) {
                 // Complete callback
                 if (report.error) {
                     self.setStatus('Error: ' + report.error);
-                    if (reportProgress) reportProgress.style.display = 'none';
                     return;
                 }
 
                 self.currentReport = report;
                 self.displayReport(report);
                 self.setStatus('Game report complete');
-
-                if (reportProgress) reportProgress.style.display = 'none';
 
                 // Restart analysis if in analysis mode
                 if (self.mode === 'analysis') {
@@ -1143,47 +959,6 @@
         html += '</div>';
         html += '</div>';
 
-        html += '</div>';
-
-        // Add move-by-move list showing both white and black moves
-        html += '<div class="move-list-section">';
-        html += '<h3 style="margin: 20px 0 10px 0; color: var(--text-main);">Move Analysis</h3>';
-        html += '<div class="move-list">';
-
-        // Group moves by full move number (white + black move = 1 full move)
-        for (var i = 1; i < report.moves.length; i++) {
-            var moveData = report.moves[i];
-            if (!moveData.move) continue;
-
-            var isWhite = moveData.color === 'white';
-            var moveNumber = moveData.moveNumber;
-            var classification = moveData.classification || { label: 'Good', class: 'good', symbol: '' };
-            var accuracy = moveData.accuracy !== undefined ? moveData.accuracy.toFixed(1) : '100.0';
-            var winChanceLoss = moveData.winChanceLoss !== undefined ? moveData.winChanceLoss.toFixed(1) : '0.0';
-
-            // Color indicator
-            var colorIndicator = isWhite ? '⚪' : '⚫';
-            var colorClass = isWhite ? 'white-move' : 'black-move';
-
-            // Accuracy color coding
-            var accuracyColor = accuracy >= 95 ? '#4a90e2' :
-                              accuracy >= 80 ? '#7cb342' :
-                              accuracy >= 60 ? '#fbc02d' : '#d32f2f';
-
-            html += '<div class="move-item ' + colorClass + '">';
-            html += '<span class="move-number">' + colorIndicator + ' ' + moveNumber + '.</span>';
-            html += '<span class="move-san">' + moveData.san + '</span>';
-            html += '<span class="move-classification ' + classification.class + '">';
-            if (classification.symbol) {
-                html += classification.symbol + ' ';
-            }
-            html += classification.label + '</span>';
-            html += '<span class="move-accuracy" style="color: ' + accuracyColor + ';">' + accuracy + '%</span>';
-            html += '<span class="move-loss">(-' + winChanceLoss + '%)</span>';
-            html += '</div>';
-        }
-
-        html += '</div>';
         html += '</div>';
 
         reportContent.innerHTML = html;

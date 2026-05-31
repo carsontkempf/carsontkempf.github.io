@@ -29,9 +29,6 @@ permalink: /chess/
       getSession: () => null
     };
 
-    // Prevents "AuthSDK is not a constructor" error
-    // Use a getter to ensure we don't block the actual SDK if it loads,
-    // but provide a fallback if it doesn't.
     if (!window.AuthSDK) {
       window.AuthSDK = function() { return window.authService; };
       window.AuthSDK.init = async function() { return window.authService; };
@@ -54,9 +51,10 @@ permalink: /chess/
 
   .settings-row {
     display: flex;
-    gap: 20px;
+    gap: 30px;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
   }
 
   .setting-item {
@@ -102,12 +100,6 @@ permalink: /chess/
     color: var(--text-main);
   }
 
-  .setting-item.toggle-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
   /* Centered Layout */
   .chess-analysis-container {
     display: flex;
@@ -121,6 +113,8 @@ permalink: /chess/
 
   .analysis-panel {
     display: none; /* Hidden by default */
+    flex: 1;
+    min-width: 300px;
   }
 
   #eval-bar {
@@ -149,7 +143,6 @@ permalink: /chess/
 
 <div id="loading-message">
   <p>Loading chess engine...</p>
-  <p id="engine-status-detail" style="font-size: 14px; color: #666; margin-top: 10px;"></p>
 </div>
 
 <div id="engine-error-notice" style="display: none; max-width: 1400px; margin: 20px auto; padding: 20px; background-color: #fee; border: 1px solid #fcc; border-radius: 4px; color: #c00; text-align: center;">
@@ -173,7 +166,7 @@ permalink: /chess/
         <input type="range" id="skill-level" min="1" max="20" value="15">
         <span id="skill-level-value">15</span>
       </div>
-      <div class="setting-item toggle-item">
+      <div class="setting-item">
         <label for="analysis-toggle">Live Analysis:</label>
         <input type="checkbox" id="analysis-toggle">
       </div>
@@ -204,6 +197,7 @@ permalink: /chess/
     <button id="new-game-btn">New Game</button>
     <button id="undo-btn">Undo Move</button>
     <button id="flip-board-btn">Flip Board</button>
+    <button id="toggle-mode-btn" class="secondary" style="display:none">Toggle Mode</button>
     <button id="generate-report-btn" class="primary">Generate Report</button>
   </div>
 
@@ -216,14 +210,11 @@ permalink: /chess/
   </div>
 </div>
 
-<!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="/assets/js/vendor/chessboard-1.0.0.min.js"></script>
 <script src="/assets/js/chess/chess.min.js"></script>
 <script src="/assets/js/worker-config.js"></script>
 <script src="/assets/js/learn-secrets-sdk.js"></script>
-
-<!-- Chess Implementation -->
 <script src="/assets/js/chess/api/lichess-client.js"></script>
 <script src="/assets/js/chess/loadEngine.js"></script>
 <script src="/assets/js/chess/stockfish-engine.js"></script>
@@ -239,15 +230,11 @@ permalink: /chess/
   var chessController;
 
   function initChess() {
-    console.log('[CHESS-PAGE] initChess starting...');
-    
-    // Load settings from localStorage
     var savedSettings = JSON.parse(localStorage.getItem('chessSettings') || '{}');
     var savedColor = savedSettings.playerColor || 'white';
     var savedSkill = savedSettings.skillLevel || 15;
     var savedAnalysis = savedSettings.analysisEnabled || false;
 
-    // Update UI to match saved settings
     document.getElementById('color-select').value = savedColor;
     document.getElementById('skill-level').value = savedSkill;
     document.getElementById('skill-level-value').textContent = savedSkill;
@@ -257,10 +244,8 @@ permalink: /chess/
         document.getElementById('main-container').classList.add('analysis-enabled');
     }
 
-    // Verify Chessboard.js
     if (typeof window.Chessboard === 'undefined') {
-        console.error('[FATAL] Chessboard.js not found in global scope');
-        document.getElementById('loading-message').innerHTML = '<p style="color:red">Error: Board library failed to load.</p>';
+        console.error('[FATAL] Chessboard.js not loaded');
         return;
     }
 
@@ -276,26 +261,23 @@ permalink: /chess/
       pieceTheme: '/assets/img/chesspieces/wikipedia/{piece}.png'
     });
 
-    console.log('[CHESS-PAGE] Controller created, calling init()...');
     chessController.init();
 
-    // Hook into engine error to show notice
+    // Hook into engine error
     if (chessController.engine) {
       chessController.engine.onEngineError = function(error) {
         document.getElementById('loading-message').style.display = 'none';
         document.getElementById('engine-error-notice').style.display = 'block';
-        document.getElementById('engine-error-message').textContent = 'The chess engine (Stockfish) failed to initialize: ' + (error.message || 'WASM RuntimeError');
+        document.getElementById('engine-error-message').textContent = 'Engine failed: ' + (error.message || 'WASM Trap');
       };
     }
 
     document.getElementById('loading-message').style.display = 'none';
     document.getElementById('chess-game').style.display = 'block';
-    console.log('[CHESS-PAGE] UI visible, initialization complete.');
   }
 
   function saveSettings() {
     if (!chessController) return;
-    
     var settings = {
         playerColor: chessController.playerColor,
         skillLevel: chessController.options.skillLevel,
@@ -305,77 +287,56 @@ permalink: /chess/
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    // Wait slightly to ensure all deferred scripts from layout are ready
-    setTimeout(function() {
-        var colorSelect = document.getElementById('color-select');
-        if (colorSelect) {
-            colorSelect.addEventListener('change', function() {
-              if (chessController) {
-                chessController.setPlayerColor(this.value);
-                saveSettings();
-              }
-            });
-        }
+    var colorSelect = document.getElementById('color-select');
+    colorSelect.addEventListener('change', function() {
+      if (chessController) {
+        chessController.setPlayerColor(this.value);
+        saveSettings();
+      }
+    });
 
-        var skillLevelSlider = document.getElementById('skill-level');
-        if (skillLevelSlider) {
-            var skillLevelValue = document.getElementById('skill-level-value');
-            skillLevelSlider.addEventListener('input', function() {
-              skillLevelValue.textContent = this.value;
-              if (chessController) {
-                chessController.setSkillLevel(parseInt(this.value, 10));
-                saveSettings();
-              }
-            });
-        }
+    var skillLevelSlider = document.getElementById('skill-level');
+    var skillLevelValue = document.getElementById('skill-level-value');
+    skillLevelSlider.addEventListener('input', function() {
+      skillLevelValue.textContent = this.value;
+      if (chessController) {
+        chessController.setSkillLevel(parseInt(this.value, 10));
+        saveSettings();
+      }
+    });
 
-        var analysisToggle = document.getElementById('analysis-toggle');
-        if (analysisToggle) {
-            analysisToggle.addEventListener('change', function() {
-              if (!chessController) return;
-              
-              var container = document.getElementById('main-container');
-              if (this.checked) {
-                  chessController.setMode('analysis');
-                  container.classList.add('analysis-enabled');
-              } else {
-                  chessController.setMode('play');
-                  container.classList.remove('analysis-enabled');
-              }
-              saveSettings();
-            });
-        }
+    var analysisToggle = document.getElementById('analysis-toggle');
+    analysisToggle.addEventListener('change', function() {
+      if (chessController) {
+        chessController.toggleMode();
+        saveSettings();
+      }
+    });
 
-        var flipBoardBtn = document.getElementById('flip-board-btn');
-        if (flipBoardBtn) {
-            flipBoardBtn.addEventListener('click', function() {
-                if (chessController && chessController.board) {
-                    chessController.board.flip();
-                }
-            });
+    var flipBoardBtn = document.getElementById('flip-board-btn');
+    flipBoardBtn.addEventListener('click', function() {
+        if (chessController && chessController.board) {
+            chessController.board.flip();
         }
+    });
 
-        var closeReportBtn = document.getElementById('close-report-btn');
-        if (closeReportBtn) {
-          closeReportBtn.addEventListener('click', function() {
-            var reportPanel = document.getElementById('report-panel');
-            if (reportPanel) {
-              reportPanel.style.display = 'none';
-            }
-          });
+    var generateReportBtn = document.getElementById('generate-report-btn');
+    if (generateReportBtn) {
+      generateReportBtn.addEventListener('click', function() {
+        if (chessController) {
+          chessController.generateReport();
         }
+      });
+    }
 
-        var generateReportBtn = document.getElementById('generate-report-btn');
-        if (generateReportBtn) {
-          generateReportBtn.addEventListener('click', function() {
-            if (chessController) {
-              chessController.generateReport();
-            }
-          });
-        }
+    var closeReportBtn = document.getElementById('close-report-btn');
+    if (closeReportBtn) {
+      closeReportBtn.addEventListener('click', function() {
+        document.getElementById('report-panel').style.display = 'none';
+      });
+    }
 
-        initChess();
-    }, 200);
+    setTimeout(initChess, 200);
   });
 })();
 </script>
