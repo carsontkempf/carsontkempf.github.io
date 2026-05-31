@@ -7,39 +7,22 @@ permalink: /chess/
 <link rel="stylesheet" href="/assets/css/vendor/chessboard-1.0.0.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chessground@9.1.1/dist/chessground.min.css">
 <link rel="stylesheet" href="/assets/css/chess-analysis.css">
+<link rel="stylesheet" href="/assets/css/chess.css">
 
 <style>
-  .page-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  .page-header h1 {
-    margin-bottom: 10px;
-    color: var(--text-heading);
-  }
-
-  .page-header p {
-    color: var(--text-main);
-    font-size: 16px;
-  }
-
   .settings-panel {
     max-width: 1400px;
     margin: 20px auto;
     padding: 15px;
-    background-color: var(--bg-tile);
-    border: 1px solid var(--bg-accent);
+    background-color: var(--bg-accent);
     border-radius: 4px;
   }
 
   .settings-row {
     display: flex;
-    gap: 30px;
+    gap: 20px;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    margin: 10px 0;
   }
 
   .setting-item {
@@ -85,9 +68,43 @@ permalink: /chess/
     color: var(--text-main);
   }
 
+  .setting-item.toggle-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Centered Layout */
+  .chess-analysis-container {
+    display: flex;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 20px;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .analysis-panel {
+    display: none; /* Hidden by default */
+  }
+
+  #eval-bar {
+    display: none !important; /* Hidden by default */
+  }
+
+  .chess-analysis-container.analysis-enabled .analysis-panel {
+    display: block;
+  }
+
+  .chess-analysis-container.analysis-enabled #eval-bar {
+    display: flex !important;
+  }
+
   #chess-board {
     width: 600px;
     height: 600px;
+    margin: 0 auto;
   }
 </style>
 
@@ -122,6 +139,10 @@ permalink: /chess/
         <input type="range" id="skill-level" min="1" max="20" value="15">
         <span id="skill-level-value">15</span>
       </div>
+      <div class="setting-item toggle-item">
+        <label for="analysis-toggle">Live Analysis:</label>
+        <input type="checkbox" id="analysis-toggle">
+      </div>
     </div>
   </div>
 
@@ -129,7 +150,7 @@ permalink: /chess/
     <div id="game-status">White to move</div>
   </div>
 
-  <div class="chess-analysis-container">
+  <div class="chess-analysis-container" id="main-container">
     <div class="chess-board-section">
       <div class="chess-board-with-eval">
         <div id="eval-bar"></div>
@@ -149,7 +170,6 @@ permalink: /chess/
     <button id="new-game-btn">New Game</button>
     <button id="undo-btn">Undo Move</button>
     <button id="flip-board-btn">Flip Board</button>
-    <button id="toggle-mode-btn" class="secondary">Live Analysis</button>
     <button id="generate-report-btn" class="primary">Generate Report</button>
   </div>
 
@@ -177,6 +197,7 @@ permalink: /chess/
 <script src="/assets/js/chess/eval-bar.js"></script>
 <script src="/assets/js/chess/game-report-scoring.js"></script>
 <script src="/assets/js/chess/game-report-generator.js"></script>
+<script src="/assets/js/chess/api/lichess-client.js"></script>
 <script src="/assets/js/chess/chess-analysis-controller.js"></script>
 
 <script>
@@ -196,12 +217,10 @@ permalink: /chess/
     document.getElementById('color-select').value = savedColor;
     document.getElementById('skill-level').value = savedSkill;
     document.getElementById('skill-level-value').textContent = savedSkill;
+    document.getElementById('analysis-toggle').checked = savedAnalysis;
     
-    var toggleBtn = document.getElementById('toggle-mode-btn');
     if (savedAnalysis) {
-        toggleBtn.textContent = 'Disable Analysis';
-        toggleBtn.classList.remove('secondary');
-        toggleBtn.classList.add('primary');
+        document.getElementById('main-container').classList.add('analysis-enabled');
     }
 
     chessController = new ChessAnalysisController({
@@ -273,20 +292,17 @@ permalink: /chess/
       }
     });
 
-    var toggleModeBtn = document.getElementById('toggle-mode-btn');
-    toggleModeBtn.addEventListener('click', function() {
+    var analysisToggle = document.getElementById('analysis-toggle');
+    analysisToggle.addEventListener('change', function() {
       if (!chessController) return;
       
-      if (chessController.mode === 'play') {
+      var container = document.getElementById('main-container');
+      if (this.checked) {
           chessController.setMode('analysis');
-          this.textContent = 'Disable Analysis';
-          this.classList.remove('secondary');
-          this.classList.add('primary');
+          container.classList.add('analysis-enabled');
       } else {
           chessController.setMode('play');
-          this.textContent = 'Live Analysis';
-          this.classList.remove('primary');
-          this.classList.add('secondary');
+          container.classList.remove('analysis-enabled');
       }
       saveSettings();
     });
@@ -304,6 +320,15 @@ permalink: /chess/
         var reportPanel = document.getElementById('report-panel');
         if (reportPanel) {
           reportPanel.style.display = 'none';
+        }
+      });
+    }
+
+    var generateReportBtn = document.getElementById('generate-report-btn');
+    if (generateReportBtn) {
+      generateReportBtn.addEventListener('click', function() {
+        if (chessController) {
+          chessController.generateReport();
         }
       });
     }

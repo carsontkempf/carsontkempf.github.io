@@ -383,39 +383,48 @@
         var currentFen = this.game.fen();
         
         console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-START] FEN:', currentFen);
+        console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-STATE] Mode:', this.mode, 'Engine Ready:', this.engine ? this.engine.ready : 'No Engine');
 
         // Try Lichess API via SecretsSDK first (Auth-free proxy)
         (async function() {
             try {
-                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-API] Fetching cloud analysis...');
-                const result = await lichessClient.getAnalysis(currentFen, 3);
+                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-API] Attempting cloud fetch...');
+                if (!window.lichessClient) {
+                    throw new Error('lichessClient not found on window');
+                }
+
+                const result = await window.lichessClient.getAnalysis(currentFen, 3);
+                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-RESULT]:', result);
                 
                 if (result && result.pvs && result.pvs.length > 0) {
-                    console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-SUCCESS]');
+                    console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-SUCCESS] Updating UI');
                     self.updateAnalysisFromCloud(result);
                     return;
+                } else {
+                    console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-EMPTY] No variations returned from cloud');
                 }
             } catch (error) {
-                console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-FALLBACK] Cloud API failed, using local engine:', error.message);
+                console.error('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-ERROR]:', error.message);
+                console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-FALLBACK] Falling back to local engine');
             }
 
             // Fallback to local Stockfish engine
             if (!self.engine || !self.engine.ready) {
-                console.log('Engine not ready, waiting to start analysis...');
-                setTimeout(function() {
-                    self.startAnalysis();
-                }, 500);
+                console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-UNAVAILABLE] Engine not ready or failed');
                 return;
             }
 
             if (self.engine.analyzing) {
+                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-RESTART] Stopping previous analysis');
                 self.engine.stopContinuousAnalysis();
             }
 
-            this.analysisLines = [];
+            console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-START] Starting Stockfish search');
+            self.analysisLines = [];
             var linesByMultiPV = {};
 
             self.engine.startContinuousAnalysis(currentFen, function(analysis) {
+                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-STREAM]:', analysis);
                 if (analysis.scoreType) {
                     self.lastAnalysisScore = {
                         scoreType: analysis.scoreType,
@@ -621,8 +630,12 @@
     };
 
     ChessAnalysisController.prototype.displayAnalysisLines = function(linesByMultiPV) {
+        console.log('[ENGINE-DIAGNOSTIC] [DISPLAY-LINES] Updating panel with lines:', Object.keys(linesByMultiPV).length);
         var analysisPanel = document.getElementById(this.analysisElement);
-        if (!analysisPanel) return;
+        if (!analysisPanel) {
+            console.error('[ENGINE-DIAGNOSTIC] [DISPLAY-ERROR] Analysis panel element not found:', this.analysisElement);
+            return;
+        }
 
         var html = '';
 

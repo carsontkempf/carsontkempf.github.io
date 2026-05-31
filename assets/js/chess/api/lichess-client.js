@@ -254,6 +254,5 @@ class LichessClient {
   }
 }
 
-// Export singleton instance
-const lichessClient = new LichessClient();
-export default lichessClient;
+// Create global singleton instance
+window.lichessClient = new LichessClient();
