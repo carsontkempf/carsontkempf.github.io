@@ -28,8 +28,18 @@
         console.log('[ENGINE-DIAGNOSTIC] [INIT-START] StockfishEngine Setup');
 
         // Verify WASM file availability and headers
-        var wasmPath = '/assets/js/chess/vendor/stockfish.wasm';
+        // Use versioned filename to avoid 404s
+        var wasmPath = '/assets/js/chess/vendor/stockfish-17.1-lite-single-03e3232.wasm';
+        
         fetch(wasmPath, { method: 'HEAD' })
+            .then(function(response) {
+                if (!response.ok) {
+                    console.warn('[ENGINE-DIAGNOSTIC] [NETWORK-WARN] Versioned WASM 404, trying fallback...');
+                    wasmPath = '/assets/js/chess/vendor/stockfish.wasm';
+                    return fetch(wasmPath, { method: 'HEAD' });
+                }
+                return response;
+            })
             .then(function(response) {
                 console.log('[ENGINE-DIAGNOSTIC] [NETWORK-CHECK] WASM File:', wasmPath);
                 console.log('  - Status:', response.status, response.statusText);

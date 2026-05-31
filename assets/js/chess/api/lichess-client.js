@@ -78,8 +78,10 @@ class LichessClient {
     }
 
     // Initialize in zero-config mode (uses Origin header for auth)
+    const baseUrl = window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://learn-secrets-ydxithfz95iajlqf.carsontkempf.workers.dev';
+    
     this.sdk = new SecretsSDK({
-      baseUrl: window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://learn-secrets-ydxithfz95iajlqf.carsontkempf.workers.dev',
+      baseUrl: baseUrl,
       timeout: 30000
     });
 
@@ -126,10 +128,17 @@ class LichessClient {
         console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SDK] Fetching via SecretsSDK:', path);
         // The SDK handles the base URL and proxy logic
         const response = await sdk.get('lichess', path);
-        data = response.data; // Proxy wraps result in a 'data' property
+        
+        // Handle nesting: sdk.get returns the proxy's JSON, which has its own .data property
+        if (response && response.data) {
+          data = response.data;
+        } else {
+          data = response; // Fallback if not nested
+        }
       } else {
         // Fallback for when SDK isn't loaded (mostly for development/emergencies)
-        const url = `${window.learnWorkerConfig.baseUrl}${path}`;
+        const baseUrl = window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://learn-secrets-ydxithfz95iajlqf.carsontkempf.workers.dev';
+        const url = `${baseUrl}${path.startsWith('/') ? path : '/' + path}`;
         console.log('[ENGINE-DIAGNOSTIC] [NETWORK-FETCH] SDK missing, fetching directly:', url);
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Direct fetch failed: ${response.status}`);
