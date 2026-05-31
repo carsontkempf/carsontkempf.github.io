@@ -146,7 +146,7 @@ class EngineManager {
 
   /**
    * Get best move for a position
-   * Tries Lichess API first if authenticated, falls back to Stockfish
+   * Tries Lichess API first (via SecretsSDK proxy), falls back to local Stockfish
    * @param {string} fen - Position in FEN notation
    * @param {number} difficulty - Difficulty level 1-10
    * @returns {Promise<object>} Move object {from, to, promotion}
@@ -161,52 +161,38 @@ class EngineManager {
     this.difficulty = difficulty;
 
     try {
-      console.log(`[ENGINE] ========== ENGINE THINKING ==========`);
-      console.log(`[ENGINE] Difficulty: ${difficulty}`);
-      console.log(`[ENGINE] Position: ${fen}`);
-      console.log(`[ENGINE] Auth0 available: ${typeof auth0Client !== 'undefined'}`);
-      console.log(`[ENGINE] Auth0 client initialized: ${typeof auth0Client !== 'undefined' && auth0Client !== null}`);
+      console.log(`[ENGINE-DIAGNOSTIC] [THINKING-START] Difficulty: ${difficulty}`);
+      console.log(`[ENGINE-DIAGNOSTIC] [POSITION]: ${fen}`);
 
       let result;
 
-      // Try Lichess API if Auth0 is available and initialized
-      if (typeof auth0Client !== 'undefined' && auth0Client !== null) {
-        try {
-          console.log('[ENGINE] Attempting to use Lichess Cloud API...');
-          result = await this.getBestMoveFromLichess(fen, difficulty);
-        } catch (error) {
-          console.warn('[ENGINE] Lichess API failed, falling back to Stockfish:', error.message);
-          console.log('[ENGINE] Fallback reason:', error);
-          result = await this.getBestMoveFromStockfish(fen, difficulty);
-        }
-      } else {
-        console.log('[ENGINE] Auth0 not available, using local Stockfish');
+      // Always try Lichess API first (Auth-free via SecretsSDK proxy)
+      try {
+        console.log('[ENGINE-DIAGNOSTIC] [API-TRY] Attempting cloud analysis via proxy...');
+        result = await this.getBestMoveFromLichess(fen, difficulty);
+      } catch (error) {
+        console.warn('[ENGINE-DIAGNOSTIC] [API-FALLBACK] Cloud API failed, using local Stockfish:', error.message);
         result = await this.getBestMoveFromStockfish(fen, difficulty);
       }
 
       // Calculate actual think time
       const thinkTime = Date.now() - this.thinkingStartTime;
-      console.log(`[ENGINE] Analysis took: ${thinkTime}ms`);
+      console.log(`[ENGINE-DIAGNOSTIC] [ANALYSIS-COMPLETE] Took: ${thinkTime}ms`);
 
-      // Add artificial delay if move came back too quickly
-      // This makes the bot feel more natural
+      // Add artificial delay if move came back too quickly for natural feel
       const targetThinkTime = this.calculateThinkTime(difficulty);
       const remainingTime = Math.max(0, targetThinkTime - thinkTime);
 
       if (remainingTime > 0) {
-        console.log(`[ENGINE] Adding ${remainingTime}ms delay for natural feel`);
         await this.delay(remainingTime);
       }
 
-      console.log(`[ENGINE] Engine found move: ${result.from}${result.to} (eval: ${result.evaluation})`);
-      console.log(`[ENGINE] ========== ENGINE DONE ==========`);
+      console.log(`[ENGINE-DIAGNOSTIC] [MOVE-FOUND]: ${result.from}${result.to}`);
 
       return result;
 
     } catch (error) {
-      console.error('[ENGINE] ========== ENGINE ERROR ==========');
-      console.error('[ENGINE] Error:', error);
-      console.error('[ENGINE] Stack:', error.stack);
+      console.error('[ENGINE-DIAGNOSTIC] [ENGINE-FATAL]:', error.message);
       throw error;
     } finally {
       this.isThinking = false;

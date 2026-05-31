@@ -34,14 +34,6 @@
     <script src="{{ '/assets/js/chess/loadEngine.js' | relative_url }}"></script>
     <script src="{{ '/assets/js/chess/stockfish-engine.js' | relative_url }}"></script>
 
-    <!-- Auth0 SDK (optional - for Lichess API) -->
-    <script>
-      // Initialize global auth0Client as null so code can check for it
-      window.auth0Client = null;
-      console.log('[CHESS LAYOUT] Auth0 client initialized as null (authentication disabled)');
-      console.log('[CHESS LAYOUT] Chess will use local Stockfish engine');
-    </script>
-
     <!-- Chess Modules -->
     <script type="module" src="{{ '/assets/js/chess/core/chess-wrapper.js' | relative_url }}"></script>
     <script type="module" src="{{ '/assets/js/chess/ui/board-manager.js' | relative_url }}"></script>

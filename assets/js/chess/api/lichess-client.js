@@ -63,123 +63,92 @@ class LichessClient {
   constructor() {
     this.cache = new Map();
     this.cacheExpiry = 3600000; // 1 hour in milliseconds
+    this.sdk = null;
   }
 
   /**
-   * Get auth token from Auth0
-   * @returns {Promise<string|null>} Access token or null if not available
+   * Initialize the Secrets SDK
    */
-  async getAuthToken() {
-    console.log('[LICHESS] ========== AUTH CHECK ==========');
-    console.log('[LICHESS] auth0Client exists:', typeof auth0Client !== 'undefined');
-    console.log('[LICHESS] auth0Client is null:', typeof auth0Client !== 'undefined' && auth0Client === null);
-    console.log('[LICHESS] auth0Client value:', typeof auth0Client !== 'undefined' ? auth0Client : 'undefined');
+  initSDK() {
+    if (this.sdk) return this.sdk;
 
-    // Access the global auth0Client if available
-    if (typeof auth0Client !== 'undefined' && auth0Client !== null) {
-      try {
-        console.log('[LICHESS] Attempting to get token from Auth0...');
-        const token = await auth0Client.getTokenSilently();
-        console.log('[LICHESS] Token obtained successfully');
-        console.log('[LICHESS] ========== AUTH SUCCESS ==========');
-        return token;
-      } catch (error) {
-        console.warn('[LICHESS] Error getting auth token:', error);
-        console.log('[LICHESS] ========== AUTH FAILED ==========');
-        return null; // Return null instead of throwing
-      }
+    if (typeof SecretsSDK === 'undefined') {
+      console.warn('[ENGINE-DIAGNOSTIC] [SDK] SecretsSDK not found. Falling back to direct fetch (might fail CORS/Auth).');
+      return null;
     }
 
-    console.log('[LICHESS] Auth0 client not available - using unauthenticated mode');
-    console.log('[LICHESS] ========== AUTH NOT AVAILABLE ==========');
-    return null; // Return null instead of throwing
+    // Initialize in zero-config mode (uses Origin header for auth)
+    this.sdk = new SecretsSDK({
+      baseUrl: window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://learn-secrets-ydxithfz95iajlqf.carsontkempf.workers.dev',
+      timeout: 30000
+    });
+
+    console.log('[ENGINE-DIAGNOSTIC] [SDK] SecretsSDK initialized (zero-config mode)');
+    return this.sdk;
   }
 
   /**
-   * Make request to Lichess proxy via Worker
+   * Make request to Lichess proxy via SDK or fetch
    * @param {string} endpoint - API endpoint ('eval', 'opening')
    * @param {object} params - Query parameters
    * @returns {Promise<object>} API response data
    */
   async request(endpoint, params = {}) {
     console.log('[ENGINE-DIAGNOSTIC] [NETWORK-START] Lichess API Request:', endpoint);
-    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-PARAMS]:', params);
-
-    // Check Worker config
-    if (!window.learnWorkerConfig) {
-      console.error('[ENGINE-DIAGNOSTIC] [NETWORK-ERROR] Worker configuration NOT LOADED');
-      throw new Error('Worker configuration not loaded. Include worker-config.js before this script.');
-    }
-
-    // Build query string
+    
+    const sdk = this.initSDK();
+    
+    // Build path with query params
     const queryParams = new URLSearchParams();
     queryParams.append('endpoint', endpoint);
-
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         queryParams.append(key, value);
       }
     });
-
-    const queryString = queryParams.toString();
-    const workerUrl = `${window.learnWorkerConfig.getEndpoint('/proxy/lichess')}?${queryString}`;
-
-    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-URL]:', workerUrl);
+    
+    const path = `/proxy/lichess?${queryParams.toString()}`;
+    const cacheKey = path;
 
     // Check cache
-    const cacheKey = workerUrl;
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
-      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-CACHE-HIT] Using cached result for:', endpoint);
+      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-CACHE-HIT] Using cached result');
       return cached.data;
     }
 
-    // Get auth token
-    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-AUTH-START] Fetching Auth0 Token...');
-    const token = await this.getAuthToken();
-
-    // If no token available, throw specific error that engine-manager can catch
-    if (!token) {
-      console.warn('[ENGINE-DIAGNOSTIC] [NETWORK-AUTH-FAILED] No auth token available - falling back to local engine');
-      throw new Error('LICHESS_AUTH_REQUIRED');
-    }
-
-    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-FETCH-START] Initiating fetch to proxy...');
     const startTime = performance.now();
 
     try {
-      // Make request to Worker
-      const response = await fetch(workerUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      });
-
-      const endTime = performance.now();
-      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-RESPONSE] Received in', Math.round(endTime - startTime), 'ms');
-      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-STATUS]:', response.status, response.statusText);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[ENGINE-DIAGNOSTIC] [NETWORK-ERROR-BODY]:', errorText);
-        throw new Error(`Request failed with status ${response.status}`);
+      let data;
+      
+      if (sdk) {
+        console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SDK] Fetching via SecretsSDK:', path);
+        // The SDK handles the base URL and proxy logic
+        const response = await sdk.get('lichess', path);
+        data = response.data; // Proxy wraps result in a 'data' property
+      } else {
+        // Fallback for when SDK isn't loaded (mostly for development/emergencies)
+        const url = `${window.learnWorkerConfig.baseUrl}${path}`;
+        console.log('[ENGINE-DIAGNOSTIC] [NETWORK-FETCH] SDK missing, fetching directly:', url);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Direct fetch failed: ${response.status}`);
+        const json = await response.json();
+        data = json.data;
       }
 
-      const result = await response.json();
-      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SUCCESS] Data received:', result);
+      const endTime = performance.now();
+      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SUCCESS] Received in', Math.round(endTime - startTime), 'ms');
 
       // Cache successful response
       this.cache.set(cacheKey, {
-        data: result.data,
+        data: data,
         timestamp: Date.now()
       });
 
-      return result.data;
+      return data;
     } catch (error) {
-      console.error('[ENGINE-DIAGNOSTIC] [NETWORK-FETCH-ERROR]:', error.message);
+      console.error('[ENGINE-DIAGNOSTIC] [NETWORK-ERROR]:', error.message);
       throw error;
     }
   }
@@ -265,17 +234,12 @@ class LichessClient {
    */
   async getAnalysis(fen, multiPv = 3) {
     try {
-      const result = await this.request('analysis', {
+      const data = await this.request('eval', { // Use 'eval' endpoint for position analysis
         fen: fen,
         multiPv: multiPv
       });
 
-      return {
-        fen: result.fen,
-        depth: result.depth,
-        pvs: result.pvs,
-        knodes: result.knodes
-      };
+      return data;
     } catch (error) {
       console.error('Error getting analysis:', error);
       throw error;

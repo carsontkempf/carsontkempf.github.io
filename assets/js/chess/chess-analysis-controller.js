@@ -380,57 +380,137 @@
 
     ChessAnalysisController.prototype.startAnalysis = function() {
         var self = this;
+        var currentFen = this.game.fen();
+        
+        console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-START] FEN:', currentFen);
 
-        if (!this.engine || !this.engine.ready) {
-            console.log('Engine not ready, waiting to start analysis...');
-            setTimeout(function() {
-                self.startAnalysis();
-            }, 500);
-            return;
-        }
+        // Try Lichess API via SecretsSDK first (Auth-free proxy)
+        (async function() {
+            try {
+                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-API] Fetching cloud analysis...');
+                const result = await lichessClient.getAnalysis(currentFen, 3);
+                
+                if (result && result.pvs && result.pvs.length > 0) {
+                    console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-SUCCESS]');
+                    self.updateAnalysisFromCloud(result);
+                    return;
+                }
+            } catch (error) {
+                console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-FALLBACK] Cloud API failed, using local engine:', error.message);
+            }
 
-        if (this.engine.analyzing) {
-            this.engine.stopContinuousAnalysis();
-        }
+            // Fallback to local Stockfish engine
+            if (!self.engine || !self.engine.ready) {
+                console.log('Engine not ready, waiting to start analysis...');
+                setTimeout(function() {
+                    self.startAnalysis();
+                }, 500);
+                return;
+            }
 
-        this.analysisLines = [];
+            if (self.engine.analyzing) {
+                self.engine.stopContinuousAnalysis();
+            }
+
+            this.analysisLines = [];
+            var linesByMultiPV = {};
+
+            self.engine.startContinuousAnalysis(currentFen, function(analysis) {
+                if (analysis.scoreType) {
+                    self.lastAnalysisScore = {
+                        scoreType: analysis.scoreType,
+                        scoreValue: analysis.scoreValue
+                    };
+
+                    if (analysis.scoreType === 'cp') {
+                        self.evalBar.setScore(analysis.scoreValue, null);
+                    } else if (analysis.scoreType === 'mate') {
+                        self.evalBar.setScore(0, analysis.scoreValue);
+                    }
+
+                    // Analyze move quality if we just made a move
+                    if (self.waitingForAnalysis && self.beforeMoveScore && (analysis.depth >= 12 || analysis.scoreType === 'mate')) {
+                        self.analyzeMoveQuality(self.beforeMoveScore, self.lastAnalysisScore);
+                        self.waitingForAnalysis = false;
+                        self.beforeMoveScore = null;
+                    }
+                }
+
+                var multipv = analysis.multipv || 1;
+                if (analysis.pv && (analysis.depth >= 10 || analysis.scoreType === 'mate')) {
+                    linesByMultiPV[multipv] = {
+                        depth: analysis.depth,
+                        score: analysis.score,
+                        scoreType: analysis.scoreType,
+                        scoreValue: analysis.scoreValue,
+                        pv: analysis.pv,
+                        nodes: analysis.nodes
+                    };
+
+                    self.displayAnalysisLines(linesByMultiPV);
+                }
+            }, 3);
+        })();
+    };
+
+    ChessAnalysisController.prototype.updateAnalysisFromCloud = function(result) {
+        var self = this;
         var linesByMultiPV = {};
+        
+        if (!result || !result.pvs) return;
 
-        this.engine.startContinuousAnalysis(this.game.fen(), function(analysis) {
-            if (analysis.scoreType) {
-                self.lastAnalysisScore = {
-                    scoreType: analysis.scoreType,
-                    scoreValue: analysis.scoreValue
-                };
+        result.pvs.forEach(function(pv, index) {
+            var multipv = index + 1;
+            linesByMultiPV[multipv] = {
+                depth: result.depth || 0,
+                scoreType: pv.cp !== undefined ? 'cp' : 'mate',
+                scoreValue: pv.cp !== undefined ? pv.cp : (pv.mate || 0),
+                pv: pv.moves ? pv.moves.split(' ') : [],
+                nodes: (result.knodes || 0) * 1000
+            };
+        });
 
-                if (analysis.scoreType === 'cp') {
-                    self.evalBar.setScore(analysis.scoreValue, null);
-                } else if (analysis.scoreType === 'mate') {
-                    self.evalBar.setScore(0, analysis.scoreValue);
-                }
+        if (result.pvs[0]) {
+            var firstLine = result.pvs[0];
+            this.lastAnalysisScore = {
+                scoreType: firstLine.cp !== undefined ? 'cp' : 'mate',
+                scoreValue: firstLine.cp !== undefined ? firstLine.cp : firstLine.mate
+            };
 
-                // Analyze move quality if we just made a move
-                if (self.waitingForAnalysis && self.beforeMoveScore && analysis.depth >= 12) {
-                    self.analyzeMoveQuality(self.beforeMoveScore, self.lastAnalysisScore);
-                    self.waitingForAnalysis = false;
-                    self.beforeMoveScore = null;
+            if (this.evalBar) {
+                if (firstLine.cp !== undefined) {
+                    this.evalBar.setScore(firstLine.cp, null);
+                } else {
+                    this.evalBar.setScore(0, firstLine.mate);
                 }
             }
 
-            var multipv = analysis.multipv || 1;
-            if (analysis.pv && analysis.depth >= 10) {
-                linesByMultiPV[multipv] = {
-                    depth: analysis.depth,
-                    score: analysis.score,
-                    scoreType: analysis.scoreType,
-                    scoreValue: analysis.scoreValue,
-                    pv: analysis.pv,
-                    nodes: analysis.nodes
-                };
-
-                self.displayAnalysisLines(linesByMultiPV);
+            // If we're waiting to analyze a move's impact
+            if (this.waitingForAnalysis && this.beforeMoveScore) {
+                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-QUALITY] Analyzing move quality from cloud data');
+                this.analyzeMoveQuality(this.beforeMoveScore, this.lastAnalysisScore);
+                this.waitingForAnalysis = false;
+                this.beforeMoveScore = null;
             }
-        }, 3);
+        }
+
+        this.displayAnalysisLines(linesByMultiPV);
+    };
+
+    ChessAnalysisController.prototype.setMode = function(mode) {
+        this.mode = mode;
+        console.log('[CONTROLLER] Mode set to:', mode);
+        
+        if (this.mode === 'analysis') {
+            this.startAnalysis();
+        } else {
+            // Stop continuous analysis if switching to play mode
+            if (this.engine && this.engine.analyzing) {
+                this.engine.stopContinuousAnalysis();
+            }
+        }
+        
+        this.updateStatus();
     };
 
     ChessAnalysisController.prototype.analyzeMoveQuality = function(beforeScore, afterScore) {
@@ -891,6 +971,24 @@
         var analysisPanel = document.getElementById(this.analysisElement);
         if (analysisPanel) {
             analysisPanel.innerHTML = '<p>Analysis disabled</p>';
+        }
+    };
+
+    ChessAnalysisController.prototype.setPlayerColor = function(color) {
+        this.playerColor = color;
+        if (this.board) {
+            this.board.orientation(color);
+        }
+        if (this.evalBar) {
+            this.evalBar.setOrientation(color);
+        }
+        
+        // If it's the engine's turn after switching sides, trigger move
+        if (this.mode === 'play') {
+            var turn = this.game.turn();
+            if ((turn === 'w' && color === 'black') || (turn === 'b' && color === 'white')) {
+                this.makeEngineMove();
+            }
         }
     };
 
