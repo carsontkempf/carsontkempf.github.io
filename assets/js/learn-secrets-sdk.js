@@ -1,23 +1,5 @@
 "use strict";
 (() => {
-  var __getOwnPropNames = Object.getOwnPropertyNames;
-  var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-    get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-  }) : x)(function(x) {
-    if (typeof require !== "undefined") return require.apply(this, arguments);
-    throw Error('Dynamic require of "' + x + '" is not supported');
-  });
-  var __esm = (fn, res) => function __init() {
-    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
-  };
-
-  // src/env-resolver.ts
-  var init_env_resolver = __esm({
-    "src/env-resolver.ts"() {
-      "use strict";
-    }
-  });
-
   // src/types.ts
   var SecretsSDKError = class extends Error {
     constructor(message, status, response) {
@@ -293,14 +275,6 @@
       return this.secretsRequest("sync", { secrets, provider });
     }
   };
-
-  // src/machine-id.ts
-  var import_child_process = __require("child_process");
-  var import_util = __require("util");
-  var execAsync = (0, import_util.promisify)(import_child_process.exec);
-
-  // src/index.ts
-  init_env_resolver();
 
   // src/browser-global.ts
   if (typeof window !== "undefined") {
