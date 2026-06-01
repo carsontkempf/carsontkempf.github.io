@@ -5,9 +5,37 @@ permalink: /chess/
 no_auth: true
 ---
 
-<link rel="stylesheet" href="/assets/css/vendor/chessboard-1.0.0.min.css">
-<link rel="stylesheet" href="/assets/css/chess-analysis.css">
-<link rel="stylesheet" href="/assets/css/chess.css">
+<link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+<link rel="stylesheet" href="{{ '/assets/css/chess-analysis.css' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/css/chess.css' | relative_url }}">
+
+<!-- Suppression of Auth0/Auth system for this page -->
+<script>
+  (function() {
+    var mockAuth = {
+      getTokenSilently: async () => 'mock-token',
+      isAuthenticated: async () => false,
+      getUser: async () => null,
+      logout: () => {},
+      loginWithRedirect: () => {}
+    };
+    window.auth0Client = mockAuth;
+    window.authService = {
+      isAuthenticated: false,
+      user: null,
+      roles: [],
+      hasRole: () => true,
+      login: () => {},
+      logout: () => {},
+      init: async () => true,
+      getSession: () => null
+    };
+    if (!window.AuthSDK) {
+      window.AuthSDK = function() { return window.authService; };
+      window.AuthSDK.init = async function() { return window.authService; };
+    }
+  })();
+</script>
 
 <style>
   .settings-panel {
@@ -98,10 +126,14 @@ no_auth: true
     display: flex !important;
   }
 
+  /* Fixed size for board container - ensuring float:left squares work */
   #chess-board {
-    width: 600px;
-    height: 600px;
+    width: 600px !important;
+    height: 600px !important;
     margin: 0 auto;
+    display: block;
+    position: relative;
+    clear: both;
   }
 </style>
 
@@ -178,18 +210,19 @@ no_auth: true
   </div>
 </div>
 
+<!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="/assets/js/vendor/chessboard-1.0.0.min.js"></script>
-<script src="/assets/js/chess/chess.min.js"></script>
-<script src="/assets/js/worker-config.js"></script>
-<script src="/assets/js/learn-secrets-sdk.js"></script>
-<script src="/assets/js/chess/api/lichess-client.js"></script>
-<script src="/assets/js/chess/loadEngine.js"></script>
-<script src="/assets/js/chess/stockfish-engine.js"></script>
-<script src="/assets/js/chess/eval-bar.js"></script>
-<script src="/assets/js/chess/game-report-scoring.js"></script>
-<script src="/assets/js/chess/game-report-generator.js"></script>
-<script src="/assets/js/chess/chess-analysis-controller.js"></script>
+<script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+<script src="{{ '/assets/js/chess/chess.min.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/worker-config.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/learn-secrets-sdk.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/chess/api/lichess-client.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/chess/loadEngine.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/chess/stockfish-engine.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/chess/eval-bar.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/chess/game-report-scoring.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/chess/game-report-generator.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/chess/chess-analysis-controller.js' | relative_url }}"></script>
 
 <script>
 (function() {
@@ -231,7 +264,6 @@ no_auth: true
 
     chessController.init();
 
-    // Hook into engine error
     if (chessController.engine) {
       chessController.engine.onEngineError = function(error) {
         document.getElementById('loading-message').style.display = 'none';
@@ -288,7 +320,7 @@ no_auth: true
         }
     });
 
-    setTimeout(initChess, 200);
+    setTimeout(initChess, 300);
   });
 })();
 </script>

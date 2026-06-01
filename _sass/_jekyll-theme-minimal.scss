@@ -2449,3 +2449,35 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
         padding: 1px 3px;
     }
 }
+
+// Bottom Bar and Versioning
+// =============================================================================
+.bottom-bar {
+  background-color: var(--bg-accent);
+  padding: 15px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  margin-top: 60px;
+}
+
+[data-theme="dark"] .bottom-bar {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.bottom-bar-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 30px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.version-info {
+  font-size: 11px;
+  color: var(--text-main);
+  opacity: 0.5;
+  font-family: monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
