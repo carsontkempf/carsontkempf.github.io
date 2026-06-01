@@ -16,9 +16,11 @@
       }
     });
   </script>
+  {% unless page.no_auth %}
   <!-- Learn Auth SDK -->
   <script defer src="/assets/js/learn-auth-sdk.js"></script>
   <script defer src="/assets/js/auth-service.js"></script>
+  {% endunless %}
   <!-- Google APIs -->
   <script defer src="https://apis.google.com/js/api.js"></script>
   <script defer src="https://accounts.google.com/gsi/client"></script>

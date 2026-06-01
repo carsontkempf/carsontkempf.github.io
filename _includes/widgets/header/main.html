@@ -8,4 +8,6 @@
 </div>
 
 {% include components/ui/theme-switch.html %}
+{% unless page.no_auth %}
 {% include components/auth/status.html %}
+{% endunless %}

@@ -2,39 +2,8 @@
 layout: page
 title: Chess Analysis Board
 permalink: /chess/
+no_auth: true
 ---
-
-<!-- Suppression of Auth0/Auth system for this page -->
-<script>
-  // Mock Auth system to prevent console errors from global scripts
-  (function() {
-    var mockAuth = {
-      getTokenSilently: async () => 'mock-token',
-      isAuthenticated: async () => false,
-      getUser: async () => null,
-      logout: () => {},
-      loginWithRedirect: () => {}
-    };
-    
-    window.auth0Client = mockAuth;
-    
-    window.authService = {
-      isAuthenticated: false,
-      user: null,
-      roles: [],
-      hasRole: () => true, // Allow everything on this page
-      login: () => {},
-      logout: () => {},
-      init: async () => true,
-      getSession: () => null
-    };
-
-    if (!window.AuthSDK) {
-      window.AuthSDK = function() { return window.authService; };
-      window.AuthSDK.init = async function() { return window.authService; };
-    }
-  })();
-</script>
 
 <link rel="stylesheet" href="/assets/css/vendor/chessboard-1.0.0.min.css">
 <link rel="stylesheet" href="/assets/css/chess-analysis.css">
@@ -197,7 +166,6 @@ permalink: /chess/
     <button id="new-game-btn">New Game</button>
     <button id="undo-btn">Undo Move</button>
     <button id="flip-board-btn">Flip Board</button>
-    <button id="toggle-mode-btn" class="secondary" style="display:none">Toggle Mode</button>
     <button id="generate-report-btn" class="primary">Generate Report</button>
   </div>
 
@@ -319,22 +287,6 @@ permalink: /chess/
             chessController.board.flip();
         }
     });
-
-    var generateReportBtn = document.getElementById('generate-report-btn');
-    if (generateReportBtn) {
-      generateReportBtn.addEventListener('click', function() {
-        if (chessController) {
-          chessController.generateReport();
-        }
-      });
-    }
-
-    var closeReportBtn = document.getElementById('close-report-btn');
-    if (closeReportBtn) {
-      closeReportBtn.addEventListener('click', function() {
-        document.getElementById('report-panel').style.display = 'none';
-      });
-    }
 
     setTimeout(initChess, 200);
   });
