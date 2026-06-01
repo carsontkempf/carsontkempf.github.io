@@ -149,7 +149,9 @@ function showResult(elementId, message, isError = false) {
 function initSDK() {
   try {
     // Create SDK in zero-config mode
-    sdk = new SecretsSDK.SecretsSDK();
+    // Defensive: Handle both nested and direct export patterns
+    const SDKConstructor = (typeof SecretsSDK === 'function') ? SecretsSDK : (SecretsSDK.SecretsSDK || SecretsSDK);
+    sdk = new SDKConstructor();
     sdk.setAppId(APP_ID);
 
     showResult('init-status', '✓ SDK initialized in zero-config mode');

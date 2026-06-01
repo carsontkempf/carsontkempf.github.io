@@ -79,8 +79,16 @@ class LichessClient {
 
     // Initialize in zero-config mode (uses Origin header for auth)
     const baseUrl = window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://learn-secrets-ydxithfz95iajlqf.carsontkempf.workers.dev';
-    
-    this.sdk = new SecretsSDK({
+
+    // Defensive: Handle both nested and direct export patterns
+    const SDKConstructor = (typeof SecretsSDK === 'function') ? SecretsSDK : (SecretsSDK.SecretsSDK || SecretsSDK);
+
+    if (typeof SDKConstructor !== 'function') {
+      console.error('[ENGINE-DIAGNOSTIC] [SDK] SecretsSDK is not a constructor:', typeof SDKConstructor);
+      return null;
+    }
+
+    this.sdk = new SDKConstructor({
       baseUrl: baseUrl,
       timeout: 30000
     });
