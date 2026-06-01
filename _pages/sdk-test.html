@@ -1,0 +1,98 @@
+---
+layout: page
+title: SDK Debug Test
+permalink: /sdk-test/
+no_auth: true
+---
+
+<style>
+  .debug-panel {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    font-family: monospace;
+    color: #00ff00;
+  }
+  .debug-panel h2 {
+    color: #00ff00;
+    margin-top: 0;
+  }
+  .log-entry {
+    margin: 5px 0;
+    padding: 5px;
+    border-left: 2px solid #00ff00;
+    padding-left: 10px;
+  }
+  .error {
+    color: #ff0000;
+    border-left-color: #ff0000;
+  }
+  .success {
+    color: #00ff00;
+    border-left-color: #00ff00;
+  }
+  .info {
+    color: #ffff00;
+    border-left-color: #ffff00;
+  }
+</style>
+
+<div class="debug-panel">
+  <h2>SecretsSDK Debug Test</h2>
+  <div id="debug-output"></div>
+</div>
+
+<script>
+  const output = document.getElementById('debug-output');
+
+  function log(msg, type = 'info') {
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    output.appendChild(entry);
+    console.log(`[SDK-TEST] ${msg}`);
+  }
+
+  log('Page loaded, starting SDK test...', 'info');
+  log(`typeof window: ${typeof window}`, 'info');
+  log(`typeof SecretsSDK before load: ${typeof SecretsSDK}`, 'info');
+  log(`typeof window.SecretsSDK before load: ${typeof window.SecretsSDK}`, 'info');
+</script>
+
+<!-- Load SDK -->
+<script src="{{ '/assets/js/learn-secrets-sdk.js' | relative_url }}"></script>
+
+<script>
+  log('SDK script tag executed', 'info');
+  log(`typeof SecretsSDK after load: ${typeof SecretsSDK}`, 'info');
+  log(`typeof window.SecretsSDK after load: ${typeof window.SecretsSDK}`, 'info');
+
+  if (typeof window.SecretsSDK === 'function') {
+    log('✓ SDK loaded successfully!', 'success');
+    try {
+      const sdk = new window.SecretsSDK({ baseUrl: 'https://test.com' });
+      log(`✓ SDK instantiated: ${sdk.constructor.name}`, 'success');
+    } catch (e) {
+      log(`✗ SDK instantiation failed: ${e.message}`, 'error');
+    }
+  } else {
+    log(`✗ SDK not found. window.SecretsSDK is: ${window.SecretsSDK}`, 'error');
+  }
+
+  // Check all scripts loaded
+  log('All loaded scripts:', 'info');
+  Array.from(document.scripts).forEach(s => {
+    if (s.src.includes('secrets')) {
+      log(`  → ${s.src}`, 'info');
+    }
+  });
+
+  // Check for any window.SecretsSDK assignment
+  setTimeout(() => {
+    log('After 1 second delay:', 'info');
+    log(`  typeof window.SecretsSDK: ${typeof window.SecretsSDK}`, 'info');
+    log(`  window.SecretsSDK value: ${window.SecretsSDK}`, 'info');
+  }, 1000);
+</script>
