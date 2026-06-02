@@ -47,7 +47,7 @@
       this.rateLimitInfo = null;
       this.appId = options.appId || null;
       this.token = options.token || options.sessionToken || null;
-      this.baseUrl = options.baseUrl || "https://cloudprototype.org";
+      this.baseUrl = options.baseUrl || "https://ctklearn.carsontkempf.workers.dev";
       this.timeout = options.timeout || 3e4;
       this.retryOn429 = options.retryOn429 !== void 0 ? options.retryOn429 : true;
       this.zeroConfigMode = !this.appId && !this.token;

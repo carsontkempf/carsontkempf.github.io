@@ -11,9 +11,9 @@
  * 4. Update WORKER_BASE_URL below with the deployed URL
  */
 
-// TODO: Update this URL after Worker is provisioned to Cloudflare
-// Expected format: https://learn-secrets-{project-id}.{account}.workers.dev
-const WORKER_BASE_URL = 'https://learn-secrets-ydxithfz95iajlqf.carsontkempf.workers.dev';
+// Updated Worker URL (current production deployment)
+// The main Learn app Worker with proper CORS configuration
+const WORKER_BASE_URL = 'https://ctklearn.carsontkempf.workers.dev';
 
 // Fallback to local development if needed
 const WORKER_BASE_URL_DEV = 'http://localhost:8787';

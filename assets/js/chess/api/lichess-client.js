@@ -78,7 +78,7 @@ class LichessClient {
     }
 
     // Initialize in zero-config mode (uses Origin header for auth)
-    const baseUrl = window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://learn-secrets-ydxithfz95iajlqf.carsontkempf.workers.dev';
+    const baseUrl = window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://ctklearn.carsontkempf.workers.dev';
 
     // Defensive: Handle both nested and direct export patterns
     const SDKConstructor = (typeof SecretsSDK === 'function') ? SecretsSDK : (SecretsSDK.SecretsSDK || SecretsSDK);
@@ -145,7 +145,7 @@ class LichessClient {
         }
       } else {
         // Fallback for when SDK isn't loaded (mostly for development/emergencies)
-        const baseUrl = window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://learn-secrets-ydxithfz95iajlqf.carsontkempf.workers.dev';
+        const baseUrl = window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://ctklearn.carsontkempf.workers.dev';
         const url = `${baseUrl}${path.startsWith('/') ? path : '/' + path}`;
         console.log('[ENGINE-DIAGNOSTIC] [NETWORK-FETCH] SDK missing, fetching directly:', url);
         const response = await fetch(url);
