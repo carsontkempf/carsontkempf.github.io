@@ -102,6 +102,7 @@ permalink: /testing/
       Test CORS preflight and analyze network communication issues. Run this if you see CORS errors in the console.
     </p>
     <button id="diagnose-cors-btn" class="btn btn-primary">Run CORS Diagnostics</button>
+    <button id="diagnose-cors-enhanced-btn" class="btn btn-secondary" style="margin-left: 0.5rem;">Run Enhanced CORS Test</button>
     <div style="margin-top: 1rem;">
       <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">What This Tests:</h4>
       <ul style="color: #666; font-size: 0.9rem; line-height: 1.8; margin-left: 1.5rem;">
@@ -110,10 +111,38 @@ permalink: /testing/
         <li>Access-Control-Allow-Headers validation</li>
         <li>Simple GET request (no preflight)</li>
         <li>Network connectivity to cloudprototype.org</li>
+        <li>Server-side CORS configuration verification</li>
       </ul>
       <p style="color: #e67e22; font-size: 0.9rem; margin-top: 0.5rem;">
         Note: Results appear in the Debug Output panel below and browser console (F12).
       </p>
+    </div>
+  </div>
+
+  <!-- Secrets Configuration Diagnostics Panel -->
+  <div class="test-panel">
+    <h3>Secrets Configuration Diagnostics</h3>
+    <p style="color: #666; margin-bottom: 1rem;">
+      Diagnose secrets configuration issues. This will check if your API keys are properly configured and provide actionable recommendations.
+    </p>
+    <div class="form-group" style="margin-bottom: 1rem;">
+      <label for="diagnostic-key-name">Secret Name to Check:</label>
+      <input type="text" id="diagnostic-key-name" value="lichess" placeholder="e.g., lichess, spotify, news" style="width: 100%; padding: 0.5rem; margin-top: 0.25rem; border: 1px solid #ced4da; border-radius: 4px;">
+    </div>
+    <button id="diagnose-secrets-btn" class="btn btn-primary">Diagnose Secrets Configuration</button>
+    <div style="margin-top: 1rem;">
+      <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">What This Checks:</h4>
+      <ul style="color: #666; font-size: 0.9rem; line-height: 1.8; margin-left: 1.5rem;">
+        <li>Whether the secret exists in the project</li>
+        <li>All available secret names in the project</li>
+        <li>Secret configuration (provider, base_url, auth headers)</li>
+        <li>SDK token origin configuration</li>
+        <li>Project access expiration status</li>
+        <li>Actionable recommendations to fix issues</li>
+      </ul>
+      <div id="secrets-diagnostic-result" style="margin-top: 1rem; display: none;">
+        <!-- Results will be populated here -->
+      </div>
     </div>
   </div>
 
