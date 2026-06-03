@@ -1014,6 +1014,23 @@
       addDebugLog(`[L1.4] FAIL - API endpoint error: ${error.message}`, 'error');
     }
 
+    // Test 1.5: Log recommendation to run cURL test
+    addDebugLog('[L1.5] Browser-based testing complete. Run server-side cURL test:', 'info');
+    addDebugLog('  curl -i -X OPTIONS https://cloudprototype.org/api/sdk/proxy \\', 'info');
+    addDebugLog(`    -H "Origin: ${origin}" \\`, 'info');
+    addDebugLog('    -H "Access-Control-Request-Method: POST"', 'info');
+    addDebugLog('  Check if CORS headers appear in server response', 'info');
+
+    layer1Results.tests.push({
+      id: 'L1.5',
+      name: 'cURL Test Recommendation',
+      status: 'INFO',
+      details: {
+        message: 'Run cURL command to bypass browser CORS restrictions',
+        command: `curl -i -X OPTIONS https://cloudprototype.org/api/sdk/proxy -H "Origin: ${origin}" -H "Access-Control-Request-Method: POST"`
+      }
+    });
+
     addDebugLog(`=== LAYER 1 COMPLETE: ${layer1Results.allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'} ===`,
                 layer1Results.allPassed ? 'success' : 'error');
 
@@ -1495,6 +1512,142 @@
       });
       addDebugLog(`[L2.8] FAIL - ${error.message}`, 'error');
     }
+
+    // Test 2.9: Deep OPTIONS inspection with timing
+    addDebugLog('[L2.9] Testing OPTIONS with deep response inspection...', 'info');
+    try {
+      const preflightStart = performance.now();
+
+      // Make OPTIONS request
+      const response = await fetch('https://cloudprototype.org/api/sdk/proxy', {
+        method: 'OPTIONS',
+        headers: {
+          'Origin': origin,
+          'Access-Control-Request-Method': 'POST',
+          'Access-Control-Request-Headers': 'content-type'
+        }
+      });
+
+      const preflightTime = performance.now() - preflightStart;
+
+      // Try to enumerate ALL headers (even if blocked)
+      const headerMap = {};
+      const knownCorsHeaders = [
+        'Access-Control-Allow-Origin',
+        'Access-Control-Allow-Methods',
+        'Access-Control-Allow-Headers',
+        'Access-Control-Allow-Credentials',
+        'Access-Control-Max-Age',
+        'Access-Control-Expose-Headers'
+      ];
+
+      // Try to get each known header
+      knownCorsHeaders.forEach(headerName => {
+        const value = response.headers.get(headerName);
+        headerMap[headerName] = value;
+      });
+
+      // Try to iterate (may be blocked)
+      const iteratedHeaders = {};
+      let iterationWorked = false;
+      try {
+        response.headers.forEach((value, key) => {
+          iteratedHeaders[key] = value;
+          iterationWorked = true;
+        });
+      } catch (e) {
+        iteratedHeaders['_error'] = e.message;
+      }
+
+      layer2Results.tests.push({
+        id: 'L2.9',
+        name: 'Deep OPTIONS Inspection',
+        status: headerMap['Access-Control-Allow-Origin'] ? 'PASS' : 'FAIL',
+        duration: preflightTime,
+        details: {
+          status: response.status,
+          statusText: response.statusText,
+          type: response.type,
+          url: response.url,
+          redirected: response.redirected,
+          ok: response.ok,
+          knownHeaders: headerMap,
+          iteratedHeaders: iteratedHeaders,
+          iterationWorked: iterationWorked,
+          time: preflightTime
+        }
+      });
+
+      if (headerMap['Access-Control-Allow-Origin']) {
+        addDebugLog(`[L2.9] PASS - CORS headers accessible via get()`, 'success');
+        addDebugLog(`  Allow-Origin: ${headerMap['Access-Control-Allow-Origin']}`, 'success');
+      } else {
+        layer2Results.allPassed = false;
+        addDebugLog(`[L2.9] FAIL - CORS headers not accessible`, 'error');
+        addDebugLog(`  Iteration worked: ${iterationWorked}`, 'error');
+      }
+    } catch (error) {
+      layer2Results.tests.push({
+        id: 'L2.9',
+        name: 'Deep OPTIONS Inspection',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer2Results.allPassed = false;
+      addDebugLog(`[L2.9] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 2.10: Test different fetch modes
+    addDebugLog('[L2.10] Testing fetch with different CORS modes...', 'info');
+
+    const modesTest = {
+      id: 'L2.10',
+      name: 'Fetch Mode Variations',
+      status: 'PASS',
+      details: { modes: {} }
+    };
+
+    const testModes = [
+      { mode: 'cors', desc: 'Standard CORS' },
+      { mode: 'same-origin', desc: 'Same-origin only' },
+      { mode: 'no-cors', desc: 'No CORS (opaque)' }
+    ];
+
+    for (const testMode of testModes) {
+      try {
+        const response = await fetch('https://cloudprototype.org/api/sdk/proxy', {
+          method: 'OPTIONS',
+          mode: testMode.mode,
+          headers: {
+            'Origin': origin
+          }
+        });
+
+        const allowOrigin = response.headers.get('Access-Control-Allow-Origin');
+
+        modesTest.details.modes[testMode.mode] = {
+          success: true,
+          status: response.status,
+          type: response.type,
+          allowOrigin: allowOrigin,
+          description: testMode.desc
+        };
+
+        addDebugLog(`[L2.10] Mode '${testMode.mode}': status ${response.status}, type '${response.type}', headers: ${allowOrigin ? 'accessible' : 'blocked'}`,
+                   allowOrigin ? 'success' : 'warning');
+      } catch (error) {
+        modesTest.details.modes[testMode.mode] = {
+          success: false,
+          error: error.message,
+          description: testMode.desc
+        };
+        modesTest.status = 'FAIL';
+        layer2Results.allPassed = false;
+        addDebugLog(`[L2.10] Mode '${testMode.mode}': FAILED - ${error.message}`, 'error');
+      }
+    }
+
+    layer2Results.tests.push(modesTest);
 
     addDebugLog(`=== LAYER 2 COMPLETE: ${layer2Results.allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'} ===`,
                 layer2Results.allPassed ? 'success' : 'error');
