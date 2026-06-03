@@ -161,6 +161,55 @@
     `;
   }
 
+  // Update rate limit display
+  function updateRateLimitDisplay() {
+    if (!sdk) return;
+
+    const usage = sdk.getUsage();
+    const remainingEl = document.querySelector('.rate-remaining');
+    const limitEl = document.querySelector('.rate-limit');
+    const resetEl = document.querySelector('.rate-reset');
+
+    if (!usage) {
+      if (remainingEl) remainingEl.textContent = '--';
+      if (limitEl) limitEl.textContent = '--';
+      if (resetEl) resetEl.textContent = 'Resets: --';
+      return;
+    }
+
+    if (remainingEl) {
+      remainingEl.textContent = usage.remaining;
+      // Change color based on remaining requests
+      if (usage.remaining < 10) {
+        remainingEl.style.color = '#dc3545'; // red
+      } else if (usage.remaining < 30) {
+        remainingEl.style.color = '#ffc107'; // yellow
+      } else {
+        remainingEl.style.color = '#27ae60'; // green
+      }
+    }
+
+    if (limitEl) {
+      limitEl.textContent = usage.limit;
+    }
+
+    if (resetEl) {
+      const resetDate = new Date(usage.reset * 1000);
+      const now = new Date();
+      const secondsUntilReset = Math.max(0, Math.floor((resetDate - now) / 1000));
+      const minutesUntilReset = Math.floor(secondsUntilReset / 60);
+      const secondsRemainder = secondsUntilReset % 60;
+
+      if (minutesUntilReset > 0) {
+        resetEl.textContent = `Resets in: ${minutesUntilReset}m ${secondsRemainder}s`;
+      } else if (secondsUntilReset > 0) {
+        resetEl.textContent = `Resets in: ${secondsUntilReset}s`;
+      } else {
+        resetEl.textContent = 'Resets: now';
+      }
+    }
+  }
+
   // Run API test
   async function runTest() {
     if (!sdk) {
@@ -193,13 +242,15 @@
     addDebugLog(`Key Name: ${scenario.keyName}`);
     addDebugLog(`Endpoint: ${scenario.endpoint}`);
     addDebugLog(`Method: ${scenario.method}`);
+    addDebugLog(`SDK Mode: ${sdk.zeroConfigMode ? 'Zero-Config (Origin-based)' : 'Token-based'}`);
 
     const startTime = performance.now();
 
     try {
       addDebugLog('Sending request to SDK proxy...');
-      addDebugLog(`Request: POST https://cloudprototype.org/api/sdk/proxy`);
-      addDebugLog(`Body: ${JSON.stringify({
+      addDebugLog(`Proxy URL: POST https://cloudprototype.org/api/sdk/proxy`);
+      addDebugLog(`Request Headers: { "Content-Type": "application/json", "Origin": "${window.location.origin}" }`);
+      addDebugLog(`Request Body: ${JSON.stringify({
         keyName: scenario.keyName,
         endpoint: scenario.endpoint,
         method: scenario.method
@@ -210,8 +261,30 @@
       });
 
       const duration = performance.now() - startTime;
-      addDebugLog(`Response received in ${duration.toFixed(2)}ms`, 'success');
-      addDebugLog(`Response data: ${JSON.stringify(response).substring(0, 200)}...`);
+
+      // Log rate limit information if available
+      const usage = sdk.getUsage();
+      if (usage) {
+        addDebugLog(`Rate Limit Info:`, 'success');
+        addDebugLog(`  - Limit: ${usage.limit} requests/minute`);
+        addDebugLog(`  - Remaining: ${usage.remaining} requests`);
+        addDebugLog(`  - Resets at: ${new Date(usage.reset * 1000).toLocaleTimeString()}`);
+      } else {
+        addDebugLog(`Rate Limit Info: Not available in response headers`);
+      }
+
+      addDebugLog(`Response Status: 200 OK`, 'success');
+      addDebugLog(`Response Time: ${duration.toFixed(2)}ms`, 'success');
+      addDebugLog(`Response Data Type: ${typeof response}`);
+      addDebugLog(`Response Data Length: ${JSON.stringify(response).length} characters`);
+
+      // Log first 500 chars of response
+      const responsePreview = JSON.stringify(response, null, 2);
+      if (responsePreview.length > 500) {
+        addDebugLog(`Response Preview (first 500 chars):\n${responsePreview.substring(0, 500)}...`);
+      } else {
+        addDebugLog(`Response Data:\n${responsePreview}`);
+      }
 
       if (statusEl) {
         statusEl.innerHTML = `
@@ -226,25 +299,74 @@
         dataEl.textContent = JSON.stringify(response, null, 2);
       }
 
+      // Update rate limit display
+      updateRateLimitDisplay();
+
       addDebugLog('=== TEST COMPLETED SUCCESSFULLY ===', 'success');
 
     } catch (error) {
       const duration = performance.now() - startTime;
-      addDebugLog(`Request failed after ${duration.toFixed(2)}ms`, 'error');
-      addDebugLog(`Error: ${error.message}`, 'error');
 
+      addDebugLog(`Request failed after ${duration.toFixed(2)}ms`, 'error');
+      addDebugLog(`Error Type: ${error.name || 'Error'}`, 'error');
+      addDebugLog(`Error Message: ${error.message}`, 'error');
+
+      // Log status code if available
+      if (error.status) {
+        addDebugLog(`HTTP Status Code: ${error.status}`, 'error');
+      }
+
+      // Log response body if available
+      if (error.response) {
+        addDebugLog(`Error Response Body: ${JSON.stringify(error.response, null, 2)}`, 'error');
+      }
+
+      // Log rate limit info even on error
+      const usage = sdk.getUsage();
+      if (usage) {
+        addDebugLog(`Rate Limit Info (from headers):`, 'error');
+        addDebugLog(`  - Limit: ${usage.limit}`);
+        addDebugLog(`  - Remaining: ${usage.remaining}`);
+        addDebugLog(`  - Resets at: ${new Date(usage.reset * 1000).toLocaleTimeString()}`);
+      }
+
+      // Log full stack trace
       if (error.stack) {
-        addDebugLog(`Stack: ${error.stack}`, 'error');
+        addDebugLog(`Stack Trace:\n${error.stack}`, 'error');
+      }
+
+      // Log any additional error properties
+      const errorKeys = Object.keys(error).filter(k => !['name', 'message', 'stack', 'status', 'response'].includes(k));
+      if (errorKeys.length > 0) {
+        addDebugLog(`Additional Error Properties:`, 'error');
+        errorKeys.forEach(key => {
+          addDebugLog(`  - ${key}: ${JSON.stringify(error[key])}`, 'error');
+        });
       }
 
       if (statusEl) {
-        statusEl.innerHTML = `<span class="status-badge status-error">Error</span>`;
+        statusEl.innerHTML = `
+          <span class="status-badge status-error">Error</span>
+          <span style="margin-left: 1rem; color: #721c24; font-size: 0.9rem;">
+            ${error.status || 'Network Error'}
+          </span>
+        `;
       }
 
       if (dataEl) {
-        dataEl.textContent = `Error: ${error.message}\n\nCheck Debug Output for details.`;
+        const errorDetails = {
+          error: error.message,
+          type: error.name,
+          status: error.status,
+          response: error.response,
+          timestamp: new Date().toISOString()
+        };
+        dataEl.textContent = JSON.stringify(errorDetails, null, 2);
         dataEl.style.color = '#721c24';
       }
+
+      // Update rate limit display even on error
+      updateRateLimitDisplay();
 
       addDebugLog('=== TEST FAILED ===', 'error');
     }
@@ -254,10 +376,16 @@
   async function runCORSDiagnostics() {
     addDebugLog('=== CORS DIAGNOSTICS STARTED ===');
     addDebugLog('Testing CORS configuration for cloudprototype.org...');
+    addDebugLog(`Current Origin: ${window.location.origin}`);
+    addDebugLog(`User Agent: ${navigator.userAgent.substring(0, 100)}...`);
 
     try {
       // Test 1: OPTIONS preflight
       addDebugLog('Test 1: OPTIONS preflight request...');
+      addDebugLog('Sending OPTIONS request to /api/sdk/proxy');
+      addDebugLog('Headers: Origin, Access-Control-Request-Method, Access-Control-Request-Headers');
+
+      const preflightStart = performance.now();
       const preflightResponse = await fetch('https://cloudprototype.org/api/sdk/proxy', {
         method: 'OPTIONS',
         headers: {
@@ -266,27 +394,91 @@
           'Access-Control-Request-Headers': 'content-type'
         }
       });
+      const preflightDuration = performance.now() - preflightStart;
 
-      addDebugLog(`Preflight status: ${preflightResponse.status}`);
-      addDebugLog('Preflight headers:');
+      addDebugLog(`Preflight Status: ${preflightResponse.status} ${preflightResponse.statusText}`,
+                  preflightResponse.status === 204 ? 'success' : 'warning');
+      addDebugLog(`Preflight Duration: ${preflightDuration.toFixed(2)}ms`);
+
+      addDebugLog('All Preflight Response Headers:');
+      const corsHeaders = [];
+      const otherHeaders = [];
       preflightResponse.headers.forEach((value, key) => {
         if (key.toLowerCase().startsWith('access-control')) {
-          addDebugLog(`  ${key}: ${value}`);
+          corsHeaders.push(`  ${key}: ${value}`);
+        } else {
+          otherHeaders.push(`  ${key}: ${value}`);
         }
       });
 
+      if (corsHeaders.length > 0) {
+        addDebugLog('CORS Headers:', 'success');
+        corsHeaders.forEach(h => addDebugLog(h, 'success'));
+      } else {
+        addDebugLog('WARNING: No CORS headers found in preflight response!', 'warning');
+      }
+
+      if (otherHeaders.length > 0) {
+        addDebugLog('Other Headers:');
+        otherHeaders.forEach(h => addDebugLog(h));
+      }
+
       // Test 2: Simple GET request
-      addDebugLog('Test 2: Simple GET request (no preflight)...');
+      addDebugLog('Test 2: Simple GET request to /api/version (no preflight)...');
+
+      const getStart = performance.now();
       const getResponse = await fetch('https://cloudprototype.org/api/version');
-      addDebugLog(`GET status: ${getResponse.status}`);
+      const getDuration = performance.now() - getStart;
+
+      addDebugLog(`GET Status: ${getResponse.status} ${getResponse.statusText}`,
+                  getResponse.ok ? 'success' : 'error');
+      addDebugLog(`GET Duration: ${getDuration.toFixed(2)}ms`);
 
       const data = await getResponse.json();
-      addDebugLog(`Response: ${JSON.stringify(data)}`);
+      addDebugLog(`Response Data: ${JSON.stringify(data, null, 2)}`, 'success');
+
+      // Test 3: Check if CORS allows our origin
+      const allowedOrigin = preflightResponse.headers.get('access-control-allow-origin');
+      if (allowedOrigin) {
+        if (allowedOrigin === '*' || allowedOrigin === window.location.origin) {
+          addDebugLog(`CORS Check: Origin "${window.location.origin}" is allowed ✓`, 'success');
+        } else {
+          addDebugLog(`CORS Check: Origin mismatch! Allowed: "${allowedOrigin}", Current: "${window.location.origin}"`, 'error');
+        }
+      } else {
+        addDebugLog('CORS Check: No Access-Control-Allow-Origin header found', 'warning');
+      }
+
+      // Test 4: Check allowed methods
+      const allowedMethods = preflightResponse.headers.get('access-control-allow-methods');
+      if (allowedMethods) {
+        const hasPOST = allowedMethods.includes('POST');
+        addDebugLog(`Allowed Methods: ${allowedMethods}`, hasPOST ? 'success' : 'warning');
+        if (!hasPOST) {
+          addDebugLog('WARNING: POST method not in allowed methods!', 'warning');
+        }
+      }
 
       addDebugLog('=== CORS DIAGNOSTICS COMPLETED ===', 'success');
 
     } catch (error) {
       addDebugLog(`CORS diagnostic failed: ${error.message}`, 'error');
+      addDebugLog(`Error Type: ${error.name}`, 'error');
+
+      if (error.stack) {
+        addDebugLog(`Stack Trace:\n${error.stack}`, 'error');
+      }
+
+      // Network error specific guidance
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        addDebugLog('This appears to be a network-level failure.', 'error');
+        addDebugLog('Possible causes:', 'error');
+        addDebugLog('  1. Server is unreachable', 'error');
+        addDebugLog('  2. CORS is blocking the request entirely', 'error');
+        addDebugLog('  3. Browser security policy preventing cross-origin request', 'error');
+        addDebugLog('  4. SSL/TLS certificate issue', 'error');
+      }
+
       addDebugLog('=== CORS DIAGNOSTICS FAILED ===', 'error');
     }
   }
