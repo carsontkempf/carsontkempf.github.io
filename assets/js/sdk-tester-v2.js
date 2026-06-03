@@ -893,28 +893,35 @@
       addDebugLog(`[L1.2] FAIL - SSL validation failed: ${error.message}`, 'error');
     }
 
-    // Test 1.3: Basic HTTP Reachability (non-CORS)
-    addDebugLog('[L1.3] Testing basic HTTP reachability...', 'info');
+    // Test 1.3: Basic HTTP Reachability (no-cors mode)
+    addDebugLog('[L1.3] Testing basic HTTP reachability (no-cors mode)...', 'info');
+    addDebugLog('[L1.3-VERBOSE] Using mode: no-cors to bypass CORS restrictions', 'info');
     try {
       const httpStart = performance.now();
       const response = await fetch('https://cloudprototype.org/', {
         method: 'GET',
+        mode: 'no-cors',
         cache: 'no-store'
       });
       const httpTime = performance.now() - httpStart;
 
-      const contentType = response.headers.get('content-type');
+      addDebugLog(`[L1.3-VERBOSE] Response type: ${response.type}`, 'info');
+      addDebugLog(`[L1.3-VERBOSE] Response status: ${response.status}`, 'info');
+
+      // With no-cors, we get opaque response (type: 'opaque', status: 0)
+      // But if it completes without error, server is reachable
+      const reachable = response.type === 'opaque' || response.ok;
 
       layer1Results.tests.push({
         id: 'L1.3',
-        name: 'HTTP Reachability',
-        status: response.ok ? 'PASS' : 'FAIL',
+        name: 'HTTP Reachability (no-cors)',
+        status: reachable ? 'PASS' : 'FAIL',
         duration: httpTime,
-        details: `Status: ${response.status}, Content-Type: ${contentType}, Time: ${httpTime.toFixed(2)}ms`
+        details: `Type: ${response.type}, Status: ${response.status}, Time: ${httpTime.toFixed(2)}ms`
       });
 
-      if (response.ok) {
-        addDebugLog(`[L1.3] PASS - Server reachable (${response.status}, ${httpTime.toFixed(2)}ms)`, 'success');
+      if (reachable) {
+        addDebugLog(`[L1.3] PASS - Server reachable (${response.type}, ${httpTime.toFixed(2)}ms)`, 'success');
       } else {
         layer1Results.allPassed = false;
         addDebugLog(`[L1.3] FAIL - Server returned ${response.status}`, 'error');
@@ -922,13 +929,46 @@
     } catch (error) {
       layer1Results.tests.push({
         id: 'L1.3',
-        name: 'HTTP Reachability',
+        name: 'HTTP Reachability (no-cors)',
         status: 'FAIL',
         error: error.message,
         details: 'Failed to reach server'
       });
       layer1Results.allPassed = false;
       addDebugLog(`[L1.3] FAIL - Server unreachable: ${error.message}`, 'error');
+    }
+
+    // Test 1.3b: Same-Origin Request Test
+    addDebugLog('[L1.3b] Testing same-origin request (control test)...', 'info');
+    try {
+      const sameOriginStart = performance.now();
+      const response = await fetch(window.location.origin + '/', {
+        method: 'HEAD',
+        cache: 'no-store'
+      });
+      const sameOriginTime = performance.now() - sameOriginStart;
+
+      layer1Results.tests.push({
+        id: 'L1.3b',
+        name: 'Same-Origin Control Test',
+        status: response.ok ? 'PASS' : 'FAIL',
+        duration: sameOriginTime,
+        details: `Confirms fetch() works on same-origin (${response.status})`
+      });
+
+      if (response.ok) {
+        addDebugLog(`[L1.3b] PASS - Same-origin fetch works (${sameOriginTime.toFixed(2)}ms)`, 'success');
+      } else {
+        addDebugLog(`[L1.3b] FAIL - Same-origin fetch failed (${response.status})`, 'error');
+      }
+    } catch (error) {
+      layer1Results.tests.push({
+        id: 'L1.3b',
+        name: 'Same-Origin Control Test',
+        status: 'FAIL',
+        error: error.message
+      });
+      addDebugLog(`[L1.3b] FAIL - ${error.message}`, 'error');
     }
 
     // Test 1.4: API Endpoint Availability
@@ -1249,6 +1289,213 @@
       addDebugLog(`[L2.4] FAIL - ${error.message}`, 'error');
     }
 
+    // Test 2.5: XMLHttpRequest Test (Alternative to fetch)
+    addDebugLog('[L2.5] Testing with XMLHttpRequest (fetch alternative)...', 'info');
+    try {
+      await new Promise((resolve, reject) => {
+        const xhrStart = performance.now();
+        const xhr = new XMLHttpRequest();
+
+        xhr.open('OPTIONS', 'https://cloudprototype.org/api/sdk/proxy', true);
+        xhr.setRequestHeader('Access-Control-Request-Method', 'POST');
+        xhr.setRequestHeader('Access-Control-Request-Headers', 'content-type');
+
+        xhr.onload = function() {
+          const xhrTime = performance.now() - xhrStart;
+          const allowOrigin = xhr.getResponseHeader('Access-Control-Allow-Origin');
+          const allowMethods = xhr.getResponseHeader('Access-Control-Allow-Methods');
+
+          layer2Results.tests.push({
+            id: 'L2.5',
+            name: 'XMLHttpRequest Test',
+            status: xhr.status === 204 && allowOrigin ? 'PASS' : 'FAIL',
+            duration: xhrTime,
+            details: {
+              status: xhr.status,
+              allowOrigin: allowOrigin,
+              allowMethods: allowMethods,
+              time: xhrTime
+            }
+          });
+
+          if (xhr.status === 204 && allowOrigin) {
+            addDebugLog(`[L2.5] PASS - XHR preflight OK (${xhr.status}, ${xhrTime.toFixed(2)}ms)`, 'success');
+            addDebugLog(`  XHR Allow-Origin: ${allowOrigin}`, 'success');
+          } else {
+            layer2Results.allPassed = false;
+            addDebugLog(`[L2.5] FAIL - XHR preflight failed (${xhr.status})`, 'error');
+          }
+          resolve();
+        };
+
+        xhr.onerror = function() {
+          layer2Results.tests.push({
+            id: 'L2.5',
+            name: 'XMLHttpRequest Test',
+            status: 'FAIL',
+            error: 'XHR request failed'
+          });
+          layer2Results.allPassed = false;
+          addDebugLog(`[L2.5] FAIL - XHR request failed`, 'error');
+          resolve(); // Don't reject to continue tests
+        };
+
+        xhr.send();
+      });
+    } catch (error) {
+      layer2Results.tests.push({
+        id: 'L2.5',
+        name: 'XMLHttpRequest Test',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer2Results.allPassed = false;
+      addDebugLog(`[L2.5] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 2.6: CORS Mode Variations Test
+    addDebugLog('[L2.6] Testing different CORS modes...', 'info');
+    const modes = ['cors', 'no-cors', 'same-origin'];
+
+    for (const mode of modes) {
+      try {
+        addDebugLog(`[L2.6] Testing mode: ${mode}`, 'info');
+        const modeStart = performance.now();
+        const response = await fetch('https://cloudprototype.org/api/sdk/proxy', {
+          method: 'OPTIONS',
+          mode: mode,
+          headers: {
+            'Access-Control-Request-Method': 'POST'
+          }
+        });
+        const modeTime = performance.now() - modeStart;
+
+        const isOpaque = response.type === 'opaque';
+        const hasHeaders = !isOpaque && response.headers.get('Access-Control-Allow-Origin');
+
+        layer2Results.tests.push({
+          id: `L2.6-${mode}`,
+          name: `CORS Mode: ${mode}`,
+          status: (mode === 'no-cors' && isOpaque) || (mode === 'cors' && response.status === 204) ? 'PASS' : 'FAIL',
+          duration: modeTime,
+          details: {
+            mode: mode,
+            type: response.type,
+            status: response.status,
+            hasHeaders: hasHeaders,
+            time: modeTime
+          }
+        });
+
+        addDebugLog(`[L2.6-${mode}] Type: ${response.type}, Status: ${response.status}, Headers: ${hasHeaders}`,
+                    (mode === 'no-cors' && isOpaque) || (mode === 'cors' && response.status === 204) ? 'success' : 'warning');
+      } catch (error) {
+        layer2Results.tests.push({
+          id: `L2.6-${mode}`,
+          name: `CORS Mode: ${mode}`,
+          status: mode === 'same-origin' ? 'EXPECTED-FAIL' : 'FAIL',
+          error: error.message
+        });
+        addDebugLog(`[L2.6-${mode}] ${mode === 'same-origin' ? 'Expected failure' : 'Failed'}: ${error.message}`,
+                    mode === 'same-origin' ? 'warning' : 'error');
+      }
+    }
+
+    // Test 2.7: Response Header Enumeration Test
+    addDebugLog('[L2.7] Testing response header enumeration...', 'info');
+    try {
+      const enumStart = performance.now();
+      const response = await fetch('https://cloudprototype.org/api/sdk/proxy', {
+        method: 'OPTIONS',
+        headers: {
+          'Origin': origin,
+          'Access-Control-Request-Method': 'POST'
+        }
+      });
+      const enumTime = performance.now() - enumStart;
+
+      // Count how many headers browser allows us to see
+      let headerCount = 0;
+      const headersList = [];
+      response.headers.forEach((value, key) => {
+        headerCount++;
+        headersList.push(key);
+      });
+
+      layer2Results.tests.push({
+        id: 'L2.7',
+        name: 'Header Enumeration',
+        status: headerCount > 0 ? 'PASS' : 'FAIL',
+        duration: enumTime,
+        details: {
+          headerCount: headerCount,
+          headers: headersList,
+          interpretation: headerCount === 0 ? 'CORS blocking all header access' :
+                         headerCount < 3 ? 'Limited header access' :
+                         'Full header access',
+          time: enumTime
+        }
+      });
+
+      if (headerCount > 0) {
+        addDebugLog(`[L2.7] PASS - Can enumerate ${headerCount} headers: ${headersList.join(', ')}`, 'success');
+      } else {
+        layer2Results.allPassed = false;
+        addDebugLog(`[L2.7] FAIL - Cannot enumerate any headers (CORS blocking)`, 'error');
+      }
+    } catch (error) {
+      layer2Results.tests.push({
+        id: 'L2.7',
+        name: 'Header Enumeration',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer2Results.allPassed = false;
+      addDebugLog(`[L2.7] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 2.8: Cloudflare-Specific Headers Test
+    addDebugLog('[L2.8] Testing Cloudflare-specific headers...', 'info');
+    try {
+      const cfStart = performance.now();
+      const response = await fetch('https://cloudprototype.org/api/version', {
+        method: 'GET'
+      });
+      const cfTime = performance.now() - cfStart;
+
+      const cfRay = response.headers.get('CF-Ray');
+      const cfCacheStatus = response.headers.get('CF-Cache-Status');
+      const server = response.headers.get('Server');
+
+      layer2Results.tests.push({
+        id: 'L2.8',
+        name: 'Cloudflare Headers',
+        status: cfRay || server === 'cloudflare' ? 'PASS' : 'FAIL',
+        duration: cfTime,
+        details: {
+          cfRay: cfRay,
+          cfCacheStatus: cfCacheStatus,
+          server: server,
+          isCloudflare: !!(cfRay || server === 'cloudflare'),
+          time: cfTime
+        }
+      });
+
+      if (cfRay || server === 'cloudflare') {
+        addDebugLog(`[L2.8] PASS - Cloudflare detected (CF-Ray: ${cfRay})`, 'success');
+      } else {
+        addDebugLog(`[L2.8] WARNING - No Cloudflare headers detected`, 'warning');
+      }
+    } catch (error) {
+      layer2Results.tests.push({
+        id: 'L2.8',
+        name: 'Cloudflare Headers',
+        status: 'FAIL',
+        error: error.message
+      });
+      addDebugLog(`[L2.8] FAIL - ${error.message}`, 'error');
+    }
+
     addDebugLog(`=== LAYER 2 COMPLETE: ${layer2Results.allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'} ===`,
                 layer2Results.allPassed ? 'success' : 'error');
 
@@ -1393,6 +1640,146 @@
       });
       layer3Results.allPassed = false;
       addDebugLog(`[L3.3] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 3.4: Direct Token Validation Test
+    addDebugLog('[L3.4] Testing direct SDK token validation...', 'info');
+    try {
+      const tokenStart = performance.now();
+      // Try to make request with deliberately invalid token to test validation
+      const response = await fetch('https://cloudprototype.org/api/sdk/proxy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sk_test_invalid123',
+          'Origin': origin
+        },
+        body: JSON.stringify({
+          keyName: 'test',
+          endpoint: '/test',
+          method: 'GET'
+        })
+      });
+      const tokenTime = performance.now() - tokenStart;
+
+      // Should get 401 or 403 for invalid token
+      const validationWorks = response.status === 401 || response.status === 403;
+
+      layer3Results.tests.push({
+        id: 'L3.4',
+        name: 'Token Validation',
+        status: validationWorks ? 'PASS' : 'FAIL',
+        duration: tokenTime,
+        details: {
+          status: response.status,
+          validationWorks: validationWorks,
+          interpretation: validationWorks ? 'Invalid token correctly rejected' : 'Token validation may not be working',
+          time: tokenTime
+        }
+      });
+
+      if (validationWorks) {
+        addDebugLog(`[L3.4] PASS - Token validation working (rejected invalid token with ${response.status})`, 'success');
+      } else {
+        addDebugLog(`[L3.4] WARNING - Token validation unclear (got ${response.status})`, 'warning');
+      }
+    } catch (error) {
+      layer3Results.tests.push({
+        id: 'L3.4',
+        name: 'Token Validation',
+        status: 'FAIL',
+        error: error.message
+      });
+      addDebugLog(`[L3.4] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 3.5: Origin Format Variations Test
+    addDebugLog('[L3.5] Testing origin format variations...', 'info');
+    const originVariations = [
+      { name: 'standard', value: origin },
+      { name: 'with-port', value: `${origin}:443` },
+      { name: 'hostname-only', value: new URL(origin).hostname },
+      { name: 'uppercase', value: origin.toUpperCase() }
+    ];
+
+    for (const variant of originVariations) {
+      try {
+        const varStart = performance.now();
+        const response = await fetch('https://cloudprototype.org/api/sdk/proxy', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Origin': variant.value
+          },
+          body: JSON.stringify({
+            keyName: 'test',
+            endpoint: '/test',
+            method: 'GET'
+          })
+        });
+        const varTime = performance.now() - varStart;
+
+        // Standard format should work (404 = auth passed, key not found)
+        // Other formats may fail with 403
+        const expected = variant.name === 'standard' ? response.status !== 403 : true;
+
+        layer3Results.tests.push({
+          id: `L3.5-${variant.name}`,
+          name: `Origin Format: ${variant.name}`,
+          status: expected ? 'PASS' : 'FAIL',
+          duration: varTime,
+          details: {
+            originValue: variant.value,
+            status: response.status,
+            authPassed: response.status !== 403,
+            time: varTime
+          }
+        });
+
+        addDebugLog(`[L3.5-${variant.name}] Origin: ${variant.value} -> ${response.status}`,
+                    expected ? 'success' : 'warning');
+      } catch (error) {
+        layer3Results.tests.push({
+          id: `L3.5-${variant.name}`,
+          name: `Origin Format: ${variant.name}`,
+          status: 'FAIL',
+          error: error.message
+        });
+        addDebugLog(`[L3.5-${variant.name}] Failed: ${error.message}`, 'error');
+      }
+    }
+
+    // Test 3.6: Browser Capabilities Test
+    addDebugLog('[L3.6] Testing browser capabilities...', 'info');
+    const capabilities = {
+      fetch: typeof fetch !== 'undefined',
+      xhr: typeof XMLHttpRequest !== 'undefined',
+      crypto: typeof crypto !== 'undefined' && typeof crypto.subtle !== 'undefined',
+      localStorage: typeof localStorage !== 'undefined',
+      sessionStorage: typeof sessionStorage !== 'undefined',
+      indexedDB: typeof indexedDB !== 'undefined',
+      serviceWorker: 'serviceWorker' in navigator,
+      webSocket: typeof WebSocket !== 'undefined'
+    };
+
+    const allCapabilities = Object.values(capabilities).every(v => v);
+
+    layer3Results.tests.push({
+      id: 'L3.6',
+      name: 'Browser Capabilities',
+      status: allCapabilities ? 'PASS' : 'WARNING',
+      details: capabilities
+    });
+
+    if (allCapabilities) {
+      addDebugLog(`[L3.6] PASS - All browser capabilities present`, 'success');
+    } else {
+      addDebugLog(`[L3.6] WARNING - Some capabilities missing:`, 'warning');
+      Object.entries(capabilities).forEach(([key, value]) => {
+        if (!value) {
+          addDebugLog(`  Missing: ${key}`, 'warning');
+        }
+      });
     }
 
     addDebugLog(`=== LAYER 3 COMPLETE: ${layer3Results.allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'} ===`,
@@ -1658,6 +2045,197 @@
       });
       layer4Results.allPassed = false;
       addDebugLog(`[L4.4] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 4.5: Database Connectivity Test
+    addDebugLog('[L4.5] Testing database connectivity...', 'info');
+    try {
+      // Test if we can reach the database through diagnostic endpoint
+      const dbStart = performance.now();
+      const response = await fetch(`https://cloudprototype.org/api/projects/${appId}/secrets/diagnostic?keyName=test`, {
+        method: 'GET',
+        headers: { 'Origin': origin }
+      });
+      const dbTime = performance.now() - dbStart;
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // If we can get project info, database is accessible
+        const dbAccessible = data.project !== undefined;
+
+        layer4Results.tests.push({
+          id: 'L4.5',
+          name: 'Database Connectivity',
+          status: dbAccessible ? 'PASS' : 'FAIL',
+          duration: dbTime,
+          details: {
+            accessible: dbAccessible,
+            responseTime: dbTime,
+            projectData: !!data.project
+          }
+        });
+
+        if (dbAccessible) {
+          addDebugLog(`[L4.5] PASS - Database accessible (${dbTime.toFixed(2)}ms)`, 'success');
+        } else {
+          layer4Results.allPassed = false;
+          addDebugLog(`[L4.5] FAIL - Database not accessible`, 'error');
+        }
+      } else {
+        layer4Results.tests.push({
+          id: 'L4.5',
+          name: 'Database Connectivity',
+          status: 'FAIL',
+          details: { status: response.status }
+        });
+        layer4Results.allPassed = false;
+        addDebugLog(`[L4.5] FAIL - Database endpoint returned ${response.status}`, 'error');
+      }
+    } catch (error) {
+      layer4Results.tests.push({
+        id: 'L4.5',
+        name: 'Database Connectivity',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer4Results.allPassed = false;
+      addDebugLog(`[L4.5] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 4.6: Secret Structure Validation
+    addDebugLog('[L4.6] Validating secret data structure...', 'info');
+    try {
+      const response = await fetch(`https://cloudprototype.org/api/projects/${appId}/secrets/diagnostic?keyName=${targetSecret}`, {
+        method: 'GET',
+        headers: { 'Origin': origin }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Check if diagnostic response has expected structure
+        const hasExpectedStructure =
+          data.project !== undefined &&
+          data.sdk_tokens !== undefined &&
+          data.secrets !== undefined &&
+          data.origin_validation !== undefined;
+
+        const requiredFields = {
+          project: !!data.project,
+          sdk_tokens: !!data.sdk_tokens,
+          secrets: !!data.secrets,
+          origin_validation: !!data.origin_validation,
+          issues_found: Array.isArray(data.issues_found),
+          recommended_actions: Array.isArray(data.recommended_actions)
+        };
+
+        layer4Results.tests.push({
+          id: 'L4.6',
+          name: 'Secret Structure Validation',
+          status: hasExpectedStructure ? 'PASS' : 'FAIL',
+          details: {
+            hasExpectedStructure: hasExpectedStructure,
+            fields: requiredFields
+          }
+        });
+
+        if (hasExpectedStructure) {
+          addDebugLog(`[L4.6] PASS - Diagnostic response structure valid`, 'success');
+        } else {
+          layer4Results.allPassed = false;
+          addDebugLog(`[L4.6] FAIL - Diagnostic response missing expected fields`, 'error');
+          Object.entries(requiredFields).forEach(([field, present]) => {
+            if (!present) {
+              addDebugLog(`  Missing field: ${field}`, 'error');
+            }
+          });
+        }
+      } else {
+        layer4Results.tests.push({
+          id: 'L4.6',
+          name: 'Secret Structure Validation',
+          status: 'FAIL',
+          details: { status: response.status }
+        });
+        layer4Results.allPassed = false;
+        addDebugLog(`[L4.6] FAIL - Could not fetch diagnostic data (${response.status})`, 'error');
+      }
+    } catch (error) {
+      layer4Results.tests.push({
+        id: 'L4.6',
+        name: 'Secret Structure Validation',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer4Results.allPassed = false;
+      addDebugLog(`[L4.6] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 4.7: Response Time Analysis
+    addDebugLog('[L4.7] Analyzing diagnostic endpoint response times...', 'info');
+    const timings = [];
+    try {
+      // Make 3 requests to get average timing
+      for (let i = 0; i < 3; i++) {
+        const start = performance.now();
+        const response = await fetch(`https://cloudprototype.org/api/projects/${appId}/secrets/diagnostic?keyName=${targetSecret}`, {
+          method: 'GET',
+          headers: { 'Origin': origin }
+        });
+        const duration = performance.now() - start;
+
+        if (response.ok) {
+          timings.push(duration);
+          addDebugLog(`[L4.7] Request ${i + 1}: ${duration.toFixed(2)}ms`, 'info');
+        }
+      }
+
+      if (timings.length > 0) {
+        const avgTime = timings.reduce((a, b) => a + b, 0) / timings.length;
+        const minTime = Math.min(...timings);
+        const maxTime = Math.max(...timings);
+
+        // Consider fast if average < 500ms
+        const isFast = avgTime < 500;
+
+        layer4Results.tests.push({
+          id: 'L4.7',
+          name: 'Response Time Analysis',
+          status: isFast ? 'PASS' : 'WARNING',
+          details: {
+            averageMs: avgTime.toFixed(2),
+            minMs: minTime.toFixed(2),
+            maxMs: maxTime.toFixed(2),
+            samples: timings.length,
+            performance: isFast ? 'Fast' : 'Slow'
+          }
+        });
+
+        if (isFast) {
+          addDebugLog(`[L4.7] PASS - Average response time: ${avgTime.toFixed(2)}ms`, 'success');
+        } else {
+          addDebugLog(`[L4.7] WARNING - Slow response time: ${avgTime.toFixed(2)}ms`, 'warning');
+        }
+      } else {
+        layer4Results.tests.push({
+          id: 'L4.7',
+          name: 'Response Time Analysis',
+          status: 'FAIL',
+          details: { error: 'No successful requests' }
+        });
+        layer4Results.allPassed = false;
+        addDebugLog(`[L4.7] FAIL - Could not measure response times`, 'error');
+      }
+    } catch (error) {
+      layer4Results.tests.push({
+        id: 'L4.7',
+        name: 'Response Time Analysis',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer4Results.allPassed = false;
+      addDebugLog(`[L4.7] FAIL - ${error.message}`, 'error');
     }
 
     addDebugLog(`=== LAYER 4 COMPLETE: ${layer4Results.allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'} ===`,
