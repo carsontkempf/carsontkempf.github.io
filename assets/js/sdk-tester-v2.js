@@ -996,6 +996,13 @@
 
     // Test 2.1: OPTIONS Preflight to SDK Proxy
     addDebugLog('[L2.1] Testing OPTIONS preflight to /api/sdk/proxy...', 'info');
+    addDebugLog(`[L2.1-VERBOSE] Request details:`, 'info');
+    addDebugLog(`  URL: https://cloudprototype.org/api/sdk/proxy`, 'info');
+    addDebugLog(`  Method: OPTIONS`, 'info');
+    addDebugLog(`  Origin: ${origin}`, 'info');
+    addDebugLog(`  Request-Method: POST`, 'info');
+    addDebugLog(`  Request-Headers: content-type`, 'info');
+
     try {
       const preflightStart = performance.now();
       const response = await fetch('https://cloudprototype.org/api/sdk/proxy', {
@@ -1008,9 +1015,29 @@
       });
       const preflightTime = performance.now() - preflightStart;
 
+      // Capture ALL response headers
+      const allResponseHeaders = {};
+      response.headers.forEach((value, key) => {
+        allResponseHeaders[key] = value;
+      });
+
+      addDebugLog(`[L2.1-VERBOSE] Response received:`, 'info');
+      addDebugLog(`  Status: ${response.status} ${response.statusText}`, 'info');
+      addDebugLog(`  Duration: ${preflightTime.toFixed(2)}ms`, 'info');
+      addDebugLog(`  ALL Headers: ${JSON.stringify(allResponseHeaders, null, 2)}`, 'info');
+
       const allowOrigin = response.headers.get('Access-Control-Allow-Origin');
       const allowMethods = response.headers.get('Access-Control-Allow-Methods');
       const allowHeaders = response.headers.get('Access-Control-Allow-Headers');
+      const allowCredentials = response.headers.get('Access-Control-Allow-Credentials');
+      const maxAge = response.headers.get('Access-Control-Max-Age');
+
+      addDebugLog(`[L2.1-VERBOSE] CORS-specific headers:`, 'info');
+      addDebugLog(`  Allow-Origin: ${allowOrigin}`, allowOrigin ? 'success' : 'error');
+      addDebugLog(`  Allow-Methods: ${allowMethods}`, allowMethods ? 'success' : 'error');
+      addDebugLog(`  Allow-Headers: ${allowHeaders}`, allowHeaders ? 'success' : 'error');
+      addDebugLog(`  Allow-Credentials: ${allowCredentials}`, 'info');
+      addDebugLog(`  Max-Age: ${maxAge}`, 'info');
 
       const passed = response.status === 204 && allowOrigin;
 
@@ -1024,6 +1051,7 @@
           allowOrigin: allowOrigin,
           allowMethods: allowMethods,
           allowHeaders: allowHeaders,
+          allHeaders: allResponseHeaders,
           time: preflightTime
         }
       });
@@ -1035,13 +1063,22 @@
       } else {
         layer2Results.allPassed = false;
         addDebugLog(`[L2.1] FAIL - Preflight failed (${response.status})`, 'error');
+        if (!allowOrigin) {
+          addDebugLog(`  CRITICAL: Access-Control-Allow-Origin header is MISSING`, 'error');
+        }
       }
     } catch (error) {
+      addDebugLog(`[L2.1-VERBOSE] Exception details:`, 'error');
+      addDebugLog(`  Error message: ${error.message}`, 'error');
+      addDebugLog(`  Error type: ${error.constructor.name}`, 'error');
+      addDebugLog(`  Error stack: ${error.stack}`, 'error');
+
       layer2Results.tests.push({
         id: 'L2.1',
         name: 'SDK Proxy Preflight',
         status: 'FAIL',
-        error: error.message
+        error: error.message,
+        errorType: error.constructor.name
       });
       layer2Results.allPassed = false;
       addDebugLog(`[L2.1] FAIL - Preflight request failed: ${error.message}`, 'error');
@@ -1049,6 +1086,11 @@
 
     // Test 2.2: OPTIONS Preflight to CORS Diagnostic Endpoint
     addDebugLog('[L2.2] Testing OPTIONS preflight to /api/cors/diagnostic...', 'info');
+    addDebugLog(`[L2.2-VERBOSE] Request details:`, 'info');
+    addDebugLog(`  URL: https://cloudprototype.org/api/cors/diagnostic`, 'info');
+    addDebugLog(`  Method: OPTIONS`, 'info');
+    addDebugLog(`  Origin: ${origin}`, 'info');
+
     try {
       const preflightStart = performance.now();
       const response = await fetch('https://cloudprototype.org/api/cors/diagnostic', {
@@ -1060,6 +1102,17 @@
         }
       });
       const preflightTime = performance.now() - preflightStart;
+
+      // Capture ALL response headers
+      const allResponseHeaders = {};
+      response.headers.forEach((value, key) => {
+        allResponseHeaders[key] = value;
+      });
+
+      addDebugLog(`[L2.2-VERBOSE] Response received:`, 'info');
+      addDebugLog(`  Status: ${response.status} ${response.statusText}`, 'info');
+      addDebugLog(`  Duration: ${preflightTime.toFixed(2)}ms`, 'info');
+      addDebugLog(`  ALL Headers: ${JSON.stringify(allResponseHeaders, null, 2)}`, 'info');
 
       const allowOrigin = response.headers.get('Access-Control-Allow-Origin');
       const diagnosticHeader = response.headers.get('X-CORS-Diagnostic');
@@ -1075,6 +1128,7 @@
           status: response.status,
           allowOrigin: allowOrigin,
           diagnosticHeader: diagnosticHeader,
+          allHeaders: allResponseHeaders,
           time: preflightTime
         }
       });
