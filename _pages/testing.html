@@ -146,6 +146,40 @@ permalink: /testing/
     </div>
   </div>
 
+  <!-- Systematic Test Framework Panel -->
+  <div class="test-panel">
+    <h3>Systematic Test Framework</h3>
+    <p style="color: #666; margin-bottom: 1rem;">
+      Comprehensive multi-layer diagnostic test suite. Runs 18+ tests across 5 layers to identify all configuration and connectivity issues.
+    </p>
+
+    <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 1rem; margin-bottom: 1rem;">
+      <h4 style="font-size: 1rem; margin: 0 0 0.5rem 0;">Test Layers:</h4>
+      <ul style="color: #666; font-size: 0.9rem; line-height: 1.8; margin: 0; padding-left: 1.5rem;">
+        <li><strong>Layer 1:</strong> Network Connectivity (DNS, SSL, HTTP reachability)</li>
+        <li><strong>Layer 2:</strong> CORS Configuration (preflight, headers, policies)</li>
+        <li><strong>Layer 3:</strong> Authentication Flow (origin validation, tokens)</li>
+        <li><strong>Layer 4:</strong> Secrets Configuration (existence, structure)</li>
+        <li><strong>Layer 5:</strong> End-to-End Integration (full API calls)</li>
+      </ul>
+    </div>
+
+    <button id="run-systematic-tests-btn" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; font-weight: bold;">
+      Run Complete Systematic Test Suite
+    </button>
+
+    <div id="systematic-test-results" style="margin-top: 1rem; display: none;">
+      <!-- Results will be populated by JavaScript -->
+    </div>
+
+    <div style="margin-top: 1rem; padding: 1rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
+      <p style="margin: 0; color: #856404; font-size: 0.9rem;">
+        <strong>Note:</strong> This test suite runs 18+ automated tests and may take 30-60 seconds.
+        All results are logged to the Debug Output panel below with detailed diagnostics.
+      </p>
+    </div>
+  </div>
+
   <!-- Debug Log Panel -->
   <div id="debug-panel" class="test-panel">
     <h3>Debug Output (Verbose)</h3>
