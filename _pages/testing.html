@@ -8,7 +8,7 @@ permalink: /testing/
 
 <div id="testing-content">
   <p style="margin-bottom: 2rem; color: #666;">
-    Test the learn-secrets-sdk npm package with NewsAPI integration.
+    Test the learn-secrets-sdk npm package with real API integrations.
     All requests are logged with verbose debug output below.
   </p>
 
@@ -22,11 +22,11 @@ permalink: /testing/
       </div>
       <div class="config-item">
         <span class="config-key">Proxy URL:</span>
-        <span class="config-value">https://ctklearn.carsontkempf.workers.dev</span>
+        <span class="config-value">https://cloudprototype.org</span>
       </div>
       <div class="config-item">
         <span class="config-key">Auth Method:</span>
-        <span class="config-value">Bearer Token</span>
+        <span class="config-value">Zero-Config (Origin-based)</span>
       </div>
       <div class="config-item">
         <span class="config-key">Rate Limit:</span>
@@ -36,75 +36,50 @@ permalink: /testing/
     <div id="sdk-status" class="checking">SDK not initialized</div>
   </div>
 
-  <!-- Configuration Panel -->
+  <!-- Interactive API Test Console -->
   <div class="test-panel">
-    <h3>Credentials</h3>
-    <div class="api-test-form">
-      <div class="form-group">
-        <label>
-          <input type="checkbox" id="zero-config-checkbox" checked>
-          <strong>Use Zero-Config Mode (Recommended)</strong>
-        </label>
-        <small style="color: #666; display: block; margin-top: 5px;">
-          Zero-config uses your browser's Origin header for authentication. No app ID or token needed!
-        </small>
-      </div>
-
-      <div id="token-mode-inputs">
-        <div class="form-group">
-          <label for="app-id-input">Project App ID</label>
-          <input
-            type="text"
-            id="app-id-input"
-            placeholder="Enter your learn site project app ID"
-            autocomplete="off"
-          >
-          <small style="color: #666;">Get this from your learn site project dashboard at ctklearn.carsontkempf.workers.dev</small>
-        </div>
-        <div class="form-group">
-          <label for="sdk-token-input">SDK Token</label>
-          <input
-            type="password"
-            id="sdk-token-input"
-            placeholder="sk_live_... or sk_test_..."
-            autocomplete="off"
-          >
-          <small style="color: #666;">Get this from Settings → SDK Tokens at ctklearn.carsontkempf.workers.dev</small>
-        </div>
-      </div>
-
-      <button id="init-sdk-btn" class="btn btn-primary">Initialize SDK</button>
-    </div>
-  </div>
-
-  <script>
-    // Toggle token inputs visibility based on zero-config checkbox
-    document.addEventListener('DOMContentLoaded', () => {
-      const checkbox = document.getElementById('zero-config-checkbox');
-      const tokenInputs = document.getElementById('token-mode-inputs');
-
-      function updateInputsVisibility() {
-        if (checkbox.checked) {
-          tokenInputs.style.display = 'none';
-        } else {
-          tokenInputs.style.display = 'block';
-        }
-      }
-
-      checkbox.addEventListener('change', updateInputsVisibility);
-      updateInputsVisibility();
-    });
-  </script>
-
-  <!-- Token Inspector Panel -->
-  <div class="test-panel">
-    <h3>Token Inspector</h3>
+    <h3>Interactive API Test Console</h3>
     <p style="color: #666; margin-bottom: 1rem;">
-      Decode and inspect your SDK token JWT claims without verification.
+      Select from pre-configured test scenarios. All values are auto-populated - no manual entry required.
     </p>
-    <button id="inspect-token-btn" class="btn btn-secondary">Decode Token</button>
-    <div id="token-claims-display" style="margin-top: 1rem;">
-      <p style="color: #999;">Enter a token above and click "Decode Token" to inspect JWT claims</p>
+
+    <div class="console-container">
+      <div class="console-controls">
+        <div class="form-group">
+          <label for="scenario-select">Test Scenario</label>
+          <select id="scenario-select" class="scenario-select">
+            <optgroup label="Lichess API">
+              <option value="lichess-account">Lichess: Get Account Info</option>
+              <option value="lichess-status">Lichess: Server Status</option>
+              <option value="lichess-games">Lichess: Current Games</option>
+              <option value="lichess-profile">Lichess: User Profile</option>
+              <option value="lichess-leaderboard">Lichess: Top Players</option>
+            </optgroup>
+            <optgroup label="NewsAPI">
+              <option value="news-headlines">NewsAPI: Top Headlines</option>
+              <option value="news-everything">NewsAPI: Search Everything</option>
+              <option value="news-sources">NewsAPI: News Sources</option>
+            </optgroup>
+            <optgroup label="Other APIs">
+              <option value="spotify-profile">Spotify: User Profile</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div id="scenario-details" class="scenario-details">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <button id="run-test-btn" class="btn btn-primary">Run Test</button>
+      </div>
+
+      <div class="console-output">
+        <div class="result-section">
+          <h4>Result</h4>
+          <div id="test-result-status"></div>
+          <div id="test-result-data"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -134,46 +109,12 @@ permalink: /testing/
         <li>Access-Control-Allow-Origin header presence</li>
         <li>Access-Control-Allow-Headers validation</li>
         <li>Simple GET request (no preflight)</li>
-        <li>Network connectivity to ctklearn.carsontkempf.workers.dev</li>
+        <li>Network connectivity to cloudprototype.org</li>
       </ul>
       <p style="color: #e67e22; font-size: 0.9rem; margin-top: 0.5rem;">
         Note: Results appear in the Debug Output panel below and browser console (F12).
       </p>
     </div>
-  </div>
-
-  <!-- API Test Console Panel -->
-  <div class="test-panel">
-    <h3>NewsAPI Test Console</h3>
-    <div class="api-test-form">
-      <div class="form-group">
-        <label for="endpoint-select">API Endpoint</label>
-        <select id="endpoint-select">
-          <option value="top-headlines">Top Headlines - Get breaking news headlines</option>
-          <option value="everything">Everything - Search all articles</option>
-          <option value="sources">Sources - Get available news sources</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="query-input">Search Query / Category</label>
-        <input
-          type="text"
-          id="query-input"
-          placeholder="e.g., 'bitcoin', 'technology', 'sports'"
-          autocomplete="off"
-        >
-        <small style="color: #666;">
-          For top-headlines: search term (optional, defaults to country=us)<br>
-          For everything: search term (required, defaults to 'technology')<br>
-          For sources: category filter (optional, defaults to language=en)
-        </small>
-      </div>
-
-      <button id="test-api-btn" class="btn btn-primary">Execute Request</button>
-    </div>
-
-    <div id="api-result" style="margin-top: 1.5rem;"></div>
   </div>
 
   <!-- Debug Log Panel -->
@@ -195,7 +136,7 @@ permalink: /testing/
 </div>
 
 <script src="/assets/js/learn-secrets-sdk.js"></script>
-<script src="/assets/js/sdk-tester.js"></script>
+<script src="/assets/js/sdk-tester-v2.js"></script>
 
 <style>
 /* Additional inline styles for testing page */
@@ -240,5 +181,136 @@ permalink: /testing/
   margin-top: 0.5rem;
   color: #666;
   font-size: 0.9rem;
+}
+
+/* Console Container Styles */
+.console-container {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .console-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.console-controls {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+
+.scenario-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  background: white;
+  cursor: pointer;
+}
+
+.scenario-details {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #666;
+}
+
+.detail-value {
+  font-family: 'Courier New', monospace;
+  color: #2196F3;
+  text-align: right;
+}
+
+.detail-description {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.console-output {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+
+.result-section h4 {
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #dee2e6;
+  color: #333;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#test-result-status {
+  margin-bottom: 1rem;
+}
+
+#test-result-data {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.status-untested {
+  background: #e9ecef;
+  color: #6c757d;
+}
+
+.status-loading {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-error {
+  background: #f8d7da;
+  color: #721c24;
 }
 </style>
