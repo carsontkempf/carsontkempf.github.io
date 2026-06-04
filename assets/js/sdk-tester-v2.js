@@ -2546,6 +2546,589 @@
     return layer5Results;
   }
 
+  // Layer 6: Secret Name Discovery & Validation
+  async function runLayer6SecretDiscoveryTests() {
+    addDebugLog('=== LAYER 6: SECRET NAME DISCOVERY & VALIDATION ===', 'info');
+    systematicTestState.currentLayer = 'layer6';
+
+    const layer6Results = {
+      layer: 6,
+      name: 'Secret Discovery',
+      tests: [],
+      allPassed: true
+    };
+
+    const origin = window.location.origin;
+    const appId = 'VtI8BSvhxAwNIIDR';
+    const targetSecret = 'lichess';
+
+    // Test 6.1: List All Secrets in Project
+    addDebugLog('[L6.1] Listing all secrets in project...', 'info');
+    let allSecretNames = [];
+    try {
+      const diagnosticStart = performance.now();
+      const response = await fetch(`https://cloudprototype.org/api/projects/${appId}/secrets/diagnostic?keyName=${targetSecret}`, {
+        method: 'GET',
+        headers: { 'Origin': origin }
+      });
+      const diagnosticTime = performance.now() - diagnosticStart;
+
+      if (response.ok) {
+        const data = await response.json();
+        allSecretNames = data.secrets?.all_names || [];
+
+        layer6Results.tests.push({
+          id: 'L6.1',
+          name: 'List All Secrets',
+          status: 'PASS',
+          duration: diagnosticTime,
+          details: {
+            totalSecrets: allSecretNames.length,
+            secretNames: allSecretNames,
+            time: diagnosticTime
+          }
+        });
+
+        addDebugLog(`[L6.1] PASS - Found ${allSecretNames.length} secrets: ${allSecretNames.join(', ')}`, 'success');
+      } else {
+        throw new Error(`Diagnostic endpoint returned ${response.status}`);
+      }
+    } catch (error) {
+      layer6Results.tests.push({
+        id: 'L6.1',
+        name: 'List All Secrets',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer6Results.allPassed = false;
+      addDebugLog(`[L6.1] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 6.2: Smart Secret Name Matching
+    addDebugLog('[L6.2] Testing smart secret name matching...', 'info');
+    try {
+      const matchStart = performance.now();
+
+      // Smart matching algorithm
+      function smartMatch(targetName, availableSecrets) {
+        // Tier 1: Exact match
+        const exactMatches = availableSecrets.filter(s => s === targetName);
+        if (exactMatches.length === 1) {
+          return { match: exactMatches[0], type: 'exact', confidence: 100 };
+        } else if (exactMatches.length > 1) {
+          return { matches: exactMatches, type: 'multiple-exact', confidence: 100 };
+        }
+
+        // Tier 2: Starts with (fuzzy)
+        const startsWithMatches = availableSecrets.filter(s => s.startsWith(targetName));
+        if (startsWithMatches.length === 1) {
+          return { match: startsWithMatches[0], type: 'fuzzy-startswith', confidence: 85, suggestion: true };
+        } else if (startsWithMatches.length > 1) {
+          return { matches: startsWithMatches, type: 'multiple-fuzzy-startswith', confidence: 85 };
+        }
+
+        // Tier 3: Contains (fuzzy)
+        const containsMatches = availableSecrets.filter(s => s.includes(targetName));
+        if (containsMatches.length === 1) {
+          return { match: containsMatches[0], type: 'fuzzy-contains', confidence: 70, suggestion: true };
+        } else if (containsMatches.length > 1) {
+          return { matches: containsMatches, type: 'multiple-fuzzy-contains', confidence: 70 };
+        }
+
+        // No matches found
+        return { match: null, type: 'none', confidence: 0, candidates: availableSecrets };
+      }
+
+      const matchResult = smartMatch(targetSecret, allSecretNames);
+      const matchTime = performance.now() - matchStart;
+
+      const testPassed = matchResult.type !== 'none';
+
+      layer6Results.tests.push({
+        id: 'L6.2',
+        name: 'Smart Secret Matching',
+        status: testPassed ? 'PASS' : 'FAIL',
+        duration: matchTime,
+        details: {
+          targetSecret: targetSecret,
+          matchResult: matchResult,
+          time: matchTime
+        }
+      });
+
+      if (testPassed) {
+        if (matchResult.type === 'exact') {
+          addDebugLog(`[L6.2] PASS - Exact match found: "${matchResult.match}"`, 'success');
+        } else if (matchResult.suggestion) {
+          addDebugLog(`[L6.2] PASS - Fuzzy match (${matchResult.type}): "${matchResult.match}" (confidence: ${matchResult.confidence}%)`, 'success');
+          addDebugLog(`  Suggestion: Consider using "${matchResult.match}" instead of "${targetSecret}"`, 'warning');
+        } else {
+          addDebugLog(`[L6.2] PASS - Multiple matches found (${matchResult.type}): ${matchResult.matches.join(', ')}`, 'warning');
+        }
+      } else {
+        layer6Results.allPassed = false;
+        addDebugLog(`[L6.2] FAIL - No matches found for "${targetSecret}"`, 'error');
+        addDebugLog(`  Available secrets: ${allSecretNames.join(', ')}`, 'error');
+      }
+    } catch (error) {
+      layer6Results.tests.push({
+        id: 'L6.2',
+        name: 'Smart Secret Matching',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer6Results.allPassed = false;
+      addDebugLog(`[L6.2] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 6.3: Secret Name Validation
+    addDebugLog('[L6.3] Validating expected secret names...', 'info');
+    try {
+      const validationStart = performance.now();
+
+      const expectedSecrets = ['lichess', 'github-pat', 'spotify-client-id'];
+
+      const validationResults = expectedSecrets.map(expected => {
+        const exactMatch = allSecretNames.find(s => s === expected);
+        const fuzzyMatch = allSecretNames.find(s => s.startsWith(expected) || s.includes(expected));
+
+        return {
+          expected: expected,
+          exactMatch: !!exactMatch,
+          fuzzyMatch: fuzzyMatch ? fuzzyMatch : null,
+          status: exactMatch ? 'EXACT' : fuzzyMatch ? 'FUZZY' : 'MISSING'
+        };
+      });
+
+      const validationTime = performance.now() - validationStart;
+
+      const allFound = validationResults.every(r => r.status !== 'MISSING');
+      const allExact = validationResults.every(r => r.status === 'EXACT');
+
+      layer6Results.tests.push({
+        id: 'L6.3',
+        name: 'Secret Name Validation',
+        status: allFound ? 'PASS' : 'FAIL',
+        duration: validationTime,
+        details: {
+          expectedSecrets: expectedSecrets,
+          validationResults: validationResults,
+          allFound: allFound,
+          allExact: allExact,
+          time: validationTime
+        }
+      });
+
+      if (allExact) {
+        addDebugLog(`[L6.3] PASS - All expected secrets found with exact names`, 'success');
+      } else if (allFound) {
+        addDebugLog(`[L6.3] PASS - All expected secrets found (some with fuzzy matches)`, 'warning');
+        validationResults.filter(r => r.status === 'FUZZY').forEach(r => {
+          addDebugLog(`  "${r.expected}" → fuzzy match: "${r.fuzzyMatch}"`, 'warning');
+        });
+      } else {
+        layer6Results.allPassed = false;
+        addDebugLog(`[L6.3] FAIL - Some expected secrets missing`, 'error');
+        validationResults.filter(r => r.status === 'MISSING').forEach(r => {
+          addDebugLog(`  Missing: "${r.expected}"`, 'error');
+        });
+      }
+    } catch (error) {
+      layer6Results.tests.push({
+        id: 'L6.3',
+        name: 'Secret Name Validation',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer6Results.allPassed = false;
+      addDebugLog(`[L6.3] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 6.4: Secret Configuration Completeness
+    addDebugLog('[L6.4] Checking secret configuration completeness...', 'info');
+    try {
+      const completenessStart = performance.now();
+      const response = await fetch(`https://cloudprototype.org/api/projects/${appId}/secrets/diagnostic?keyName=${targetSecret}`, {
+        method: 'GET',
+        headers: { 'Origin': origin }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const secretConfig = data.secrets?.key_config;
+
+        if (secretConfig) {
+          const requiredFields = {
+            name: !!secretConfig.name,
+            provider: !!secretConfig.provider,
+            base_url: !!secretConfig.base_url,
+            auth_header: !!secretConfig.auth_header,
+            has_api_key: !!secretConfig.has_api_key
+          };
+
+          const completeness = Object.values(requiredFields).filter(v => v).length;
+          const totalFields = Object.keys(requiredFields).length;
+          const completenessPercent = (completeness / totalFields * 100).toFixed(0);
+
+          const completenessTime = performance.now() - completenessStart;
+
+          const isComplete = completeness === totalFields;
+
+          layer6Results.tests.push({
+            id: 'L6.4',
+            name: 'Secret Configuration Completeness',
+            status: isComplete ? 'PASS' : 'FAIL',
+            duration: completenessTime,
+            details: {
+              secretName: secretConfig.name,
+              requiredFields: requiredFields,
+              completeness: completeness,
+              totalFields: totalFields,
+              completenessPercent: completenessPercent,
+              time: completenessTime
+            }
+          });
+
+          if (isComplete) {
+            addDebugLog(`[L6.4] PASS - Secret "${secretConfig.name}" fully configured (${completenessPercent}%)`, 'success');
+          } else {
+            layer6Results.allPassed = false;
+            addDebugLog(`[L6.4] FAIL - Secret incomplete (${completenessPercent}%)`, 'error');
+            Object.entries(requiredFields).filter(([k, v]) => !v).forEach(([field]) => {
+              addDebugLog(`  Missing: ${field}`, 'error');
+            });
+          }
+        } else {
+          throw new Error('Secret configuration not found in diagnostic response');
+        }
+      } else {
+        throw new Error(`Diagnostic endpoint returned ${response.status}`);
+      }
+    } catch (error) {
+      layer6Results.tests.push({
+        id: 'L6.4',
+        name: 'Secret Configuration Completeness',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer6Results.allPassed = false;
+      addDebugLog(`[L6.4] FAIL - ${error.message}`, 'error');
+    }
+
+    addDebugLog(`=== LAYER 6 COMPLETE: ${layer6Results.allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'} ===`,
+                layer6Results.allPassed ? 'success' : 'error');
+
+    return layer6Results;
+  }
+
+  // Layer 7: Fix Validation & Regression Prevention
+  async function runLayer7FixValidationTests() {
+    addDebugLog('=== LAYER 7: FIX VALIDATION & REGRESSION PREVENTION ===', 'info');
+    systematicTestState.currentLayer = 'layer7';
+
+    const layer7Results = {
+      layer: 7,
+      name: 'Fix Validation',
+      tests: [],
+      allPassed: true
+    };
+
+    const origin = window.location.origin;
+
+    // Test 7.1: Validate v1.7.15 CORS Fix
+    addDebugLog('[L7.1] Validating v1.7.15 CORS fix...', 'info');
+    try {
+      const corsStart = performance.now();
+      const response = await fetch('https://cloudprototype.org/api/sdk/proxy', {
+        method: 'OPTIONS',
+        headers: { 'Origin': origin }
+      });
+      const corsTime = performance.now() - corsStart;
+
+      // Check 1: Status 204
+      const statusCheck = response.status === 204;
+
+      // Check 2: Access-Control-Allow-Origin accessible
+      const allowOrigin = response.headers.get('Access-Control-Allow-Origin');
+      const originCheck = allowOrigin !== null && allowOrigin !== '';
+
+      // Check 3: Access-Control-Expose-Headers present
+      const exposeHeaders = response.headers.get('Access-Control-Expose-Headers');
+      const exposeCheck = exposeHeaders !== null && exposeHeaders.includes('Access-Control-Allow-Origin');
+
+      // Check 4: Can enumerate headers
+      let enumerationCheck = false;
+      let headerCount = 0;
+      try {
+        const headerArray = Array.from(response.headers.entries());
+        headerCount = headerArray.length;
+        enumerationCheck = headerArray.length > 0;
+      } catch (e) {
+        enumerationCheck = false;
+      }
+
+      const allChecks = statusCheck && originCheck && exposeCheck && enumerationCheck;
+
+      layer7Results.tests.push({
+        id: 'L7.1',
+        name: 'Validate CORS Fix',
+        status: allChecks ? 'PASS' : 'FAIL',
+        duration: corsTime,
+        details: {
+          statusCheck: statusCheck,
+          originCheck: originCheck,
+          exposeCheck: exposeCheck,
+          enumerationCheck: enumerationCheck,
+          allowOrigin: allowOrigin,
+          exposeHeaders: exposeHeaders,
+          enumerableCount: headerCount,
+          time: corsTime
+        }
+      });
+
+      if (allChecks) {
+        addDebugLog(`[L7.1] PASS - All 4 CORS fix checks succeeded (${corsTime.toFixed(2)}ms)`, 'success');
+        addDebugLog(`  ✓ Status 204`, 'success');
+        addDebugLog(`  ✓ Allow-Origin accessible: ${allowOrigin}`, 'success');
+        addDebugLog(`  ✓ Expose-Headers present: ${exposeHeaders}`, 'success');
+        addDebugLog(`  ✓ Headers enumerable: ${headerCount} headers`, 'success');
+      } else {
+        layer7Results.allPassed = false;
+        addDebugLog(`[L7.1] FAIL - CORS fix verification failed`, 'error');
+        addDebugLog(`  Status check: ${statusCheck}`, statusCheck ? 'success' : 'error');
+        addDebugLog(`  Origin check: ${originCheck}`, originCheck ? 'success' : 'error');
+        addDebugLog(`  Expose check: ${exposeCheck}`, exposeCheck ? 'success' : 'error');
+        addDebugLog(`  Enumeration check: ${enumerationCheck}`, enumerationCheck ? 'success' : 'error');
+      }
+    } catch (error) {
+      layer7Results.tests.push({
+        id: 'L7.1',
+        name: 'Validate CORS Fix',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer7Results.allPassed = false;
+      addDebugLog(`[L7.1] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 7.2: Test Error Message Clarity
+    addDebugLog('[L7.2] Testing error message clarity...', 'info');
+    try {
+      const errorStart = performance.now();
+      const errorTests = [];
+
+      // Error test 1: Non-existent secret
+      try {
+        const response1 = await fetch('https://cloudprototype.org/api/sdk/proxy', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Origin': origin
+          },
+          body: JSON.stringify({
+            keyName: 'nonexistent-secret-xyz-12345',
+            endpoint: '/test',
+            method: 'GET'
+          })
+        });
+
+        if (!response1.ok) {
+          const errorData = await response1.json();
+          const isClear = errorData.error &&
+                         (errorData.error.includes('not found') ||
+                          errorData.error.includes('404') ||
+                          errorData.error.includes('nonexistent'));
+          errorTests.push({
+            test: 'Non-existent secret',
+            status: response1.status,
+            error: errorData.error,
+            clear: isClear
+          });
+        } else {
+          errorTests.push({
+            test: 'Non-existent secret',
+            status: response1.status,
+            error: 'Expected error but got success',
+            clear: false
+          });
+        }
+      } catch (e) {
+        errorTests.push({
+          test: 'Non-existent secret',
+          status: 'exception',
+          error: e.message,
+          clear: e.message.includes('not found') || e.message.includes('404')
+        });
+      }
+
+      const errorTime = performance.now() - errorStart;
+      const allClear = errorTests.every(t => t.clear);
+
+      layer7Results.tests.push({
+        id: 'L7.2',
+        name: 'Error Message Clarity',
+        status: allClear ? 'PASS' : 'WARN',
+        duration: errorTime,
+        details: {
+          errorTests: errorTests,
+          time: errorTime
+        }
+      });
+
+      if (allClear) {
+        addDebugLog(`[L7.2] PASS - Error messages are clear and actionable (${errorTime.toFixed(2)}ms)`, 'success');
+        errorTests.forEach(t => {
+          addDebugLog(`  ${t.test}: "${t.error}"`, 'success');
+        });
+      } else {
+        addDebugLog(`[L7.2] WARN - Some error messages could be clearer`, 'warning');
+        errorTests.forEach(t => {
+          addDebugLog(`  ${t.test}: "${t.error}" (clear: ${t.clear})`, t.clear ? 'success' : 'warning');
+        });
+      }
+    } catch (error) {
+      layer7Results.tests.push({
+        id: 'L7.2',
+        name: 'Error Message Clarity',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer7Results.allPassed = false;
+      addDebugLog(`[L7.2] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 7.3: Test Secret Name Fix Validation
+    addDebugLog('[L7.3] Testing secret name fix validation...', 'info');
+    try {
+      const fixStart = performance.now();
+
+      // Check if lichess secret is now accessible
+      const diagnosticResponse = await fetch('https://cloudprototype.org/api/projects/VtI8BSvhxAwNIIDR/secrets/diagnostic?keyName=lichess', {
+        method: 'GET',
+        headers: { 'Origin': origin }
+      });
+      const fixTime = performance.now() - fixStart;
+
+      if (diagnosticResponse.ok) {
+        const diagnostic = await diagnosticResponse.json();
+
+        const secretExists = diagnostic.secrets?.key_exists === true;
+        const noIssues = diagnostic.issues_found?.length === 0;
+        const hasConfig = !!diagnostic.secrets?.key_config;
+
+        const fixValidated = secretExists && hasConfig;
+
+        layer7Results.tests.push({
+          id: 'L7.3',
+          name: 'Secret Name Fix Validation',
+          status: fixValidated ? 'PASS' : 'WARN',
+          duration: fixTime,
+          details: {
+            secretExists: secretExists,
+            hasConfig: hasConfig,
+            noIssues: noIssues,
+            secretName: diagnostic.secrets?.requested_key,
+            allNames: diagnostic.secrets?.all_names,
+            time: fixTime
+          }
+        });
+
+        if (fixValidated) {
+          addDebugLog(`[L7.3] PASS - Secret name fix validated (${fixTime.toFixed(2)}ms)`, 'success');
+          addDebugLog(`  Secret "lichess" is accessible`, 'success');
+          if (noIssues) {
+            addDebugLog(`  No configuration issues found`, 'success');
+          }
+        } else {
+          addDebugLog(`[L7.3] WARN - Secret name issue may still exist`, 'warning');
+          addDebugLog(`  Secret exists: ${secretExists}`, secretExists ? 'success' : 'warning');
+          addDebugLog(`  Has config: ${hasConfig}`, hasConfig ? 'success' : 'warning');
+          if (diagnostic.issues_found && diagnostic.issues_found.length > 0) {
+            addDebugLog(`  Issues: ${diagnostic.issues_found.join(', ')}`, 'warning');
+          }
+          if (diagnostic.secrets?.all_names) {
+            addDebugLog(`  Available secrets: ${diagnostic.secrets.all_names.join(', ')}`, 'info');
+          }
+        }
+      } else {
+        throw new Error(`Diagnostic endpoint returned ${diagnosticResponse.status}`);
+      }
+    } catch (error) {
+      layer7Results.tests.push({
+        id: 'L7.3',
+        name: 'Secret Name Fix Validation',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer7Results.allPassed = false;
+      addDebugLog(`[L7.3] FAIL - ${error.message}`, 'error');
+    }
+
+    // Test 7.4: End-to-End Lichess Integration Test
+    addDebugLog('[L7.4] Testing end-to-end Lichess integration...', 'info');
+    try {
+      const integrationStart = performance.now();
+
+      // Test Lichess API call through SDK
+      if (typeof sdk === 'undefined' || !sdk) {
+        throw new Error('SDK not initialized');
+      }
+
+      const testEndpoint = '/api/user/carsontkempf';
+
+      const response = await sdk.call('lichess', testEndpoint, {
+        method: 'GET'
+      });
+
+      const integrationTime = performance.now() - integrationStart;
+
+      const success = response && response.data && (response.data.username || response.data.id);
+
+      layer7Results.tests.push({
+        id: 'L7.4',
+        name: 'End-to-End Lichess Integration',
+        status: success ? 'PASS' : 'FAIL',
+        duration: integrationTime,
+        details: {
+          endpoint: testEndpoint,
+          hasData: !!response.data,
+          username: response.data?.username || response.data?.id,
+          time: integrationTime
+        }
+      });
+
+      if (success) {
+        addDebugLog(`[L7.4] PASS - Lichess API integration working (${integrationTime.toFixed(2)}ms)`, 'success');
+        addDebugLog(`  User: ${response.data.username || response.data.id}`, 'success');
+      } else {
+        layer7Results.allPassed = false;
+        addDebugLog(`[L7.4] FAIL - Lichess API call returned invalid response`, 'error');
+      }
+    } catch (error) {
+      layer7Results.tests.push({
+        id: 'L7.4',
+        name: 'End-to-End Lichess Integration',
+        status: 'FAIL',
+        error: error.message
+      });
+      layer7Results.allPassed = false;
+
+      // Differentiate error types
+      if (error.message.includes('404') || error.message.includes('not found')) {
+        addDebugLog(`[L7.4] FAIL - Lichess secret not found (expected if not configured yet)`, 'warning');
+      } else if (error.message.includes('403')) {
+        addDebugLog(`[L7.4] FAIL - Authentication failed (check origin configuration)`, 'error');
+      } else {
+        addDebugLog(`[L7.4] FAIL - ${error.message}`, 'error');
+      }
+    }
+
+    addDebugLog(`=== LAYER 7 COMPLETE: ${layer7Results.allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'} ===`,
+                layer7Results.allPassed ? 'success' : 'error');
+
+    return layer7Results;
+  }
+
   // Master test runner
   async function runSystematicTests() {
     addDebugLog('='.repeat(60), 'info');
@@ -2578,6 +3161,14 @@
 
       // Layer 5: End-to-End Integration
       systematicTestState.results.layer5 = await runLayer5IntegrationTests();
+      addDebugLog('', 'info');
+
+      // Layer 6: Secret Discovery
+      systematicTestState.results.layer6 = await runLayer6SecretDiscoveryTests();
+      addDebugLog('', 'info');
+
+      // Layer 7: Fix Validation
+      systematicTestState.results.layer7 = await runLayer7FixValidationTests();
       addDebugLog('', 'info');
 
       // Summary
