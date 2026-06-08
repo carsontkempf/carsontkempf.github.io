@@ -843,9 +843,7 @@
     addDebugLog('[L1.1] Testing DNS resolution for cloudprototype.org...', 'info');
     try {
       const dnsStart = performance.now();
-      const response = await fetch('https://cloudprototype.org/api/version', {
-        cache: 'no-store'
-      });
+      const response = await fetch('https://cloudprototype.org/api/version');
       const dnsTime = performance.now() - dnsStart;
 
       layer1Results.tests.push({
@@ -873,9 +871,7 @@
     addDebugLog('[L1.2] Testing SSL certificate...', 'info');
     try {
       const sslStart = performance.now();
-      const response = await fetch('https://cloudprototype.org/api/version', {
-        cache: 'no-store'
-      });
+      const response = await fetch('https://cloudprototype.org/api/version');
       const sslTime = performance.now() - sslStart;
 
       layer1Results.tests.push({
