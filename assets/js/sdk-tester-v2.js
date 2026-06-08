@@ -483,6 +483,14 @@
     }
   }
 
+  // Reset debug log silently (used on page load)
+  function resetDebugLog() {
+    const debugLog = document.getElementById('debug-log');
+    if (debugLog) {
+      debugLog.innerHTML = '';
+    }
+  }
+
   // Clear debug log
   function clearDebugLog() {
     const debugLog = document.getElementById('debug-log');
@@ -3264,8 +3272,42 @@
     resultContainer.style.display = 'block';
   }
 
+  // Keyboard chord: Ctrl+C then K → run extended tests + copy log
+  let _chordActive = false;
+  let _chordTimer = null;
+
+  document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'c') {
+      _chordActive = true;
+      clearTimeout(_chordTimer);
+      _chordTimer = setTimeout(() => { _chordActive = false; }, 2000);
+      return;
+    }
+    if (_chordActive && !e.ctrlKey && e.key === 'k') {
+      e.preventDefault();
+      _chordActive = false;
+      clearTimeout(_chordTimer);
+      addDebugLog('Ctrl+C+K: running extended tests, log will be copied on completion...', 'info');
+      runSystematicTests().then(() => {
+        const debugLog = document.getElementById('debug-log');
+        if (!debugLog) return;
+        const text = Array.from(debugLog.querySelectorAll('.debug-entry')).map(entry => {
+          const timestamp = entry.querySelector('.debug-timestamp')?.textContent || '--';
+          const message = entry.querySelector('.debug-message')?.textContent || '';
+          return `[${timestamp}] ${message}`;
+        }).join('\n');
+        navigator.clipboard.writeText(text).then(() => {
+          addDebugLog('Log copied to clipboard (Ctrl+C+K)', 'success');
+        }).catch(err => {
+          addDebugLog(`Failed to copy log: ${err.message}`, 'error');
+        });
+      });
+    }
+  });
+
   // Initialize when DOM is ready
   document.addEventListener('DOMContentLoaded', async function() {
+    resetDebugLog();
     addDebugLog('Page loaded, initializing SDK tester v2...');
 
     // Scenario selector
