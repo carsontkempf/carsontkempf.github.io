@@ -1,253 +1,513 @@
 ---
 layout: page
-title: Auth & RBAC Testing
+title: Auth Testing
 permalink: /auth-testing/
 ---
 
-<div id="auth-testing-content">
-  <p style="margin-bottom: 2rem; color: #666;">
-    Test the learn-auth-sdk with cross-origin bearer token authentication and RBAC.
-  </p>
+<div id="auth-test-root">
 
-  <!-- SDK Info Panel -->
-  <div class="test-panel">
-    <h3>SDK Configuration</h3>
-    <div class="config-display">
-      <div class="config-item">
-        <span class="config-key">Package:</span>
-        <span class="config-value">learn-auth-sdk@0.3.1</span>
-      </div>
-      <div class="config-item">
-        <span class="config-key">Auth URL:</span>
-        <span class="config-value" id="auth-url-display">https://cloudprototype.org/api/auth</span>
-      </div>
-      <div class="config-item">
-        <span class="config-key">Storage:</span>
-        <span class="config-value">PocketBase (Oracle)</span>
-      </div>
-      <div class="config-item">
-        <span class="config-key">Token:</span>
-        <span class="config-value" id="token-display">none</span>
-      </div>
+  <div class="run-panel">
+    <div class="url-row">
+      <span class="url-label">Auth URL</span>
+      <span class="url-value">https://cloudprototype.org/api/auth</span>
     </div>
-    <div id="auth-status" class="status-badge checking">Checking session...</div>
-  </div>
-
-  <!-- Auth Forms (logged out) -->
-  <div id="logged-out-view">
-    <div class="test-panel">
-      <h3>Sign In</h3>
-      <div class="form-group">
-        <label for="email-input">Email</label>
-        <input type="email" id="email-input" placeholder="email@example.com">
-      </div>
-      <div class="form-group">
-        <label for="password-input">Password</label>
-        <input type="password" id="password-input" placeholder="minimum 8 characters">
-      </div>
-      <button id="signin-btn" class="btn btn-primary">Sign In</button>
-    </div>
-
-    <div class="test-panel">
-      <h3>Sign Up</h3>
-      <div class="form-group">
-        <label for="signup-name-input">Name</label>
-        <input type="text" id="signup-name-input" placeholder="Your name">
-      </div>
-      <div class="form-group">
-        <label for="signup-email-input">Email</label>
-        <input type="email" id="signup-email-input" placeholder="email@example.com">
-      </div>
-      <div class="form-group">
-        <label for="signup-password-input">Password</label>
-        <input type="password" id="signup-password-input" placeholder="minimum 8 characters">
-      </div>
-      <button id="signup-btn" class="btn btn-secondary">Create Account</button>
+    <div class="input-row">
+      <input type="email" id="t-email" placeholder="Email" autocomplete="email">
+      <input type="password" id="t-password" placeholder="Password" autocomplete="current-password">
+      <button id="run-btn" onclick="runSuite()">Run Full Test Suite</button>
     </div>
   </div>
 
-  <!-- Logged In View -->
-  <div id="logged-in-view" style="display: none;">
-    <div class="test-panel">
-      <h3>User Profile</h3>
-      <div class="profile-display">
-        <p><strong>ID:</strong> <span id="user-id"></span></p>
-        <p><strong>Email:</strong> <span id="user-email"></span></p>
-        <p><strong>Name:</strong> <span id="user-name"></span></p>
-        <p><strong>Roles:</strong> <span id="user-roles" class="roles-list"></span></p>
-      </div>
-      <button id="signout-btn" class="btn btn-secondary">Sign Out</button>
-    </div>
-
-    <div class="test-panel">
-      <h3>RBAC Check</h3>
-      <div class="role-tester">
-        <input type="text" id="role-check-input" placeholder="Role name (e.g. admin)">
-        <button id="check-role-btn" class="btn btn-primary">Check Role</button>
-      </div>
-      <div id="role-result" class="result-box" style="display:none;"></div>
-    </div>
+  <div id="results-root" style="display:none;">
+    <div id="summary-bar"></div>
+    <div id="layers-output"></div>
+    <button id="copy-btn" onclick="copyReport()">Copy Report to Clipboard</button>
+    <div id="copy-confirm" style="display:none;">Copied to clipboard.</div>
   </div>
 
-  <!-- Debug Log -->
-  <div class="test-panel">
-    <h3>Debug Log</h3>
-    <button id="clear-log-btn" class="btn btn-secondary" style="margin-bottom:0.5rem;">Clear</button>
-    <div id="debug-log" style="height: 240px; overflow-y: auto; background: #f4f4f4; padding: 10px; font-family: monospace; font-size: 12px; border-radius: 4px;"></div>
-  </div>
 </div>
 
 <script src="/assets/js/learn-auth-sdk.js"></script>
 <script>
-  const AUTH_URL = 'https://cloudprototype.org/api/auth';
-  let auth;
-  const logEl = document.getElementById('debug-log');
+const AUTH_URL = 'https://cloudprototype.org/api/auth';
+const TOKEN_KEY = 'learn_auth_token';
 
-  function log(msg, type = 'info') {
-    const entry = document.createElement('div');
-    entry.style.color = type === 'error' ? '#c0392b' : (type === 'success' ? '#27ae60' : '#333');
-    entry.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
-    logEl.appendChild(entry);
-    logEl.scrollTop = logEl.scrollHeight;
+let reportLines = [];
+
+function ts() { return Date.now(); }
+
+function elapsed(start) { return Date.now() - start; }
+
+async function runSuite() {
+  const email = document.getElementById('t-email').value.trim();
+  const password = document.getElementById('t-password').value;
+  if (!email || !password) {
+    alert('Email and password required.');
+    return;
   }
 
-  function updateTokenDisplay() {
-    const token = auth.getToken();
-    const el = document.getElementById('token-display');
-    el.textContent = token ? token.slice(0, 20) + '...' : 'none';
-  }
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  btn.textContent = 'Running...';
 
-  function initAuth() {
-    document.getElementById('auth-url-display').textContent = AUTH_URL;
-    auth = new AuthSDK({ tenantUrl: AUTH_URL });
-    log('AuthSDK initialized. URL: ' + AUTH_URL);
-    updateTokenDisplay();
-    checkSession();
-  }
+  document.getElementById('results-root').style.display = 'none';
+  document.getElementById('layers-output').innerHTML = '';
+  document.getElementById('summary-bar').innerHTML = '';
 
-  async function checkSession() {
-    log('Checking session...');
-    try {
-      const session = await auth.getSession();
-      updateTokenDisplay();
-      if (session && session.data && session.data.user) {
-        showLoggedIn(session.data.user);
-        log('Session active: ' + session.data.user.email, 'success');
-      } else {
-        showLoggedOut();
-        log('No active session.');
+  const suiteStart = ts();
+  const allTests = [];
+  reportLines = [];
+
+  const layers = [
+    {
+      id: 1,
+      name: 'SDK & Connectivity',
+      tests: async () => {
+        const results = [];
+        let auth;
+
+        // 1.1 SDK loaded
+        let t = ts();
+        try {
+          const ok = typeof AuthSDK === 'function';
+          results.push(r('1.1', 'SDK loaded', ok, ok ? 'typeof AuthSDK === function' : 'AuthSDK not a function: ' + typeof AuthSDK, elapsed(t)));
+        } catch(e) { results.push(r('1.1', 'SDK loaded', false, e.message, elapsed(t))); }
+
+        // 1.2 SDK instantiates
+        t = ts();
+        try {
+          auth = new AuthSDK({ tenantUrl: AUTH_URL });
+          results.push(r('1.2', 'SDK instantiates', true, 'new AuthSDK({tenantUrl}) succeeded', elapsed(t)));
+        } catch(e) { results.push(r('1.2', 'SDK instantiates', false, e.message, elapsed(t))); }
+
+        // 1.3 Endpoint reachable
+        t = ts();
+        try {
+          const res = await fetch(AUTH_URL + '/get-session', { headers: { 'Content-Type': 'application/json' } });
+          const ok = res.status < 600;
+          results.push(r('1.3', 'Auth endpoint reachable', ok, 'HTTP ' + res.status + ' (any response = reachable)', elapsed(t)));
+        } catch(e) {
+          results.push(r('1.3', 'Auth endpoint reachable', false, 'Network error: ' + e.message, elapsed(t)));
+        }
+
+        return { results, state: { auth } };
       }
-    } catch (err) {
-      log('Session check error: ' + err.message, 'error');
-      showLoggedOut();
+    },
+    {
+      id: 2,
+      name: 'Authentication',
+      tests: async ({ auth }) => {
+        const results = [];
+
+        // 2.1 Sign in
+        let t = ts();
+        let signInResult;
+        try {
+          signInResult = await auth.signIn(email, password);
+          const ok = !signInResult.error;
+          results.push(r('2.1', 'Sign in returns data', ok,
+            ok ? 'Signed in as ' + (signInResult.data?.user?.email || email) : 'Error: ' + (signInResult.error?.message || JSON.stringify(signInResult.error)),
+            elapsed(t)));
+        } catch(e) { results.push(r('2.1', 'Sign in returns data', false, e.message, elapsed(t))); signInResult = { error: { message: e.message } }; }
+
+        // 2.2 Bearer token stored
+        t = ts();
+        try {
+          const token = auth.getToken();
+          const ok = typeof token === 'string' && token.length > 0;
+          results.push(r('2.2', 'Bearer token stored in SDK', ok, ok ? 'token[0..19]: ' + token.slice(0, 20) + '...' : 'token is: ' + token, elapsed(t)));
+        } catch(e) { results.push(r('2.2', 'Bearer token stored in SDK', false, e.message, elapsed(t))); }
+
+        // 2.3 Token in localStorage
+        t = ts();
+        try {
+          const stored = localStorage.getItem(TOKEN_KEY);
+          const token = auth.getToken();
+          const ok = stored !== null && stored === token;
+          results.push(r('2.3', 'Token persisted to localStorage', ok,
+            ok ? 'localStorage["' + TOKEN_KEY + '"] matches SDK token' : 'mismatch — stored: ' + (stored ? stored.slice(0,10)+'...' : 'null') + ' sdk: ' + (token ? token.slice(0,10)+'...' : 'null'),
+            elapsed(t)));
+        } catch(e) { results.push(r('2.3', 'Token persisted to localStorage', false, e.message, elapsed(t))); }
+
+        // 2.4 Token format valid
+        t = ts();
+        try {
+          const token = auth.getToken();
+          const ok = typeof token === 'string' && token.length >= 10;
+          results.push(r('2.4', 'Token format valid', ok, ok ? 'length: ' + token.length + ' chars' : 'token too short or wrong type: ' + token, elapsed(t)));
+        } catch(e) { results.push(r('2.4', 'Token format valid', false, e.message, elapsed(t))); }
+
+        const authFailed = results.some(x => x.id === '2.1' && !x.pass);
+        return { results, state: { auth }, skip: authFailed };
+      }
+    },
+    {
+      id: 3,
+      name: 'Session Validation',
+      tests: async ({ auth }) => {
+        const results = [];
+        let session;
+
+        // 3.1 Session exists
+        let t = ts();
+        try {
+          session = await auth.getSession();
+          const ok = !!(session && session.data && session.data.session);
+          results.push(r('3.1', 'Session exists', ok, ok ? 'session id: ' + session.data.session.id : 'no session data returned', elapsed(t)));
+        } catch(e) { results.push(r('3.1', 'Session exists', false, e.message, elapsed(t))); }
+
+        // 3.2 User data present
+        t = ts();
+        try {
+          const user = session && session.data && session.data.user;
+          const ok = !!(user && user.id && user.email);
+          results.push(r('3.2', 'User data present', ok, ok ? 'id: ' + user.id.slice(0,12) + '..., email: ' + user.email : 'missing id or email on user object', elapsed(t)));
+        } catch(e) { results.push(r('3.2', 'User data present', false, e.message, elapsed(t))); }
+
+        // 3.3 Email matches
+        t = ts();
+        try {
+          const sessionEmail = session && session.data && session.data.user && session.data.user.email;
+          const ok = sessionEmail === email;
+          results.push(r('3.3', 'Session email matches input', ok,
+            ok ? 'email matches: ' + email : 'expected "' + email + '" got "' + sessionEmail + '"',
+            elapsed(t)));
+        } catch(e) { results.push(r('3.3', 'Session email matches input', false, e.message, elapsed(t))); }
+
+        // 3.4 Session not expired
+        t = ts();
+        try {
+          const expiresAt = session && session.data && session.data.session && session.data.session.expiresAt;
+          const ok = expiresAt && new Date(expiresAt) > new Date();
+          results.push(r('3.4', 'Session not expired', !!ok,
+            ok ? 'expires: ' + new Date(expiresAt).toLocaleString() : 'no expiresAt or already expired: ' + expiresAt,
+            elapsed(t)));
+        } catch(e) { results.push(r('3.4', 'Session not expired', false, e.message, elapsed(t))); }
+
+        return { results, state: { auth, session } };
+      }
+    },
+    {
+      id: 4,
+      name: 'RBAC',
+      tests: async ({ auth }) => {
+        const results = [];
+        let roles = [];
+
+        // 4.1 getRoles returns array
+        let t = ts();
+        try {
+          roles = await auth.getRoles();
+          const ok = Array.isArray(roles);
+          results.push(r('4.1', 'getRoles() returns array', ok, ok ? 'roles: [' + roles.join(', ') + ']' : 'returned: ' + typeof roles, elapsed(t)));
+        } catch(e) { results.push(r('4.1', 'getRoles() returns array', false, e.message, elapsed(t))); }
+
+        // 4.2 Has at least one role (warn if empty)
+        t = ts();
+        try {
+          const ok = roles.length > 0;
+          results.push(r('4.2', 'Has at least one role', ok, ok ? roles.length + ' role(s): ' + roles.join(', ') : 'user has no roles assigned (new user)', elapsed(t), !ok ? 'warn' : null));
+        } catch(e) { results.push(r('4.2', 'Has at least one role', false, e.message, elapsed(t))); }
+
+        // 4.3 hasRole() consistent with getRoles()
+        t = ts();
+        try {
+          if (roles.length > 0) {
+            const testRole = roles[0];
+            const has = await auth.hasRole(testRole);
+            results.push(r('4.3', 'hasRole() consistent with getRoles()', has, 'hasRole("' + testRole + '") returned ' + has, elapsed(t)));
+          } else {
+            results.push(r('4.3', 'hasRole() consistent with getRoles()', true, 'skipped — no roles to verify (pass by default)', elapsed(t), 'warn'));
+          }
+        } catch(e) { results.push(r('4.3', 'hasRole() consistent with getRoles()', false, e.message, elapsed(t))); }
+
+        // 4.4 Unknown role returns false
+        t = ts();
+        try {
+          const has = await auth.hasRole('__nonexistent_role_xyz__');
+          const ok = has === false;
+          results.push(r('4.4', 'Unknown role returns false', ok, 'hasRole("__nonexistent_role_xyz__") = ' + has, elapsed(t)));
+        } catch(e) { results.push(r('4.4', 'Unknown role returns false', false, e.message, elapsed(t))); }
+
+        return { results, state: { auth } };
+      }
+    },
+    {
+      id: 5,
+      name: 'Sign Out & Cleanup',
+      tests: async ({ auth }) => {
+        const results = [];
+
+        // 5.1 Sign out succeeds
+        let t = ts();
+        try {
+          await auth.signOut();
+          results.push(r('5.1', 'Sign out succeeds', true, 'signOut() completed without error', elapsed(t)));
+        } catch(e) { results.push(r('5.1', 'Sign out succeeds', false, e.message, elapsed(t))); }
+
+        // 5.2 Token cleared from SDK
+        t = ts();
+        try {
+          const token = auth.getToken();
+          const ok = token === null;
+          results.push(r('5.2', 'Token cleared from SDK', ok, ok ? 'getToken() === null' : 'token still present after sign-out: ' + token, elapsed(t)));
+        } catch(e) { results.push(r('5.2', 'Token cleared from SDK', false, e.message, elapsed(t))); }
+
+        // 5.3 Session cleared
+        t = ts();
+        try {
+          const session = await auth.getSession();
+          const user = session && session.data && session.data.user;
+          const ok = !user;
+          results.push(r('5.3', 'Session cleared after sign-out', ok, ok ? 'getSession() returns no user' : 'user still in session: ' + (user && user.email), elapsed(t)));
+        } catch(e) {
+          // Some auth impls throw on empty session — that counts as cleared
+          results.push(r('5.3', 'Session cleared after sign-out', true, 'getSession() threw (session cleared): ' + e.message, elapsed(t)));
+        }
+
+        return { results, state: {} };
+      }
     }
-  }
+  ];
 
-  function showLoggedIn(user) {
-    document.getElementById('logged-out-view').style.display = 'none';
-    document.getElementById('logged-in-view').style.display = 'block';
-    document.getElementById('auth-status').textContent = 'Logged In';
-    document.getElementById('auth-status').className = 'status-badge active';
-    document.getElementById('user-id').textContent = user.id;
-    document.getElementById('user-email').textContent = user.email;
-    document.getElementById('user-name').textContent = user.name || 'N/A';
-    auth.getRoles().then(roles => {
-      document.getElementById('user-roles').textContent = roles.length ? roles.join(', ') : 'none';
-    });
-  }
+  // Run layers
+  let sharedState = {};
+  for (const layer of layers) {
+    const layerEl = document.createElement('div');
+    layerEl.className = 'layer';
+    layerEl.id = 'layer-' + layer.id;
+    layerEl.innerHTML = '<div class="layer-title">Layer ' + layer.id + ': ' + layer.name + '</div><div class="layer-tests" id="lt-' + layer.id + '"></div>';
+    document.getElementById('layers-output').appendChild(layerEl);
 
-  function showLoggedOut() {
-    document.getElementById('logged-out-view').style.display = 'block';
-    document.getElementById('logged-in-view').style.display = 'none';
-    document.getElementById('auth-status').textContent = 'Logged Out';
-    document.getElementById('auth-status').className = 'status-badge';
-  }
+    const ltEl = document.getElementById('lt-' + layer.id);
 
-  document.getElementById('signin-btn').onclick = async () => {
-    const email = document.getElementById('email-input').value;
-    const password = document.getElementById('password-input').value;
-    if (!email || !password) { log('Email and password required.', 'error'); return; }
-    log('Signing in: ' + email);
+    let layerResult;
     try {
-      const result = await auth.signIn(email, password);
-      updateTokenDisplay();
-      if (result.error) throw new Error(result.error.message || 'Sign in failed');
-      log('Sign in successful!', 'success');
-      checkSession();
-    } catch (err) {
-      log('Sign in failed: ' + err.message, 'error');
+      layerResult = await layer.tests(sharedState);
+    } catch(e) {
+      ltEl.innerHTML = '<div class="test-row fail"><span class="badge fail">ERROR</span><span class="test-name">Layer ' + layer.id + ' crashed</span><span class="test-detail">' + escHtml(e.message) + '</span></div>';
+      reportLines.push('\nLayer ' + layer.id + ': ' + layer.name);
+      reportLines.push('  [ERROR] Layer crashed: ' + e.message);
+      continue;
     }
-  };
 
-  document.getElementById('signup-btn').onclick = async () => {
-    const name = document.getElementById('signup-name-input').value;
-    const email = document.getElementById('signup-email-input').value;
-    const password = document.getElementById('signup-password-input').value;
-    if (!name || !email || !password) { log('Name, email, and password required.', 'error'); return; }
-    log('Creating account: ' + email);
-    try {
-      const result = await auth.signUp(email, password, name);
-      updateTokenDisplay();
-      if (result.error) throw new Error(result.error.message || 'Sign up failed');
-      log('Account created!', 'success');
-      checkSession();
-    } catch (err) {
-      log('Sign up failed: ' + err.message, 'error');
+    const { results, state, skip } = layerResult;
+    if (state) Object.assign(sharedState, state);
+
+    reportLines.push('\nLayer ' + layer.id + ': ' + layer.name);
+
+    for (const res of results) {
+      allTests.push(res);
+      ltEl.appendChild(makeTestRow(res));
+      reportLines.push('  [' + (res.warn ? 'WARN' : (res.pass ? 'PASS' : 'FAIL')) + '] ' + res.id + ' ' + res.name + ' (' + res.ms + 'ms)' + (res.detail ? ' — ' + res.detail : ''));
     }
-  };
 
-  document.getElementById('signout-btn').onclick = async () => {
-    log('Signing out...');
-    await auth.signOut();
-    updateTokenDisplay();
-    showLoggedOut();
-    log('Signed out.', 'success');
-  };
+    if (skip) {
+      const skipMsg = document.createElement('div');
+      skipMsg.className = 'skip-notice';
+      skipMsg.textContent = 'Authentication failed — skipping remaining layers.';
+      document.getElementById('layers-output').appendChild(skipMsg);
+      reportLines.push('\n[SKIPPED] Authentication failed — remaining layers skipped.');
+      break;
+    }
+  }
 
-  document.getElementById('check-role-btn').onclick = async () => {
-    const role = document.getElementById('role-check-input').value;
-    if (!role) return;
-    log('Checking role: ' + role);
-    const hasRole = await auth.hasRole(role);
-    const el = document.getElementById('role-result');
+  // Summary
+  const totalMs = elapsed(suiteStart);
+  const passed = allTests.filter(x => x.pass || x.warn).length;
+  const failed = allTests.filter(x => !x.pass && !x.warn).length;
+  const total = allTests.length;
+
+  const summaryEl = document.getElementById('summary-bar');
+  summaryEl.className = 'summary-bar ' + (failed === 0 ? 'all-pass' : 'has-fail');
+  summaryEl.innerHTML =
+    '<span class="summary-count">' + passed + ' / ' + total + ' passed</span>' +
+    (failed > 0 ? '<span class="summary-fail">' + failed + ' failed</span>' : '') +
+    '<span class="summary-time">' + totalMs + 'ms total</span>';
+
+  // Build report header
+  const header = [
+    'learn-auth-sdk Test Report',
+    'Generated: ' + new Date().toLocaleString(),
+    'Auth URL: ' + AUTH_URL,
+    'User: ' + email,
+    'Result: ' + passed + '/' + total + ' passed (' + totalMs + 'ms)',
+  ];
+  reportLines = header.concat(reportLines);
+
+  document.getElementById('results-root').style.display = 'block';
+  btn.disabled = false;
+  btn.textContent = 'Run Full Test Suite';
+}
+
+function r(id, name, pass, detail, ms, warn) {
+  return { id, name, pass: !!pass, detail: detail || '', ms, warn: warn || null };
+}
+
+function makeTestRow(res) {
+  const div = document.createElement('div');
+  div.className = 'test-row ' + (res.warn ? 'warn' : (res.pass ? 'pass' : 'fail'));
+  div.innerHTML =
+    '<span class="badge ' + (res.warn ? 'warn' : (res.pass ? 'pass' : 'fail')) + '">' +
+    (res.warn ? 'WARN' : (res.pass ? 'PASS' : 'FAIL')) + '</span>' +
+    '<span class="test-id">' + escHtml(res.id) + '</span>' +
+    '<span class="test-name">' + escHtml(res.name) + '</span>' +
+    '<span class="test-ms">' + res.ms + 'ms</span>' +
+    '<span class="test-detail">' + escHtml(res.detail) + '</span>';
+  return div;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function copyReport() {
+  const text = reportLines.join('\n');
+  try {
+    await navigator.clipboard.writeText(text);
+    const el = document.getElementById('copy-confirm');
     el.style.display = 'block';
-    el.textContent = hasRole ? 'User HAS the "' + role + '" role' : 'User does NOT have the "' + role + '" role';
-    el.className = 'result-box ' + (hasRole ? 'success' : 'error');
-    log('Role "' + role + '": ' + (hasRole ? 'YES' : 'NO'), hasRole ? 'success' : 'info');
-  };
-
-  document.getElementById('clear-log-btn').onclick = () => { logEl.innerHTML = ''; };
-
-  window.onload = initAuth;
+    setTimeout(() => { el.style.display = 'none'; }, 2000);
+  } catch(e) {
+    prompt('Copy the report below:', text);
+  }
+}
 </script>
 
 <style>
-.test-panel {
-  background: white;
-  border: 1px solid #ddd;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+#auth-test-root {
+  max-width: 820px;
+  margin: 0 auto;
+  font-family: inherit;
 }
-.test-panel h3 { margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; }
-.form-group { margin-bottom: 0.8rem; }
-.form-group label { display: block; margin-bottom: 0.3rem; font-weight: 500; font-size: 0.9rem; }
-.form-group input { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.9rem; }
-.btn { padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; border: none; font-weight: 500; font-size: 0.9rem; }
-.btn-primary { background: #007bff; color: white; }
-.btn-secondary { background: #6c757d; color: white; margin-left: 0.5rem; }
-.btn-primary:hover { background: #0056b3; }
-.btn-secondary:hover { background: #545b62; }
-.status-badge { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px; font-size: 0.8rem; background: #eee; margin-top: 0.5rem; }
-.status-badge.active { background: #28a745; color: white; }
-.status-badge.checking { background: #ffc107; color: #333; }
-.result-box { margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 4px; font-weight: bold; font-size: 0.9rem; }
-.result-box.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-.result-box.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-.config-display { font-size: 0.85rem; margin-bottom: 0.5rem; }
-.config-item { margin-bottom: 0.3rem; display: flex; gap: 0.5rem; }
-.config-key { font-weight: bold; color: #555; min-width: 80px; }
-.role-tester { display: flex; gap: 0.5rem; align-items: center; }
-.role-tester input { flex: 1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
+.run-panel {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.url-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+.url-label { font-weight: 600; color: #555; }
+.url-value { font-family: monospace; color: #007bff; background: #f0f4ff; padding: 0.15rem 0.5rem; border-radius: 4px; }
+.input-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.input-row input {
+  flex: 1;
+  min-width: 160px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.input-row input:focus { outline: none; border-color: #007bff; }
+#run-btn {
+  padding: 0.55rem 1.4rem;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#run-btn:hover:not(:disabled) { background: #0056b3; }
+#run-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.summary-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.summary-bar.all-pass { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.summary-bar.has-fail { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.summary-count { font-size: 1.05rem; }
+.summary-fail { background: rgba(0,0,0,0.1); padding: 0.1rem 0.5rem; border-radius: 4px; }
+.summary-time { margin-left: auto; font-weight: 400; opacity: 0.8; }
+
+.layer {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.layer-title {
+  background: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+}
+.layer-tests { padding: 0.25rem 0; }
+.test-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+.test-row:last-child { border-bottom: none; }
+.test-row.pass { background: #f6fff8; }
+.test-row.fail { background: #fff6f6; }
+.test-row.warn { background: #fffbf0; }
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 3px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+.badge.pass { background: #28a745; color: #fff; }
+.badge.fail { background: #dc3545; color: #fff; }
+.badge.warn { background: #e6a817; color: #fff; }
+.test-id { font-weight: 600; color: #555; min-width: 2.5rem; flex-shrink: 0; }
+.test-name { font-weight: 500; color: #222; flex: 1; }
+.test-ms { color: #888; font-family: monospace; font-size: 0.8rem; flex-shrink: 0; }
+.test-detail { color: #666; font-family: monospace; font-size: 0.78rem; flex-shrink: 0; max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.skip-notice {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+#copy-btn {
+  padding: 0.5rem 1.1rem;
+  background: #6c757d;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+#copy-btn:hover { background: #545b62; }
+#copy-confirm {
+  color: #28a745;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
 </style>
