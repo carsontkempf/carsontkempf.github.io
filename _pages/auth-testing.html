@@ -6,8 +6,7 @@ permalink: /auth-testing/
 
 <div id="auth-testing-content">
   <p style="margin-bottom: 2rem; color: #666;">
-    Test the learn-auth-sdk npm package with Role-Based Access Control (RBAC).
-    Data is stored in your tenant-isolated Cloudflare D1 database.
+    Test the learn-auth-sdk with cross-origin bearer token authentication and RBAC.
   </p>
 
   <!-- SDK Info Panel -->
@@ -16,32 +15,25 @@ permalink: /auth-testing/
     <div class="config-display">
       <div class="config-item">
         <span class="config-key">Package:</span>
-        <span class="config-value">learn-auth-sdk@0.1.0</span>
+        <span class="config-value">learn-auth-sdk@0.3.1</span>
       </div>
       <div class="config-item">
-        <span class="config-key">Tenant URL:</span>
-        <span class="config-value" id="tenant-url-display">https://[tenant].cloudprototype.org/api/auth</span>
+        <span class="config-key">Auth URL:</span>
+        <span class="config-value" id="auth-url-display">https://cloudprototype.org/api/auth</span>
       </div>
       <div class="config-item">
         <span class="config-key">Storage:</span>
-        <span class="config-value">Tenant-Isolated D1</span>
+        <span class="config-value">PocketBase (Oracle)</span>
+      </div>
+      <div class="config-item">
+        <span class="config-key">Token:</span>
+        <span class="config-value" id="token-display">none</span>
       </div>
     </div>
     <div id="auth-status" class="status-badge checking">Checking session...</div>
   </div>
 
-  <!-- Tenant Config Panel -->
-  <div class="test-panel">
-    <h3>Tenant Configuration</h3>
-    <div class="form-group">
-      <label for="tenant-id-input">Tenant ID / Subdomain</label>
-      <input type="text" id="tenant-id-input" placeholder="e.g. test-tenant" value="test-tenant">
-      <small>Requests will be routed to https://[tenant].cloudprototype.org</small>
-    </div>
-    <button id="update-tenant-btn" class="btn btn-secondary">Update Tenant</button>
-  </div>
-
-  <!-- Auth Forms -->
+  <!-- Auth Forms (logged out) -->
   <div id="logged-out-view">
     <div class="test-panel">
       <h3>Sign In</h3>
@@ -51,10 +43,26 @@ permalink: /auth-testing/
       </div>
       <div class="form-group">
         <label for="password-input">Password</label>
-        <input type="password" id="password-input" placeholder="********">
+        <input type="password" id="password-input" placeholder="minimum 8 characters">
       </div>
       <button id="signin-btn" class="btn btn-primary">Sign In</button>
-      <button id="signup-btn" class="btn btn-secondary">Sign Up (as new user)</button>
+    </div>
+
+    <div class="test-panel">
+      <h3>Sign Up</h3>
+      <div class="form-group">
+        <label for="signup-name-input">Name</label>
+        <input type="text" id="signup-name-input" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label for="signup-email-input">Email</label>
+        <input type="email" id="signup-email-input" placeholder="email@example.com">
+      </div>
+      <div class="form-group">
+        <label for="signup-password-input">Password</label>
+        <input type="password" id="signup-password-input" placeholder="minimum 8 characters">
+      </div>
+      <button id="signup-btn" class="btn btn-secondary">Create Account</button>
     </div>
   </div>
 
@@ -72,45 +80,48 @@ permalink: /auth-testing/
     </div>
 
     <div class="test-panel">
-      <h3>RBAC Verification</h3>
-      <p>Test if you have specific roles assigned in your D1 database.</p>
+      <h3>RBAC Check</h3>
       <div class="role-tester">
-        <input type="text" id="role-check-input" placeholder="Enter role name (e.g. admin)">
+        <input type="text" id="role-check-input" placeholder="Role name (e.g. admin)">
         <button id="check-role-btn" class="btn btn-primary">Check Role</button>
       </div>
-      <div id="role-result" class="result-box"></div>
+      <div id="role-result" class="result-box" style="display:none;"></div>
     </div>
   </div>
 
   <!-- Debug Log -->
   <div class="test-panel">
     <h3>Debug Log</h3>
-    <div id="debug-log" style="height: 200px; overflow-y: auto; background: #f4f4f4; padding: 10px; font-family: monospace; font-size: 12px; border-radius: 4px;">
-    </div>
+    <button id="clear-log-btn" class="btn btn-secondary" style="margin-bottom:0.5rem;">Clear</button>
+    <div id="debug-log" style="height: 240px; overflow-y: auto; background: #f4f4f4; padding: 10px; font-family: monospace; font-size: 12px; border-radius: 4px;"></div>
   </div>
 </div>
 
 <script src="/assets/js/learn-auth-sdk.js"></script>
 <script>
-  // Simple tester logic
+  const AUTH_URL = 'https://cloudprototype.org/api/auth';
   let auth;
   const logEl = document.getElementById('debug-log');
-  
+
   function log(msg, type = 'info') {
     const entry = document.createElement('div');
-    entry.style.color = type === 'error' ? 'red' : (type === 'success' ? 'green' : 'black');
-    entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    entry.style.color = type === 'error' ? '#c0392b' : (type === 'success' ? '#27ae60' : '#333');
+    entry.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
     logEl.appendChild(entry);
     logEl.scrollTop = logEl.scrollHeight;
   }
 
+  function updateTokenDisplay() {
+    const token = auth.getToken();
+    const el = document.getElementById('token-display');
+    el.textContent = token ? token.slice(0, 20) + '...' : 'none';
+  }
+
   function initAuth() {
-    const tenant = document.getElementById('tenant-id-input').value;
-    const tenantUrl = `https://${tenant}.cloudprototype.org/api/auth`;
-    document.getElementById('tenant-url-display').textContent = tenantUrl;
-    
-    auth = new AuthSDK({ tenantUrl });
-    log(`AuthSDK initialized for tenant: ${tenant}`);
+    document.getElementById('auth-url-display').textContent = AUTH_URL;
+    auth = new AuthSDK({ tenantUrl: AUTH_URL });
+    log('AuthSDK initialized. URL: ' + AUTH_URL);
+    updateTokenDisplay();
     checkSession();
   }
 
@@ -118,15 +129,16 @@ permalink: /auth-testing/
     log('Checking session...');
     try {
       const session = await auth.getSession();
-      if (session?.data) {
+      updateTokenDisplay();
+      if (session && session.data && session.data.user) {
         showLoggedIn(session.data.user);
-        log('Session found for user: ' + session.data.user.email, 'success');
+        log('Session active: ' + session.data.user.email, 'success');
       } else {
         showLoggedOut();
         log('No active session.');
       }
     } catch (err) {
-      log('Error checking session: ' + err.message, 'error');
+      log('Session check error: ' + err.message, 'error');
       showLoggedOut();
     }
   }
@@ -136,14 +148,11 @@ permalink: /auth-testing/
     document.getElementById('logged-in-view').style.display = 'block';
     document.getElementById('auth-status').textContent = 'Logged In';
     document.getElementById('auth-status').className = 'status-badge active';
-    
     document.getElementById('user-id').textContent = user.id;
     document.getElementById('user-email').textContent = user.email;
     document.getElementById('user-name').textContent = user.name || 'N/A';
-    
-    // Update roles display
     auth.getRoles().then(roles => {
-      document.getElementById('user-roles').textContent = roles.length ? roles.join(', ') : 'No roles';
+      document.getElementById('user-roles').textContent = roles.length ? roles.join(', ') : 'none';
     });
   }
 
@@ -154,15 +163,15 @@ permalink: /auth-testing/
     document.getElementById('auth-status').className = 'status-badge';
   }
 
-  document.getElementById('update-tenant-btn').onclick = initAuth;
-
   document.getElementById('signin-btn').onclick = async () => {
     const email = document.getElementById('email-input').value;
     const password = document.getElementById('password-input').value;
-    log(`Attempting sign in for ${email}...`);
+    if (!email || !password) { log('Email and password required.', 'error'); return; }
+    log('Signing in: ' + email);
     try {
       const result = await auth.signIn(email, password);
-      if (result.error) throw new Error(result.error.message || 'Login failed');
+      updateTokenDisplay();
+      if (result.error) throw new Error(result.error.message || 'Sign in failed');
       log('Sign in successful!', 'success');
       checkSession();
     } catch (err) {
@@ -170,23 +179,45 @@ permalink: /auth-testing/
     }
   };
 
+  document.getElementById('signup-btn').onclick = async () => {
+    const name = document.getElementById('signup-name-input').value;
+    const email = document.getElementById('signup-email-input').value;
+    const password = document.getElementById('signup-password-input').value;
+    if (!name || !email || !password) { log('Name, email, and password required.', 'error'); return; }
+    log('Creating account: ' + email);
+    try {
+      const result = await auth.signUp(email, password, name);
+      updateTokenDisplay();
+      if (result.error) throw new Error(result.error.message || 'Sign up failed');
+      log('Account created!', 'success');
+      checkSession();
+    } catch (err) {
+      log('Sign up failed: ' + err.message, 'error');
+    }
+  };
+
   document.getElementById('signout-btn').onclick = async () => {
     log('Signing out...');
     await auth.signOut();
+    updateTokenDisplay();
     showLoggedOut();
+    log('Signed out.', 'success');
   };
 
   document.getElementById('check-role-btn').onclick = async () => {
     const role = document.getElementById('role-check-input').value;
     if (!role) return;
-    log(`Checking if user has role: ${role}...`);
+    log('Checking role: ' + role);
     const hasRole = await auth.hasRole(role);
-    const resultEl = document.getElementById('role-result');
-    resultEl.textContent = hasRole ? `✓ User HAS the "${role}" role` : `✗ User DOES NOT have the "${role}" role`;
-    resultEl.className = 'result-box ' + (hasRole ? 'success' : 'error');
+    const el = document.getElementById('role-result');
+    el.style.display = 'block';
+    el.textContent = hasRole ? 'User HAS the "' + role + '" role' : 'User does NOT have the "' + role + '" role';
+    el.className = 'result-box ' + (hasRole ? 'success' : 'error');
+    log('Role "' + role + '": ' + (hasRole ? 'YES' : 'NO'), hasRole ? 'success' : 'info');
   };
 
-  // Initial init
+  document.getElementById('clear-log-btn').onclick = () => { logEl.innerHTML = ''; };
+
   window.onload = initAuth;
 </script>
 
@@ -199,19 +230,24 @@ permalink: /auth-testing/
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
-.test-panel h3 { margin-top: 0; margin-bottom: 1rem; font-size: 1.2rem; }
-.form-group { margin-bottom: 1rem; }
-.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
-.form-group input { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-.btn { padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; border: none; font-weight: 500; }
+.test-panel h3 { margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; }
+.form-group { margin-bottom: 0.8rem; }
+.form-group label { display: block; margin-bottom: 0.3rem; font-weight: 500; font-size: 0.9rem; }
+.form-group input { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.9rem; }
+.btn { padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; border: none; font-weight: 500; font-size: 0.9rem; }
 .btn-primary { background: #007bff; color: white; }
 .btn-secondary { background: #6c757d; color: white; margin-left: 0.5rem; }
-.status-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.8rem; background: #eee; }
+.btn-primary:hover { background: #0056b3; }
+.btn-secondary:hover { background: #545b62; }
+.status-badge { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px; font-size: 0.8rem; background: #eee; margin-top: 0.5rem; }
 .status-badge.active { background: #28a745; color: white; }
-.result-box { margin-top: 1rem; padding: 1rem; border-radius: 4px; font-weight: bold; }
+.status-badge.checking { background: #ffc107; color: #333; }
+.result-box { margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 4px; font-weight: bold; font-size: 0.9rem; }
 .result-box.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 .result-box.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-.config-display { font-size: 0.9rem; }
-.config-item { margin-bottom: 0.4rem; }
-.config-key { font-weight: bold; color: #555; }
+.config-display { font-size: 0.85rem; margin-bottom: 0.5rem; }
+.config-item { margin-bottom: 0.3rem; display: flex; gap: 0.5rem; }
+.config-key { font-weight: bold; color: #555; min-width: 80px; }
+.role-tester { display: flex; gap: 0.5rem; align-items: center; }
+.role-tester input { flex: 1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
 </style>
