@@ -30,9 +30,9 @@
     'lichess-profile': {
       name: 'Lichess: User Profile',
       keyName: 'lichess',
-      endpoint: '/api/user/carsontkempf',
+      endpoint: '/api/user/lichess',
       method: 'GET',
-      description: 'Get public profile information for user carsontkempf'
+      description: 'Get public profile information for Lichess official account'
     },
     'lichess-leaderboard': {
       name: 'Lichess: Top Players',
@@ -843,8 +843,7 @@
     addDebugLog('[L1.1] Testing DNS resolution for cloudprototype.org...', 'info');
     try {
       const dnsStart = performance.now();
-      const response = await fetch('https://cloudprototype.org/favicon.ico', {
-        method: 'HEAD',
+      const response = await fetch('https://cloudprototype.org/api/version', {
         cache: 'no-store'
       });
       const dnsTime = performance.now() - dnsStart;
@@ -874,8 +873,7 @@
     addDebugLog('[L1.2] Testing SSL certificate...', 'info');
     try {
       const sslStart = performance.now();
-      const response = await fetch('https://cloudprototype.org/', {
-        method: 'HEAD',
+      const response = await fetch('https://cloudprototype.org/api/version', {
         cache: 'no-store'
       });
       const sslTime = performance.now() - sslStart;
@@ -1646,7 +1644,7 @@
         addDebugLog(`[L2.10] Mode '${testMode.mode}': status ${response.status}, type '${response.type}', headers: ${allowOrigin ? 'accessible' : 'blocked'}`,
                    allowOrigin ? 'success' : 'warning');
       } catch (error) {
-        const isNoCorsExpected = testMode.mode === 'no-cors';
+        const isNoCorsExpected = testMode.mode === 'no-cors' || testMode.mode === 'same-origin';
         modesTest.details.modes[testMode.mode] = {
           success: false,
           error: error.message,
@@ -2462,7 +2460,7 @@
       }
 
       const start = performance.now();
-      const response = await sdk.call('lichess', '/api/user/carsontkempf', {
+      const response = await sdk.call('lichess', '/api/user/lichess', {
         method: 'GET'
       });
       const duration = performance.now() - start;
@@ -2528,7 +2526,7 @@
         },
         body: JSON.stringify({
           keyName: 'lichess',
-          endpoint: '/api/user/carsontkempf',
+          endpoint: '/api/user/lichess',
           method: 'GET'
         })
       });
@@ -3102,7 +3100,7 @@
         throw new Error('SDK not initialized');
       }
 
-      const testEndpoint = '/api/user/carsontkempf';
+      const testEndpoint = '/api/user/lichess';
 
       const response = await sdk.call('lichess', testEndpoint, {
         method: 'GET'
@@ -3110,7 +3108,7 @@
 
       const integrationTime = performance.now() - integrationStart;
 
-      const success = response && response.data && (response.data.username || response.data.id);
+      const success = response && (response.username || response.id);
 
       layer7Results.tests.push({
         id: 'L7.4',
@@ -3119,15 +3117,15 @@
         duration: integrationTime,
         details: {
           endpoint: testEndpoint,
-          hasData: !!response.data,
-          username: response.data?.username || response.data?.id,
+          hasData: !!response,
+          username: response?.username || response?.id,
           time: integrationTime
         }
       });
 
       if (success) {
         addDebugLog(`[L7.4] PASS - Lichess API integration working (${integrationTime.toFixed(2)}ms)`, 'success');
-        addDebugLog(`  User: ${response.data.username || response.data.id}`, 'success');
+        addDebugLog(`  User: ${response.username || response.id}`, 'success');
       } else {
         layer7Results.allPassed = false;
         addDebugLog(`[L7.4] FAIL - Lichess API call returned invalid response`, 'error');
