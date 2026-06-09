@@ -102,6 +102,9 @@ header .theme-switch {
 .page-content {
   margin-left: calc(var(--sidebar-width-collapsed) + var(--sidebar-offset));
   transition: margin-left 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 [data-sidebar="expanded"] .page-content {
@@ -111,6 +114,7 @@ header .theme-switch {
 
 .wrapper {
   padding: var(--grid-gap);
+  flex: 1;
 }
 
 
@@ -2456,7 +2460,6 @@ img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
   background-color: var(--bg-accent);
   padding: 15px 0;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
-  margin-top: 60px;
 }
 
 [data-theme="dark"] .bottom-bar {
