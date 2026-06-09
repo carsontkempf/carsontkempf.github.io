@@ -1,237 +1,65 @@
 ---
 permalink: /assets/js/auth.js
 ---
-// Create the global service object
-window.authService = {
-    isAuthenticated: false,
-    user: null,
-    roles: [],
-    client: null,
-    login: () => console.error("Login service not ready."),
-    logout: () => console.error("Login service not ready."),
-    hasRole: (role) => {
-        console.error("Role checking not ready");
-        return false;
-    },
-    getApiKey: async () => {
-        console.error("API key service not available");
-        return null;
-    }
-};
+(function() {
+    const AUTH_URL = 'https://cloudprototype.org/api/auth';
 
-/* ADD */
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('========================================');
-    console.log('[AUTH] DOMContentLoaded event fired');
-    console.log('[AUTH] Starting Auth0 initialization...');
-    console.log('[AUTH] Current URL:', window.location.href);
-    console.log('========================================');
-
-    // Auth0 config from Jekyll site variables (injected via build script)
-    const config = {
-        domain: '{{ site.auth0.domain }}',
-        clientId: '{{ site.auth0.client_id }}',
-        audience: '{{ site.auth0.audience }}',
-        callbackUrl: '{{ site.auth0.callback_url | default: site.url }}'
+    window.authService = {
+        isAuthenticated: false,
+        user: null,
+        roles: [],
+        login() { window.location.href = '/login/'; },
+        logout() {
+            const sdk = window._learnAuth;
+            if (sdk) sdk.signOut().finally(() => { window.location.href = '/'; });
+            else window.location.href = '/';
+        },
+        hasRole(required) {
+            const list = Array.isArray(required) ? required : [required];
+            const userRoles = (window.authService.roles || []).map(r => r.toLowerCase());
+            return list.some(r => userRoles.includes(r.toLowerCase()));
+        },
+        getApiKey: async () => null
     };
 
-    console.log('[AUTH] ========================================');
-    console.log('[AUTH] Auth0 Configuration:');
-    console.log('[AUTH] Domain:', config.domain);
-    console.log('[AUTH] Client ID:', config.clientId);
-    console.log('[AUTH] Audience:', config.audience);
-    console.log('[AUTH] Callback URL:', config.callbackUrl);
+    async function init() {
+        try {
+            if (typeof AuthSDK === 'undefined') throw new Error('AuthSDK not loaded');
+            const auth = new AuthSDK({ tenantUrl: AUTH_URL });
+            window._learnAuth = auth;
 
-    // Validate configuration
-    const hasInvalidChars = config.domain.includes('$') || config.domain.includes('{');
-    if (hasInvalidChars) {
-        console.error('[AUTH] ERROR: Config contains unprocessed template variables');
-        console.error('[AUTH] Environment variables were not substituted during build');
-    } else {
-        console.log('[AUTH] Config values properly substituted');
-    }
-    console.log('[AUTH] ========================================');
+            const [session, roles] = await Promise.all([auth.getSession(), auth.getRoles()]);
+            const user = session?.data?.user ?? null;
 
-    try {
-        // 1. Verify Auth0 SDK is loaded
-        if (!window.auth0) {
-            console.error('[AUTH] FATAL ERROR: Auth0 SDK not loaded! window.auth0 is undefined');
-            console.error('[AUTH] Make sure auth0-spa-js is included in the page');
-            throw new Error('Auth0 SDK not loaded');
-        }
-        console.log('[AUTH] ✓ Auth0 SDK loaded successfully');
+            window.authService.isAuthenticated = !!user;
+            window.authService.user = user;
+            window.authService.roles = roles;
 
-        // 2. Create the Auth0 client with REFRESH TOKEN support
-        const redirectUri = config.callbackUrl || window.location.origin;
-        console.log('[AUTH] Creating Auth0 client with redirect URI:', redirectUri);
+            const loginBtn = document.getElementById('btn-login');
+            const dashboardBtn = document.getElementById('btn-dashboard');
+            const logoutBtn = document.getElementById('btn-logout');
 
-        const auth0Client = await window.auth0.createAuth0Client({
-            domain: config.domain,
-            clientId: config.clientId,
-            authorizationParams: {
-                redirect_uri: redirectUri,
-                audience: config.audience,
-                scope: 'openid profile email offline_access'
-            },
-            useRefreshTokens: true,
-            cacheLocation: 'localstorage'
-        });
-        console.log('[AUTH] ✓ Auth0 client created successfully');
-        window.authService.client = auth0Client;
-
-        // 3. Handle the user returning from Auth0
-        console.log('[AUTH] Checking for Auth0 redirect callback...');
-        if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
-            console.log('[AUTH] Auth0 callback detected, processing...');
-            await auth0Client.handleRedirectCallback();
-            console.log('[AUTH] ✓ Callback handled, redirecting to dashboard...');
-            window.history.replaceState({}, document.title, '/dashboard/');
-            window.location.href = '/dashboard/';
-            return;
-        }
-        console.log('[AUTH] No Auth0 callback detected');
-
-        // 4. Check the session and update the state
-        console.log('[AUTH] Checking authentication status...');
-        const isAuthenticated = await auth0Client.isAuthenticated();
-        console.log('[AUTH] Authentication status:', isAuthenticated);
-        window.authService.isAuthenticated = isAuthenticated;
-        if (isAuthenticated) {
-            window.authService.user = await auth0Client.getUser();
-            console.log('[AUTH] ✓ User authenticated:', window.authService.user.email || window.authService.user.sub);
-
-            // Extract roles from user claims (Auth0 custom claims are namespaced)
-            const roles = window.authService.user['https://carsontkempf.github.io/roles']
-                || window.authService.user['roles']
-                || window.authService.user['user_metadata']?.roles
-                || window.authService.user['app_metadata']?.roles
-                || [];
-
-            window.authService.roles = Array.isArray(roles) ? roles : [];
-            console.log('[AUTH] User roles:', window.authService.roles);
-        } else {
-            console.log('[AUTH] User not authenticated');
-            window.authService.roles = [];
-        }
-
-        // 5. Define the global login/logout methods
-        console.log('[AUTH] Setting up login/logout methods...');
-        window.authService.login = () => {
-            console.log('[AUTH] Login triggered, redirecting to Auth0...');
-            auth0Client.loginWithRedirect();
-        };
-        window.authService.logout = () => {
-            console.log('[AUTH] Logout triggered...');
-            auth0Client.logout({
-                logoutParams: { returnTo: window.location.origin }
-            });
-        };
-
-        // Define role checking method (case-insensitive)
-        window.authService.hasRole = (requiredRole) => {
-            if (!window.authService.roles || window.authService.roles.length === 0) {
-                return false;
-            }
-            // Support single role string or array of roles
-            const required = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-            // Case-insensitive comparison
-            const userRolesLower = window.authService.roles.map(r => r.toLowerCase());
-            return required.some(role => userRolesLower.includes(role.toLowerCase()));
-        };
-
-        console.log('[AUTH] ✓ Login/logout methods configured');
-
-        // 6. Define getApiKey method (NOTE: This won't work on GitHub Pages without backend)
-        window.authService.getApiKey = async () => {
-            if (!isAuthenticated) {
-                throw new Error('User not authenticated');
-            }
-
-            try {
-                const token = await auth0Client.getTokenSilently();
-                const response = await fetch('/.netlify/functions/get-api-key', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to get API key: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data.apiKey || data.key || JSON.stringify(data);
-            } catch (error) {
-                console.error('Error getting API key:', error);
-                return null;
-            }
-        };
-
-        // 7. Get references to the UI buttons
-        console.log('[AUTH] Configuring UI buttons...');
-        const loginBtn = document.getElementById('btn-login');
-        const dashboardBtn = document.getElementById('btn-dashboard');
-        const logoutBtn = document.getElementById('btn-logout');
-
-        console.log('[AUTH] Button elements:', {
-            loginBtn: !!loginBtn,
-            dashboardBtn: !!dashboardBtn,
-            logoutBtn: !!logoutBtn
-        });
-
-        // 8. Update button visibility based on auth state and page location
-        if (isAuthenticated) {
-            if (loginBtn) loginBtn.style.display = 'none';
-            
-            // Show logout button ONLY on exact /dashboard/ page
-            const isOnExactDashboard = window.location.pathname === '/dashboard/' || window.location.pathname === '/dashboard';
-            
-            if (isOnExactDashboard) {
-                if (dashboardBtn) dashboardBtn.style.display = 'none';
-                if (logoutBtn) logoutBtn.style.display = 'inline-block';
+            if (user) {
+                const onDash = window.location.pathname === '/dashboard/' || window.location.pathname === '/dashboard';
+                if (loginBtn) loginBtn.style.display = 'none';
+                if (dashboardBtn) dashboardBtn.style.display = onDash ? 'none' : 'inline-block';
+                if (logoutBtn) logoutBtn.style.display = onDash ? 'inline-block' : 'none';
             } else {
-                // Show dashboard button on all other pages when authenticated
-                if (dashboardBtn) dashboardBtn.style.display = 'inline-block';
+                if (loginBtn) loginBtn.style.display = 'inline-block';
+                if (dashboardBtn) dashboardBtn.style.display = 'none';
                 if (logoutBtn) logoutBtn.style.display = 'none';
             }
-        } else {
-            if (loginBtn) loginBtn.style.display = 'inline-block';
-            if (dashboardBtn) dashboardBtn.style.display = 'none';
-            if (logoutBtn) logoutBtn.style.display = 'none';
+
+            if (loginBtn) loginBtn.addEventListener('click', e => { e.preventDefault(); window.authService.login(); });
+            if (logoutBtn) logoutBtn.addEventListener('click', e => { e.preventDefault(); window.authService.logout(); });
+
+        } catch (err) {
+            console.error('[AUTH] Init failed:', err);
+        } finally {
+            document.dispatchEvent(new CustomEvent('authReady'));
         }
-
-        console.log('[AUTH] ✓ Button visibility configured');
-
-        // 9. Wire up the buttons to the auth service methods
-        if (loginBtn) {
-            loginBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.authService.login();
-            });
-        }
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.authService.logout();
-            });
-        }
-
-        console.log('[AUTH] ✓ Button event listeners configured');
-
-        // 10. Fire the "ready" event for page-specific scripts
-        console.log('[AUTH] Dispatching authReady event...');
-        document.dispatchEvent(new CustomEvent('authReady'));
-
-        console.log('========================================');
-        console.log('[AUTH] ✓ Auth0 initialization complete!');
-        console.log('========================================');
-
-    } catch (error) {
-        console.error('========================================');
-        console.error('[AUTH] FATAL ERROR during initialization:');
-        console.error('[AUTH] Error:', error);
-        console.error('[AUTH] Error message:', error.message);
-        console.error('[AUTH] Error stack:', error.stack);
-        console.error('========================================');
     }
-});
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+})();
