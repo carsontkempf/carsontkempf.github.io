@@ -201,8 +201,35 @@ async function runSuite() {
         const results = [];
         dlog('\n── Layer 2: Authentication ──');
 
-        // 2.1 Sign in
+        // 2.0 Ensure test user exists (sign-up or pre-exists)
         let t = ts();
+        try {
+          const upResult = await auth.signUp(email, password, 'Test User');
+          const isNew = !upResult.error;
+          const errMsg = upResult.error?.message || upResult.error?.code || '';
+          const alreadyExists = !isNew && (
+            errMsg.toLowerCase().includes('exist') ||
+            errMsg.toLowerCase().includes('already') ||
+            upResult.error?.code === 'USER_ALREADY_EXISTS' ||
+            upResult.error?.status === 422
+          );
+          if (isNew) {
+            await auth.signOut().catch(() => {});
+            dlog('  2.0 new user created, signed out for clean 2.1 test');
+          } else {
+            dlog('  2.0 signup result: ' + JSON.stringify(upResult.error));
+          }
+          const ok = isNew || alreadyExists;
+          const detail = isNew ? 'new user created' : (alreadyExists ? 'user pre-exists' : 'signup error: ' + errMsg);
+          results.push(r('2.0', 'Account setup (new or pre-exists)', ok, detail, elapsed(t), !ok ? 'warn' : null));
+        } catch(e) {
+          dlog('  2.0 ERROR: ' + e.message);
+          results.push(r('2.0', 'Account setup (new or pre-exists)', false, e.message, elapsed(t)));
+        }
+        logResult(results.at(-1));
+
+        // 2.1 Sign in
+        t = ts();
         let signInData = null;
         try {
           const result = await auth.signIn(email, password);
