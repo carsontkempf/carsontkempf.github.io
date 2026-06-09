@@ -10,6 +10,8 @@ permalink: /auth-testing/
     <div class="url-row">
       <span class="url-label">Auth URL</span>
       <span class="url-value">https://cloudprototype.org/api/auth</span>
+      <span class="url-label" style="margin-left:1rem;">SDK</span>
+      <span class="url-value">learn-auth-sdk@0.3.1</span>
     </div>
     <div class="input-row">
       <input type="email" id="t-email" placeholder="Email" autocomplete="email" autofocus>
@@ -21,8 +23,16 @@ permalink: /auth-testing/
   <div id="results-root" style="display:none;">
     <div id="summary-bar"></div>
     <div id="layers-output"></div>
-    <button id="copy-btn" onclick="copyReport()">Copy Report to Clipboard</button>
-    <div id="copy-confirm" style="display:none;">Copied to clipboard.</div>
+    <div class="raw-log-panel">
+      <div class="raw-log-header">
+        <span>Complete Debug Log</span>
+        <div class="raw-log-actions">
+          <span id="copy-confirm" style="display:none;">Copied.</span>
+          <button id="copy-btn" onclick="copyReport()">Copy to Clipboard</button>
+        </div>
+      </div>
+      <pre id="raw-log"></pre>
+    </div>
   </div>
 
 </div>
@@ -32,313 +42,19 @@ permalink: /auth-testing/
 const AUTH_URL = 'https://cloudprototype.org/api/auth';
 const TOKEN_KEY = 'learn_auth_token';
 
-let reportLines = [];
+let rawLog = [];
+
+function dlog(line) {
+  rawLog.push(line);
+  const pre = document.getElementById('raw-log');
+  if (pre) { pre.textContent += line + '\n'; pre.scrollTop = pre.scrollHeight; }
+}
 
 function ts() { return Date.now(); }
-
-function elapsed(start) { return Date.now() - start; }
-
-async function runSuite() {
-  const email = document.getElementById('t-email').value.trim();
-  const password = document.getElementById('t-password').value;
-  if (!email || !password) {
-    alert('Email and password required.');
-    return;
-  }
-
-  const btn = document.getElementById('run-btn');
-  btn.disabled = true;
-  btn.textContent = 'Running...';
-
-  document.getElementById('results-root').style.display = 'none';
-  document.getElementById('layers-output').innerHTML = '';
-  document.getElementById('summary-bar').innerHTML = '';
-
-  const suiteStart = ts();
-  const allTests = [];
-  reportLines = [];
-
-  const layers = [
-    {
-      id: 1,
-      name: 'SDK & Connectivity',
-      tests: async () => {
-        const results = [];
-        let auth;
-
-        // 1.1 SDK loaded
-        let t = ts();
-        try {
-          const ok = typeof AuthSDK === 'function';
-          results.push(r('1.1', 'SDK loaded', ok, ok ? 'typeof AuthSDK === function' : 'AuthSDK not a function: ' + typeof AuthSDK, elapsed(t)));
-        } catch(e) { results.push(r('1.1', 'SDK loaded', false, e.message, elapsed(t))); }
-
-        // 1.2 SDK instantiates
-        t = ts();
-        try {
-          auth = new AuthSDK({ tenantUrl: AUTH_URL });
-          results.push(r('1.2', 'SDK instantiates', true, 'new AuthSDK({tenantUrl}) succeeded', elapsed(t)));
-        } catch(e) { results.push(r('1.2', 'SDK instantiates', false, e.message, elapsed(t))); }
-
-        // 1.3 Endpoint reachable
-        t = ts();
-        try {
-          const res = await fetch(AUTH_URL + '/get-session', { headers: { 'Content-Type': 'application/json' } });
-          const ok = res.status < 600;
-          results.push(r('1.3', 'Auth endpoint reachable', ok, 'HTTP ' + res.status + ' (any response = reachable)', elapsed(t)));
-        } catch(e) {
-          results.push(r('1.3', 'Auth endpoint reachable', false, 'Network error: ' + e.message, elapsed(t)));
-        }
-
-        return { results, state: { auth } };
-      }
-    },
-    {
-      id: 2,
-      name: 'Authentication',
-      tests: async ({ auth }) => {
-        const results = [];
-
-        // 2.1 Sign in
-        let t = ts();
-        let signInResult;
-        try {
-          signInResult = await auth.signIn(email, password);
-          const ok = !signInResult.error;
-          results.push(r('2.1', 'Sign in returns data', ok,
-            ok ? 'Signed in as ' + (signInResult.data?.user?.email || email) : 'Error: ' + (signInResult.error?.message || JSON.stringify(signInResult.error)),
-            elapsed(t)));
-        } catch(e) { results.push(r('2.1', 'Sign in returns data', false, e.message, elapsed(t))); signInResult = { error: { message: e.message } }; }
-
-        // 2.2 Bearer token stored
-        t = ts();
-        try {
-          const token = auth.getToken();
-          const ok = typeof token === 'string' && token.length > 0;
-          results.push(r('2.2', 'Bearer token stored in SDK', ok, ok ? 'token[0..19]: ' + token.slice(0, 20) + '...' : 'token is: ' + token, elapsed(t)));
-        } catch(e) { results.push(r('2.2', 'Bearer token stored in SDK', false, e.message, elapsed(t))); }
-
-        // 2.3 Token in localStorage
-        t = ts();
-        try {
-          const stored = localStorage.getItem(TOKEN_KEY);
-          const token = auth.getToken();
-          const ok = stored !== null && stored === token;
-          results.push(r('2.3', 'Token persisted to localStorage', ok,
-            ok ? 'localStorage["' + TOKEN_KEY + '"] matches SDK token' : 'mismatch — stored: ' + (stored ? stored.slice(0,10)+'...' : 'null') + ' sdk: ' + (token ? token.slice(0,10)+'...' : 'null'),
-            elapsed(t)));
-        } catch(e) { results.push(r('2.3', 'Token persisted to localStorage', false, e.message, elapsed(t))); }
-
-        // 2.4 Token format valid
-        t = ts();
-        try {
-          const token = auth.getToken();
-          const ok = typeof token === 'string' && token.length >= 10;
-          results.push(r('2.4', 'Token format valid', ok, ok ? 'length: ' + token.length + ' chars' : 'token too short or wrong type: ' + token, elapsed(t)));
-        } catch(e) { results.push(r('2.4', 'Token format valid', false, e.message, elapsed(t))); }
-
-        const authFailed = results.some(x => x.id === '2.1' && !x.pass);
-        return { results, state: { auth }, skip: authFailed };
-      }
-    },
-    {
-      id: 3,
-      name: 'Session Validation',
-      tests: async ({ auth }) => {
-        const results = [];
-        let session;
-
-        // 3.1 Session exists
-        let t = ts();
-        try {
-          session = await auth.getSession();
-          const ok = !!(session && session.data && session.data.session);
-          results.push(r('3.1', 'Session exists', ok, ok ? 'session id: ' + session.data.session.id : 'no session data returned', elapsed(t)));
-        } catch(e) { results.push(r('3.1', 'Session exists', false, e.message, elapsed(t))); }
-
-        // 3.2 User data present
-        t = ts();
-        try {
-          const user = session && session.data && session.data.user;
-          const ok = !!(user && user.id && user.email);
-          results.push(r('3.2', 'User data present', ok, ok ? 'id: ' + user.id.slice(0,12) + '..., email: ' + user.email : 'missing id or email on user object', elapsed(t)));
-        } catch(e) { results.push(r('3.2', 'User data present', false, e.message, elapsed(t))); }
-
-        // 3.3 Email matches
-        t = ts();
-        try {
-          const sessionEmail = session && session.data && session.data.user && session.data.user.email;
-          const ok = sessionEmail === email;
-          results.push(r('3.3', 'Session email matches input', ok,
-            ok ? 'email matches: ' + email : 'expected "' + email + '" got "' + sessionEmail + '"',
-            elapsed(t)));
-        } catch(e) { results.push(r('3.3', 'Session email matches input', false, e.message, elapsed(t))); }
-
-        // 3.4 Session not expired
-        t = ts();
-        try {
-          const expiresAt = session && session.data && session.data.session && session.data.session.expiresAt;
-          const ok = expiresAt && new Date(expiresAt) > new Date();
-          results.push(r('3.4', 'Session not expired', !!ok,
-            ok ? 'expires: ' + new Date(expiresAt).toLocaleString() : 'no expiresAt or already expired: ' + expiresAt,
-            elapsed(t)));
-        } catch(e) { results.push(r('3.4', 'Session not expired', false, e.message, elapsed(t))); }
-
-        return { results, state: { auth, session } };
-      }
-    },
-    {
-      id: 4,
-      name: 'RBAC',
-      tests: async ({ auth }) => {
-        const results = [];
-        let roles = [];
-
-        // 4.1 getRoles returns array
-        let t = ts();
-        try {
-          roles = await auth.getRoles();
-          const ok = Array.isArray(roles);
-          results.push(r('4.1', 'getRoles() returns array', ok, ok ? 'roles: [' + roles.join(', ') + ']' : 'returned: ' + typeof roles, elapsed(t)));
-        } catch(e) { results.push(r('4.1', 'getRoles() returns array', false, e.message, elapsed(t))); }
-
-        // 4.2 Has at least one role (warn if empty)
-        t = ts();
-        try {
-          const ok = roles.length > 0;
-          results.push(r('4.2', 'Has at least one role', ok, ok ? roles.length + ' role(s): ' + roles.join(', ') : 'user has no roles assigned (new user)', elapsed(t), !ok ? 'warn' : null));
-        } catch(e) { results.push(r('4.2', 'Has at least one role', false, e.message, elapsed(t))); }
-
-        // 4.3 hasRole() consistent with getRoles()
-        t = ts();
-        try {
-          if (roles.length > 0) {
-            const testRole = roles[0];
-            const has = await auth.hasRole(testRole);
-            results.push(r('4.3', 'hasRole() consistent with getRoles()', has, 'hasRole("' + testRole + '") returned ' + has, elapsed(t)));
-          } else {
-            results.push(r('4.3', 'hasRole() consistent with getRoles()', true, 'skipped — no roles to verify (pass by default)', elapsed(t), 'warn'));
-          }
-        } catch(e) { results.push(r('4.3', 'hasRole() consistent with getRoles()', false, e.message, elapsed(t))); }
-
-        // 4.4 Unknown role returns false
-        t = ts();
-        try {
-          const has = await auth.hasRole('__nonexistent_role_xyz__');
-          const ok = has === false;
-          results.push(r('4.4', 'Unknown role returns false', ok, 'hasRole("__nonexistent_role_xyz__") = ' + has, elapsed(t)));
-        } catch(e) { results.push(r('4.4', 'Unknown role returns false', false, e.message, elapsed(t))); }
-
-        return { results, state: { auth } };
-      }
-    },
-    {
-      id: 5,
-      name: 'Sign Out & Cleanup',
-      tests: async ({ auth }) => {
-        const results = [];
-
-        // 5.1 Sign out succeeds
-        let t = ts();
-        try {
-          await auth.signOut();
-          results.push(r('5.1', 'Sign out succeeds', true, 'signOut() completed without error', elapsed(t)));
-        } catch(e) { results.push(r('5.1', 'Sign out succeeds', false, e.message, elapsed(t))); }
-
-        // 5.2 Token cleared from SDK
-        t = ts();
-        try {
-          const token = auth.getToken();
-          const ok = token === null;
-          results.push(r('5.2', 'Token cleared from SDK', ok, ok ? 'getToken() === null' : 'token still present after sign-out: ' + token, elapsed(t)));
-        } catch(e) { results.push(r('5.2', 'Token cleared from SDK', false, e.message, elapsed(t))); }
-
-        // 5.3 Session cleared
-        t = ts();
-        try {
-          const session = await auth.getSession();
-          const user = session && session.data && session.data.user;
-          const ok = !user;
-          results.push(r('5.3', 'Session cleared after sign-out', ok, ok ? 'getSession() returns no user' : 'user still in session: ' + (user && user.email), elapsed(t)));
-        } catch(e) {
-          // Some auth impls throw on empty session — that counts as cleared
-          results.push(r('5.3', 'Session cleared after sign-out', true, 'getSession() threw (session cleared): ' + e.message, elapsed(t)));
-        }
-
-        return { results, state: {} };
-      }
-    }
-  ];
-
-  // Run layers
-  let sharedState = {};
-  for (const layer of layers) {
-    const layerEl = document.createElement('div');
-    layerEl.className = 'layer';
-    layerEl.id = 'layer-' + layer.id;
-    layerEl.innerHTML = '<div class="layer-title">Layer ' + layer.id + ': ' + layer.name + '</div><div class="layer-tests" id="lt-' + layer.id + '"></div>';
-    document.getElementById('layers-output').appendChild(layerEl);
-
-    const ltEl = document.getElementById('lt-' + layer.id);
-
-    let layerResult;
-    try {
-      layerResult = await layer.tests(sharedState);
-    } catch(e) {
-      ltEl.innerHTML = '<div class="test-row fail"><span class="badge fail">ERROR</span><span class="test-name">Layer ' + layer.id + ' crashed</span><span class="test-detail">' + escHtml(e.message) + '</span></div>';
-      reportLines.push('\nLayer ' + layer.id + ': ' + layer.name);
-      reportLines.push('  [ERROR] Layer crashed: ' + e.message);
-      continue;
-    }
-
-    const { results, state, skip } = layerResult;
-    if (state) Object.assign(sharedState, state);
-
-    reportLines.push('\nLayer ' + layer.id + ': ' + layer.name);
-
-    for (const res of results) {
-      allTests.push(res);
-      ltEl.appendChild(makeTestRow(res));
-      reportLines.push('  [' + (res.warn ? 'WARN' : (res.pass ? 'PASS' : 'FAIL')) + '] ' + res.id + ' ' + res.name + ' (' + res.ms + 'ms)' + (res.detail ? ' — ' + res.detail : ''));
-    }
-
-    if (skip) {
-      const skipMsg = document.createElement('div');
-      skipMsg.className = 'skip-notice';
-      skipMsg.textContent = 'Authentication failed — skipping remaining layers.';
-      document.getElementById('layers-output').appendChild(skipMsg);
-      reportLines.push('\n[SKIPPED] Authentication failed — remaining layers skipped.');
-      break;
-    }
-  }
-
-  // Summary
-  const totalMs = elapsed(suiteStart);
-  const passed = allTests.filter(x => x.pass || x.warn).length;
-  const failed = allTests.filter(x => !x.pass && !x.warn).length;
-  const total = allTests.length;
-
-  const summaryEl = document.getElementById('summary-bar');
-  summaryEl.className = 'summary-bar ' + (failed === 0 ? 'all-pass' : 'has-fail');
-  summaryEl.innerHTML =
-    '<span class="summary-count">' + passed + ' / ' + total + ' passed</span>' +
-    (failed > 0 ? '<span class="summary-fail">' + failed + ' failed</span>' : '') +
-    '<span class="summary-time">' + totalMs + 'ms total</span>';
-
-  // Build report header
-  const header = [
-    'learn-auth-sdk Test Report',
-    'Generated: ' + new Date().toLocaleString(),
-    'Auth URL: ' + AUTH_URL,
-    'User: ' + email,
-    'Result: ' + passed + '/' + total + ' passed (' + totalMs + 'ms)',
-  ];
-  reportLines = header.concat(reportLines);
-
-  document.getElementById('results-root').style.display = 'block';
-  btn.disabled = false;
-  btn.textContent = 'Run Full Test Suite';
-}
+function elapsed(s) { return Date.now() - s; }
+function fmt(v) { return v === null ? 'null' : v === undefined ? 'undefined' : String(v); }
+function trunc(s, n) { s = fmt(s); return s.length > n ? s.slice(0, n) + '...' : s; }
+function objKeys(o) { try { return o ? Object.keys(o).join(', ') : 'null'; } catch(e) { return '?'; } }
 
 function r(id, name, pass, detail, ms, warn) {
   return { id, name, pass: !!pass, detail: detail || '', ms, warn: warn || null };
@@ -346,10 +62,10 @@ function r(id, name, pass, detail, ms, warn) {
 
 function makeTestRow(res) {
   const div = document.createElement('div');
-  div.className = 'test-row ' + (res.warn ? 'warn' : (res.pass ? 'pass' : 'fail'));
+  const cls = res.warn ? 'warn' : (res.pass ? 'pass' : 'fail');
+  div.className = 'test-row ' + cls;
   div.innerHTML =
-    '<span class="badge ' + (res.warn ? 'warn' : (res.pass ? 'pass' : 'fail')) + '">' +
-    (res.warn ? 'WARN' : (res.pass ? 'PASS' : 'FAIL')) + '</span>' +
+    '<span class="badge ' + cls + '">' + (res.warn ? 'WARN' : (res.pass ? 'PASS' : 'FAIL')) + '</span>' +
     '<span class="test-id">' + escHtml(res.id) + '</span>' +
     '<span class="test-name">' + escHtml(res.name) + '</span>' +
     '<span class="test-ms">' + res.ms + 'ms</span>' +
@@ -361,22 +77,583 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-async function copyReport() {
-  const text = reportLines.join('\n');
+function logResult(res) {
+  const tag = res.warn ? '[WARN]' : (res.pass ? '[PASS]' : '[FAIL]');
+  dlog('  ' + tag + ' ' + res.id + ' ' + res.name + ' (' + res.ms + 'ms)');
+  if (res.detail) dlog('         ' + res.detail);
+}
+
+async function runSuite() {
+  const email = document.getElementById('t-email').value.trim();
+  const password = document.getElementById('t-password').value;
+  if (!email || !password) { alert('Email and password required.'); return; }
+
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+
+  rawLog = [];
+  document.getElementById('raw-log').textContent = '';
+  document.getElementById('results-root').style.display = 'none';
+  document.getElementById('layers-output').innerHTML = '';
+  document.getElementById('summary-bar').innerHTML = '';
+
+  const suiteStart = ts();
+  const allTests = [];
+
+  dlog('================================================');
+  dlog('learn-auth-sdk Test Suite');
+  dlog('Generated : ' + new Date().toLocaleString());
+  dlog('Auth URL  : ' + AUTH_URL);
+  dlog('User      : ' + email);
+  dlog('================================================');
+
+  const layers = [
+
+    // ── Layer 1: SDK & Connectivity ──────────────────────────────────────────
+    {
+      id: 1,
+      name: 'SDK & Connectivity',
+      tests: async () => {
+        const results = [];
+        let auth;
+        dlog('\n── Layer 1: SDK & Connectivity ──');
+
+        // 1.1 SDK global loaded
+        let t = ts();
+        try {
+          const type = typeof AuthSDK;
+          const ok = type === 'function';
+          dlog('  1.1 typeof AuthSDK = "' + type + '"');
+          results.push(r('1.1', 'SDK global loaded', ok, 'typeof AuthSDK === "' + type + '"', elapsed(t)));
+        } catch(e) { dlog('  1.1 ERROR: ' + e.message); results.push(r('1.1', 'SDK global loaded', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 1.2 SDK instantiates without error
+        t = ts();
+        try {
+          auth = new AuthSDK({ tenantUrl: AUTH_URL });
+          const hasGetSession = typeof auth.getSession === 'function';
+          const hasSignIn = typeof auth.signIn === 'function';
+          const hasGetToken = typeof auth.getToken === 'function';
+          dlog('  1.2 auth.getSession=' + hasGetSession + ' auth.signIn=' + hasSignIn + ' auth.getToken=' + hasGetToken);
+          const ok = hasGetSession && hasSignIn && hasGetToken;
+          results.push(r('1.2', 'SDK instantiates with all methods', ok,
+            ok ? 'getSession/signIn/getToken present' : 'missing methods on instance', elapsed(t)));
+        } catch(e) { dlog('  1.2 ERROR: ' + e.message); results.push(r('1.2', 'SDK instantiates with all methods', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 1.3 Endpoint reachable (raw fetch)
+        t = ts();
+        try {
+          const res = await fetch(AUTH_URL + '/get-session', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          const corsOrigin = res.headers.get('access-control-allow-origin');
+          const contentType = res.headers.get('content-type');
+          dlog('  1.3 status=' + res.status + ' content-type=' + contentType);
+          dlog('  1.3 access-control-allow-origin=' + corsOrigin);
+          const ok = res.status < 600;
+          results.push(r('1.3', 'Auth endpoint reachable', ok, 'HTTP ' + res.status + ', cors=' + (corsOrigin || 'none'), elapsed(t)));
+        } catch(e) {
+          dlog('  1.3 Network error: ' + e.message);
+          results.push(r('1.3', 'Auth endpoint reachable', false, 'Network error: ' + e.message, elapsed(t)));
+        }
+        logResult(results.at(-1));
+
+        // 1.4 CORS allows carsontkempf.github.io
+        t = ts();
+        try {
+          const res = await fetch(AUTH_URL + '/get-session', {
+            method: 'OPTIONS',
+            headers: {
+              'Origin': 'https://carsontkempf.github.io',
+              'Access-Control-Request-Method': 'POST',
+              'Access-Control-Request-Headers': 'Content-Type, Authorization'
+            }
+          });
+          const allowOrigin = res.headers.get('access-control-allow-origin');
+          const allowCreds = res.headers.get('access-control-allow-credentials');
+          const allowHeaders = res.headers.get('access-control-allow-headers');
+          dlog('  1.4 OPTIONS status=' + res.status);
+          dlog('  1.4 allow-origin=' + allowOrigin);
+          dlog('  1.4 allow-credentials=' + allowCreds);
+          dlog('  1.4 allow-headers=' + allowHeaders);
+          const ok = allowOrigin === 'https://carsontkempf.github.io' || allowOrigin === '*';
+          results.push(r('1.4', 'CORS allows github.io origin', ok,
+            'allow-origin=' + (allowOrigin || 'none') + ', creds=' + allowCreds, elapsed(t)));
+        } catch(e) {
+          dlog('  1.4 ERROR: ' + e.message);
+          results.push(r('1.4', 'CORS allows github.io origin', false, e.message, elapsed(t)));
+        }
+        logResult(results.at(-1));
+
+        return { results, state: { auth } };
+      }
+    },
+
+    // ── Layer 2: Authentication ───────────────────────────────────────────────
+    {
+      id: 2,
+      name: 'Authentication',
+      tests: async ({ auth }) => {
+        const results = [];
+        dlog('\n── Layer 2: Authentication ──');
+
+        // 2.1 Sign in
+        let t = ts();
+        let signInData = null;
+        try {
+          const result = await auth.signIn(email, password);
+          signInData = result.data;
+          const ok = !result.error;
+          if (ok) {
+            dlog('  2.1 sign-in OK. response keys: [' + objKeys(result.data) + ']');
+            if (result.data?.user) dlog('  2.1 user keys: [' + objKeys(result.data.user) + ']');
+            if (result.data?.user) dlog('  2.1 user.id=' + trunc(result.data.user.id, 16) + ' user.email=' + result.data.user.email + ' user.name=' + result.data.user.name);
+          } else {
+            dlog('  2.1 sign-in FAILED: ' + JSON.stringify(result.error));
+          }
+          results.push(r('2.1', 'Sign in succeeds', ok,
+            ok ? 'user=' + result.data?.user?.email : (result.error?.message || JSON.stringify(result.error)), elapsed(t)));
+        } catch(e) {
+          dlog('  2.1 EXCEPTION: ' + e.message);
+          results.push(r('2.1', 'Sign in succeeds', false, e.message, elapsed(t)));
+        }
+        logResult(results.at(-1));
+
+        // 2.2 Bearer token returned and stored
+        t = ts();
+        try {
+          const token = auth.getToken();
+          const ok = typeof token === 'string' && token.length >= 10;
+          dlog('  2.2 getToken()=' + (token ? trunc(token, 24) + '... (len=' + token.length + ')' : 'null'));
+          dlog('  2.2 signIn response had token field: ' + !!(signInData?.token));
+          results.push(r('2.2', 'Bearer token stored in SDK', ok,
+            ok ? 'len=' + token.length + ' preview=' + token.slice(0,16) + '...' : 'token=' + fmt(token), elapsed(t)));
+        } catch(e) { dlog('  2.2 ERROR: ' + e.message); results.push(r('2.2', 'Bearer token stored in SDK', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 2.3 Token persisted to localStorage
+        t = ts();
+        try {
+          const stored = localStorage.getItem(TOKEN_KEY);
+          const sdkToken = auth.getToken();
+          const ok = stored !== null && stored === sdkToken;
+          dlog('  2.3 localStorage["' + TOKEN_KEY + '"]=' + (stored ? trunc(stored, 16) + '...' : 'null'));
+          dlog('  2.3 matches SDK token: ' + ok);
+          results.push(r('2.3', 'Token persisted to localStorage', ok,
+            ok ? 'key="' + TOKEN_KEY + '" matches SDK token' : 'mismatch or null: stored=' + trunc(stored, 10), elapsed(t)));
+        } catch(e) { dlog('  2.3 ERROR: ' + e.message); results.push(r('2.3', 'Token persisted to localStorage', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 2.4 Sign-in response contains user object
+        t = ts();
+        try {
+          const user = signInData?.user;
+          const hasId = !!(user?.id);
+          const hasEmail = !!(user?.email);
+          const ok = hasId && hasEmail;
+          dlog('  2.4 signIn.data.user: id=' + fmt(user?.id) + ' email=' + fmt(user?.email) + ' name=' + fmt(user?.name));
+          dlog('  2.4 emailVerified=' + fmt(user?.emailVerified) + ' createdAt=' + fmt(user?.createdAt) + ' role=' + fmt(user?.role));
+          results.push(r('2.4', 'Sign-in response has user object', ok,
+            ok ? 'id=' + trunc(user.id, 12) + ' email=' + user.email : 'missing id or email', elapsed(t)));
+        } catch(e) { dlog('  2.4 ERROR: ' + e.message); results.push(r('2.4', 'Sign-in response has user object', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        const authFailed = results.find(x => x.id === '2.1') && !results.find(x => x.id === '2.1').pass;
+        return { results, state: { auth, signInData }, skip: authFailed };
+      }
+    },
+
+    // ── Layer 3: Session Validation ──────────────────────────────────────────
+    {
+      id: 3,
+      name: 'Session Validation',
+      tests: async ({ auth }) => {
+        const results = [];
+        let sessionData = null;
+        dlog('\n── Layer 3: Session Validation ──');
+
+        // 3.1 getSession returns session object
+        let t = ts();
+        try {
+          const res = await auth.getSession();
+          sessionData = res?.data;
+          const ok = !!(sessionData?.session);
+          dlog('  3.1 getSession() response keys: [' + objKeys(res?.data) + ']');
+          if (sessionData?.session) {
+            dlog('  3.1 session.id=' + trunc(sessionData.session.id, 16) + ' token=' + trunc(sessionData.session.token, 16) + '...');
+            dlog('  3.1 session.createdAt=' + sessionData.session.createdAt + ' expiresAt=' + sessionData.session.expiresAt);
+          }
+          results.push(r('3.1', 'getSession() returns session', ok,
+            ok ? 'id=' + trunc(sessionData.session.id, 16) : 'no session object in response', elapsed(t)));
+        } catch(e) { dlog('  3.1 ERROR: ' + e.message); results.push(r('3.1', 'getSession() returns session', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 3.2 User object on session
+        t = ts();
+        try {
+          const user = sessionData?.user;
+          const ok = !!(user?.id && user?.email);
+          dlog('  3.2 session.user keys: [' + objKeys(user) + ']');
+          dlog('  3.2 id=' + fmt(user?.id) + ' email=' + fmt(user?.email) + ' name=' + fmt(user?.name));
+          dlog('  3.2 createdAt=' + fmt(user?.createdAt) + ' updatedAt=' + fmt(user?.updatedAt));
+          results.push(r('3.2', 'Session has user object', ok,
+            ok ? 'id=' + trunc(user.id, 12) + ' email=' + user.email : 'missing user.id or user.email', elapsed(t)));
+        } catch(e) { dlog('  3.2 ERROR: ' + e.message); results.push(r('3.2', 'Session has user object', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 3.3 Session email matches input
+        t = ts();
+        try {
+          const sessionEmail = sessionData?.user?.email;
+          const ok = sessionEmail === email;
+          dlog('  3.3 input email: ' + email);
+          dlog('  3.3 session email: ' + sessionEmail);
+          dlog('  3.3 match: ' + ok);
+          results.push(r('3.3', 'Session email matches input', ok,
+            ok ? 'match: ' + email : '"' + sessionEmail + '" !== "' + email + '"', elapsed(t)));
+        } catch(e) { dlog('  3.3 ERROR: ' + e.message); results.push(r('3.3', 'Session email matches input', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 3.4 Session not expired
+        t = ts();
+        try {
+          const expiresAt = sessionData?.session?.expiresAt;
+          const expDate = expiresAt ? new Date(expiresAt) : null;
+          const now = new Date();
+          const ok = !!(expDate && expDate > now);
+          const daysLeft = expDate ? Math.round((expDate - now) / 86400000) : null;
+          dlog('  3.4 expiresAt=' + fmt(expiresAt));
+          dlog('  3.4 now=' + now.toISOString() + ' daysLeft=' + daysLeft);
+          results.push(r('3.4', 'Session not expired', !!ok,
+            ok ? 'expires ' + expDate.toLocaleString() + ' (' + daysLeft + 'd left)' : 'expired or missing expiresAt', elapsed(t)));
+        } catch(e) { dlog('  3.4 ERROR: ' + e.message); results.push(r('3.4', 'Session not expired', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 3.5 Bearer header is being sent (verify via a second raw fetch with token)
+        t = ts();
+        try {
+          const token = auth.getToken();
+          const res = await fetch(AUTH_URL + '/get-session', {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          });
+          const body = await res.json().catch(() => null);
+          const user = body?.user || body?.data?.user;
+          const ok = res.status === 200 && !!(user?.email);
+          dlog('  3.5 raw fetch with Bearer token: status=' + res.status);
+          dlog('  3.5 response body keys: [' + objKeys(body) + ']');
+          dlog('  3.5 user from raw fetch: ' + fmt(user?.email));
+          results.push(r('3.5', 'Bearer token accepted by server', ok,
+            ok ? 'raw fetch authenticated as ' + user.email : 'status=' + res.status + ' user=' + fmt(user), elapsed(t)));
+        } catch(e) { dlog('  3.5 ERROR: ' + e.message); results.push(r('3.5', 'Bearer token accepted by server', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        return { results, state: { auth, sessionData } };
+      }
+    },
+
+    // ── Layer 4: Token Persistence ────────────────────────────────────────────
+    {
+      id: 4,
+      name: 'Token Persistence',
+      tests: async ({ auth }) => {
+        const results = [];
+        dlog('\n── Layer 4: Token Persistence ──');
+
+        // 4.1 Token survives SDK re-instantiation
+        let t = ts();
+        try {
+          const originalToken = auth.getToken();
+          const auth2 = new AuthSDK({ tenantUrl: AUTH_URL });
+          const restoredToken = auth2.getToken();
+          const ok = restoredToken !== null && restoredToken === originalToken;
+          dlog('  4.1 original token: ' + trunc(originalToken, 20) + '...');
+          dlog('  4.1 new instance token: ' + (restoredToken ? trunc(restoredToken, 20) + '...' : 'null'));
+          dlog('  4.1 tokens match: ' + ok);
+          results.push(r('4.1', 'Token survives SDK re-instantiation', ok,
+            ok ? 'token restored from localStorage on new instance' : 'token not restored: ' + fmt(restoredToken), elapsed(t)));
+        } catch(e) { dlog('  4.1 ERROR: ' + e.message); results.push(r('4.1', 'Token survives SDK re-instantiation', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 4.2 Re-instantiated SDK can fetch session
+        t = ts();
+        try {
+          const auth2 = new AuthSDK({ tenantUrl: AUTH_URL });
+          const session = await auth2.getSession();
+          const user = session?.data?.user;
+          const ok = !!(user?.email);
+          dlog('  4.2 fresh instance getSession() user: ' + fmt(user?.email));
+          dlog('  4.2 session.id: ' + fmt(session?.data?.session?.id));
+          results.push(r('4.2', 'Re-instantiated SDK session valid', ok,
+            ok ? 'session active as ' + user.email : 'no user on session from fresh instance', elapsed(t)));
+        } catch(e) { dlog('  4.2 ERROR: ' + e.message); results.push(r('4.2', 'Re-instantiated SDK session valid', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 4.3 localStorage entry exists with correct key
+        t = ts();
+        try {
+          const stored = localStorage.getItem(TOKEN_KEY);
+          const allKeys = Object.keys(localStorage).filter(k => k.includes('learn') || k.includes('auth') || k.includes('token'));
+          const ok = stored !== null;
+          dlog('  4.3 localStorage["' + TOKEN_KEY + '"]: ' + (stored ? 'present (len=' + stored.length + ')' : 'null'));
+          dlog('  4.3 related localStorage keys: [' + allKeys.join(', ') + ']');
+          results.push(r('4.3', 'localStorage has token key', ok,
+            ok ? '"' + TOKEN_KEY + '" present, len=' + stored.length : 'key not found in localStorage', elapsed(t)));
+        } catch(e) { dlog('  4.3 ERROR: ' + e.message); results.push(r('4.3', 'localStorage has token key', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        return { results, state: { auth } };
+      }
+    },
+
+    // ── Layer 5: RBAC ────────────────────────────────────────────────────────
+    {
+      id: 5,
+      name: 'RBAC',
+      tests: async ({ auth, sessionData }) => {
+        const results = [];
+        let roles = [];
+        dlog('\n── Layer 5: RBAC ──');
+
+        // 5.1 getRoles() returns array
+        let t = ts();
+        try {
+          roles = await auth.getRoles();
+          const ok = Array.isArray(roles);
+          dlog('  5.1 getRoles() = [' + roles.join(', ') + '] (Array: ' + ok + ')');
+          // Also log the raw user.role and user.roles fields from session
+          const rawRole = sessionData?.user?.role;
+          const rawRoles = sessionData?.user?.roles;
+          dlog('  5.1 session.user.role (singular): ' + fmt(rawRole));
+          dlog('  5.1 session.user.roles (array): ' + fmt(rawRoles));
+          results.push(r('5.1', 'getRoles() returns array', ok,
+            ok ? '[' + roles.join(', ') + '] (' + roles.length + ' roles)' : 'not an array: ' + typeof roles, elapsed(t)));
+        } catch(e) { dlog('  5.1 ERROR: ' + e.message); results.push(r('5.1', 'getRoles() returns array', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 5.2 Role count (warn if zero)
+        t = ts();
+        try {
+          const ok = roles.length > 0;
+          dlog('  5.2 role count: ' + roles.length);
+          results.push(r('5.2', 'User has at least one role', ok,
+            ok ? roles.length + ' role(s): [' + roles.join(', ') + ']' : 'no roles assigned (new user default)', elapsed(t), !ok ? 'warn' : null));
+        } catch(e) { dlog('  5.2 ERROR: ' + e.message); results.push(r('5.2', 'User has at least one role', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 5.3 hasRole() consistent with getRoles()
+        t = ts();
+        try {
+          if (roles.length > 0) {
+            const testRole = roles[0];
+            const has = await auth.hasRole(testRole);
+            dlog('  5.3 hasRole("' + testRole + '") = ' + has);
+            results.push(r('5.3', 'hasRole() consistent with getRoles()', has,
+              'hasRole("' + testRole + '") = ' + has, elapsed(t)));
+          } else {
+            dlog('  5.3 skipped — no roles to verify');
+            results.push(r('5.3', 'hasRole() consistent with getRoles()', true, 'skipped — no roles to cross-check', elapsed(t), 'warn'));
+          }
+        } catch(e) { dlog('  5.3 ERROR: ' + e.message); results.push(r('5.3', 'hasRole() consistent with getRoles()', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 5.4 Check specific role: 'user'
+        t = ts();
+        try {
+          const hasUser = await auth.hasRole('user');
+          dlog('  5.4 hasRole("user") = ' + hasUser);
+          results.push(r('5.4', 'hasRole("user") check', hasUser,
+            'hasRole("user") = ' + hasUser, elapsed(t), !hasUser ? 'warn' : null));
+        } catch(e) { dlog('  5.4 ERROR: ' + e.message); results.push(r('5.4', 'hasRole("user") check', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 5.5 Check specific role: 'admin'
+        t = ts();
+        try {
+          const hasAdmin = await auth.hasRole('admin');
+          dlog('  5.5 hasRole("admin") = ' + hasAdmin);
+          results.push(r('5.5', 'hasRole("admin") check', true,
+            'hasRole("admin") = ' + hasAdmin + ' (informational)', elapsed(t), 'warn'));
+        } catch(e) { dlog('  5.5 ERROR: ' + e.message); results.push(r('5.5', 'hasRole("admin") check (info)', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 5.6 Unknown role returns false
+        t = ts();
+        try {
+          const has = await auth.hasRole('__nonexistent_xyz__');
+          const ok = has === false;
+          dlog('  5.6 hasRole("__nonexistent_xyz__") = ' + has + ' (expected false)');
+          results.push(r('5.6', 'Unknown role returns false', ok,
+            'hasRole("__nonexistent_xyz__") = ' + has, elapsed(t)));
+        } catch(e) { dlog('  5.6 ERROR: ' + e.message); results.push(r('5.6', 'Unknown role returns false', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        return { results, state: { auth } };
+      }
+    },
+
+    // ── Layer 6: Sign Out & Cleanup ───────────────────────────────────────────
+    {
+      id: 6,
+      name: 'Sign Out & Cleanup',
+      tests: async ({ auth }) => {
+        const results = [];
+        dlog('\n── Layer 6: Sign Out & Cleanup ──');
+
+        // 6.1 Sign out does not throw
+        let t = ts();
+        try {
+          await auth.signOut();
+          dlog('  6.1 signOut() completed without error');
+          results.push(r('6.1', 'signOut() completes without error', true, 'no exception thrown', elapsed(t)));
+        } catch(e) { dlog('  6.1 ERROR: ' + e.message); results.push(r('6.1', 'signOut() completes without error', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 6.2 Token cleared from SDK
+        t = ts();
+        try {
+          const token = auth.getToken();
+          const ok = token === null;
+          dlog('  6.2 getToken() after signOut = ' + fmt(token));
+          results.push(r('6.2', 'Token cleared from SDK', ok,
+            ok ? 'getToken() === null' : 'token still present: ' + trunc(token, 16), elapsed(t)));
+        } catch(e) { dlog('  6.2 ERROR: ' + e.message); results.push(r('6.2', 'Token cleared from SDK', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 6.3 Token cleared from localStorage
+        t = ts();
+        try {
+          const stored = localStorage.getItem(TOKEN_KEY);
+          const ok = stored === null;
+          dlog('  6.3 localStorage["' + TOKEN_KEY + '"] after signOut = ' + fmt(stored));
+          results.push(r('6.3', 'Token cleared from localStorage', ok,
+            ok ? 'localStorage key removed' : 'key still present: ' + trunc(stored, 16), elapsed(t)));
+        } catch(e) { dlog('  6.3 ERROR: ' + e.message); results.push(r('6.3', 'Token cleared from localStorage', false, e.message, elapsed(t))); }
+        logResult(results.at(-1));
+
+        // 6.4 Session returns no user after sign-out
+        t = ts();
+        try {
+          const session = await auth.getSession();
+          const user = session?.data?.user;
+          const ok = !user;
+          dlog('  6.4 getSession() after signOut: user=' + fmt(user?.email));
+          dlog('  6.4 session.data keys: [' + objKeys(session?.data) + ']');
+          results.push(r('6.4', 'Session cleared after sign-out', ok,
+            ok ? 'no user on session after sign-out' : 'user still present: ' + user?.email, elapsed(t)));
+        } catch(e) {
+          dlog('  6.4 getSession() threw after signOut (counts as cleared): ' + e.message);
+          results.push(r('6.4', 'Session cleared after sign-out', true, 'getSession() threw: ' + e.message, elapsed(t)));
+        }
+        logResult(results.at(-1));
+
+        return { results, state: {} };
+      }
+    }
+
+  ];
+
+  // ── Run all layers ────────────────────────────────────────────────────────
+  let sharedState = {};
+  for (const layer of layers) {
+    const layerEl = document.createElement('div');
+    layerEl.className = 'layer';
+    layerEl.innerHTML =
+      '<div class="layer-title">Layer ' + layer.id + ': ' + layer.name + '</div>' +
+      '<div class="layer-tests" id="lt-' + layer.id + '"></div>';
+    document.getElementById('layers-output').appendChild(layerEl);
+    const ltEl = document.getElementById('lt-' + layer.id);
+
+    let layerResult;
+    try {
+      layerResult = await layer.tests(sharedState);
+    } catch(e) {
+      dlog('  [ERROR] Layer ' + layer.id + ' crashed: ' + e.message);
+      ltEl.innerHTML = '<div class="test-row fail"><span class="badge fail">ERROR</span><span class="test-name">Layer crashed</span><span class="test-detail">' + escHtml(e.message) + '</span></div>';
+      continue;
+    }
+
+    const { results, state, skip } = layerResult;
+    if (state) Object.assign(sharedState, state);
+    for (const res of results) {
+      allTests.push(res);
+      ltEl.appendChild(makeTestRow(res));
+    }
+
+    if (skip) {
+      dlog('\n[SKIPPED] Authentication failed — remaining layers skipped.');
+      const skipEl = document.createElement('div');
+      skipEl.className = 'skip-notice';
+      skipEl.textContent = 'Authentication failed — skipping remaining layers.';
+      document.getElementById('layers-output').appendChild(skipEl);
+      break;
+    }
+  }
+
+  // ── Summary ───────────────────────────────────────────────────────────────
+  const totalMs = elapsed(suiteStart);
+  const passed = allTests.filter(x => x.pass || x.warn).length;
+  const failed = allTests.filter(x => !x.pass && !x.warn).length;
+  const total = allTests.length;
+
+  dlog('\n================================================');
+  dlog('RESULT: ' + passed + '/' + total + ' passed, ' + failed + ' failed (' + totalMs + 'ms)');
+  dlog('================================================');
+
+  const summaryEl = document.getElementById('summary-bar');
+  summaryEl.className = 'summary-bar ' + (failed === 0 ? 'all-pass' : 'has-fail');
+  summaryEl.innerHTML =
+    '<span class="summary-count">' + passed + ' / ' + total + ' passed</span>' +
+    (failed > 0 ? '<span class="summary-fail">' + failed + ' failed</span>' : '') +
+    '<span class="summary-time">' + totalMs + 'ms total</span>';
+
+  document.getElementById('results-root').style.display = 'block';
+  btn.disabled = false;
+  btn.textContent = 'Run Full Test Suite';
+
+  // Auto-copy
   try {
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(rawLog.join('\n'));
     const el = document.getElementById('copy-confirm');
-    el.style.display = 'block';
-    setTimeout(() => { el.style.display = 'none'; }, 2000);
+    el.textContent = 'Report auto-copied to clipboard.';
+    el.style.display = 'inline';
+    setTimeout(() => { el.style.display = 'none'; }, 3000);
   } catch(e) {
-    prompt('Copy the report below:', text);
+    // clipboard blocked — user can click the button
   }
 }
+
+async function copyReport() {
+  try {
+    await navigator.clipboard.writeText(rawLog.join('\n'));
+    const el = document.getElementById('copy-confirm');
+    el.textContent = 'Copied.';
+    el.style.display = 'inline';
+    setTimeout(() => { el.style.display = 'none'; }, 2000);
+  } catch(e) {
+    prompt('Copy the report:', rawLog.join('\n'));
+  }
+}
+
+// Enter key on inputs
+document.addEventListener('DOMContentLoaded', () => {
+  ['t-email', 't-password'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') runSuite();
+    });
+  });
+});
 </script>
 
 <style>
 #auth-test-root {
-  max-width: 820px;
+  max-width: 860px;
   margin: 0 auto;
   font-family: inherit;
 }
@@ -390,49 +667,31 @@ async function copyReport() {
 .url-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
   margin-bottom: 1rem;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
+  flex-wrap: wrap;
 }
 .url-label { font-weight: 600; color: #555; }
 .url-value { font-family: monospace; color: #007bff; background: #f0f4ff; padding: 0.15rem 0.5rem; border-radius: 4px; }
-.input-row {
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
+.input-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
 .input-row input {
-  flex: 1;
-  min-width: 160px;
+  flex: 1; min-width: 160px;
   padding: 0.55rem 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem;
 }
 .input-row input:focus { outline: none; border-color: #007bff; }
 #run-btn {
-  padding: 0.55rem 1.4rem;
-  background: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
+  padding: 0.55rem 1.4rem; background: #007bff; color: #fff;
+  border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; white-space: nowrap;
 }
 #run-btn:hover:not(:disabled) { background: #0056b3; }
 #run-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .summary-bar {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.25rem;
-  font-size: 0.9rem;
-  font-weight: 600;
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1.25rem;
+  font-size: 0.9rem; font-weight: 600;
 }
 .summary-bar.all-pass { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 .summary-bar.has-fail { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
@@ -440,28 +699,15 @@ async function copyReport() {
 .summary-fail { background: rgba(0,0,0,0.1); padding: 0.1rem 0.5rem; border-radius: 4px; }
 .summary-time { margin-left: auto; font-weight: 400; opacity: 0.8; }
 
-.layer {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  overflow: hidden;
-}
+.layer { background: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 1rem; overflow: hidden; }
 .layer-title {
-  background: #f8f9fa;
-  border-bottom: 1px solid #ddd;
-  padding: 0.6rem 1rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #333;
+  background: #f8f9fa; border-bottom: 1px solid #ddd;
+  padding: 0.6rem 1rem; font-weight: 600; font-size: 0.88rem; color: #333;
 }
 .layer-tests { padding: 0.25rem 0; }
 .test-row {
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
+  display: flex; align-items: baseline; gap: 0.55rem;
+  padding: 0.45rem 1rem; font-size: 0.82rem;
   border-bottom: 1px solid #f0f0f0;
 }
 .test-row:last-child { border-bottom: none; }
@@ -469,45 +715,46 @@ async function copyReport() {
 .test-row.fail { background: #fff6f6; }
 .test-row.warn { background: #fffbf0; }
 .badge {
-  display: inline-block;
-  padding: 0.1rem 0.45rem;
-  border-radius: 3px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  flex-shrink: 0;
+  display: inline-block; padding: 0.1rem 0.42rem; border-radius: 3px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.03em; flex-shrink: 0;
 }
 .badge.pass { background: #28a745; color: #fff; }
 .badge.fail { background: #dc3545; color: #fff; }
 .badge.warn { background: #e6a817; color: #fff; }
 .test-id { font-weight: 600; color: #555; min-width: 2.5rem; flex-shrink: 0; }
 .test-name { font-weight: 500; color: #222; flex: 1; }
-.test-ms { color: #888; font-family: monospace; font-size: 0.8rem; flex-shrink: 0; }
-.test-detail { color: #666; font-family: monospace; font-size: 0.78rem; flex-shrink: 0; max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.test-ms { color: #888; font-family: monospace; font-size: 0.78rem; flex-shrink: 0; }
+.test-detail { color: #555; font-family: monospace; font-size: 0.76rem; flex-shrink: 0; max-width: 380px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .skip-notice {
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffc107;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  font-size: 0.85rem;
-  margin-bottom: 1rem;
+  background: #fff3cd; color: #856404; border: 1px solid #ffc107;
+  border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.85rem; margin-bottom: 1rem;
 }
+
+.raw-log-panel {
+  background: #0d1117; border-radius: 8px; overflow: hidden;
+  margin-top: 1.5rem; margin-bottom: 2rem;
+}
+.raw-log-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.6rem 1rem; background: #161b22; border-bottom: 1px solid #30363d;
+  font-size: 0.82rem; font-weight: 600; color: #8b949e;
+}
+.raw-log-actions { display: flex; align-items: center; gap: 0.75rem; }
+#copy-confirm { color: #3fb950; font-size: 0.8rem; }
 #copy-btn {
-  padding: 0.5rem 1.1rem;
-  background: #6c757d;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  margin-bottom: 0.5rem;
+  padding: 0.3rem 0.8rem; background: #21262d; color: #c9d1d9;
+  border: 1px solid #30363d; border-radius: 5px; font-size: 0.78rem; cursor: pointer;
 }
-#copy-btn:hover { background: #545b62; }
-#copy-confirm {
-  color: #28a745;
-  font-size: 0.85rem;
-  margin-top: 0.25rem;
+#copy-btn:hover { background: #30363d; }
+#raw-log {
+  margin: 0; padding: 1rem 1.25rem;
+  font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.75rem;
+  color: #c9d1d9; line-height: 1.55;
+  max-height: 480px; overflow-y: auto;
+  white-space: pre; word-break: break-all;
 }
+#raw-log::-webkit-scrollbar { width: 6px; }
+#raw-log::-webkit-scrollbar-track { background: #0d1117; }
+#raw-log::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
 </style>
