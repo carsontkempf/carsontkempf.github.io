@@ -200,52 +200,65 @@ async function runSuite() {
       tests: async ({ auth }) => {
         const results = [];
         dlog('\n── Layer 2: Authentication ──');
+        dlog('  [INIT] auth methods: signUp=' + typeof auth.signUp + ' signIn=' + typeof auth.signIn + ' signOut=' + typeof auth.signOut);
+        dlog('  [INIT] email=' + email + ' password.length=' + password.length);
 
         // 2.0 Ensure test user exists (sign-up or pre-exists)
         let t = ts();
+        dlog('  2.0 START');
         try {
+          dlog('  2.0 calling auth.signUp(' + email + ', [password], "Test User")...');
           const upResult = await auth.signUp(email, password, 'Test User');
+          dlog('  2.0 signUp returned. type=' + typeof upResult);
+          dlog('  2.0 raw result: ' + JSON.stringify(upResult).slice(0, 400));
           const isNew = !upResult.error;
           const errMsg = upResult.error?.message || upResult.error?.code || '';
+          const errStatus = upResult.error?.status;
           const alreadyExists = !isNew && (
             errMsg.toLowerCase().includes('exist') ||
             errMsg.toLowerCase().includes('already') ||
             upResult.error?.code === 'USER_ALREADY_EXISTS' ||
-            upResult.error?.status === 422
+            errStatus === 422
           );
+          dlog('  2.0 isNew=' + isNew + ' alreadyExists=' + alreadyExists + ' errMsg="' + errMsg + '" errStatus=' + errStatus);
           if (isNew) {
             await auth.signOut().catch(() => {});
             dlog('  2.0 new user created, signed out for clean 2.1 test');
-          } else {
-            dlog('  2.0 signup result: ' + JSON.stringify(upResult.error));
           }
           const ok = isNew || alreadyExists;
           const detail = isNew ? 'new user created' : (alreadyExists ? 'user pre-exists' : 'signup error: ' + errMsg);
           results.push(r('2.0', 'Account setup (new or pre-exists)', ok, detail, elapsed(t), !ok ? 'warn' : null));
         } catch(e) {
-          dlog('  2.0 ERROR: ' + e.message);
-          results.push(r('2.0', 'Account setup (new or pre-exists)', false, e.message, elapsed(t)));
+          dlog('  2.0 EXCEPTION type=' + (e?.constructor?.name || '?') + ' message=' + (e?.message || String(e)));
+          dlog('  2.0 stack: ' + (e?.stack || 'none').slice(0, 300));
+          results.push(r('2.0', 'Account setup (new or pre-exists)', false, (e?.message || String(e)), elapsed(t)));
         }
         logResult(results.at(-1));
 
         // 2.1 Sign in
         t = ts();
+        dlog('  2.1 START — calling auth.signIn(' + email + ', [password])...');
         let signInData = null;
         try {
           const result = await auth.signIn(email, password);
+          dlog('  2.1 raw result: ' + JSON.stringify(result).slice(0, 500));
           signInData = result.data;
           const ok = !result.error;
           if (ok) {
             dlog('  2.1 sign-in OK. response keys: [' + objKeys(result.data) + ']');
+            dlog('  2.1 token present: ' + !!(result.data?.token));
             if (result.data?.user) dlog('  2.1 user keys: [' + objKeys(result.data.user) + ']');
             if (result.data?.user) dlog('  2.1 user.id=' + trunc(result.data.user.id, 16) + ' user.email=' + result.data.user.email + ' user.name=' + result.data.user.name);
           } else {
-            dlog('  2.1 sign-in FAILED: ' + JSON.stringify(result.error));
+            dlog('  2.1 sign-in FAILED');
+            dlog('  2.1 error.code=' + result.error?.code + ' error.status=' + result.error?.status);
+            dlog('  2.1 error.message=' + result.error?.message);
+            dlog('  2.1 full error: ' + JSON.stringify(result.error));
           }
           results.push(r('2.1', 'Sign in succeeds', ok,
             ok ? 'user=' + result.data?.user?.email : (result.error?.message || JSON.stringify(result.error)), elapsed(t)));
         } catch(e) {
-          dlog('  2.1 EXCEPTION: ' + e.message);
+          dlog('  2.1 EXCEPTION type=' + (e?.constructor?.name || '?') + ' message=' + (e?.message || String(e)));
           results.push(r('2.1', 'Sign in succeeds', false, e.message, elapsed(t)));
         }
         logResult(results.at(-1));
