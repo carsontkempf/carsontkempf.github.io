@@ -180,8 +180,11 @@ permalink: /login/
     btn.disabled = true;
     btn.textContent = 'Redirecting...';
     try {
-      const redirect = new URLSearchParams(window.location.search).get('redirect') || '/';
-      await auth.loginWithGoogle(redirect);
+      const redirect = new URLSearchParams(window.location.search).get('redirect');
+      const callbackURL = redirect
+        ? (redirect.startsWith('http') ? redirect : window.location.origin + redirect)
+        : window.location.href;
+      await auth.loginWithGoogle(callbackURL);
     } catch(e) {
       showMessage('Google sign-in failed. Try again.', 'error');
       btn.disabled = false;
@@ -189,7 +192,25 @@ permalink: /login/
     }
   }
 
-  window.onload = checkSession;
+  window.onload = async function() {
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    if (hash.has('auth_token')) {
+      const token = hash.get('auth_token');
+      localStorage.setItem('learn_auth_token', token);
+      const userStr = hash.get('auth_user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(decodeURIComponent(userStr));
+          showLoggedIn(user);
+          window.history.replaceState({}, '', window.location.pathname + window.location.search);
+          return;
+        } catch(e) {
+          console.error('Failed to parse auth_user from hash:', e);
+        }
+      }
+    }
+    await checkSession();
+  };
 </script>
 
 <style>
