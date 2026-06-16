@@ -1,10 +1,10 @@
 ---
 layout: page
-title: Login
-permalink: /login/
+title: Create Account
+permalink: /signup/
 ---
 
-<div id="login-container">
+<div id="signup-container">
 
   <div id="logged-in-panel" style="display:none;">
     <div class="card">
@@ -12,7 +12,6 @@ permalink: /login/
       <div class="user-info">
         <p><strong>Name:</strong> <span id="display-name"></span></p>
         <p><strong>Email:</strong> <span id="display-email"></span></p>
-        <p><strong>Roles:</strong> <span id="display-roles"></span></p>
       </div>
       <div class="actions">
         <a href="/" class="btn btn-primary">Go to Home</a>
@@ -23,51 +22,32 @@ permalink: /login/
 
   <div id="auth-panel">
     <div class="card">
-      <div class="tabs">
-        <button id="tab-signin" class="tab active" onclick="switchTab('signin')">Sign In</button>
-        <button id="tab-signup" class="tab" onclick="switchTab('signup')">Create Account</button>
-      </div>
+      <h2 style="margin:0 0 1.5rem;font-size:1.2rem;font-weight:600;color:#333;">Create Account</h2>
 
-      <!-- Sign In Form -->
-      <div id="form-signin">
-        <div class="form-group">
-          <label for="signin-email">Email</label>
-          <input type="email" id="signin-email" placeholder="you@example.com" autocomplete="email">
-        </div>
-        <div class="form-group">
-          <label for="signin-password">Password</label>
-          <input type="password" id="signin-password" placeholder="Your password" autocomplete="current-password">
-        </div>
-        <button id="signin-btn" class="btn btn-primary full-width">Sign In</button>
+      <div class="form-group">
+        <label for="signup-name">Name</label>
+        <input type="text" id="signup-name" placeholder="Your name" autocomplete="name">
       </div>
-
-      <!-- Sign Up Form -->
-      <div id="form-signup" style="display:none;">
-        <div class="form-group">
-          <label for="signup-name">Name</label>
-          <input type="text" id="signup-name" placeholder="Your name" autocomplete="name">
-        </div>
-        <div class="form-group">
-          <label for="signup-email">Email</label>
-          <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email">
-        </div>
-        <div class="form-group">
-          <label for="signup-password">Password</label>
-          <input type="password" id="signup-password" placeholder="Minimum 8 characters" autocomplete="new-password">
-        </div>
-        <button id="signup-btn" class="btn btn-primary full-width">Create Account</button>
+      <div class="form-group">
+        <label for="signup-email">Email</label>
+        <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email">
       </div>
+      <div class="form-group">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" placeholder="Minimum 8 characters" autocomplete="new-password">
+      </div>
+      <button id="signup-btn" class="btn btn-primary full-width">Create Account</button>
 
       <div id="auth-message" class="message" style="display:none;"></div>
 
       <div class="divider"><span>or</span></div>
-      <button id="google-btn" class="btn btn-google full-width" onclick="googleLogin()">
+      <button id="google-btn" class="btn btn-google full-width" onclick="googleSignup()">
         <img src="/assets/img/search.png" alt="Google" style="width:1em;height:1em;vertical-align:middle;object-fit:contain;flex-shrink:0;">
         Continue with Google
       </button>
 
       <p style="text-align:center;margin-top:1.5rem;font-size:0.9rem;color:#666;">
-        New here? <a href="/signup/" style="color:#007bff;text-decoration:none;">Create account</a>
+        Already have an account? <a href="/login/" style="color:#007bff;text-decoration:none;">Sign in</a>
       </p>
     </div>
   </div>
@@ -78,14 +58,6 @@ permalink: /login/
 <script>
   const AUTH_URL = 'https://cloudprototype.org/api/auth';
   const auth = new AuthSDK({ tenantUrl: AUTH_URL });
-
-  function switchTab(tab) {
-    document.getElementById('form-signin').style.display = tab === 'signin' ? 'block' : 'none';
-    document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
-    document.getElementById('tab-signin').className = 'tab' + (tab === 'signin' ? ' active' : '');
-    document.getElementById('tab-signup').className = 'tab' + (tab === 'signup' ? ' active' : '');
-    clearMessage();
-  }
 
   function showMessage(msg, type) {
     const el = document.getElementById('auth-message');
@@ -100,10 +72,10 @@ permalink: /login/
     el.textContent = '';
   }
 
-  function setLoading(btnId, loading) {
-    const btn = document.getElementById(btnId);
+  function setLoading(loading) {
+    const btn = document.getElementById('signup-btn');
     btn.disabled = loading;
-    btn.textContent = loading ? 'Please wait...' : (btnId === 'signin-btn' ? 'Sign In' : 'Create Account');
+    btn.textContent = loading ? 'Please wait...' : 'Create Account';
   }
 
   async function checkSession() {
@@ -122,30 +94,7 @@ permalink: /login/
     document.getElementById('logged-in-panel').style.display = 'block';
     document.getElementById('display-name').textContent = user.name || 'N/A';
     document.getElementById('display-email').textContent = user.email;
-    auth.getRoles().then(roles => {
-      document.getElementById('display-roles').textContent = roles.length ? roles.join(', ') : 'none';
-    });
   }
-
-  document.getElementById('signin-btn').onclick = async () => {
-    const email = document.getElementById('signin-email').value.trim();
-    const password = document.getElementById('signin-password').value;
-    if (!email || !password) { showMessage('Email and password required.', 'error'); return; }
-    setLoading('signin-btn', true);
-    clearMessage();
-    try {
-      const result = await auth.signIn(email, password);
-      if (result.error) throw new Error(result.error.message || 'Sign in failed');
-      showMessage('Signed in successfully!', 'success');
-      setTimeout(() => {
-        const redirect = new URLSearchParams(window.location.search).get('redirect') || '/';
-        window.location.href = redirect;
-      }, 800);
-    } catch (err) {
-      showMessage(err.message, 'error');
-      setLoading('signin-btn', false);
-    }
-  };
 
   document.getElementById('signup-btn').onclick = async () => {
     const name = document.getElementById('signup-name').value.trim();
@@ -153,7 +102,7 @@ permalink: /login/
     const password = document.getElementById('signup-password').value;
     if (!name || !email || !password) { showMessage('All fields required.', 'error'); return; }
     if (password.length < 8) { showMessage('Password must be at least 8 characters.', 'error'); return; }
-    setLoading('signup-btn', true);
+    setLoading(true);
     clearMessage();
     try {
       const result = await auth.signUp(email, password, name);
@@ -165,7 +114,7 @@ permalink: /login/
       }, 1000);
     } catch (err) {
       showMessage(err.message, 'error');
-      setLoading('signup-btn', false);
+      setLoading(false);
     }
   };
 
@@ -175,14 +124,13 @@ permalink: /login/
     document.getElementById('logged-in-panel').style.display = 'none';
   };
 
-  // Handle Enter key
-  ['signin-email', 'signin-password'].forEach(id => {
+  ['signup-name', 'signup-email', 'signup-password'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('signin-btn').click();
+      if (e.key === 'Enter') document.getElementById('signup-btn').click();
     });
   });
 
-  async function googleLogin() {
+  async function googleSignup() {
     const btn = document.getElementById('google-btn');
     btn.disabled = true;
     btn.textContent = 'Redirecting...';
@@ -193,7 +141,7 @@ permalink: /login/
         : window.location.href;
       await auth.loginWithGoogle(callbackURL);
     } catch(e) {
-      showMessage('Google sign-in failed. Try again.', 'error');
+      showMessage('Google sign-up failed. Try again.', 'error');
       btn.disabled = false;
       btn.textContent = 'Continue with Google';
     }
@@ -221,7 +169,7 @@ permalink: /login/
 </script>
 
 <style>
-#login-container {
+#signup-container {
   max-width: 400px;
   margin: 2rem auto;
   padding: 0 1rem;
@@ -232,28 +180,6 @@ permalink: /login/
   border-radius: 10px;
   padding: 2rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-.tabs {
-  display: flex;
-  gap: 0;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid #e0e0e0;
-}
-.tab {
-  flex: 1;
-  padding: 0.6rem;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 0.95rem;
-  color: #666;
-  font-weight: 500;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-}
-.tab.active {
-  color: #007bff;
-  border-bottom-color: #007bff;
 }
 .form-group { margin-bottom: 1rem; }
 .form-group label { display: block; margin-bottom: 0.3rem; font-weight: 500; font-size: 0.9rem; color: #333; }
@@ -303,11 +229,6 @@ permalink: /login/
   gap: 0.5rem;
   margin-top: 0.5rem;
   padding: 0.35rem 0.75rem;
-}
-.google-icon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
 }
 .btn-google:hover:not(:disabled) { background: #f8f9fa; }
 .divider {
