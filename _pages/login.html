@@ -27,10 +27,11 @@ permalink: /login/
         src="https://cloudprototype.org/auth/widget/login"
         frameborder="0"
         scrolling="no"
-        style="width:100%;display:block;border:none;min-height:380px;"
+        style="width:100%;display:block;border:none;height:300px;"
         title="Sign in"
       ></iframe>
     </div>
+    <p class="switch-link">New here? <a href="/signup/">Create account</a></p>
   </div>
 
 </div>
@@ -44,7 +45,7 @@ permalink: /login/
     if (e.origin !== 'https://cloudprototype.org') return;
     if (e.data && e.data.type === 'resize') {
       const iframe = document.getElementById('auth-iframe');
-      if (iframe) iframe.style.height = (e.data.height + 8) + 'px';
+      if (iframe) iframe.style.height = (e.data.height + 4) + 'px';
     }
     if (e.data && e.data.type === 'auth:success') {
       const redirect = new URLSearchParams(window.location.search).get('redirect') || '/';
@@ -108,6 +109,17 @@ permalink: /login/
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
+.switch-link {
+  text-align: center;
+  margin: 12px 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+.switch-link a {
+  color: #2563eb;
+  text-decoration: none;
+}
+.switch-link a:hover { text-decoration: underline; }
 .status-card {
   background: white;
   border: 1px solid #e0e0e0;
