@@ -358,6 +358,24 @@ no_auth: true
     });
   }
 
+  function tryEngineMove() {
+    var ctrl = window.chessController;
+    if (!ctrl) {
+      addEntry('warn', '[CTRL+SHIFT+C] chessController not ready');
+      return;
+    }
+    if (ctrl.game && ctrl.game.game_over()) {
+      addEntry('warn', '[CTRL+SHIFT+C] Game is over — no move attempted');
+      return;
+    }
+    if (!ctrl.engine || !ctrl.engine.ready) {
+      addEntry('warn', '[CTRL+SHIFT+C] Engine not ready — no move attempted');
+      return;
+    }
+    addEntry('info', '[CTRL+SHIFT+C] Requesting engine move for FEN: ' + ctrl.game.fen());
+    ctrl.makeEngineMove();
+  }
+
   function scheduleCopy() {
     clearTimeout(_copyTimer);
     setTitle('Debug Log — waiting for logs...');
@@ -436,6 +454,7 @@ no_auth: true
     document.addEventListener('keydown', function(e) {
       if (e.ctrlKey && e.shiftKey && e.key === 'C') {
         e.preventDefault();
+        tryEngineMove();
         scheduleCopy();
       }
     });
@@ -508,6 +527,7 @@ no_auth: true
     });
 
     chessController.init();
+    window.chessController = chessController;
 
     if (chessController.engine) {
       chessController.engine.onEngineError = function(error) {
