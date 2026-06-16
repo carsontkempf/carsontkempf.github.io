@@ -275,6 +275,7 @@ no_auth: true
       <button class="debug-filter-btn debug-filter-active" data-filter="warn">warn</button>
       <button class="debug-filter-btn debug-filter-active" data-filter="error">error</button>
       <button id="debug-auth-btn">Test Auth</button>
+      <button id="debug-origin-btn">Check Origin</button>
       <button id="debug-clear-btn">Clear</button>
       <button id="debug-copy-btn">Copy</button>
     </div>
@@ -296,7 +297,7 @@ no_auth: true
 
   var CAPTURE_TAGS = [
     '[ENGINE-DIAGNOSTIC]', '[NETWORK', '[LICHESS-FALLBACK]',
-    '[CONTROLLER]', '[FATAL]', '[WARN]', '[SDK]', '[UNCAUGHT]', '[NETWORK-DIAG]'
+    '[CONTROLLER]', '[FATAL]', '[WARN]', '[SDK]', '[UNCAUGHT]', '[NETWORK-DIAG]', '[SDK-INIT]'
   ];
 
   function ts() {
@@ -420,11 +421,15 @@ no_auth: true
     var baseUrl = cfg.baseUrl || 'https://ctklearn.carsontkempf.workers.dev';
     var origin = window.location.origin;
     var clientSdk = (window.lichessClient && window.lichessClient.sdk) ? 'initialized' : 'null';
+    var cacheSize = (window.lichessClient && window.lichessClient.cache) ? window.lichessClient.cache.size : '?';
+    var sdkType = sdkOk ? (typeof SecretsSDK === 'function' ? 'function' : typeof SecretsSDK) : 'n/a';
     var parts = [
       'SDK global: ' + (sdkOk ? 'loaded' : 'NOT FOUND'),
+      'SDK type: ' + sdkType,
       'baseUrl: ' + baseUrl,
       'origin: ' + origin,
-      'lichessClient.sdk: ' + clientSdk
+      'lichessClient.sdk: ' + clientSdk,
+      'cache entries: ' + cacheSize
     ];
     _statusEl.textContent = parts.join(' | ');
   }
@@ -464,6 +469,20 @@ no_auth: true
         });
       }).catch(function(e) {
         addEntry('error', '[NETWORK-DIAG] fetch failed: ' + e.message);
+      });
+    });
+
+    document.getElementById('debug-origin-btn').addEventListener('click', function() {
+      var baseUrl = (window.learnWorkerConfig && window.learnWorkerConfig.baseUrl) || 'https://ctklearn.carsontkempf.workers.dev';
+      var url = baseUrl + '/api/sdk/origin-check';
+      addEntry('info', '[NETWORK-DIAG] origin-check -> ' + url + ' (origin: ' + window.location.origin + ')');
+      fetch(url).then(function(r) {
+        return r.json().then(function(j) {
+          var lvl = j.registered ? 'info' : 'error';
+          addEntry(lvl, '[NETWORK-DIAG] origin-check: registered=' + j.registered + ' tokens_checked=' + (j.tokens_checked !== undefined ? j.tokens_checked : '?') + ' origin=' + (j.origin || '?'));
+        });
+      }).catch(function(e) {
+        addEntry('error', '[NETWORK-DIAG] origin-check failed: ' + e.message);
       });
     });
 

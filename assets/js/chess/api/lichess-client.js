@@ -94,6 +94,7 @@ class LichessClient {
     });
 
     console.log('[ENGINE-DIAGNOSTIC] [SDK] SecretsSDK initialized (zero-config mode)');
+    console.log('[ENGINE-DIAGNOSTIC] [SDK-INIT] constructor: ' + typeof SDKConstructor + ' | baseUrl: ' + baseUrl + ' | instance created: ' + (!!this.sdk));
     return this.sdk;
   }
 
@@ -123,9 +124,10 @@ class LichessClient {
     // Check cache
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
-      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-CACHE-HIT] Using cached result');
+      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-CACHE-HIT] age=' + Math.round((Date.now() - cached.timestamp) / 1000) + 's key=' + cacheKey);
       return cached.data;
     }
+    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-CACHE-MISS] key=' + cacheKey + (cached ? ' (expired, age=' + Math.round((Date.now() - cached.timestamp) / 1000) + 's)' : ' (no entry)'));
 
     const startTime = performance.now();
     const diagBaseUrl = window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://ctklearn.carsontkempf.workers.dev';
@@ -143,13 +145,14 @@ class LichessClient {
           const response = await sdk.get('lichess', path);
 
           // Handle nesting: sdk.get returns the proxy's JSON, which has its own .data property
+          console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SDK-RESPONSE] keys=' + JSON.stringify(Object.keys(response || {})) + ' has_data=' + !!(response && response.data));
           if (response && response.data) {
             data = response.data;
           } else {
             data = response; // Fallback if not nested
           }
         } catch (sdkError) {
-          console.error('[ENGINE-DIAGNOSTIC] [NETWORK-SDK-ERROR] SDK threw: ' + sdkError.message);
+          console.error('[ENGINE-DIAGNOSTIC] [NETWORK-SDK-ERROR] ' + sdkError.message + ' | status: ' + (sdkError.status || 'n/a') + ' | data: ' + JSON.stringify(sdkError.data || null));
           try {
             const diagResp = await fetch(proxyUrl, {
               method: 'POST',
