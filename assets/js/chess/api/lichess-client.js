@@ -128,20 +128,40 @@ class LichessClient {
     }
 
     const startTime = performance.now();
+    const diagBaseUrl = window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://ctklearn.carsontkempf.workers.dev';
+    const proxyUrl = diagBaseUrl + '/api/sdk/proxy';
+    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SDK] Origin: ' + window.location.origin);
+    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SDK] Proxy URL: ' + proxyUrl);
 
     try {
       let data;
-      
+
       if (sdk) {
         console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SDK] Fetching via SecretsSDK:', path);
-        // The SDK handles the base URL and proxy logic
-        const response = await sdk.get('lichess', path);
-        
-        // Handle nesting: sdk.get returns the proxy's JSON, which has its own .data property
-        if (response && response.data) {
-          data = response.data;
-        } else {
-          data = response; // Fallback if not nested
+        try {
+          // The SDK handles the base URL and proxy logic
+          const response = await sdk.get('lichess', path);
+
+          // Handle nesting: sdk.get returns the proxy's JSON, which has its own .data property
+          if (response && response.data) {
+            data = response.data;
+          } else {
+            data = response; // Fallback if not nested
+          }
+        } catch (sdkError) {
+          console.error('[ENGINE-DIAGNOSTIC] [NETWORK-SDK-ERROR] SDK threw: ' + sdkError.message);
+          try {
+            const diagResp = await fetch(proxyUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ keyName: 'lichess', endpoint: path, method: 'GET' })
+            });
+            const diagText = await diagResp.text();
+            console.error('[ENGINE-DIAGNOSTIC] [NETWORK-DIAG] status=' + diagResp.status + ' body=' + diagText);
+          } catch (diagErr) {
+            console.error('[ENGINE-DIAGNOSTIC] [NETWORK-DIAG] diagnostic fetch failed: ' + diagErr.message);
+          }
+          throw sdkError;
         }
       } else {
         // Fallback for when SDK isn't loaded (mostly for development/emergencies)
