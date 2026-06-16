@@ -7,7 +7,7 @@ permalink: /signup/
 <div id="signup-container">
 
   <div id="logged-in-panel" style="display:none;">
-    <div class="card">
+    <div class="status-card">
       <h2>Signed In</h2>
       <div class="user-info">
         <p><strong>Name:</strong> <span id="display-name"></span></p>
@@ -21,34 +21,15 @@ permalink: /signup/
   </div>
 
   <div id="auth-panel">
-    <div class="card">
-      <h2 style="margin:0 0 1.5rem;font-size:1.2rem;font-weight:600;color:#333;">Create Account</h2>
-
-      <div class="form-group">
-        <label for="signup-name">Name</label>
-        <input type="text" id="signup-name" placeholder="Your name" autocomplete="name">
-      </div>
-      <div class="form-group">
-        <label for="signup-email">Email</label>
-        <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email">
-      </div>
-      <div class="form-group">
-        <label for="signup-password">Password</label>
-        <input type="password" id="signup-password" placeholder="Minimum 8 characters" autocomplete="new-password">
-      </div>
-      <button id="signup-btn" class="btn btn-primary full-width">Create Account</button>
-
-      <div id="auth-message" class="message" style="display:none;"></div>
-
-      <div class="divider"><span>or</span></div>
-      <button id="google-btn" class="btn btn-google full-width" onclick="googleSignup()">
-        <img src="/assets/img/search.png" alt="Google" style="width:1em;height:1em;vertical-align:middle;object-fit:contain;flex-shrink:0;">
-        Continue with Google
-      </button>
-
-      <p style="text-align:center;margin-top:1.5rem;font-size:0.9rem;color:#666;">
-        Already have an account? <a href="/login/" style="color:#007bff;text-decoration:none;">Sign in</a>
-      </p>
+    <div class="iframe-card">
+      <iframe
+        id="auth-iframe"
+        src="https://cloudprototype.org/auth/widget/signup"
+        frameborder="0"
+        scrolling="no"
+        style="width:100%;display:block;border:none;min-height:440px;"
+        title="Create account"
+      ></iframe>
     </div>
   </div>
 
@@ -59,24 +40,17 @@ permalink: /signup/
   const AUTH_URL = 'https://cloudprototype.org/api/auth';
   const auth = new AuthSDK({ tenantUrl: AUTH_URL });
 
-  function showMessage(msg, type) {
-    const el = document.getElementById('auth-message');
-    el.textContent = msg;
-    el.className = 'message ' + type;
-    el.style.display = 'block';
-  }
-
-  function clearMessage() {
-    const el = document.getElementById('auth-message');
-    el.style.display = 'none';
-    el.textContent = '';
-  }
-
-  function setLoading(loading) {
-    const btn = document.getElementById('signup-btn');
-    btn.disabled = loading;
-    btn.textContent = loading ? 'Please wait...' : 'Create Account';
-  }
+  window.addEventListener('message', function(e) {
+    if (e.origin !== 'https://cloudprototype.org') return;
+    if (e.data && e.data.type === 'resize') {
+      const iframe = document.getElementById('auth-iframe');
+      if (iframe) iframe.style.height = (e.data.height + 8) + 'px';
+    }
+    if (e.data && e.data.type === 'auth:success') {
+      const redirect = new URLSearchParams(window.location.search).get('redirect') || '/';
+      window.location.href = redirect;
+    }
+  });
 
   async function checkSession() {
     try {
@@ -96,56 +70,11 @@ permalink: /signup/
     document.getElementById('display-email').textContent = user.email;
   }
 
-  document.getElementById('signup-btn').onclick = async () => {
-    const name = document.getElementById('signup-name').value.trim();
-    const email = document.getElementById('signup-email').value.trim();
-    const password = document.getElementById('signup-password').value;
-    if (!name || !email || !password) { showMessage('All fields required.', 'error'); return; }
-    if (password.length < 8) { showMessage('Password must be at least 8 characters.', 'error'); return; }
-    setLoading(true);
-    clearMessage();
-    try {
-      const result = await auth.signUp(email, password, name);
-      if (result.error) throw new Error(result.error.message || 'Sign up failed');
-      showMessage('Account created! Signing you in...', 'success');
-      setTimeout(() => {
-        const redirect = new URLSearchParams(window.location.search).get('redirect') || '/';
-        window.location.href = redirect;
-      }, 1000);
-    } catch (err) {
-      showMessage(err.message, 'error');
-      setLoading(false);
-    }
-  };
-
   document.getElementById('signout-btn').onclick = async () => {
     await auth.signOut();
     document.getElementById('auth-panel').style.display = 'block';
     document.getElementById('logged-in-panel').style.display = 'none';
   };
-
-  ['signup-name', 'signup-email', 'signup-password'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('signup-btn').click();
-    });
-  });
-
-  async function googleSignup() {
-    const btn = document.getElementById('google-btn');
-    btn.disabled = true;
-    btn.textContent = 'Redirecting...';
-    try {
-      const redirect = new URLSearchParams(window.location.search).get('redirect');
-      const callbackURL = redirect
-        ? (redirect.startsWith('http') ? redirect : window.location.origin + redirect)
-        : window.location.href;
-      await auth.loginWithGoogle(callbackURL);
-    } catch(e) {
-      showMessage('Google sign-up failed. Try again.', 'error');
-      btn.disabled = false;
-      btn.textContent = 'Continue with Google';
-    }
-  }
 
   window.onload = async function() {
     const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
@@ -159,9 +88,7 @@ permalink: /signup/
           showLoggedIn(user);
           window.history.replaceState({}, '', window.location.pathname + window.location.search);
           return;
-        } catch(e) {
-          console.error('Failed to parse auth_user from hash:', e);
-        }
+        } catch(e) {}
       }
     }
     await checkSession();
@@ -170,29 +97,27 @@ permalink: /signup/
 
 <style>
 #signup-container {
-  max-width: 400px;
+  max-width: 420px;
   margin: 2rem auto;
   padding: 0 1rem;
 }
-.card {
+.iframe-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.status-card {
   background: white;
   border: 1px solid #e0e0e0;
   border-radius: 10px;
   padding: 2rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
-.form-group { margin-bottom: 1rem; }
-.form-group label { display: block; margin-bottom: 0.3rem; font-weight: 500; font-size: 0.9rem; color: #333; }
-.form-group input {
-  width: 100%;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  box-sizing: border-box;
-  font-size: 0.95rem;
-  transition: border-color 0.2s;
-}
-.form-group input:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 2px rgba(0,123,255,0.15); }
+.user-info { margin: 1rem 0; font-size: 0.95rem; }
+.user-info p { margin: 0.4rem 0; }
+.actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
 .btn {
   padding: 0.65rem 1.2rem;
   border-radius: 6px;
@@ -200,50 +125,9 @@ permalink: /signup/
   border: none;
   font-weight: 600;
   font-size: 0.95rem;
-  transition: background 0.2s, opacity 0.2s;
 }
-.btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-primary { background: #007bff; color: white; }
-.btn-primary:hover:not(:disabled) { background: #0056b3; }
+.btn-primary { background: #007bff; color: white; text-decoration: none; }
+.btn-primary:hover { background: #0056b3; }
 .btn-outline { background: white; color: #666; border: 1px solid #ccc; }
 .btn-outline:hover { background: #f5f5f5; }
-.full-width { width: 100%; margin-top: 0.5rem; }
-.message {
-  margin-top: 1rem;
-  padding: 0.7rem 1rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-.message.error { background: #fff0f0; color: #c0392b; border: 1px solid #f5c6cb; }
-.message.success { background: #f0fff4; color: #27ae60; border: 1px solid #c3e6cb; }
-.user-info { margin: 1rem 0; font-size: 0.95rem; }
-.user-info p { margin: 0.4rem 0; }
-.actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
-.btn-google {
-  background: white;
-  color: #3c4043;
-  border: 1px solid #dadce0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  padding: 0.35rem 0.75rem;
-}
-.btn-google:hover:not(:disabled) { background: #f8f9fa; }
-.divider {
-  text-align: center;
-  position: relative;
-  margin: 1rem 0;
-  color: #999;
-  font-size: 0.85rem;
-}
-.divider::before {
-  content: '';
-  position: absolute;
-  top: 50%; left: 0; right: 0;
-  height: 1px;
-  background: #e0e0e0;
-}
-.divider span { background: white; padding: 0 0.5rem; position: relative; }
 </style>
