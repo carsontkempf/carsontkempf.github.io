@@ -48,6 +48,8 @@ permalink: /signup/
       if (iframe) iframe.style.height = (e.data.height + 4) + 'px';
     }
     if (e.data && e.data.type === 'auth:success') {
+      if (e.data.token) localStorage.setItem('learn_auth_token', e.data.token);
+      if (e.data.user) localStorage.setItem('learn_auth_user', JSON.stringify(e.data.user));
       const redirect = new URLSearchParams(window.location.search).get('redirect') || '/';
       window.location.href = redirect;
     }
