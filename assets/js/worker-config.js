@@ -13,7 +13,7 @@
 
 // Updated Worker URL (current production deployment)
 // The main Learn app Worker with proper CORS configuration
-const WORKER_BASE_URL = 'https://ctklearn.carsontkempf.workers.dev';
+const WORKER_BASE_URL = 'https://cloudprototype.org';
 
 // Fallback to local development if needed
 const WORKER_BASE_URL_DEV = 'http://localhost:8787';
