@@ -104,34 +104,81 @@
             console.log('[ENGINE-DIAGNOSTIC] [CREATED] Engine instance created successfully');
 
             this.engine.onerror = function(error) {
-                console.error('[ENGINE-DIAGNOSTIC] [RUNTIME-ERROR] Stockfish reported a failure.');
-                console.error('[ENGINE-DIAGNOSTIC]   - Error message:', error && error.message);
-                console.error('[ENGINE-DIAGNOSTIC]   - Engine phase at crash:', self._enginePhase || 'unknown');
-                console.error('[ENGINE-DIAGNOSTIC]   - Last FEN analyzed:', self._lastFen || 'none');
-                console.error('[ENGINE-DIAGNOSTIC]   - SIMD gate (diag):', window.__diagSimdCheck);
+                self._crashCount = (self._crashCount || 0) + 1;
+                var crashedAtDepth = self._maxDepthReached || 0;
+                var targetDepth = self._analysisMaxDepth || 12;
+                var crashedMultiPV = self._analysisMultiPV || 3;
+
+                console.error('[ENGINE-DIAGNOSTIC] [CRASH #' + self._crashCount + '] Stockfish failure');
+                console.error('[ENGINE-DIAGNOSTIC]   - crash #:', self._crashCount);
+                console.error('[ENGINE-DIAGNOSTIC]   - phase:', self._enginePhase || 'unknown');
+                console.error('[ENGINE-DIAGNOSTIC]   - depth at crash: reached=' + crashedAtDepth + ' / target=' + targetDepth);
+                console.error('[ENGINE-DIAGNOSTIC]   - MultiPV at crash:', crashedMultiPV);
+                console.error('[ENGINE-DIAGNOSTIC]   - FEN:', self._lastFen || 'none');
+                console.error('[ENGINE-DIAGNOSTIC]   - SIMD gate:', window.__diagSimdCheck);
+                console.error('[ENGINE-DIAGNOSTIC]   - error:', error && error.message);
                 try {
                     var mem = window.performance && window.performance.memory;
-                    if (mem) console.error('[ENGINE-DIAGNOSTIC]   - Heap used/limit (MB):', Math.round(mem.usedJSHeapSize/1048576), '/', Math.round(mem.jsHeapSizeLimit/1048576));
+                    if (mem) console.error('[ENGINE-DIAGNOSTIC]   - heap used/limit (MB):', Math.round(mem.usedJSHeapSize/1048576), '/', Math.round(mem.jsHeapSizeLimit/1048576));
                 } catch (_) {}
-                if (error && error.message && error.message.includes('unreachable')) {
-                    console.error('[ENGINE-DIAGNOSTIC]   - Trap cause: SIMD gate=' + window.__diagSimdCheck + ' → if true: OOM or WASM assertion; if false: SIMD HW mismatch');
+
+                // Adaptive recovery strategy
+                if (self._crashCount === 1) {
+                    self._analysisMaxDepth = Math.max(6, crashedAtDepth > 0 ? crashedAtDepth - 2 : 10);
+                    self._analysisMultiPV = 1;
+                    console.log('[ENGINE-DIAGNOSTIC] [RECOVERY #1] Reducing depth to ' + self._analysisMaxDepth + ', MultiPV to 1, re-init...');
+                } else if (self._crashCount === 2) {
+                    self._analysisMaxDepth = Math.max(4, (self._analysisMaxDepth || 8) - 3);
+                    self._analysisMultiPV = 1;
+                    console.log('[ENGINE-DIAGNOSTIC] [RECOVERY #2] Reducing depth to ' + self._analysisMaxDepth + ', re-init...');
+                } else {
+                    console.error('[ENGINE-DIAGNOSTIC] [RECOVERY-FAILED] 3 crashes — disabling analysis engine');
+                    self.ready = false;
+                    self.error = true;
+                    self.simdUnsupported = true;
+                    if (self.onEngineError) self.onEngineError(error);
+                    return;
                 }
+
+                // Tear down crashed engine cleanly
+                var oldEngine = self.engine;
+                self.engine = null;
                 self.ready = false;
-                self.error = true;
-                if (self.onEngineError) {
-                    self.onEngineError(error);
-                }
+                self.error = false;
+                self.analyzing = false;
+                try { if (oldEngine && oldEngine.quit) oldEngine.quit(); } catch (_) {}
+
+                // Capture recovery targets before async
+                var recoveryFen = self._analysisFen;
+                var recoveryCallback = self._analysisCallback;
+                var recoveryMultiPV = self._analysisMultiPV;
+
+                setTimeout(function() {
+                    console.log('[ENGINE-DIAGNOSTIC] [RECOVERY] Re-initializing engine (depth=' + self._analysisMaxDepth + ' multipv=' + recoveryMultiPV + ')...');
+                    self.init(function() {
+                        console.log('[ENGINE-DIAGNOSTIC] [RECOVERY] Engine ready, restarting analysis');
+                        if (recoveryFen && recoveryCallback) {
+                            self.startContinuousAnalysis(recoveryFen, recoveryCallback, recoveryMultiPV);
+                        }
+                    });
+                }, 1000);
+
+                if (self.onEngineError) self.onEngineError(error);
             };
         } catch (e) {
             console.error('[ENGINE-DIAGNOSTIC] [FATAL] Exception during engine creation:', e);
             return;
         }
 
-        self._enginePhase = 'uci-init';
+        self._setPhase = function(p) {
+            console.log('[ENGINE-DIAGNOSTIC] [PHASE] ' + (self._enginePhase || 'none') + ' → ' + p);
+            self._enginePhase = p;
+        };
+        self._setPhase('uci-init');
         console.log('[ENGINE-DIAGNOSTIC] [UCI-INIT] Sending "uci" command');
         this.engine.send('uci', function() {
             console.log('[ENGINE-DIAGNOSTIC] [UCI-READY] Engine responded to "uci"');
-            self._enginePhase = 'ready';
+            self._setPhase('ready');
             self.ready = true;
 
             console.log('[ENGINE-DIAGNOSTIC] [CONFIG] Applying memory-safe defaults (Hash=16, Threads=1)');
@@ -163,12 +210,12 @@
         this.ensureStopped().then(function() {
             self.analyzing = true;
             self._lastFen = fen;
-            self._enginePhase = 'analyzing-bestmove';
+            if (self._setPhase) self._setPhase('analyzing-bestmove');
 
             self.engine.send('position fen ' + fen);
             self.engine.send('go depth ' + self.depth, function(result) {
                 self.analyzing = false;
-                self._enginePhase = 'ready';
+                if (self._setPhase) self._setPhase('ready');
                 var match = result.match(/bestmove ([a-h][1-8][a-h][1-8][qrbn]?)/);
                 if (match && callback) {
                     callback(match[1]);
@@ -259,28 +306,59 @@
     StockfishEngine.prototype.startContinuousAnalysis = function(fen, streamCallback, multipv) {
         var self = this;
         if (!this.ready) {
-            console.error('Engine not ready');
+            console.error('[ENGINE-DIAGNOSTIC] startContinuousAnalysis: engine not ready');
             return;
         }
 
+        // Initialize adaptive depth on first call only — preserved across recovery re-inits
+        if (self._analysisMaxDepth === undefined) self._analysisMaxDepth = 12;
+        multipv = multipv || 3;
+
+        // Store for crash recovery
+        self._analysisFen = fen;
+        self._analysisCallback = streamCallback;
+        self._analysisMultiPV = multipv;
+
         this.ensureStopped().then(function() {
+            if (!self.ready) return; // crashed during ensureStopped
+
             self.analyzing = true;
             self._lastFen = fen;
-            self._enginePhase = 'analyzing-continuous';
-            multipv = multipv || 3;
+            if (self._setPhase) self._setPhase('analyzing-continuous');
+            self._maxDepthReached = 0;
+
+            var targetDepth = self._analysisMaxDepth;
+            var thisMPV = self._analysisMultiPV;
+
+            console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOOP] search start: depth=' + targetDepth + ' multipv=' + thisMPV);
 
             self.engine.stream = function(line) {
-                if (streamCallback && line.indexOf('info') === 0) {
+                if (line.indexOf('info') === 0) {
                     var analysis = self.parseInfo(line);
                     if (analysis) {
-                        streamCallback(analysis);
+                        if (analysis.depth && analysis.depth > (self._maxDepthReached || 0)) {
+                            self._maxDepthReached = analysis.depth;
+                        }
+                        if (streamCallback) streamCallback(analysis);
                     }
                 }
             };
 
-            self.engine.send('setoption name MultiPV value ' + multipv);
+            self.engine.send('setoption name MultiPV value ' + thisMPV);
             self.engine.send('position fen ' + fen);
-            self.engine.send('go infinite');
+            self.engine.send('go depth ' + targetDepth, function() {
+                if (!self.analyzing) return; // stopped externally
+
+                // Depth completed cleanly — ratchet up
+                var prev = self._analysisMaxDepth;
+                self._analysisMaxDepth = Math.min(25, prev + 1);
+                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOOP] depth ' + prev + ' complete, next: ' + self._analysisMaxDepth);
+
+                // Loop: restart at same FEN with incremented depth
+                if (self._analysisFen === fen) {
+                    self.startContinuousAnalysis(fen, streamCallback, thisMPV);
+                }
+            });
         });
     };
 
