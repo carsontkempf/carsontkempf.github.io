@@ -1,191 +1,76 @@
 /**
  * Lichess API Client
  *
- * Frontend wrapper for calling the Lichess proxy Netlify function
- * Handles authentication, caching, and error handling
+ * Calls Lichess public APIs directly from the browser.
+ * No proxy needed — lichess.org and explorer.lichess.ovh both have CORS enabled.
  */
 
-// Netlify Functions API Base URLs (primary and fallback)
-const NETLIFY_API_BASES_LICHESS = [
-    'https://carsontkempf.netlify.app/.netlify/functions',
-    'https://resonant-cheesecake-638dd1.netlify.app/.netlify/functions'
-];
-let currentApiBaseIndexLichess = 0;
+const LICHESS_EVAL_URL = 'https://lichess.org/api/cloud-eval';
+const LICHESS_EXPLORER_URL = 'https://explorer.lichess.ovh/lichess';
 
-// Helper function to make fetch requests with automatic fallback on CORS errors
-async function fetchWithFallbackLichess(endpoint, options = {}) {
-    // Handle query strings - split on ? to separate function name from params
-    const [functionName, queryString] = endpoint.includes('?')
-        ? endpoint.split('?')
-        : [endpoint, ''];
-
-    for (let i = currentApiBaseIndexLichess; i < NETLIFY_API_BASES_LICHESS.length; i++) {
-        const baseUrl = NETLIFY_API_BASES_LICHESS[i];
-        const url = queryString
-            ? `${baseUrl}/${functionName}?${queryString}`
-            : `${baseUrl}/${functionName}`;
-
-        console.log(`[LICHESS-FALLBACK] Attempt ${i + 1}/${NETLIFY_API_BASES_LICHESS.length}: ${url}`);
-
-        try {
-            const response = await fetch(url, options);
-
-            // If successful, update current index for future calls
-            if (response.ok || response.status === 401 || response.status === 403) {
-                if (i !== currentApiBaseIndexLichess) {
-                    console.log(`[LICHESS-FALLBACK] Switched to fallback URL: ${baseUrl}`);
-                    currentApiBaseIndexLichess = i;
-                }
-                return response;
-            }
-
-            console.log(`[LICHESS-FALLBACK] Response status ${response.status}, trying next URL...`);
-        } catch (error) {
-            console.error(`[LICHESS-FALLBACK] Error with ${baseUrl}:`, error.message);
-
-            // Check if it's a CORS error
-            if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
-                console.log(`[LICHESS-FALLBACK] CORS error detected, trying next URL...`);
-                continue;
-            }
-
-            // If it's not a CORS error and we're on the last URL, throw
-            if (i === NETLIFY_API_BASES_LICHESS.length - 1) {
-                throw error;
-            }
-        }
-    }
-
-    throw new Error('All Netlify API endpoints failed');
+function selectMoveByDifficulty(pvs, difficulty) {
+    if (!pvs || pvs.length === 0) return 0;
+    if (difficulty >= 10) return 0;
+    const maxPvIndex = Math.min(pvs.length - 1, 4);
+    const r = Math.random();
+    if (difficulty >= 8) return r < 0.9 ? 0 : Math.min(1, maxPvIndex);
+    if (difficulty >= 6) { if (r < 0.7) return 0; if (r < 0.9) return Math.min(1, maxPvIndex); return Math.min(2, maxPvIndex); }
+    if (difficulty >= 4) { if (r < 0.5) return 0; if (r < 0.8) return Math.min(1, maxPvIndex); if (r < 0.95) return Math.min(2, maxPvIndex); return Math.min(3, maxPvIndex); }
+    if (difficulty >= 2) { if (r < 0.3) return 0; if (r < 0.55) return Math.min(1, maxPvIndex); if (r < 0.75) return Math.min(2, maxPvIndex); if (r < 0.9) return Math.min(3, maxPvIndex); return Math.min(4, maxPvIndex); }
+    return Math.floor(Math.random() * Math.min(pvs.length, 5));
 }
 
 class LichessClient {
   constructor() {
     this.cache = new Map();
-    this.cacheExpiry = 3600000; // 1 hour in milliseconds
-    this.sdk = null;
+    this.cacheExpiry = 3600000;
   }
 
   /**
-   * Initialize the Secrets SDK
-   */
-  initSDK() {
-    if (this.sdk) return this.sdk;
-
-    if (typeof SecretsSDK === 'undefined') {
-      console.warn('[ENGINE-DIAGNOSTIC] [SDK] SecretsSDK not found. Falling back to direct fetch (might fail CORS/Auth).');
-      return null;
-    }
-
-    // Initialize in zero-config mode (uses Origin header for auth)
-    const baseUrl = window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://ctklearn.carsontkempf.workers.dev';
-
-    // Defensive: Handle both nested and direct export patterns
-    const SDKConstructor = (typeof SecretsSDK === 'function') ? SecretsSDK : (SecretsSDK.SecretsSDK || SecretsSDK);
-
-    if (typeof SDKConstructor !== 'function') {
-      console.error('[ENGINE-DIAGNOSTIC] [SDK] SecretsSDK is not a constructor:', typeof SDKConstructor);
-      return null;
-    }
-
-    this.sdk = new SDKConstructor({
-      baseUrl: baseUrl,
-      timeout: 30000
-    });
-
-    console.log('[ENGINE-DIAGNOSTIC] [SDK] SecretsSDK initialized (zero-config mode)');
-    console.log('[ENGINE-DIAGNOSTIC] [SDK-INIT] constructor: ' + typeof SDKConstructor + ' | baseUrl: ' + baseUrl + ' | instance created: ' + (!!this.sdk));
-    return this.sdk;
-  }
-
-  /**
-   * Make request to Lichess proxy via SDK or fetch
-   * @param {string} endpoint - API endpoint ('eval', 'opening')
+   * Make request directly to Lichess public APIs (CORS-enabled, no auth required)
+   * @param {string} endpoint - 'eval' or 'opening'
    * @param {object} params - Query parameters
-   * @returns {Promise<object>} API response data
    */
   async request(endpoint, params = {}) {
     console.log('[ENGINE-DIAGNOSTIC] [NETWORK-START] Lichess API Request:', endpoint);
-    
-    const sdk = this.initSDK();
-    
-    // Build path with query params
-    const queryParams = new URLSearchParams();
-    queryParams.append('endpoint', endpoint);
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        queryParams.append(key, value);
-      }
-    });
-    
-    const path = `/proxy/lichess?${queryParams.toString()}`;
-    const cacheKey = path;
 
-    // Check cache
+    const cacheKey = endpoint + '?' + JSON.stringify(params);
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
-      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-CACHE-HIT] age=' + Math.round((Date.now() - cached.timestamp) / 1000) + 's key=' + cacheKey);
+      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-CACHE-HIT] age=' + Math.round((Date.now() - cached.timestamp) / 1000) + 's');
       return cached.data;
     }
-    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-CACHE-MISS] key=' + cacheKey + (cached ? ' (expired, age=' + Math.round((Date.now() - cached.timestamp) / 1000) + 's)' : ' (no entry)'));
 
     const startTime = performance.now();
-    const diagBaseUrl = window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://ctklearn.carsontkempf.workers.dev';
-    const proxyUrl = diagBaseUrl + '/api/sdk/proxy';
-    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SDK] Origin: ' + window.location.origin);
-    console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SDK] Proxy URL: ' + proxyUrl);
+    let url, response, data;
 
     try {
-      let data;
-
-      if (sdk) {
-        console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SDK] Fetching via SecretsSDK:', path);
-        try {
-          // The SDK handles the base URL and proxy logic
-          const response = await sdk.get('lichess', path);
-
-          // Handle nesting: sdk.get returns the proxy's JSON, which has its own .data property
-          console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SDK-RESPONSE] keys=' + JSON.stringify(Object.keys(response || {})) + ' has_data=' + !!(response && response.data));
-          if (response && response.data) {
-            data = response.data;
-          } else {
-            data = response; // Fallback if not nested
-          }
-        } catch (sdkError) {
-          console.error('[ENGINE-DIAGNOSTIC] [NETWORK-SDK-ERROR] ' + sdkError.message + ' | status: ' + (sdkError.status || 'n/a') + ' | data: ' + JSON.stringify(sdkError.data || null));
-          try {
-            const diagResp = await fetch(proxyUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ keyName: 'lichess', endpoint: path, method: 'GET' })
-            });
-            const diagText = await diagResp.text();
-            console.error('[ENGINE-DIAGNOSTIC] [NETWORK-DIAG] status=' + diagResp.status + ' body=' + diagText);
-          } catch (diagErr) {
-            console.error('[ENGINE-DIAGNOSTIC] [NETWORK-DIAG] diagnostic fetch failed: ' + diagErr.message);
-          }
-          throw sdkError;
-        }
+      if (endpoint === 'opening') {
+        const fen = params.fen;
+        if (!fen) throw new Error('FEN is required for opening lookup');
+        url = `${LICHESS_EXPLORER_URL}?fen=${encodeURIComponent(fen)}&ratings=1600,1800,2000,2200,2500&speeds=blitz,rapid,classical`;
+        response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!response.ok) throw new Error(`Lichess Explorer API error: ${response.status}`);
+        data = await response.json();
       } else {
-        // Fallback for when SDK isn't loaded (mostly for development/emergencies)
-        const baseUrl = window.learnWorkerConfig ? window.learnWorkerConfig.baseUrl : 'https://ctklearn.carsontkempf.workers.dev';
-        const url = `${baseUrl}${path.startsWith('/') ? path : '/' + path}`;
-        console.log('[ENGINE-DIAGNOSTIC] [NETWORK-FETCH] SDK missing, fetching directly:', url);
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Direct fetch failed: ${response.status}`);
-        const json = await response.json();
-        data = json.data;
+        // eval or analysis
+        const fen = params.fen;
+        if (!fen) throw new Error('FEN is required for evaluation');
+        const multiPv = params.multiPv || 1;
+        url = `${LICHESS_EVAL_URL}?fen=${encodeURIComponent(fen)}&multiPv=${multiPv}`;
+        response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!response.ok) throw new Error(`Lichess cloud-eval API error: ${response.status}`);
+        data = await response.json();
+        // Apply difficulty-based move selection
+        if (data.pvs && data.pvs.length > 0 && params.difficulty) {
+          const idx = selectMoveByDifficulty(data.pvs, parseInt(params.difficulty));
+          data.selectedMove = data.pvs[idx];
+          data.difficulty = parseInt(params.difficulty);
+        }
       }
 
-      const endTime = performance.now();
-      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SUCCESS] Received in', Math.round(endTime - startTime), 'ms');
-
-      // Cache successful response
-      this.cache.set(cacheKey, {
-        data: data,
-        timestamp: Date.now()
-      });
-
+      console.log('[ENGINE-DIAGNOSTIC] [NETWORK-SUCCESS] Received in', Math.round(performance.now() - startTime), 'ms');
+      this.cache.set(cacheKey, { data, timestamp: Date.now() });
       return data;
     } catch (error) {
       console.error('[ENGINE-DIAGNOSTIC] [NETWORK-ERROR]:', error.message);
