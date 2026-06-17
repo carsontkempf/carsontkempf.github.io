@@ -351,6 +351,11 @@
         console.log('[ENGINE-DIAGNOSTIC] [MOVE-REQUEST] FEN:', fen);
 
         if (!engineReady || simdBlocked) {
+            if (self.engine && self.engine._recovering) {
+                self.setStatus('Engine recovering...');
+                setTimeout(function() { self.makeEngineMove(); }, 1500);
+                return;
+            }
             var msg = (this.engine && this.engine.simdErrorMessage) || 'Chess engine unavailable. Please update your browser.';
             console.warn('[ENGINE-DIAGNOSTIC] [MOVE-ROUTE] Stockfish unavailable:', msg);
             this.setStatus(msg);
@@ -393,6 +398,10 @@
         console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-START] FEN:', currentFen);
 
         if (!self.engine || !self.engine.ready || self.engine.simdUnsupported) {
+            if (self.engine && self.engine._recovering) {
+                console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-RECOVERING] Engine recovering — analysis will restart automatically');
+                return;
+            }
             console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-UNAVAILABLE] Engine not ready or SIMD unsupported');
             self.showAnalysisUnavailable('No analysis available for this position');
             return;

@@ -113,6 +113,7 @@
                 console.error('[ENGINE-DIAGNOSTIC]   - crash #:', self._crashCount);
                 console.error('[ENGINE-DIAGNOSTIC]   - phase:', self._enginePhase || 'unknown');
                 console.error('[ENGINE-DIAGNOSTIC]   - depth at crash: reached=' + crashedAtDepth + ' / target=' + targetDepth);
+                console.error('[ENGINE-DIAGNOSTIC]   - seldepth at crash: reached=' + (self._maxSeldepthReached || 0));
                 console.error('[ENGINE-DIAGNOSTIC]   - MultiPV at crash:', crashedMultiPV);
                 console.error('[ENGINE-DIAGNOSTIC]   - FEN:', self._lastFen || 'none');
                 console.error('[ENGINE-DIAGNOSTIC]   - SIMD gate:', window.__diagSimdCheck);
@@ -126,10 +127,12 @@
                 if (self._crashCount === 1) {
                     self._analysisMaxDepth = Math.max(6, crashedAtDepth > 0 ? crashedAtDepth - 2 : 10);
                     self._analysisMultiPV = 1;
+                    self._recovering = true;
                     console.log('[ENGINE-DIAGNOSTIC] [RECOVERY #1] Reducing depth to ' + self._analysisMaxDepth + ', MultiPV to 1, re-init...');
                 } else if (self._crashCount === 2) {
                     self._analysisMaxDepth = Math.max(4, (self._analysisMaxDepth || 8) - 3);
                     self._analysisMultiPV = 1;
+                    self._recovering = true;
                     console.log('[ENGINE-DIAGNOSTIC] [RECOVERY #2] Reducing depth to ' + self._analysisMaxDepth + ', re-init...');
                 } else {
                     console.error('[ENGINE-DIAGNOSTIC] [RECOVERY-FAILED] 3 crashes — disabling analysis engine');
@@ -188,6 +191,7 @@
 
             self.engine.send('isready', function() {
                 console.log('[ENGINE-DIAGNOSTIC] [READY] Engine fully initialized and ready');
+                self._recovering = false;
                 if (callback) callback();
             });
         });
@@ -326,6 +330,7 @@
             self._lastFen = fen;
             if (self._setPhase) self._setPhase('analyzing-continuous');
             self._maxDepthReached = 0;
+            self._maxSeldepthReached = 0;
 
             var targetDepth = self._analysisMaxDepth;
             var thisMPV = self._analysisMultiPV;
@@ -339,6 +344,9 @@
                         if (analysis.depth && analysis.depth > (self._maxDepthReached || 0)) {
                             self._maxDepthReached = analysis.depth;
                         }
+                        if (analysis.seldepth && analysis.seldepth > (self._maxSeldepthReached || 0)) {
+                            self._maxSeldepthReached = analysis.seldepth;
+                        }
                         if (streamCallback) streamCallback(analysis);
                     }
                 }
@@ -351,8 +359,9 @@
 
                 // Depth completed cleanly — ratchet up
                 var prev = self._analysisMaxDepth;
-                self._analysisMaxDepth = Math.min(25, prev + 1);
-                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOOP] depth ' + prev + ' complete, next: ' + self._analysisMaxDepth);
+                self._analysisMaxDepth = Math.min(15, prev + 1);
+                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOOP] depth ' + prev + ' seldepth=' + (self._maxSeldepthReached || 0) + ' complete, next: ' + self._analysisMaxDepth);
+                self._maxSeldepthReached = 0;
 
                 // Loop: restart at same FEN with incremented depth
                 if (self._analysisFen === fen) {
@@ -396,6 +405,9 @@
 
         var depthMatch = line.match(/depth (\d+)/);
         if (depthMatch) analysis.depth = parseInt(depthMatch[1], 10);
+
+        var seldepthMatch = line.match(/seldepth (\d+)/);
+        if (seldepthMatch) analysis.seldepth = parseInt(seldepthMatch[1], 10);
 
         var scoreMatch = line.match(/score (cp|mate) (-?\d+)/);
         if (scoreMatch) {
