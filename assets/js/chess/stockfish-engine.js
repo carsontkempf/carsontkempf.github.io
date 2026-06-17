@@ -64,7 +64,7 @@
             try {
                 if (typeof WebAssembly !== 'object' || typeof WebAssembly.validate !== 'function') return false;
                 // SIMD-specific instruction: v128.load
-                var result = WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 15, 11]));
+                var result = WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 4, 1, 96, 0, 0, 3, 2, 1, 0, 10, 23, 1, 21, 0, 253, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 11]));
                 console.log('[ENGINE-DIAGNOSTIC] [FEATURE-CHECK] WASM SIMD Support:', result);
                 return result;
             } catch (e) {
@@ -74,9 +74,10 @@
         })();
 
         if (!hasSimd) {
-            console.warn('[ENGINE-DIAGNOSTIC] [WARN] Browser WASM SIMD not supported. Local engine disabled.');
+            console.warn('[ENGINE-DIAGNOSTIC] [WARN] Browser WASM SIMD not supported. Stockfish requires a modern browser (Chrome 91+, Firefox 89+, Safari 16.4+).');
             self.error = true;
             self.simdUnsupported = true;
+            self.simdErrorMessage = 'Chess engine requires a modern browser. Please update your browser to use the AI opponent.';
             if (callback) callback();
             return;
         }

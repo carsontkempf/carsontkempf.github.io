@@ -351,8 +351,9 @@
         console.log('[ENGINE-DIAGNOSTIC] [MOVE-REQUEST] FEN:', fen);
 
         if (!engineReady || simdBlocked) {
-            console.log('[ENGINE-DIAGNOSTIC] [MOVE-ROUTE] Local Stockfish unavailable — routing to Lichess cloud');
-            this.makeEngineMoveFromLichess(fen);
+            var msg = (this.engine && this.engine.simdErrorMessage) || 'Chess engine unavailable. Please update your browser.';
+            console.warn('[ENGINE-DIAGNOSTIC] [MOVE-ROUTE] Stockfish unavailable:', msg);
+            this.setStatus(msg);
             return;
         }
 
@@ -383,67 +384,6 @@
                 }
             }
         });
-    };
-
-    ChessAnalysisController.prototype.makeEngineMoveFromLichess = function(fen) {
-        var self = this;
-        var skillLevel = this.options.skillLevel || 10;
-        var difficulty = Math.max(1, Math.min(10, Math.round(skillLevel / 2)));
-        var multiPv = Math.min(difficulty, 5);
-
-        console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-START] Fetching move from Lichess cloud');
-        console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-START] skillLevel:', skillLevel, '→ difficulty:', difficulty, 'multiPv:', multiPv);
-        console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-START] FEN:', fen);
-        console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-START] lichessClient exists:', !!window.lichessClient);
-
-        this.setStatus('Thinking...');
-
-        if (!window.lichessClient) {
-            console.error('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-FATAL] window.lichessClient not found — cannot make move');
-            self.updateStatus();
-            return;
-        }
-
-        window.lichessClient.getBestMove(fen, difficulty, multiPv)
-            .then(function(result) {
-                console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-RESULT] raw result:', JSON.stringify(result));
-
-                if (!result) {
-                    console.warn('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-NULL] Position not in Lichess cloud DB — no move available');
-                    self.updateStatus('Position not in Lichess database');
-                    return;
-                }
-
-                if (!result.from || !result.to) {
-                    console.warn('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-MALFORMED] Result missing from/to:', JSON.stringify(result));
-                    self.updateStatus();
-                    return;
-                }
-
-                console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-APPLY] from:', result.from, 'to:', result.to, 'promotion:', result.promotion);
-                var move = self.game.move({
-                    from: result.from,
-                    to: result.to,
-                    promotion: result.promotion
-                });
-
-                console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-APPLIED] game.move() returned:', move ? (result.from + result.to) : 'ILLEGAL/NULL');
-
-                if (move) {
-                    self.board.position(self.game.fen());
-                    self.updateStatus();
-                    if (self.mode === 'play') {
-                        window.setTimeout(function() { self.startAnalysis(); }, 100);
-                    }
-                } else {
-                    console.error('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-ILLEGAL] Move rejected by chess engine:', result.from + result.to);
-                    self.updateStatus();
-                }
-            })
-            .catch(function(err) {
-                console.error('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-ERROR] getBestMove threw:', err.message);
-                self.updateStatus();
-            });
     };
 
     ChessAnalysisController.prototype.startAnalysis = function() {
