@@ -51,7 +51,7 @@ class LichessClient {
         url = `${LICHESS_EXPLORER_URL}?fen=${encodeURIComponent(fen)}&ratings=1600,1800,2000,2200,2500&speeds=blitz,rapid,classical`;
         response = await fetch(url, { headers: { 'Accept': 'application/json' } });
         if (response.status === 404) {
-          console.warn('[ENGINE-DIAGNOSTIC] [NETWORK-MISS] Opening not found in Lichess explorer');
+          console.warn('[ENGINE-DIAGNOSTIC] [NETWORK-MISS] Opening not found in Lichess explorer | FEN:', fen, '| URL:', url);
           return null;
         }
         if (!response.ok) throw new Error(`Lichess Explorer API error: ${response.status}`);
@@ -64,7 +64,7 @@ class LichessClient {
         url = `${LICHESS_EVAL_URL}?fen=${encodeURIComponent(fen)}&multiPv=${multiPv}`;
         response = await fetch(url, { headers: { 'Accept': 'application/json' } });
         if (response.status === 404) {
-          console.warn('[ENGINE-DIAGNOSTIC] [NETWORK-MISS] Position not in Lichess cloud database');
+          console.warn('[ENGINE-DIAGNOSTIC] [NETWORK-MISS] Position not in Lichess cloud database | FEN:', fen, '| URL:', url);
           return null;
         }
         if (!response.ok) throw new Error(`Lichess cloud-eval API error: ${response.status}`);

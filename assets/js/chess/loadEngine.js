@@ -99,17 +99,25 @@ var loadEngine = (function ()
         console.log('WebAssembly Support:', typeof WebAssembly === "object");
         
         if (typeof WebAssembly === "object") {
-            const simdCheck = WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 15, 11]));
+            // Valid SIMD test: v128.const () -> () module
+            const simdCheck = WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 4, 1, 96, 0, 0, 3, 2, 1, 0, 10, 23, 1, 21, 0, 253, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 11]));
             console.log('WASM SIMD Support:', simdCheck);
-            
+            window.__diagSimdCheck = simdCheck;
+
             try {
-                // Check for SharedArrayBuffer (Requires COOP/COEP headers)
                 const sabSupported = typeof SharedArrayBuffer !== 'undefined';
                 console.log('SharedArrayBuffer Support:', sabSupported);
                 console.log('Cross-Origin Isolated:', window.crossOriginIsolated);
             } catch (e) {
                 console.log('SharedArrayBuffer Check Error:', e.message);
             }
+
+            try {
+                const mem = window.performance && window.performance.memory;
+                if (mem) {
+                    console.log('Heap used/total/limit (MB):', Math.round(mem.usedJSHeapSize/1048576), '/', Math.round(mem.totalJSHeapSize/1048576), '/', Math.round(mem.jsHeapSizeLimit/1048576));
+                }
+            } catch (_) {}
         }
         
         console.log('Engine Path:', path);
@@ -117,20 +125,31 @@ var loadEngine = (function ()
 
         if (typeof Worker === "function") {
             try {
+                var _workerStartMs = Date.now();
                 var worker = new Worker(path);
-                console.log('[ENGINE-DIAGNOSTIC] Worker instance created successfully');
+                console.log('[ENGINE-DIAGNOSTIC] Worker instance created successfully, path:', path);
 
                 worker.onerror = function(e) {
-                    // Surgical error logging to avoid massive object dumps
-                    console.error('[ENGINE-DIAGNOSTIC] [CRITICAL] Worker Error Event');
+                    var elapsed = Date.now() - _workerStartMs;
+                    console.error('[ENGINE-DIAGNOSTIC] [CRITICAL] Worker Error Event (', elapsed, 'ms after spawn)');
+                    console.error('  - Type:', e.type);
                     console.error('  - Message:', e.message);
                     console.error('  - Source:', e.filename);
-                    console.error('  - Position:', 'Line ' + e.lineno + ', Col ' + e.colno);
-                    
+                    console.error('  - Position: Line', e.lineno, 'Col', e.colno);
+                    console.error('  - SIMD detected (diag):', window.__diagSimdCheck);
+                    console.error('  - User Agent:', navigator.userAgent);
+                    console.error('  - Platform:', navigator.platform);
+                    console.error('  - Device Memory:', navigator.deviceMemory, 'GB');
+                    console.error('  - Hardware Concurrency:', navigator.hardwareConcurrency);
+                    try {
+                        var mem = window.performance && window.performance.memory;
+                        if (mem) console.error('  - Heap used/limit (MB):', Math.round(mem.usedJSHeapSize/1048576), '/', Math.round(mem.jsHeapSizeLimit/1048576));
+                    } catch (_) {}
+
                     if (e.message && e.message.includes('unreachable')) {
-                        console.error('[ENGINE-DIAGNOSTIC] [ANALYSIS] "unreachable" trap hit at runtime.');
-                        console.error('  Possible Root Cause: The WASM module attempted to execute an illegal instruction (likely SIMD) or accessed out-of-bounds memory.');
-                        console.error('  Recommendation: Check if browser supports WASM SIMD and has sufficient memory.');
+                        console.error('[ENGINE-DIAGNOSTIC] [ANALYSIS] "unreachable" WASM trap.');
+                        console.error('  Causes: (1) SIMD instruction on non-SIMD hardware, (2) OOM/stack overflow, (3) WASM internal assertion.');
+                        console.error('  SIMD gate passed =', window.__diagSimdCheck, '— if true, this is likely OOM or a non-SIMD path bug.');
                     }
                 };
 
