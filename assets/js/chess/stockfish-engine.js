@@ -42,11 +42,11 @@
             })
             .then(function(response) {
                 console.log('[ENGINE-DIAGNOSTIC] [NETWORK-CHECK] WASM File:', wasmPath);
-                console.log('  - Status:', response.status, response.statusText);
-                console.log('  - Content-Type:', response.headers.get('Content-Type'));
+                console.log('[ENGINE-DIAGNOSTIC]   - Status:', response.status, response.statusText);
+                console.log('[ENGINE-DIAGNOSTIC]   - Content-Type:', response.headers.get('Content-Type'));
                 var size = response.headers.get('Content-Length');
                 if (size) {
-                    console.log('  - Content-Length:', (parseInt(size) / 1048576).toFixed(2) + ' MB');
+                    console.log('[ENGINE-DIAGNOSTIC]   - Content-Length:', (parseInt(size) / 1048576).toFixed(2) + ' MB');
                 }
             })
             .catch(function(err) {
@@ -104,15 +104,18 @@
             console.log('[ENGINE-DIAGNOSTIC] [CREATED] Engine instance created successfully');
 
             this.engine.onerror = function(error) {
-                // Sliced log to avoid massive object serialization (like the Window dump)
                 console.error('[ENGINE-DIAGNOSTIC] [RUNTIME-ERROR] Stockfish reported a failure.');
-                if (error && error.message) {
-                    console.error('  - Error Message:', error.message);
-                    if (error.message.includes('unreachable')) {
-                        console.error('  - Analysis: This is a WASM trap. Likely out-of-memory or incompatible instruction.');
-                    }
+                console.error('[ENGINE-DIAGNOSTIC]   - Error message:', error && error.message);
+                console.error('[ENGINE-DIAGNOSTIC]   - Engine phase at crash:', self._enginePhase || 'unknown');
+                console.error('[ENGINE-DIAGNOSTIC]   - Last FEN analyzed:', self._lastFen || 'none');
+                console.error('[ENGINE-DIAGNOSTIC]   - SIMD gate (diag):', window.__diagSimdCheck);
+                try {
+                    var mem = window.performance && window.performance.memory;
+                    if (mem) console.error('[ENGINE-DIAGNOSTIC]   - Heap used/limit (MB):', Math.round(mem.usedJSHeapSize/1048576), '/', Math.round(mem.jsHeapSizeLimit/1048576));
+                } catch (_) {}
+                if (error && error.message && error.message.includes('unreachable')) {
+                    console.error('[ENGINE-DIAGNOSTIC]   - Trap cause: SIMD gate=' + window.__diagSimdCheck + ' → if true: OOM or WASM assertion; if false: SIMD HW mismatch');
                 }
-                
                 self.ready = false;
                 self.error = true;
                 if (self.onEngineError) {
@@ -124,17 +127,18 @@
             return;
         }
 
+        self._enginePhase = 'uci-init';
         console.log('[ENGINE-DIAGNOSTIC] [UCI-INIT] Sending "uci" command');
         this.engine.send('uci', function() {
             console.log('[ENGINE-DIAGNOSTIC] [UCI-READY] Engine responded to "uci"');
+            self._enginePhase = 'ready';
             self.ready = true;
-            
-            // Apply memory-safe defaults immediately
+
             console.log('[ENGINE-DIAGNOSTIC] [CONFIG] Applying memory-safe defaults (Hash=16, Threads=1)');
             self.engine.send('setoption name Hash value 16');
             self.engine.send('setoption name Threads value 1');
             self.engine.send('setoption name Skill Level value ' + self.skillLevel);
-            
+
             self.engine.send('isready', function() {
                 console.log('[ENGINE-DIAGNOSTIC] [READY] Engine fully initialized and ready');
                 if (callback) callback();
@@ -158,10 +162,13 @@
 
         this.ensureStopped().then(function() {
             self.analyzing = true;
+            self._lastFen = fen;
+            self._enginePhase = 'analyzing-bestmove';
 
             self.engine.send('position fen ' + fen);
             self.engine.send('go depth ' + self.depth, function(result) {
                 self.analyzing = false;
+                self._enginePhase = 'ready';
                 var match = result.match(/bestmove ([a-h][1-8][a-h][1-8][qrbn]?)/);
                 if (match && callback) {
                     callback(match[1]);
@@ -258,6 +265,8 @@
 
         this.ensureStopped().then(function() {
             self.analyzing = true;
+            self._lastFen = fen;
+            self._enginePhase = 'analyzing-continuous';
             multipv = multipv || 3;
 
             self.engine.stream = function(line) {

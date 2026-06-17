@@ -81,47 +81,33 @@ var loadEngine = (function ()
         path = path || "stockfish.js";
 
         // Advanced Environment Diagnostics
-        console.group('[ENGINE-DIAGNOSTIC] --- Advanced Environment Audit ---');
-        console.log('User Agent:', navigator.userAgent);
-        console.log('Platform:', navigator.platform);
-        console.log('Device Memory (GB):', navigator.deviceMemory || 'Unknown');
-        console.log('Hardware Concurrency (Cores):', navigator.hardwareConcurrency || 'Unknown');
-        
+        console.log('[ENGINE-DIAGNOSTIC] --- Environment Audit ---');
+        console.log('[ENGINE-DIAGNOSTIC] UA:', navigator.userAgent);
+        console.log('[ENGINE-DIAGNOSTIC] Platform:', navigator.platform);
+        console.log('[ENGINE-DIAGNOSTIC] Device Memory (GB):', navigator.deviceMemory || 'Unknown');
+        console.log('[ENGINE-DIAGNOSTIC] Hardware Concurrency:', navigator.hardwareConcurrency || 'Unknown');
+        console.log('[ENGINE-DIAGNOSTIC] Worker Support:', typeof Worker === "function");
+        console.log('[ENGINE-DIAGNOSTIC] WebAssembly Support:', typeof WebAssembly === "object");
+
         if (window.performance && window.performance.memory) {
-            console.log('Memory Usage (MB):', {
-                used: Math.round(performance.memory.usedJSHeapSize / 1048576),
-                total: Math.round(performance.memory.totalJSHeapSize / 1048576),
-                limit: Math.round(performance.memory.jsHeapSizeLimit / 1048576)
-            });
+            var _m0 = window.performance.memory;
+            console.log('[ENGINE-DIAGNOSTIC] Heap at spawn (MB): used=' + Math.round(_m0.usedJSHeapSize/1048576) + ' total=' + Math.round(_m0.totalJSHeapSize/1048576) + ' limit=' + Math.round(_m0.jsHeapSizeLimit/1048576));
         }
 
-        console.log('Worker Support:', typeof Worker === "function");
-        console.log('WebAssembly Support:', typeof WebAssembly === "object");
-        
         if (typeof WebAssembly === "object") {
-            // Valid SIMD test: v128.const () -> () module
-            const simdCheck = WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 4, 1, 96, 0, 0, 3, 2, 1, 0, 10, 23, 1, 21, 0, 253, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 11]));
-            console.log('WASM SIMD Support:', simdCheck);
+            var simdCheck = WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 4, 1, 96, 0, 0, 3, 2, 1, 0, 10, 23, 1, 21, 0, 253, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 11]));
+            console.log('[ENGINE-DIAGNOSTIC] WASM SIMD Support:', simdCheck);
             window.__diagSimdCheck = simdCheck;
 
             try {
-                const sabSupported = typeof SharedArrayBuffer !== 'undefined';
-                console.log('SharedArrayBuffer Support:', sabSupported);
-                console.log('Cross-Origin Isolated:', window.crossOriginIsolated);
+                console.log('[ENGINE-DIAGNOSTIC] SharedArrayBuffer Support:', typeof SharedArrayBuffer !== 'undefined');
+                console.log('[ENGINE-DIAGNOSTIC] Cross-Origin Isolated:', window.crossOriginIsolated);
             } catch (e) {
-                console.log('SharedArrayBuffer Check Error:', e.message);
+                console.log('[ENGINE-DIAGNOSTIC] SharedArrayBuffer Check Error:', e.message);
             }
-
-            try {
-                const mem = window.performance && window.performance.memory;
-                if (mem) {
-                    console.log('Heap used/total/limit (MB):', Math.round(mem.usedJSHeapSize/1048576), '/', Math.round(mem.totalJSHeapSize/1048576), '/', Math.round(mem.jsHeapSizeLimit/1048576));
-                }
-            } catch (_) {}
         }
-        
-        console.log('Engine Path:', path);
-        console.groupEnd();
+
+        console.log('[ENGINE-DIAGNOSTIC] Engine Path:', path);
 
         if (typeof Worker === "function") {
             try {
@@ -131,25 +117,24 @@ var loadEngine = (function ()
 
                 worker.onerror = function(e) {
                     var elapsed = Date.now() - _workerStartMs;
-                    console.error('[ENGINE-DIAGNOSTIC] [CRITICAL] Worker Error Event (', elapsed, 'ms after spawn)');
-                    console.error('  - Type:', e.type);
-                    console.error('  - Message:', e.message);
-                    console.error('  - Source:', e.filename);
-                    console.error('  - Position: Line', e.lineno, 'Col', e.colno);
-                    console.error('  - SIMD detected (diag):', window.__diagSimdCheck);
-                    console.error('  - User Agent:', navigator.userAgent);
-                    console.error('  - Platform:', navigator.platform);
-                    console.error('  - Device Memory:', navigator.deviceMemory, 'GB');
-                    console.error('  - Hardware Concurrency:', navigator.hardwareConcurrency);
+                    console.error('[ENGINE-DIAGNOSTIC] [CRITICAL] Worker Error Event (' + elapsed + 'ms after spawn)');
+                    console.error('[ENGINE-DIAGNOSTIC]   - Type:', e.type);
+                    console.error('[ENGINE-DIAGNOSTIC]   - Message:', e.message);
+                    console.error('[ENGINE-DIAGNOSTIC]   - Source:', e.filename);
+                    console.error('[ENGINE-DIAGNOSTIC]   - Position: Line', e.lineno, 'Col', e.colno);
+                    console.error('[ENGINE-DIAGNOSTIC]   - SIMD detected (diag):', window.__diagSimdCheck);
+                    console.error('[ENGINE-DIAGNOSTIC]   - Last Worker msg before crash:', window.__lastWorkerMsg || '(none)');
+                    console.error('[ENGINE-DIAGNOSTIC]   - User Agent:', navigator.userAgent);
+                    console.error('[ENGINE-DIAGNOSTIC]   - Platform:', navigator.platform);
+                    console.error('[ENGINE-DIAGNOSTIC]   - Device Memory:', navigator.deviceMemory, 'GB');
+                    console.error('[ENGINE-DIAGNOSTIC]   - Hardware Concurrency:', navigator.hardwareConcurrency);
                     try {
                         var mem = window.performance && window.performance.memory;
-                        if (mem) console.error('  - Heap used/limit (MB):', Math.round(mem.usedJSHeapSize/1048576), '/', Math.round(mem.jsHeapSizeLimit/1048576));
+                        if (mem) console.error('[ENGINE-DIAGNOSTIC]   - Heap used/limit (MB):', Math.round(mem.usedJSHeapSize/1048576), '/', Math.round(mem.jsHeapSizeLimit/1048576));
                     } catch (_) {}
 
                     if (e.message && e.message.includes('unreachable')) {
-                        console.error('[ENGINE-DIAGNOSTIC] [ANALYSIS] "unreachable" WASM trap.');
-                        console.error('  Causes: (1) SIMD instruction on non-SIMD hardware, (2) OOM/stack overflow, (3) WASM internal assertion.');
-                        console.error('  SIMD gate passed =', window.__diagSimdCheck, '— if true, this is likely OOM or a non-SIMD path bug.');
+                        console.error('[ENGINE-DIAGNOSTIC] [ANALYSIS] "unreachable" WASM trap — SIMD gate=' + window.__diagSimdCheck + '; if true: OOM or WASM assertion; if false: SIMD HW mismatch');
                     }
                 };
 
@@ -231,7 +216,8 @@ var loadEngine = (function ()
                 my_que,
                 split,
                 i;
-            
+
+            window.__lastWorkerMsg = line;
             console.log('[ENGINE-DIAGNOSTIC] [STDOUT]:', line);
             
             /// If it's got more than one line in it, break it up.

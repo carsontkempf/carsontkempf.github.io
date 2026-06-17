@@ -401,9 +401,9 @@ no_auth: true
       var msg = Array.prototype.slice.call(arguments).map(function(a) {
         return (a && typeof a === 'object') ? JSON.stringify(a) : String(a);
       }).join(' ');
-      if (CAPTURE_TAGS.some(function(tag) { return msg.indexOf(tag) !== -1; })) {
-        addEntry(level, msg);
-      }
+      var shouldCapture = level === 'error'
+        || CAPTURE_TAGS.some(function(tag) { return msg.indexOf(tag) !== -1; });
+      if (shouldCapture) addEntry(level, msg);
     };
   }
   patchMethod('log', 'info');
@@ -411,7 +411,18 @@ no_auth: true
   patchMethod('error', 'error');
 
   window.addEventListener('error', function(e) {
-    addEntry('error', '[UNCAUGHT] ' + e.message + ' @ ' + (e.filename || '') + ':' + e.lineno);
+    var stack = (e.error && e.error.stack)
+      ? ' | stack: ' + e.error.stack.split('\n').slice(0, 4).join(' > ')
+      : '';
+    addEntry('error', '[UNCAUGHT] ' + e.message + ' @ ' + (e.filename || '') + ':' + e.lineno + stack);
+  });
+
+  window.addEventListener('unhandledrejection', function(e) {
+    var msg = e.reason ? (e.reason.message || String(e.reason)) : 'unknown';
+    var stack = (e.reason && e.reason.stack)
+      ? ' | stack: ' + e.reason.stack.split('\n').slice(0, 4).join(' > ')
+      : '';
+    addEntry('error', '[UNCAUGHT-PROMISE] ' + msg + stack);
   });
 
   function refreshSDKStatus() {
