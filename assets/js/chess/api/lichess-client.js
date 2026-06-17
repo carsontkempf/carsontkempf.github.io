@@ -94,49 +94,49 @@ class LichessClient {
    * @returns {Promise<object>} Analysis with best move
    */
   async getBestMove(fen, difficulty = 5, multiPv = 1) {
-    try {
-      const result = await this.request('eval', {
-        fen: fen,
-        difficulty: difficulty,
-        multiPv: multiPv
-      });
+    console.log('[ENGINE-DIAGNOSTIC] [LICHESS-CLIENT] getBestMove() called, difficulty:', difficulty, 'multiPv:', multiPv);
+    console.log('[ENGINE-DIAGNOSTIC] [LICHESS-CLIENT] FEN:', fen);
 
-      if (!result) return null;
+    const result = await this.request('eval', { fen, difficulty, multiPv });
 
-      // Extract move from result
-      if (result.selectedMove && result.selectedMove.moves) {
-        const uciMove = result.selectedMove.moves.split(' ')[0];
-        return {
-          uci: uciMove,
-          from: uciMove.substring(0, 2),
-          to: uciMove.substring(2, 4),
-          promotion: uciMove.length > 4 ? uciMove.charAt(4) : undefined,
-          evaluation: result.selectedMove.cp || result.selectedMove.mate,
-          depth: result.depth,
-          pvs: result.pvs,
-          difficulty: result.difficulty
-        };
-      }
+    console.log('[ENGINE-DIAGNOSTIC] [LICHESS-CLIENT] request() returned:', result === null ? 'null (not in DB)' : JSON.stringify(result).substring(0, 200));
 
-      // Fallback: return first PV if available
-      if (result.pvs && result.pvs.length > 0 && result.pvs[0].moves) {
-        const uciMove = result.pvs[0].moves.split(' ')[0];
-        return {
-          uci: uciMove,
-          from: uciMove.substring(0, 2),
-          to: uciMove.substring(2, 4),
-          promotion: uciMove.length > 4 ? uciMove.charAt(4) : undefined,
-          evaluation: result.pvs[0].cp || result.pvs[0].mate,
-          depth: result.depth,
-          pvs: result.pvs
-        };
-      }
-
-      throw new Error('No moves found in analysis result');
-    } catch (error) {
-      console.error('Error getting best move:', error);
-      throw error;
+    if (!result) {
+      console.warn('[ENGINE-DIAGNOSTIC] [LICHESS-CLIENT] getBestMove returning null — position not in Lichess DB');
+      return null;
     }
+
+    if (result.selectedMove && result.selectedMove.moves) {
+      const uciMove = result.selectedMove.moves.split(' ')[0];
+      console.log('[ENGINE-DIAGNOSTIC] [LICHESS-CLIENT] selectedMove UCI:', uciMove);
+      return {
+        uci: uciMove,
+        from: uciMove.substring(0, 2),
+        to: uciMove.substring(2, 4),
+        promotion: uciMove.length > 4 ? uciMove.charAt(4) : undefined,
+        evaluation: result.selectedMove.cp || result.selectedMove.mate,
+        depth: result.depth,
+        pvs: result.pvs,
+        difficulty: result.difficulty
+      };
+    }
+
+    if (result.pvs && result.pvs.length > 0 && result.pvs[0].moves) {
+      const uciMove = result.pvs[0].moves.split(' ')[0];
+      console.log('[ENGINE-DIAGNOSTIC] [LICHESS-CLIENT] fallback first PV UCI:', uciMove);
+      return {
+        uci: uciMove,
+        from: uciMove.substring(0, 2),
+        to: uciMove.substring(2, 4),
+        promotion: uciMove.length > 4 ? uciMove.charAt(4) : undefined,
+        evaluation: result.pvs[0].cp || result.pvs[0].mate,
+        depth: result.depth,
+        pvs: result.pvs
+      };
+    }
+
+    console.error('[ENGINE-DIAGNOSTIC] [LICHESS-CLIENT] No moves in result — pvs:', JSON.stringify(result.pvs));
+    throw new Error('No moves found in analysis result');
   }
 
   /**

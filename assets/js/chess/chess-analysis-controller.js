@@ -113,12 +113,16 @@
         };
 
         this.engine.init(function() {
+            console.log('[ENGINE-DIAGNOSTIC] [ENGINE-INIT-CB] engine.init callback fired');
+            console.log('[ENGINE-DIAGNOSTIC] [ENGINE-INIT-CB] engine.ready:', self.engine.ready);
+            console.log('[ENGINE-DIAGNOSTIC] [ENGINE-INIT-CB] engine.error:', self.engine.error);
+            console.log('[ENGINE-DIAGNOSTIC] [ENGINE-INIT-CB] engine.simdUnsupported:', self.engine.simdUnsupported);
+            console.log('[ENGINE-DIAGNOSTIC] [ENGINE-INIT-CB] mode:', self.mode, 'playerColor:', self.playerColor, 'turn:', self.game.turn());
             self.updateStatus();
 
             if (self.mode === 'analysis') {
                 self.startAnalysis();
             } else if (self.playerColor === 'black' && self.game.turn() === 'w') {
-                // If it's the beginning of a game and engine is white (player is black)
                 self.makeEngineMove();
             }
         });
@@ -336,12 +340,29 @@
 
     ChessAnalysisController.prototype.makeEngineMove = function() {
         var self = this;
-        if (!this.engine || !this.engine.ready) return;
+        var fen = this.game.fen();
 
+        var engineReady = !!(this.engine && this.engine.ready);
+        var simdBlocked = !!(this.engine && this.engine.simdUnsupported);
+        console.log('[ENGINE-DIAGNOSTIC] [MOVE-REQUEST] makeEngineMove() called');
+        console.log('[ENGINE-DIAGNOSTIC] [MOVE-REQUEST] engine exists:', !!this.engine);
+        console.log('[ENGINE-DIAGNOSTIC] [MOVE-REQUEST] engine.ready:', engineReady);
+        console.log('[ENGINE-DIAGNOSTIC] [MOVE-REQUEST] engine.simdUnsupported:', simdBlocked);
+        console.log('[ENGINE-DIAGNOSTIC] [MOVE-REQUEST] FEN:', fen);
+
+        if (!engineReady || simdBlocked) {
+            console.log('[ENGINE-DIAGNOSTIC] [MOVE-ROUTE] Local Stockfish unavailable — routing to Lichess cloud');
+            this.makeEngineMoveFromLichess(fen);
+            return;
+        }
+
+        console.log('[ENGINE-DIAGNOSTIC] [MOVE-ROUTE] Using local Stockfish engine');
         this.setStatus('Engine thinking...');
 
-        this.engine.getBestMove(this.game.fen(), function(bestMove) {
+        this.engine.getBestMove(fen, function(bestMove) {
+            console.log('[ENGINE-DIAGNOSTIC] [STOCKFISH-RESULT] bestMove:', bestMove);
             if (!bestMove) {
+                console.warn('[ENGINE-DIAGNOSTIC] [STOCKFISH-NULL] Engine returned no move');
                 self.updateStatus();
                 return;
             }
@@ -350,25 +371,79 @@
             var to = bestMove.substring(2, 4);
             var promotion = bestMove.length > 4 ? bestMove.substring(4) : undefined;
 
-            var move = self.game.move({
-                from: from,
-                to: to,
-                promotion: promotion
-            });
+            console.log('[ENGINE-DIAGNOSTIC] [STOCKFISH-APPLY] from:', from, 'to:', to, 'promotion:', promotion);
+            var move = self.game.move({ from: from, to: to, promotion: promotion });
+            console.log('[ENGINE-DIAGNOSTIC] [STOCKFISH-APPLIED] move:', move ? (from + to) : 'ILLEGAL');
 
             if (move) {
-                // Update position WITH animation for engine moves (user should see it move)
                 self.board.position(self.game.fen());
                 self.updateStatus();
-
-                // Start continuous analysis after engine move to track player move quality
                 if (self.mode === 'play') {
-                    window.setTimeout(function() {
-                        self.startAnalysis();
-                    }, 100);
+                    window.setTimeout(function() { self.startAnalysis(); }, 100);
                 }
             }
         });
+    };
+
+    ChessAnalysisController.prototype.makeEngineMoveFromLichess = function(fen) {
+        var self = this;
+        var skillLevel = this.options.skillLevel || 10;
+        var difficulty = Math.max(1, Math.min(10, Math.round(skillLevel / 2)));
+        var multiPv = Math.min(difficulty, 5);
+
+        console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-START] Fetching move from Lichess cloud');
+        console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-START] skillLevel:', skillLevel, '→ difficulty:', difficulty, 'multiPv:', multiPv);
+        console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-START] FEN:', fen);
+        console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-START] lichessClient exists:', !!window.lichessClient);
+
+        this.setStatus('Thinking...');
+
+        if (!window.lichessClient) {
+            console.error('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-FATAL] window.lichessClient not found — cannot make move');
+            self.updateStatus();
+            return;
+        }
+
+        window.lichessClient.getBestMove(fen, difficulty, multiPv)
+            .then(function(result) {
+                console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-RESULT] raw result:', JSON.stringify(result));
+
+                if (!result) {
+                    console.warn('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-NULL] Position not in Lichess cloud DB — no move available');
+                    self.updateStatus('Position not in Lichess database');
+                    return;
+                }
+
+                if (!result.from || !result.to) {
+                    console.warn('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-MALFORMED] Result missing from/to:', JSON.stringify(result));
+                    self.updateStatus();
+                    return;
+                }
+
+                console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-APPLY] from:', result.from, 'to:', result.to, 'promotion:', result.promotion);
+                var move = self.game.move({
+                    from: result.from,
+                    to: result.to,
+                    promotion: result.promotion
+                });
+
+                console.log('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-APPLIED] game.move() returned:', move ? (result.from + result.to) : 'ILLEGAL/NULL');
+
+                if (move) {
+                    self.board.position(self.game.fen());
+                    self.updateStatus();
+                    if (self.mode === 'play') {
+                        window.setTimeout(function() { self.startAnalysis(); }, 100);
+                    }
+                } else {
+                    console.error('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-ILLEGAL] Move rejected by chess engine:', result.from + result.to);
+                    self.updateStatus();
+                }
+            })
+            .catch(function(err) {
+                console.error('[ENGINE-DIAGNOSTIC] [LICHESS-MOVE-ERROR] getBestMove threw:', err.message);
+                self.updateStatus();
+            });
     };
 
     ChessAnalysisController.prototype.startAnalysis = function() {
