@@ -386,23 +386,21 @@
                 }
 
                 const result = await window.lichessClient.getAnalysis(currentFen, 3);
-                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-RESULT]:', result);
-                
+
                 if (result && result.pvs && result.pvs.length > 0) {
                     console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-SUCCESS] Updating UI');
                     self.updateAnalysisFromCloud(result);
                     return;
-                } else {
-                    console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-EMPTY] No variations returned from cloud');
                 }
+                // null = position not in Lichess DB, fall through silently to local engine
             } catch (error) {
                 console.error('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-ERROR]:', error.message);
-                console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-FALLBACK] Falling back to local engine');
             }
 
             // Fallback to local Stockfish engine
-            if (!self.engine || !self.engine.ready) {
-                console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-UNAVAILABLE] Engine not ready or failed');
+            if (!self.engine || !self.engine.ready || self.engine.simdUnsupported) {
+                console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-UNAVAILABLE] Engine not ready or SIMD unsupported');
+                self.showAnalysisUnavailable('No analysis available for this position');
                 return;
             }
 
@@ -548,6 +546,12 @@
             classification: classification,
             winChanceLoss: winChanceLoss
         });
+    };
+
+    ChessAnalysisController.prototype.showAnalysisUnavailable = function(msg) {
+        var analysisPanel = document.getElementById(this.analysisElement);
+        if (!analysisPanel) return;
+        analysisPanel.innerHTML = '<div class="analysis-unavailable">' + msg + '</div>';
     };
 
     ChessAnalysisController.prototype.displayAnalysisLines = function(linesByMultiPV) {

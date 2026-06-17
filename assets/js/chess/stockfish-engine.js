@@ -74,7 +74,11 @@
         })();
 
         if (!hasSimd) {
-            console.warn('[ENGINE-DIAGNOSTIC] [WARN] Browser does not support WASM SIMD. Stockfish 17.1 (lite-single) requires SIMD.');
+            console.warn('[ENGINE-DIAGNOSTIC] [WARN] Browser WASM SIMD not supported. Local engine disabled.');
+            self.error = true;
+            self.simdUnsupported = true;
+            if (callback) callback();
+            return;
         }
 
         if (this.engine && !this.ready) {

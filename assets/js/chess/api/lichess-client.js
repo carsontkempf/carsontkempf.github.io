@@ -50,6 +50,10 @@ class LichessClient {
         if (!fen) throw new Error('FEN is required for opening lookup');
         url = `${LICHESS_EXPLORER_URL}?fen=${encodeURIComponent(fen)}&ratings=1600,1800,2000,2200,2500&speeds=blitz,rapid,classical`;
         response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (response.status === 404) {
+          console.warn('[ENGINE-DIAGNOSTIC] [NETWORK-MISS] Opening not found in Lichess explorer');
+          return null;
+        }
         if (!response.ok) throw new Error(`Lichess Explorer API error: ${response.status}`);
         data = await response.json();
       } else {
@@ -59,6 +63,10 @@ class LichessClient {
         const multiPv = params.multiPv || 1;
         url = `${LICHESS_EVAL_URL}?fen=${encodeURIComponent(fen)}&multiPv=${multiPv}`;
         response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (response.status === 404) {
+          console.warn('[ENGINE-DIAGNOSTIC] [NETWORK-MISS] Position not in Lichess cloud database');
+          return null;
+        }
         if (!response.ok) throw new Error(`Lichess cloud-eval API error: ${response.status}`);
         data = await response.json();
         // Apply difficulty-based move selection
@@ -92,6 +100,8 @@ class LichessClient {
         difficulty: difficulty,
         multiPv: multiPv
       });
+
+      if (!result) return null;
 
       // Extract move from result
       if (result.selectedMove && result.selectedMove.moves) {
@@ -158,17 +168,11 @@ class LichessClient {
    * @returns {Promise<object>} Full analysis with multiple lines
    */
   async getAnalysis(fen, multiPv = 3) {
-    try {
-      const data = await this.request('eval', { // Use 'eval' endpoint for position analysis
-        fen: fen,
-        multiPv: multiPv
-      });
-
-      return data;
-    } catch (error) {
-      console.error('Error getting analysis:', error);
-      throw error;
-    }
+    const data = await this.request('eval', {
+      fen: fen,
+      multiPv: multiPv
+    });
+    return data; // null when position not in Lichess DB
   }
 
   /**
