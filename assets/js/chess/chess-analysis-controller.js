@@ -389,46 +389,25 @@
     ChessAnalysisController.prototype.startAnalysis = function() {
         var self = this;
         var currentFen = this.game.fen();
-        
+
         console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-START] FEN:', currentFen);
 
-        // Try Lichess API via SecretsSDK first (Auth-free proxy)
-        (async function() {
-            try {
-                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-API] Attempting cloud fetch...');
-                if (!window.lichessClient) {
-                    throw new Error('lichessClient not found on window');
-                }
+        if (!self.engine || !self.engine.ready || self.engine.simdUnsupported) {
+            console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-UNAVAILABLE] Engine not ready or SIMD unsupported');
+            self.showAnalysisUnavailable('No analysis available for this position');
+            return;
+        }
 
-                const result = await window.lichessClient.getAnalysis(currentFen, 3);
+        if (self.engine.analyzing) {
+            console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-RESTART] Stopping previous analysis');
+            self.engine.stopContinuousAnalysis();
+        }
 
-                if (result && result.pvs && result.pvs.length > 0) {
-                    console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-SUCCESS] Updating UI');
-                    self.updateAnalysisFromCloud(result);
-                    return;
-                }
-                // null = position not in Lichess DB, fall through silently to local engine
-            } catch (error) {
-                console.error('[ENGINE-DIAGNOSTIC] [ANALYSIS-API-ERROR]:', error.message);
-            }
+        console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-START] Starting Stockfish search');
+        self.analysisLines = [];
+        var linesByMultiPV = {};
 
-            // Fallback to local Stockfish engine
-            if (!self.engine || !self.engine.ready || self.engine.simdUnsupported) {
-                console.warn('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-UNAVAILABLE] Engine not ready or SIMD unsupported');
-                self.showAnalysisUnavailable('No analysis available for this position');
-                return;
-            }
-
-            if (self.engine.analyzing) {
-                console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-RESTART] Stopping previous analysis');
-                self.engine.stopContinuousAnalysis();
-            }
-
-            console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-START] Starting Stockfish search');
-            self.analysisLines = [];
-            var linesByMultiPV = {};
-
-            self.engine.startContinuousAnalysis(currentFen, function(analysis) {
+        self.engine.startContinuousAnalysis(currentFen, function(analysis) {
                 if (analysis.scoreType) {
                     self.lastAnalysisScore = {
                         scoreType: analysis.scoreType,
@@ -462,8 +441,7 @@
 
                     self.displayAnalysisLines(linesByMultiPV);
                 }
-            }, 3);
-        })();
+        }, 3);
     };
 
     ChessAnalysisController.prototype.updateAnalysisFromCloud = function(result) {
