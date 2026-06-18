@@ -123,6 +123,10 @@
                     if (mem) console.error('[ENGINE-DIAGNOSTIC]   - heap used/limit (MB):', Math.round(mem.usedJSHeapSize/1048576), '/', Math.round(mem.jsHeapSizeLimit/1048576));
                 } catch (_) {}
 
+                if (crashedMultiPV >= 3 && (self._maxSeldepthReached || 0) >= 15) {
+                    console.error('[ENGINE-DIAGNOSTIC] [CRASH-PATTERN] MultiPV=' + crashedMultiPV + ' + seldepth=' + (self._maxSeldepthReached || 0) + ' = WASM call stack overflow (reduce MultiPV or lower depth)');
+                }
+
                 // Adaptive recovery strategy
                 if (self._crashCount === 1) {
                     self._analysisMaxDepth = Math.max(6, crashedAtDepth > 0 ? crashedAtDepth - 2 : 10);
@@ -214,10 +218,14 @@
         this.ensureStopped().then(function() {
             self.analyzing = true;
             self._lastFen = fen;
+            self._maxDepthReached = 0;
+            self._maxSeldepthReached = 0;
             if (self._setPhase) self._setPhase('analyzing-bestmove');
+            console.log('[ENGINE-DIAGNOSTIC] [BESTMOVE-START] depth=' + self.depth + ' FEN:', fen);
 
             self.engine.send('position fen ' + fen);
             self.engine.send('go depth ' + self.depth, function(result) {
+                console.log('[ENGINE-DIAGNOSTIC] [BESTMOVE-COMPLETE] maxDepth=' + self._maxDepthReached + ' maxSeldepth=' + self._maxSeldepthReached);
                 self.analyzing = false;
                 if (self._setPhase) self._setPhase('ready');
                 var match = result.match(/bestmove ([a-h][1-8][a-h][1-8][qrbn]?)/);
@@ -316,6 +324,7 @@
 
         // Initialize adaptive depth on first call only — preserved across recovery re-inits
         if (self._analysisMaxDepth === undefined) self._analysisMaxDepth = 12;
+        if (self._analysisMaxDepth > 15) self._analysisMaxDepth = 12; // prevent stale recovery value from bypassing ceiling
         multipv = multipv || 3;
 
         // Store for crash recovery
@@ -329,6 +338,7 @@
             self.analyzing = true;
             self._lastFen = fen;
             if (self._setPhase) self._setPhase('analyzing-continuous');
+            self._watchdogFired = false;
             self._maxDepthReached = 0;
             self._maxSeldepthReached = 0;
 
@@ -346,6 +356,30 @@
                         }
                         if (analysis.seldepth && analysis.seldepth > (self._maxSeldepthReached || 0)) {
                             self._maxSeldepthReached = analysis.seldepth;
+
+                            if (self._maxSeldepthReached >= 14) {
+                                console.warn('[ENGINE-DIAGNOSTIC] [SELDEPTH-DANGER] seldepth=' + self._maxSeldepthReached + ' depth=' + (analysis.depth || '?') + ' multipv=' + (self._analysisMultiPV || '?') + ' (crash threshold ~19)');
+                            }
+
+                            if (self._maxSeldepthReached >= 17 && !self._watchdogFired && self.analyzing) {
+                                self._watchdogFired = true;
+                                var prevCeil = self._analysisMaxDepth;
+                                self._analysisMaxDepth = Math.max(6, prevCeil - 2);
+                                console.warn('[ENGINE-DIAGNOSTIC] [SELDEPTH-WATCHDOG] seldepth=' + self._maxSeldepthReached + ' >=17 — stopping early. ceiling: ' + prevCeil + ' -> ' + self._analysisMaxDepth);
+                                self.analyzing = false;
+                                self.engine.stream = null;
+                                self.engine.stop_moves();
+                                var wdFen = self._analysisFen;
+                                var wdCallback = self._analysisCallback;
+                                var wdMPV = self._analysisMultiPV;
+                                setTimeout(function() {
+                                    self._watchdogFired = false;
+                                    self._maxSeldepthReached = 0;
+                                    if (self.ready && !self.analyzing && self._analysisFen === wdFen) {
+                                        self.startContinuousAnalysis(wdFen, wdCallback, wdMPV);
+                                    }
+                                }, 200);
+                            }
                         }
                         if (streamCallback) streamCallback(analysis);
                     }

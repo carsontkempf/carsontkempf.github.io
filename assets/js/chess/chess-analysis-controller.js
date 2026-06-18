@@ -450,7 +450,7 @@
 
                     self.displayAnalysisLines(linesByMultiPV);
                 }
-        }, 3);
+        }, 1);
     };
 
     ChessAnalysisController.prototype.updateAnalysisFromCloud = function(result) {
