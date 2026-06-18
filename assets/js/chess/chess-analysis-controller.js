@@ -415,6 +415,7 @@
         console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-START] Starting Stockfish search');
         self.analysisLines = [];
         var linesByMultiPV = {};
+        if (window.engineViz) window.engineViz.clear();
 
         self.engine.startContinuousAnalysis(currentFen, function(analysis) {
                 if (analysis.scoreType) {
@@ -449,6 +450,7 @@
                     };
 
                     self.displayAnalysisLines(linesByMultiPV);
+                    if (window.engineViz) window.engineViz.update(analysis, currentFen);
                 }
         }, 1);
     };

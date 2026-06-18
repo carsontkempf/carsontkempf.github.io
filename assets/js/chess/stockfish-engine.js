@@ -338,7 +338,6 @@
             self.analyzing = true;
             self._lastFen = fen;
             if (self._setPhase) self._setPhase('analyzing-continuous');
-            self._watchdogFired = false;
             self._maxDepthReached = 0;
             self._maxSeldepthReached = 0;
 
@@ -356,29 +355,8 @@
                         }
                         if (analysis.seldepth && analysis.seldepth > (self._maxSeldepthReached || 0)) {
                             self._maxSeldepthReached = analysis.seldepth;
-
                             if (self._maxSeldepthReached >= 14) {
                                 console.warn('[ENGINE-DIAGNOSTIC] [SELDEPTH-DANGER] seldepth=' + self._maxSeldepthReached + ' depth=' + (analysis.depth || '?') + ' multipv=' + (self._analysisMultiPV || '?') + ' (crash threshold ~19)');
-                            }
-
-                            if (self._maxSeldepthReached >= 17 && !self._watchdogFired && self.analyzing) {
-                                self._watchdogFired = true;
-                                var prevCeil = self._analysisMaxDepth;
-                                self._analysisMaxDepth = Math.max(6, prevCeil - 2);
-                                console.warn('[ENGINE-DIAGNOSTIC] [SELDEPTH-WATCHDOG] seldepth=' + self._maxSeldepthReached + ' >=17 — stopping early. ceiling: ' + prevCeil + ' -> ' + self._analysisMaxDepth);
-                                self.analyzing = false;
-                                self.engine.stream = null;
-                                self.engine.stop_moves();
-                                var wdFen = self._analysisFen;
-                                var wdCallback = self._analysisCallback;
-                                var wdMPV = self._analysisMultiPV;
-                                setTimeout(function() {
-                                    self._watchdogFired = false;
-                                    self._maxSeldepthReached = 0;
-                                    if (self.ready && !self.analyzing && self._analysisFen === wdFen) {
-                                        self.startContinuousAnalysis(wdFen, wdCallback, wdMPV);
-                                    }
-                                }, 200);
                             }
                         }
                         if (streamCallback) streamCallback(analysis);
