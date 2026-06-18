@@ -66,6 +66,12 @@
                 console.log('Square clicked:', square);
                 self.onSquareClick(square);
             },
+            onMouseoverSquare: function(square, piece) {
+                self.onMouseoverSquare(square, piece);
+            },
+            onMouseoutSquare: function(square, piece) {
+                self.onMouseoutSquare(square, piece);
+            },
             pieceTheme: this.options.pieceTheme || '/assets/img/chesspieces/wikipedia/{piece}.png',
             snapSpeed: 100,
             moveSpeed: 200,
@@ -301,31 +307,41 @@
         }
     };
 
-    ChessAnalysisController.prototype.highlightValidMoves = function(square) {
+    ChessAnalysisController.prototype.highlightValidMoves = function(square, withSelection) {
         this.removeHighlights();
 
-        var moves = this.game.moves({
-            square: square,
-            verbose: true
-        });
-
+        var moves = this.game.moves({ square: square, verbose: true });
         if (moves.length === 0) return;
 
         var boardEl = document.getElementById(this.boardElement);
         if (!boardEl) return;
 
-        var selectedSquareEl = boardEl.querySelector('.square-' + square);
-        if (selectedSquareEl) {
-            selectedSquareEl.classList.add('highlight-selected');
+        if (withSelection !== false) {
+            var selectedSquareEl = boardEl.querySelector('.square-' + square);
+            if (selectedSquareEl) selectedSquareEl.classList.add('highlight-selected');
         }
 
         for (var i = 0; i < moves.length; i++) {
-            var targetSquare = moves[i].to;
-            var targetSquareEl = boardEl.querySelector('.square-' + targetSquare);
-            if (targetSquareEl) {
-                targetSquareEl.classList.add('highlight-valid-move');
-            }
+            var targetSquareEl = boardEl.querySelector('.square-' + moves[i].to);
+            if (targetSquareEl) targetSquareEl.classList.add('highlight-valid-move');
         }
+    };
+
+    ChessAnalysisController.prototype.onMouseoverSquare = function(square, piece) {
+        if (this.selectedSquare !== null) return;
+        if (!piece) return;
+        var pieceTurn = piece.charAt(0) === 'w' ? 'w' : 'b';
+        if (pieceTurn !== this.game.turn()) return;
+        if (this.mode === 'play') {
+            var playerTurn = this.playerColor === 'white' ? 'w' : 'b';
+            if (pieceTurn !== playerTurn) return;
+        }
+        this.highlightValidMoves(square, false);
+    };
+
+    ChessAnalysisController.prototype.onMouseoutSquare = function(square, piece) {
+        if (this.selectedSquare !== null) return;
+        this.removeHighlights();
     };
 
     ChessAnalysisController.prototype.removeHighlights = function() {
