@@ -38,6 +38,7 @@
     }
 
     function pvToSan(uciPv, fen) {
+        console.log('[VIZ] pvToSan() Chess=' + (typeof Chess !== 'undefined') + ' uciLen=' + (uciPv && uciPv.length));
         if (!uciPv || !uciPv.length || typeof Chess === 'undefined') return [];
         try {
             var tmp = new Chess(fen);
@@ -49,7 +50,10 @@
                 sans.push(m.san);
             }
             return sans;
-        } catch (e) { return []; }
+        } catch (e) {
+            console.error('[VIZ] pvToSan() error:', e);
+            return [];
+        }
     }
 
     function insertPath(sans, isBest) {
@@ -97,10 +101,12 @@
 
     function initSvg() {
         var el = getContainer();
+        console.log('[VIZ] initSvg() container=' + !!el + ' d3=' + (typeof d3 !== 'undefined'));
         if (!el) return;
         injectCss();
 
         W = el.clientWidth || 700;
+        console.log('[VIZ] initSvg() W=' + W);
 
         if (_svg) {
             el.innerHTML = '';
@@ -112,6 +118,8 @@
             .attr('width', W)
             .attr('height', H)
             .style('background', '#0d0d0d');
+
+        console.log('[VIZ] initSvg() SVG created');
 
         _g = _svg.append('g').attr('transform', 'translate(60,' + (H / 2) + ')');
 
@@ -139,6 +147,7 @@
         }
 
         var hierarchy = d3.hierarchy(d3Root);
+        console.log('[VIZ] render() nodes=' + hierarchy.descendants().length + ' bestDepth=' + _bestDepth);
         var treeLayout = d3.tree().nodeSize([NODE_H, NODE_W]);
         treeLayout(hierarchy);
 
@@ -198,6 +207,7 @@
     }
 
     function update(analysis, fen) {
+        console.log('[VIZ] update() depth=' + (analysis && analysis.depth) + ' pvLen=' + (analysis && analysis.pv && analysis.pv.length) + ' d3=' + (typeof d3 !== 'undefined') + ' container=' + !!getContainer());
         if (!analysis || !analysis.pv || !analysis.pv.length) return;
 
         if (fen && fen !== _currentFen) {
@@ -230,6 +240,7 @@
     }
 
     function clear() {
+        console.log('[VIZ] clear()');
         _trie = makeTrieRoot();
         _bestPath = [];
         _bestDepth = 0;

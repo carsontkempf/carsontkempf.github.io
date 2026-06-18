@@ -19,6 +19,10 @@
         this.callbacks = {};
         this.skillLevel = this.options.skillLevel || 10;
         this.depth = this.options.depth || 15;
+        this._sessionMaxSeldepth = 0;
+        this._activeGoDepth = 0;
+        this._stdoutCircBuf = [];
+        this._analysisHistory = [];
 
         window.__stockfishInstance = this;
     }
@@ -113,7 +117,9 @@
                 console.error('[ENGINE-DIAGNOSTIC]   - crash #:', self._crashCount);
                 console.error('[ENGINE-DIAGNOSTIC]   - phase:', self._enginePhase || 'unknown');
                 console.error('[ENGINE-DIAGNOSTIC]   - depth at crash: reached=' + crashedAtDepth + ' / target=' + targetDepth);
-                console.error('[ENGINE-DIAGNOSTIC]   - seldepth at crash: reached=' + (self._maxSeldepthReached || 0));
+                console.error('[ENGINE-DIAGNOSTIC]   - seldepth this search:', self._maxSeldepthReached || 0, '(resets each search)');
+                console.error('[ENGINE-DIAGNOSTIC]   - seldepth session max:', self._sessionMaxSeldepth || 0, '(never resets)');
+                console.error('[ENGINE-DIAGNOSTIC]   - activeGoDepth:', self._activeGoDepth || 0);
                 console.error('[ENGINE-DIAGNOSTIC]   - MultiPV at crash:', crashedMultiPV);
                 console.error('[ENGINE-DIAGNOSTIC]   - FEN:', self._lastFen || 'none');
                 console.error('[ENGINE-DIAGNOSTIC]   - SIMD gate:', window.__diagSimdCheck);
@@ -122,10 +128,8 @@
                     var mem = window.performance && window.performance.memory;
                     if (mem) console.error('[ENGINE-DIAGNOSTIC]   - heap used/limit (MB):', Math.round(mem.usedJSHeapSize/1048576), '/', Math.round(mem.jsHeapSizeLimit/1048576));
                 } catch (_) {}
-
-                if (crashedMultiPV >= 3 && (self._maxSeldepthReached || 0) >= 15) {
-                    console.error('[ENGINE-DIAGNOSTIC] [CRASH-PATTERN] MultiPV=' + crashedMultiPV + ' + seldepth=' + (self._maxSeldepthReached || 0) + ' = WASM call stack overflow (reduce MultiPV or lower depth)');
-                }
+                console.error('[ENGINE-DIAGNOSTIC]   - analysisHistory:', JSON.stringify(self._analysisHistory || []));
+                console.error('[ENGINE-DIAGNOSTIC]   - stdoutCircBuf:', JSON.stringify(self._stdoutCircBuf || []));
 
                 // Adaptive recovery strategy
                 if (self._crashCount === 1) {
@@ -325,8 +329,8 @@
         }
 
         // Initialize adaptive depth on first call only — preserved across recovery re-inits
-        if (self._analysisMaxDepth === undefined) self._analysisMaxDepth = 12;
-        if (self._analysisMaxDepth > 15) self._analysisMaxDepth = 12; // prevent stale recovery value from bypassing ceiling
+        if (self._analysisMaxDepth === undefined) self._analysisMaxDepth = 4;
+        if (self._analysisMaxDepth > 8) self._analysisMaxDepth = 8; // ceiling: seldepth stays ~12-16 at depth 8, safe below WASM crash threshold
         multipv = multipv || 1;
 
         // Store for crash recovery
@@ -349,6 +353,9 @@
             console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOOP] search start: depth=' + targetDepth + ' multipv=' + thisMPV);
 
             self.engine.stream = function(line) {
+                self._stdoutCircBuf.push(line);
+                if (self._stdoutCircBuf.length > 20) self._stdoutCircBuf.shift();
+
                 if (line.indexOf('info') === 0) {
                     var analysis = self.parseInfo(line);
                     if (analysis) {
@@ -357,9 +364,13 @@
                         }
                         if (analysis.seldepth && analysis.seldepth > (self._maxSeldepthReached || 0)) {
                             self._maxSeldepthReached = analysis.seldepth;
-                            if (self._maxSeldepthReached >= 14) {
-                                console.warn('[ENGINE-DIAGNOSTIC] [SELDEPTH-DANGER] seldepth=' + self._maxSeldepthReached + ' depth=' + (analysis.depth || '?') + ' multipv=' + (self._analysisMultiPV || '?') + ' (crash threshold ~19)');
-                            }
+                        }
+                        if (analysis.seldepth && analysis.seldepth > (self._sessionMaxSeldepth || 0)) {
+                            self._sessionMaxSeldepth = analysis.seldepth;
+                        }
+                        if (analysis.depth && analysis.seldepth) {
+                            self._analysisHistory.push({ depth: analysis.depth, seldepth: analysis.seldepth, ms: Date.now() });
+                            if (self._analysisHistory.length > 10) self._analysisHistory.shift();
                         }
                         if (streamCallback) streamCallback(analysis);
                     }
@@ -368,12 +379,13 @@
 
             self.engine.send('setoption name MultiPV value ' + thisMPV);
             self.engine.send('position fen ' + fen);
+            self._activeGoDepth = targetDepth;
             self.engine.send('go depth ' + targetDepth, function() {
                 if (!self.analyzing) return; // stopped externally
 
                 // Depth completed cleanly — ratchet up
                 var prev = self._analysisMaxDepth;
-                self._analysisMaxDepth = Math.min(15, prev + 1);
+                self._analysisMaxDepth = Math.min(8, prev + 1);
                 console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOOP] depth ' + prev + ' seldepth=' + (self._maxSeldepthReached || 0) + ' complete, next: ' + self._analysisMaxDepth);
                 self._maxSeldepthReached = 0;
 
