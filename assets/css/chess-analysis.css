@@ -18,27 +18,6 @@
   align-items: stretch;
 }
 
-/* Fix chessboard piece positioning */
-#chess-board {
-  position: relative;
-}
-
-/* Center chess pieces in squares */
-#chess-board .piece-417db {
-  position: absolute;
-  top: 10%;
-  left: 10%;
-  width: 80% !important;
-  height: 80% !important;
-}
-
-/* Fix draggable piece positioning to follow cursor correctly */
-body .piece-417db.dragging-417db {
-  z-index: 10000 !important;
-  cursor: grabbing !important;
-  transform: translate(-50%, -50%) !important;
-}
-
 .eval-bar-wrapper {
   width: 30px;
   min-height: 600px;

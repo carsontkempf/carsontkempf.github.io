@@ -5,7 +5,7 @@ permalink: /chess/
 no_auth: true
 ---
 
-<link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+<link rel="stylesheet" href="{{ '/assets/css/chess-board.css' | relative_url }}">
 <link rel="stylesheet" href="{{ '/assets/css/chess-analysis.css' | relative_url }}">
 <link rel="stylesheet" href="{{ '/assets/css/chess.css' | relative_url }}">
 
@@ -528,7 +528,7 @@ no_auth: true
 <!-- Dependencies -->
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+<script src="{{ '/assets/js/chess/chess-board.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/chess/chess.min.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/worker-config.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/learn-secrets-sdk.js' | relative_url }}"></script>

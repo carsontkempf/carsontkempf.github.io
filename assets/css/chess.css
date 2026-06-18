@@ -22,15 +22,6 @@
   width: 100% !important;
 }
 
-/* Piece positioning - centered within square */
-#chess-board img.piece-417db {
-  position: absolute;
-  top: 10%;
-  left: 10%;
-  width: 80% !important;
-  height: 80% !important;
-}
-
 /* Click-to-move highlights */
 .highlight-selected {
   background-color: rgba(255, 255, 0, 0.4) !important;
