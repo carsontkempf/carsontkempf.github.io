@@ -439,6 +439,9 @@
                 }
 
                 var multipv = analysis.multipv || 1;
+                if (analysis.pv) {
+                    if (window.engineViz) window.engineViz.update(analysis, currentFen);
+                }
                 if (analysis.pv && (analysis.depth >= 10 || analysis.scoreType === 'mate')) {
                     linesByMultiPV[multipv] = {
                         depth: analysis.depth,
@@ -450,7 +453,6 @@
                     };
 
                     self.displayAnalysisLines(linesByMultiPV);
-                    if (window.engineViz) window.engineViz.update(analysis, currentFen);
                 }
         }, 1);
     };

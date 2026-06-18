@@ -223,8 +223,10 @@
             if (self._setPhase) self._setPhase('analyzing-bestmove');
             console.log('[ENGINE-DIAGNOSTIC] [BESTMOVE-START] depth=' + self.depth + ' FEN:', fen);
 
+            var safeDepth = Math.min(self.depth, 12);
+            console.warn('[ENGINE-DIAGNOSTIC] [BESTMOVE-GO] depth=' + safeDepth + (self.depth > 12 ? ' (capped from ' + self.depth + ')' : ''));
             self.engine.send('position fen ' + fen);
-            self.engine.send('go depth ' + self.depth, function(result) {
+            self.engine.send('go depth ' + safeDepth, function(result) {
                 console.log('[ENGINE-DIAGNOSTIC] [BESTMOVE-COMPLETE] maxDepth=' + self._maxDepthReached + ' maxSeldepth=' + self._maxSeldepthReached);
                 self.analyzing = false;
                 if (self._setPhase) self._setPhase('ready');
@@ -325,7 +327,7 @@
         // Initialize adaptive depth on first call only — preserved across recovery re-inits
         if (self._analysisMaxDepth === undefined) self._analysisMaxDepth = 12;
         if (self._analysisMaxDepth > 15) self._analysisMaxDepth = 12; // prevent stale recovery value from bypassing ceiling
-        multipv = multipv || 3;
+        multipv = multipv || 1;
 
         // Store for crash recovery
         self._analysisFen = fen;
