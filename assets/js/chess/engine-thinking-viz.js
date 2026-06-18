@@ -37,23 +37,10 @@
         return { name: '', children: {}, count: 0, onBestPath: false, depth: 0 };
     }
 
-    function pvToSan(uciPv, fen) {
-        console.log('[VIZ] pvToSan() Chess=' + (typeof Chess !== 'undefined') + ' uciLen=' + (uciPv && uciPv.length));
-        if (!uciPv || !uciPv.length || typeof Chess === 'undefined') return [];
-        try {
-            var tmp = new Chess(fen);
-            var sans = [];
-            for (var i = 0; i < uciPv.length; i++) {
-                var uci = uciPv[i];
-                var m = tmp.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || undefined });
-                if (!m) break;
-                sans.push(m.san);
-            }
-            return sans;
-        } catch (e) {
-            console.error('[VIZ] pvToSan() error:', e);
-            return [];
-        }
+    function pvMoves(uciPv) {
+        console.log('[VIZ] pvMoves() uciLen=' + (uciPv && uciPv.length));
+        if (!uciPv || !uciPv.length) return [];
+        return uciPv.slice();
     }
 
     function insertPath(sans, isBest) {
@@ -223,17 +210,17 @@
             initSvg();
         }
 
-        var sans = pvToSan(analysis.pv, _currentFen || fen);
-        if (!sans.length) return;
+        var moves = pvMoves(analysis.pv);
+        if (!moves.length) return;
 
         var depth = analysis.depth || 0;
-        insertPath(sans, false);
+        insertPath(moves, false);
 
         if (depth > _bestDepth) {
             _bestDepth = depth;
-            _bestPath = sans;
+            _bestPath = moves;
             clearBestPath(_trie);
-            markBestPath(sans);
+            markBestPath(moves);
         }
 
         render();
