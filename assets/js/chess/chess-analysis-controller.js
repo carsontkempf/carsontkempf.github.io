@@ -434,6 +434,10 @@
         if (window.engineViz) window.engineViz.clear();
 
         self.engine.startContinuousAnalysis(currentFen, function(analysis) {
+                if (analysis.nodes) {
+                    self._engineStats = { nodes: analysis.nodes, nps: analysis.nps || 0, depth: analysis.depth || 0 };
+                }
+
                 if (analysis.scoreType) {
                     self.lastAnalysisScore = {
                         scoreType: analysis.scoreType,
@@ -585,6 +589,14 @@
         }
 
         var html = '';
+
+        // Engine search stats bar
+        if (this._engineStats) {
+            var s = this._engineStats;
+            html += '<div class="engine-search-stats">Depth ' + s.depth + ' | ' +
+                s.nodes.toLocaleString() + ' nodes | ' +
+                Math.round(s.nps / 1000) + 'k nps</div>';
+        }
 
         // Live stats section (shown first and prominently)
         if (this.moveHistory.length > 0) {
@@ -740,6 +752,19 @@
         }
 
         this.setStatus(status);
+
+        var statusEl = document.getElementById(this.statusElement);
+        if (statusEl) {
+            statusEl.classList.remove('status-check', 'status-gameover');
+            if (this.game.game_over()) {
+                statusEl.classList.add('status-gameover');
+                if (this.engine && this.engine.analyzing) {
+                    this.engine.stopContinuousAnalysis();
+                }
+            } else if (this.game.in_check()) {
+                statusEl.classList.add('status-check');
+            }
+        }
     };
 
     ChessAnalysisController.prototype.setStatus = function(text) {

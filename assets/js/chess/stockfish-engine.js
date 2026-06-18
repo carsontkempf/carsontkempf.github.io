@@ -453,6 +453,9 @@
         var nodesMatch = line.match(/nodes (\d+)/);
         if (nodesMatch) analysis.nodes = parseInt(nodesMatch[1], 10);
 
+        var npsMatch = line.match(/nps (\d+)/);
+        if (npsMatch) analysis.nps = parseInt(npsMatch[1], 10);
+
         return Object.keys(analysis).length > 1 ? analysis : null;
     };
 

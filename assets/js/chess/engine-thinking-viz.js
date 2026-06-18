@@ -1,29 +1,25 @@
 (function(window) {
     'use strict';
 
-    var _trie = null;
-    var _bestPath = [];
     var _bestDepth = 0;
     var _currentFen = null;
-    var _svg = null;
-    var _g = null;
-    var _zoom = null;
-    var _cssInjected = false;
     var _containerEl = null;
-
-    var W = 0, H = 320;
-    var NODE_R = 7;
-    var NODE_W = 80; // horizontal spacing per depth level
-    var NODE_H = 22; // vertical spacing between siblings
+    var _cssInjected = false;
 
     function injectCss() {
         if (_cssInjected) return;
         _cssInjected = true;
         var s = document.createElement('style');
         s.textContent = [
-            '#engine-thinking-viz{width:100%;height:' + H + 'px;background:#0d0d0d;border-radius:4px;',
-            'margin:10px auto;max-width:1400px;overflow:hidden;position:relative;box-sizing:border-box;}',
-            '#engine-thinking-viz svg{display:block;}'
+            '#engine-thinking-viz{width:100%;background:#0d0d0d;border-radius:4px;',
+            'margin:10px auto;max-width:1400px;box-sizing:border-box;',
+            'padding:10px 14px;min-height:44px;font-family:monospace;}',
+            '.viz-idle{font-size:12px;color:#444;}',
+            '.viz-line{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;}',
+            '.viz-depth{font-size:12px;color:#777;white-space:nowrap;}',
+            '.viz-score{font-size:13px;font-weight:700;white-space:nowrap;min-width:52px;}',
+            '.viz-score.pos{color:#5a9fd4;}.viz-score.neg{color:#c0392b;}.viz-score.even{color:#888;}',
+            '.viz-moves{font-size:12px;color:#ccc;word-break:break-word;}'
         ].join('');
         document.head.appendChild(s);
     }
@@ -33,220 +29,70 @@
         return _containerEl;
     }
 
-    function makeTrieRoot() {
-        return { name: '', children: {}, count: 0, onBestPath: false, depth: 0 };
-    }
-
-    function pvMoves(uciPv) {
-        console.log('[VIZ] pvMoves() uciLen=' + (uciPv && uciPv.length));
-        if (!uciPv || !uciPv.length) return [];
-        return uciPv.slice();
-    }
-
-    function insertPath(sans, isBest) {
-        var node = _trie;
-        if (isBest) {
-            node.onBestPath = true;
+    function uciToSan(uciMoves, fen) {
+        if (!window.Chess) return uciMoves.join(' ');
+        var game;
+        try { game = new Chess(fen); } catch (e) { return uciMoves.join(' '); }
+        var sans = [];
+        for (var i = 0; i < Math.min(uciMoves.length, 12); i++) {
+            var mv = uciMoves[i];
+            var result = game.move({ from: mv.substring(0, 2), to: mv.substring(2, 4), promotion: mv.length > 4 ? mv[4] : undefined });
+            if (!result) break;
+            sans.push(result.san);
         }
-        for (var i = 0; i < sans.length; i++) {
-            var mv = sans[i];
-            if (!node.children[mv]) {
-                node.children[mv] = { name: mv, children: {}, count: 0, onBestPath: false, depth: i + 1 };
-            }
-            node.children[mv].count++;
-            if (isBest) node.children[mv].onBestPath = true;
-            node = node.children[mv];
+        return sans.join(' ');
+    }
+
+    function formatScore(analysis) {
+        if (!analysis.scoreType) return '';
+        if (analysis.scoreType === 'mate') {
+            var m = analysis.scoreValue;
+            return (m > 0 ? '+' : '') + 'M' + Math.abs(m);
         }
+        var cp = analysis.scoreValue;
+        return (cp >= 0 ? '+' : '') + (cp / 100).toFixed(2);
     }
 
-    function clearBestPath(node) {
-        node.onBestPath = false;
-        Object.values(node.children).forEach(clearBestPath);
-    }
-
-    function markBestPath(sans) {
-        var node = _trie;
-        node.onBestPath = true;
-        for (var i = 0; i < sans.length; i++) {
-            var mv = sans[i];
-            if (!node.children[mv]) break;
-            node.children[mv].onBestPath = true;
-            node = node.children[mv];
-        }
-    }
-
-    function trieToD3(node) {
-        var kids = Object.values(node.children).map(trieToD3);
-        return {
-            name: node.name,
-            count: node.count,
-            onBestPath: node.onBestPath,
-            trieDepth: node.depth,
-            children: kids.length ? kids : null
-        };
-    }
-
-    function initSvg() {
+    function render(analysis) {
         var el = getContainer();
-        console.log('[VIZ] initSvg() container=' + !!el + ' d3=' + (typeof d3 !== 'undefined'));
         if (!el) return;
         injectCss();
 
-        W = el.clientWidth || 700;
-        console.log('[VIZ] initSvg() W=' + W);
+        var scoreStr = formatScore(analysis);
+        var scoreClass = !analysis.scoreType ? 'even' : (analysis.scoreValue > 20 ? 'pos' : analysis.scoreValue < -20 ? 'neg' : 'even');
+        var sanLine = uciToSan(analysis.pv, _currentFen);
+        var depth = analysis.depth || 0;
+        var seldepth = analysis.seldepth ? '/' + analysis.seldepth : '';
 
-        if (_svg) {
-            el.innerHTML = '';
-            _svg = null;
-            _g = null;
-        }
-
-        _svg = d3.select(el).append('svg')
-            .attr('width', W)
-            .attr('height', H)
-            .style('background', '#0d0d0d');
-
-        console.log('[VIZ] initSvg() SVG created');
-
-        _g = _svg.append('g').attr('transform', 'translate(60,' + (H / 2) + ')');
-
-        _zoom = d3.zoom()
-            .scaleExtent([0.3, 3])
-            .on('zoom', function(event) {
-                _g.attr('transform', event.transform);
-            });
-
-        _svg.call(_zoom);
-    }
-
-    function render() {
-        if (!_svg || !_g || !_trie) return;
-
-        var d3Root = trieToD3(_trie);
-        if (!d3Root.children) {
-            _g.selectAll('*').remove();
-            _g.append('text')
-                .attr('fill', '#333')
-                .attr('font-size', '12px')
-                .attr('font-family', 'monospace')
-                .text('searching...');
-            return;
-        }
-
-        var hierarchy = d3.hierarchy(d3Root);
-        console.log('[VIZ] render() nodes=' + hierarchy.descendants().length + ' bestDepth=' + _bestDepth);
-        var treeLayout = d3.tree().nodeSize([NODE_H, NODE_W]);
-        treeLayout(hierarchy);
-
-        _g.selectAll('*').remove();
-
-        // Links
-        _g.selectAll('.link')
-            .data(hierarchy.links())
-            .enter().append('path')
-            .attr('class', 'link')
-            .attr('fill', 'none')
-            .attr('stroke', function(d) {
-                return (d.source.data.onBestPath && d.target.data.onBestPath) ? '#ffd700' : '#333';
-            })
-            .attr('stroke-width', function(d) {
-                return (d.source.data.onBestPath && d.target.data.onBestPath) ? 2 : 1;
-            })
-            .attr('d', d3.linkHorizontal()
-                .x(function(d) { return d.y; })
-                .y(function(d) { return d.x; })
-            );
-
-        // Nodes
-        var nodeGroups = _g.selectAll('.node')
-            .data(hierarchy.descendants().filter(function(d) { return d.data.name !== ''; }))
-            .enter().append('g')
-            .attr('class', 'node')
-            .attr('transform', function(d) { return 'translate(' + d.y + ',' + d.x + ')'; });
-
-        // Determine if white or black is to move at each ply based on FEN
-        var whiteToMove = _currentFen && _currentFen.split(' ')[1] === 'w';
-
-        nodeGroups.append('circle')
-            .attr('r', NODE_R)
-            .attr('fill', function(d) {
-                var ply = d.data.trieDepth;
-                var engineIsWhite = whiteToMove;
-                // ply 1 = engine's first move, alternates from there
-                var isEnginePly = (ply % 2 === 1);
-                if (d.data.onBestPath) {
-                    return isEnginePly
-                        ? (engineIsWhite ? '#2a5a8c' : '#8c2a2a')
-                        : (engineIsWhite ? '#5a2a2a' : '#2a5a5a');
-                }
-                return isEnginePly ? '#1a3050' : '#301a1a';
-            })
-            .attr('stroke', function(d) { return d.data.onBestPath ? '#ffd700' : '#555'; })
-            .attr('stroke-width', function(d) { return d.data.onBestPath ? 1.5 : 0.5; });
-
-        nodeGroups.append('text')
-            .attr('dy', NODE_R + 11)
-            .attr('text-anchor', 'middle')
-            .attr('fill', function(d) { return d.data.onBestPath ? '#eee' : '#666'; })
-            .attr('font-size', '9px')
-            .attr('font-family', 'monospace')
-            .text(function(d) { return d.data.name; });
+        el.innerHTML = '<div class="viz-line">' +
+            '<span class="viz-depth">Depth ' + depth + seldepth + '</span>' +
+            (scoreStr ? '<span class="viz-score ' + scoreClass + '">' + scoreStr + '</span>' : '') +
+            '<span class="viz-moves">' + sanLine + '</span>' +
+            '</div>';
     }
 
     function update(analysis, fen) {
-        console.log('[VIZ] update() depth=' + (analysis && analysis.depth) + ' pvLen=' + (analysis && analysis.pv && analysis.pv.length) + ' d3=' + (typeof d3 !== 'undefined') + ' container=' + !!getContainer());
         if (!analysis || !analysis.pv || !analysis.pv.length) return;
 
         if (fen && fen !== _currentFen) {
-            _trie = makeTrieRoot();
-            _bestPath = [];
-            _bestDepth = 0;
             _currentFen = fen;
-            initSvg();
+            _bestDepth = 0;
         }
-
-        if (!_trie) {
-            _trie = makeTrieRoot();
-            initSvg();
-        }
-
-        var moves = pvMoves(analysis.pv);
-        if (!moves.length) return;
 
         var depth = analysis.depth || 0;
-        insertPath(moves, false);
+        if (depth < _bestDepth) return;
+        _bestDepth = depth;
 
-        if (depth > _bestDepth) {
-            _bestDepth = depth;
-            _bestPath = moves;
-            clearBestPath(_trie);
-            markBestPath(moves);
-        }
-
-        render();
+        render(analysis);
     }
 
     function clear() {
-        console.log('[VIZ] clear()');
-        _trie = makeTrieRoot();
-        _bestPath = [];
         _bestDepth = 0;
         _currentFen = null;
-
         var el = getContainer();
         if (!el) return;
         injectCss();
-
-        if (!_svg) {
-            initSvg();
-        } else {
-            _g.selectAll('*').remove();
-            _g.append('text')
-                .attr('fill', '#333')
-                .attr('font-size', '12px')
-                .attr('font-family', 'monospace')
-                .text('waiting for engine...');
-        }
+        el.innerHTML = '<span class="viz-idle">waiting for engine...</span>';
     }
 
     window.engineViz = { update: update, clear: clear };

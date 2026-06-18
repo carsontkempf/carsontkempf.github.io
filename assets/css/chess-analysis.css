@@ -447,6 +447,34 @@
   margin: 6px 0;
 }
 
+.engine-search-stats {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-main);
+  padding: 6px 10px;
+  background: var(--bg-accent);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+#game-status.status-gameover {
+  background: #c0392b;
+  color: #fff;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+#game-status.status-check {
+  background: #e67e22;
+  color: #fff;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
 @media (max-width: 900px) {
   .chess-analysis-container {
     flex-direction: column;
