@@ -192,6 +192,9 @@ no_auth: true
   .debug-warn    { border-color: #e6a000; color: #e6a000; }
   .debug-error   { border-color: #f85149; color: #f85149; }
   .debug-success { border-color: #3fb950; color: #3fb950; }
+  .debug-collapsed #debug-sdk-status,
+  .debug-collapsed #debug-log-entries { display: none; }
+  #debug-toggle-btn { min-width: 38px; }
 </style>
 
 <div class="page-header">
@@ -271,6 +274,7 @@ no_auth: true
   <div id="debug-header">
     <span>Debug Log</span>
     <div class="debug-btn-group">
+      <button id="debug-toggle-btn">show</button>
       <button class="debug-filter-btn" data-filter="info">info</button>
       <button class="debug-filter-btn debug-filter-active" data-filter="warn">warn</button>
       <button class="debug-filter-btn debug-filter-active" data-filter="error">error</button>
@@ -451,6 +455,16 @@ no_auth: true
     _logEl = document.getElementById('debug-log-entries');
     _statusEl = document.getElementById('debug-sdk-status');
     _titleEl = document.querySelector('#debug-header span');
+
+    var _debugCollapsed = true;
+    var _debugPanel = document.getElementById('chess-debug-panel');
+    var _toggleBtn = document.getElementById('debug-toggle-btn');
+    _debugPanel.classList.add('debug-collapsed');
+    _toggleBtn.addEventListener('click', function() {
+      _debugCollapsed = !_debugCollapsed;
+      _debugPanel.classList.toggle('debug-collapsed', _debugCollapsed);
+      _toggleBtn.textContent = _debugCollapsed ? 'show' : 'hide';
+    });
 
     _entries.forEach(renderEntry);
 
