@@ -333,76 +333,39 @@ async function fetchWithFallback(endpoint, options = {}) {
   throw new Error('All Netlify API endpoints failed');
 }
 
-document.addEventListener('authReady', async function() {
-  console.log('[AUTH0-USERS] authReady event fired');
-  console.log('[AUTH0-USERS] Netlify API Base URLs:', NETLIFY_API_BASES);
+window.addEventListener('auth:ready', async function(event) {
+  const isAuthenticated = event.detail?.isAuthenticated;
 
-  // Defensive check: ensure authService is fully initialized
-  if (!window.authService || !window.authService.client) {
-    console.error('[AUTH0-USERS] authReady fired but authService not fully initialized');
+  if (!isAuthenticated) {
     document.getElementById('auth0-login-prompt').style.display = 'block';
     return;
   }
 
-  // Re-verify authentication state instead of trusting cached value
   try {
-    const isAuthenticated = await window.authService.client.isAuthenticated();
-    window.authService.isAuthenticated = isAuthenticated;
-
-    console.log('[AUTH0-USERS] Authentication verified:', isAuthenticated);
-
-    if (isAuthenticated) {
-      // Ensure user object exists before proceeding
-      if (!window.authService.user) {
-        window.authService.user = await window.authService.client.getUser();
-      }
-      console.log('[AUTH0-USERS] User object:', window.authService.user);
-      await checkAdminPermissions();
-    } else {
-      console.log('[AUTH0-USERS] User not authenticated, showing login prompt');
-      document.getElementById('auth0-login-prompt').style.display = 'block';
-    }
+    const user = await window.authService.getUser();
+    await checkAdminPermissions(user);
   } catch (error) {
-    console.error('[AUTH0-USERS] Error checking authentication:', error);
+    console.error('[AUTH-USERS] Error checking authentication:', error);
     document.getElementById('auth0-login-prompt').style.display = 'block';
   }
 });
 
-async function checkAdminPermissions() {
-  console.log('[AUTH0-USERS] Checking admin permissions...');
-  const user = window.authService.user;
-
+async function checkAdminPermissions(user) {
   if (!user) {
-    console.error('[AUTH0-USERS] No user object available');
     document.getElementById('auth0-login-prompt').style.display = 'block';
     return;
   }
 
-  const customRoles = user['https://carsontkempf.github.io/roles'] || [];
-  const auth0Roles = user['https://auth0.com/roles'] || [];
-  const appMetadataRoles = user.app_metadata?.roles || [];
-  const userMetadataRoles = user.user_metadata?.roles || [];
+  const role = (user.role || '').toLowerCase();
+  const roles = (user.roles || []).map(r => r.toLowerCase());
+  const isSiteOwner = user.email === 'carsontkempf@gmail.com' || user.email === 'ctkfdp@umsystem.edu';
+  const isAdmin = role === 'admin' || roles.includes('admin') || isSiteOwner;
 
-  const allRoles = [...customRoles, ...auth0Roles, ...appMetadataRoles, ...userMetadataRoles];
-
-  console.log('[AUTH0-USERS] All roles found:', allRoles);
-
-  // Check for admin role (case-insensitive)
-  const hasAdminRole = allRoles.some(role => role.toLowerCase() === 'admin');
-  const hasRootRole = allRoles.some(role => role.toLowerCase() === 'root');
-  const isSiteOwner = user.email === 'ctkfdp@umsystem.edu';
-
-  console.log('[AUTH0-USERS] Has admin role:', hasAdminRole);
-  console.log('[AUTH0-USERS] Has root role:', hasRootRole);
-  console.log('[AUTH0-USERS] Is site owner:', isSiteOwner);
-
-  if (hasAdminRole || hasRootRole || isSiteOwner) {
-    console.log('[AUTH0-USERS] Access granted, loading content...');
+  if (isAdmin) {
     document.getElementById('auth0-content-wrapper').style.display = 'block';
     await loadAllUsers();
     await loadAllRoles();
   } else {
-    console.log('[AUTH0-USERS] Access denied');
     document.getElementById('auth0-login-prompt').style.display = 'block';
   }
 }
@@ -410,8 +373,8 @@ async function checkAdminPermissions() {
 // Helper to get user access token for API calls
 async function getUserToken() {
   try {
-    const token = await window.authService.client.getTokenSilently();
-    return token;
+    const session = await window.authService.getSession();
+    return session?.session?.id ?? null;
   } catch (error) {
     console.error('Error getting user token:', error);
     return null;

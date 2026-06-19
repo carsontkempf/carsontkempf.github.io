@@ -1316,41 +1316,49 @@ document.addEventListener('configReady', () => {
 });
 
 // Main initialization
-document.addEventListener('authReady', async () => {
+window.addEventListener('auth:ready', async (event) => {
     console.log('Auth ready event received');
 
-    // Check role-based access: Spotify-Apple, Admin, or Root
-    const hasAccess = window.authService.isAuthenticated &&
-                     (window.authService.hasRole(['Spotify-Apple', 'Admin', 'Root']));
+    const isAuthenticated = event.detail?.isAuthenticated;
 
-    if (!hasAccess) {
+    if (!isAuthenticated) {
+        document.getElementById('spotify-apple-login-prompt').innerHTML = `
+            <h2>Access Denied</h2>
+            <p>You must be logged in to view this page.</p>
+            <button onclick="authService.login()" class="login-btn">Log In</button>
+        `;
         document.getElementById('spotify-apple-login-prompt').style.display = 'block';
-        if (!window.authService.isAuthenticated) {
-            document.getElementById('spotify-apple-login-prompt').innerHTML = `
-                <h2>Access Denied</h2>
-                <p>You must be logged in to view this page.</p>
-                <button onclick="authService.login()" class="login-btn">Log In</button>
-            `;
-        } else {
-            document.getElementById('spotify-apple-login-prompt').innerHTML = `
-                <h2>Access Denied</h2>
-                <p>You do not have permission to access this page.</p>
-                <p>This page requires the Spotify-Apple, Admin, or Root role.</p>
-                <p>Your roles: ${window.authService.roles.join(', ') || 'None'}</p>
-            `;
-        }
         return;
     }
 
-    if (window.authService.isAuthenticated) {
+    const user = await window.authService.getUser();
+    const role = (user?.role || '').toLowerCase();
+    const roles = (user?.roles || []).map(r => r.toLowerCase());
+    const isSiteOwner = user?.email === 'carsontkempf@gmail.com' || user?.email === 'ctkfdp@umsystem.edu';
+    const hasAccess = role === 'admin' || roles.includes('admin') ||
+                      role === 'spotify-apple' || roles.includes('spotify-apple') ||
+                      isSiteOwner;
+
+    if (!hasAccess) {
+        const allRoles = await window.authService.getRoles();
+        document.getElementById('spotify-apple-login-prompt').innerHTML = `
+            <h2>Access Denied</h2>
+            <p>You do not have permission to access this page.</p>
+            <p>This page requires the Spotify-Apple or Admin role.</p>
+            <p>Your roles: ${allRoles.join(', ') || 'None'}</p>
+        `;
+        document.getElementById('spotify-apple-login-prompt').style.display = 'block';
+        return;
+    }
+
+    if (isAuthenticated) {
         document.getElementById('spotify-apple-content-wrapper').style.display = 'block';
         
-        const user = window.authService.user;
         const profileDiv = document.getElementById('user-profile-details');
         
         if (user && profileDiv) {
             profileDiv.innerHTML = `
-                <p class="welcome-message">Welcome, ${user.name}!</p>
+                <p class="welcome-message">Welcome, ${user.name || user.email}!</p>
                 <p class="login-status">Your login status is confirmed.</p>
             `;
         }

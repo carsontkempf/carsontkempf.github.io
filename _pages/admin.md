@@ -74,20 +74,31 @@ permalink: /admin/
 </div>
 
 <script>
-document.addEventListener('authReady', () => {
-    const hasAccess = window.authService.isAuthenticated &&
-                     (window.authService.hasRole(['Admin', 'Writer', 'Root']));
+window.addEventListener('auth:ready', async (event) => {
+    const isAuthenticated = event.detail?.isAuthenticated;
+
+    if (!isAuthenticated) {
+        document.getElementById('admin-login-prompt').style.display = 'block';
+        return;
+    }
+
+    const user = await window.authService.getUser();
+    const role = (user?.role || '').toLowerCase();
+    const roles = (user?.roles || []).map(r => r.toLowerCase());
+    const isSiteOwner = user?.email === 'carsontkempf@gmail.com' || user?.email === 'ctkfdp@umsystem.edu';
+    const hasAccess = role === 'admin' || roles.includes('admin') ||
+                      role === 'writer' || roles.includes('writer') ||
+                      isSiteOwner;
 
     if (!hasAccess) {
+        const allRoles = await window.authService.getRoles();
+        document.getElementById('admin-login-prompt').innerHTML = `
+            <h2>Access Denied</h2>
+            <p>You don't have permission to access this page.</p>
+            <p>Required role: Admin or Writer</p>
+            <p>Your roles: ${allRoles.join(', ') || 'None'}</p>
+        `;
         document.getElementById('admin-login-prompt').style.display = 'block';
-        if (window.authService.isAuthenticated) {
-            document.getElementById('admin-login-prompt').innerHTML = `
-                <h2>Access Denied</h2>
-                <p>You don't have permission to access this page.</p>
-                <p>Required role: Admin or Writer</p>
-                <p>Your roles: ${window.authService.roles.join(', ') || 'None'}</p>
-            `;
-        }
         return;
     }
 
