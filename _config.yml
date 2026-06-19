@@ -26,7 +26,7 @@ url: "https://carsontkempf.github.io" # the base hostname & protocol for your si
 repository: "carsontkempf/carsontkempf.github.io"
 github_username:  carsontkempf
 author: Carson Kempf
-version: 1.1.67
+version: 1.1.68
 
 safe: false
 show_downloads: false
@@ -47,6 +47,8 @@ collections:
   pages:
     output: true
     permalink: /:path/
+  dashboards:
+    output: true
 
 # Process .liquid files as JavaScript
 defaults:
@@ -59,6 +61,11 @@ defaults:
       type: "pages"
     values:
       layout: "page"
+  - scope:
+      path: "_dashboards"
+      type: "dashboards"
+    values:
+      layout: "category-dashboard"
 
 # Include .liquid files in processing
 include:

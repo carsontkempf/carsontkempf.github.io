@@ -3,7 +3,7 @@
 * Version is tracked in `_config.yml` under the `version` key
 * Displayed in the site footer as `v1.1.z`
 * MUST increment z by 1 on every git push, no exceptions
-* Current version as of last update: 1.1.67
+* Current version as of last update: 1.1.68
 
 ---
 

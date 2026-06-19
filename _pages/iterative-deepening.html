@@ -1,0 +1,305 @@
+---
+layout: page
+title: Iterative Deepening Search
+permalink: /algorithms/iterative-deepening/
+no_auth: true
+---
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+
+<style>
+  .id-page { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+  .id-header { margin-bottom: 20px; }
+  .id-header h1 { margin-bottom: 6px; }
+  .id-header p { color: var(--text-main); margin: 0; }
+
+  .id-controls {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 18px; padding: 12px 16px;
+    background: var(--bg-accent); border-radius: 4px;
+  }
+  .id-controls button {
+    padding: 6px 16px; border-radius: 3px; border: 1px solid #555;
+    background: #333; color: #ddd; cursor: pointer; font-size: 13px;
+  }
+  .id-controls button:hover { background: #444; }
+  .id-controls button:disabled { opacity: 0.4; cursor: default; }
+  .id-speed-wrap { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #888; }
+  .id-frame-info { font-size: 12px; color: #777; margin-left: auto; }
+
+  .id-main { display: flex; gap: 24px; flex-wrap: wrap; }
+  .id-viz-col { flex: 1 1 480px; min-height: 420px; }
+  .id-code-col { flex: 0 0 320px; }
+
+  #id-svg-wrap {
+    background: #0d0d0d; border-radius: 4px; overflow: hidden;
+    border: 1px solid #222;
+  }
+  #id-svg-wrap svg { display: block; width: 100%; }
+
+  .id-depth-badge {
+    font-family: monospace; font-size: 13px;
+    padding: 6px 12px; background: #1a1a1a;
+    border-radius: 4px; border: 1px solid #333;
+    margin-bottom: 10px; color: #aaa;
+  }
+  .id-depth-badge span { color: #5a9fd4; font-weight: bold; }
+
+  .id-pseudocode {
+    background: #0d0d0d; border: 1px solid #222; border-radius: 4px;
+    font-family: monospace; font-size: 12px; padding: 14px;
+    line-height: 1.7;
+  }
+  .id-pseudocode .pc-line { display: block; padding: 1px 6px; border-radius: 2px; color: #666; }
+  .id-pseudocode .pc-line.active { background: #2a2a00; color: #e6d700; }
+  .id-pseudocode .pc-line.dim { color: #333; }
+  .id-pseudocode .pc-kw { color: #569cd6; }
+  .id-pseudocode .pc-fn { color: #dcdcaa; }
+  .id-pseudocode .pc-cm { color: #4a4a4a; font-style: italic; }
+
+  .id-legend {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin-top: 10px; font-size: 11px; color: #777;
+  }
+  .id-legend-item { display: flex; align-items: center; gap: 5px; }
+  .id-legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+</style>
+
+<div class="id-page">
+  <div class="id-header">
+    <h1>Iterative Deepening Search</h1>
+    <p>Repeatedly runs depth-limited search with increasing depth limits, combining DFS memory efficiency with BFS completeness.</p>
+  </div>
+
+  <div class="id-controls">
+    <button id="id-reset">Reset</button>
+    <button id="id-back">&#8592; Step</button>
+    <button id="id-play">Play</button>
+    <button id="id-fwd">Step &#8594;</button>
+    <div class="id-speed-wrap">
+      Speed: <input type="range" id="id-speed" min="1" max="10" value="5" style="width:80px">
+    </div>
+    <div class="id-frame-info" id="id-frame-info">Frame 0 / 0</div>
+  </div>
+
+  <div class="id-main">
+    <div class="id-viz-col">
+      <div class="id-depth-badge">Current depth limit: <span id="id-depth-val">—</span></div>
+      <div id="id-svg-wrap"></div>
+      <div class="id-legend">
+        <div class="id-legend-item"><div class="id-legend-dot" style="background:#444"></div>unvisited</div>
+        <div class="id-legend-item"><div class="id-legend-dot" style="background:#e6d700"></div>expanding</div>
+        <div class="id-legend-item"><div class="id-legend-dot" style="background:#5a9fd4"></div>visited</div>
+        <div class="id-legend-item"><div class="id-legend-dot" style="background:#e67e22"></div>depth cutoff</div>
+      </div>
+    </div>
+    <div class="id-code-col">
+      <div class="id-pseudocode" id="id-pseudocode"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── Tree definition ──────────────────────────────── */
+  /* Branching factor 3, depth 3. Node ids: root=0, children of N = 3N+1, 3N+2, 3N+3 */
+  var MAX_DEPTH = 3;
+  var BRANCH = 3;
+  var MAX_DEPTH_LIMIT = 3;
+
+  function children(id) {
+    if (depth(id) >= MAX_DEPTH) return [];
+    return [BRANCH * id + 1, BRANCH * id + 2, BRANCH * id + 3];
+  }
+  function depth(id) {
+    if (id === 0) return 0;
+    var d = 0, n = id;
+    while (n > 0) { n = Math.floor((n - 1) / BRANCH); d++; }
+    return d;
+  }
+  function allNodes() {
+    var list = [], q = [0];
+    while (q.length) { var n = q.shift(); list.push(n); children(n).forEach(function(c) { q.push(c); }); }
+    return list;
+  }
+  var ALL_NODES = allNodes();
+
+  /* ── Pseudocode lines ─────────────────────────────── */
+  var PSEUDO = [
+    { text: '<span class="pc-kw">function</span> <span class="pc-fn">IDDFS</span>(root, maxDepth):', line: 0 },
+    { text: '  <span class="pc-kw">for</span> limit = 1 <span class="pc-kw">to</span> maxDepth:', line: 1 },
+    { text: '    result = <span class="pc-fn">DLS</span>(root, limit)', line: 2 },
+    { text: '    <span class="pc-kw">if</span> result: <span class="pc-kw">return</span> result', line: 3 },
+    { text: '', line: -1 },
+    { text: '<span class="pc-kw">function</span> <span class="pc-fn">DLS</span>(node, limit):', line: 4 },
+    { text: '  <span class="pc-kw">if</span> isGoal(node): <span class="pc-kw">return</span> node', line: 5 },
+    { text: '  <span class="pc-kw">if</span> limit == 0:', line: 6 },
+    { text: '    <span class="pc-kw">return</span> CUTOFF <span class="pc-cm">// depth limit hit</span>', line: 7 },
+    { text: '  <span class="pc-kw">for</span> child <span class="pc-kw">in</span> node.children:', line: 8 },
+    { text: '    result = <span class="pc-fn">DLS</span>(child, limit - 1)', line: 9 },
+    { text: '    <span class="pc-kw">if</span> result: <span class="pc-kw">return</span> result', line: 10 },
+    { text: '  <span class="pc-kw">return</span> NOT_FOUND', line: 11 }
+  ];
+
+  /* ── Frame computation ────────────────────────────── */
+  var frames = [];
+
+  function dls(nodeId, limit, depthLimit, nodeStates) {
+    nodeStates[nodeId] = 'expanding';
+    var activeLine;
+    if (limit === 0) {
+      activeLine = 6;
+      frames.push({ depthLimit: depthLimit, nodeStates: clone(nodeStates), activeLine: activeLine });
+      frames.push({ depthLimit: depthLimit, nodeStates: clone(nodeStates), activeLine: 7 });
+      nodeStates[nodeId] = 'cutoff';
+      return;
+    }
+    activeLine = (depth(nodeId) === 0) ? 2 : 9;
+    frames.push({ depthLimit: depthLimit, nodeStates: clone(nodeStates), activeLine: activeLine });
+    var ch = children(nodeId);
+    if (ch.length > 0) {
+      frames.push({ depthLimit: depthLimit, nodeStates: clone(nodeStates), activeLine: 8 });
+      for (var i = 0; i < ch.length; i++) {
+        dls(ch[i], limit - 1, depthLimit, nodeStates);
+      }
+    }
+    nodeStates[nodeId] = 'visited';
+  }
+
+  function buildFrames() {
+    frames = [];
+    for (var dl = 1; dl <= MAX_DEPTH_LIMIT; dl++) {
+      var ns = {};
+      ALL_NODES.forEach(function(n) { ns[n] = 'unvisited'; });
+      frames.push({ depthLimit: dl, nodeStates: clone(ns), activeLine: 1 });
+      dls(0, dl, dl, ns);
+    }
+    frames.push({ depthLimit: MAX_DEPTH_LIMIT, nodeStates: frames[frames.length-1].nodeStates, activeLine: 3 });
+  }
+
+  function clone(obj) {
+    var o = {};
+    Object.keys(obj).forEach(function(k) { o[k] = obj[k]; });
+    return o;
+  }
+
+  buildFrames();
+
+  /* ── D3 Setup ─────────────────────────────────────── */
+  var W = 520, H = 380;
+  var svg = d3.select('#id-svg-wrap').append('svg')
+    .attr('viewBox', '0 0 ' + W + ' ' + H);
+
+  var treeData = buildHierarchy();
+  var treeLayout = d3.tree().size([W - 60, H - 80]);
+  var root = d3.hierarchy(treeData);
+  treeLayout(root);
+
+  function buildHierarchy() {
+    function node(id) {
+      var obj = { id: id, children: [] };
+      var ch = children(id);
+      ch.forEach(function(c) { obj.children.push(node(c)); });
+      return obj;
+    }
+    return node(0);
+  }
+
+  var g = svg.append('g').attr('transform', 'translate(30,50)');
+
+  var linkSel = g.selectAll('.id-link')
+    .data(root.links())
+    .enter().append('line')
+    .attr('class', 'id-link')
+    .attr('x1', function(d) { return d.source.x; })
+    .attr('y1', function(d) { return d.source.y; })
+    .attr('x2', function(d) { return d.target.x; })
+    .attr('y2', function(d) { return d.target.y; })
+    .attr('stroke', '#333').attr('stroke-width', 1.5);
+
+  var nodeSel = g.selectAll('.id-node')
+    .data(root.descendants())
+    .enter().append('circle')
+    .attr('class', 'id-node')
+    .attr('cx', function(d) { return d.x; })
+    .attr('cy', function(d) { return d.y; })
+    .attr('r', 12)
+    .attr('fill', '#444').attr('stroke', '#222').attr('stroke-width', 1.5);
+
+  /* ── Pseudocode render ─────────────────────────────── */
+  var pcEl = document.getElementById('id-pseudocode');
+  pcEl.innerHTML = PSEUDO.map(function(p, i) {
+    return '<span class="pc-line" data-line="' + p.line + '" id="pc-' + i + '">' + (p.text || '&nbsp;') + '</span>';
+  }).join('');
+
+  /* ── State ────────────────────────────────────────── */
+  var curFrame = 0;
+  var playing = false;
+  var timer = null;
+
+  var COLOR = { unvisited: '#444', expanding: '#e6d700', visited: '#5a9fd4', cutoff: '#e67e22' };
+
+  function applyFrame(f) {
+    var ns = f.nodeStates;
+    nodeSel.attr('fill', function(d) { return COLOR[ns[d.data.id]] || '#444'; });
+    document.getElementById('id-depth-val').textContent = f.depthLimit;
+    document.getElementById('id-frame-info').textContent =
+      'Frame ' + (curFrame + 1) + ' / ' + frames.length;
+
+    document.querySelectorAll('.pc-line').forEach(function(el) {
+      var ln = parseInt(el.dataset.line, 10);
+      el.classList.remove('active', 'dim');
+      if (f.activeLine === ln) el.classList.add('active');
+    });
+  }
+
+  function go(n) {
+    curFrame = Math.max(0, Math.min(frames.length - 1, n));
+    applyFrame(frames[curFrame]);
+    updateButtons();
+  }
+
+  function updateButtons() {
+    document.getElementById('id-back').disabled = curFrame === 0;
+    document.getElementById('id-fwd').disabled = curFrame === frames.length - 1;
+    document.getElementById('id-play').textContent = playing ? 'Pause' : 'Play';
+  }
+
+  function startPlay() {
+    playing = true;
+    updateButtons();
+    function tick() {
+      if (curFrame >= frames.length - 1) { stopPlay(); return; }
+      go(curFrame + 1);
+      var speed = parseInt(document.getElementById('id-speed').value, 10);
+      var delay = Math.round(1200 / speed);
+      timer = setTimeout(tick, delay);
+    }
+    var speed = parseInt(document.getElementById('id-speed').value, 10);
+    timer = setTimeout(tick, Math.round(1200 / speed));
+  }
+
+  function stopPlay() {
+    playing = false;
+    clearTimeout(timer);
+    updateButtons();
+  }
+
+  document.getElementById('id-reset').addEventListener('click', function() {
+    stopPlay(); go(0);
+  });
+  document.getElementById('id-back').addEventListener('click', function() {
+    stopPlay(); go(curFrame - 1);
+  });
+  document.getElementById('id-fwd').addEventListener('click', function() {
+    stopPlay(); go(curFrame + 1);
+  });
+  document.getElementById('id-play').addEventListener('click', function() {
+    if (playing) { stopPlay(); } else { startPlay(); }
+  });
+
+  go(0);
+})();
+</script>

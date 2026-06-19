@@ -1,0 +1,470 @@
+---
+layout: page
+title: Chess Alpha-Beta Iterative Deepening
+permalink: /algorithms/chess-iterative-deepening/
+no_auth: true
+---
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+
+<style>
+  .ab-page { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+  .ab-header { margin-bottom: 20px; }
+  .ab-header h1 { margin-bottom: 6px; }
+  .ab-header p { color: var(--text-main); margin: 0; }
+
+  .ab-controls {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 14px; padding: 12px 16px;
+    background: var(--bg-accent); border-radius: 4px;
+  }
+  .ab-controls button {
+    padding: 6px 16px; border-radius: 3px; border: 1px solid #555;
+    background: #333; color: #ddd; cursor: pointer; font-size: 13px;
+  }
+  .ab-controls button:hover { background: #444; }
+  .ab-controls button:disabled { opacity: 0.4; cursor: default; }
+  .ab-speed-wrap { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #888; }
+  .ab-frame-info { font-size: 12px; color: #777; margin-left: auto; }
+
+  .ab-main { display: flex; gap: 24px; flex-wrap: wrap; }
+  .ab-viz-col { flex: 1 1 480px; }
+  .ab-code-col { flex: 0 0 320px; }
+
+  .ab-depth-badge {
+    font-family: monospace; font-size: 13px;
+    padding: 6px 12px; background: #1a1a1a;
+    border-radius: 4px; border: 1px solid #333;
+    margin-bottom: 10px; color: #aaa;
+    display: flex; gap: 20px;
+  }
+  .ab-depth-badge span { color: #5a9fd4; font-weight: bold; }
+
+  #ab-svg-wrap {
+    background: #0d0d0d; border-radius: 4px; overflow: hidden;
+    border: 1px solid #222;
+  }
+  #ab-svg-wrap svg { display: block; width: 100%; }
+
+  .ab-narration {
+    margin-top: 10px; padding: 8px 12px;
+    background: #111; border-left: 3px solid #5a9fd4;
+    border-radius: 2px; font-size: 12px; color: #aaa;
+    min-height: 34px; font-style: italic;
+  }
+
+  .ab-pseudocode {
+    background: #0d0d0d; border: 1px solid #222; border-radius: 4px;
+    font-family: monospace; font-size: 12px; padding: 14px;
+    line-height: 1.7;
+  }
+  .ab-pseudocode .pc-line { display: block; padding: 1px 6px; border-radius: 2px; color: #666; }
+  .ab-pseudocode .pc-line.active { background: #2a2a00; color: #e6d700; }
+  .ab-pseudocode .pc-kw { color: #569cd6; }
+  .ab-pseudocode .pc-fn { color: #dcdcaa; }
+  .ab-pseudocode .pc-cm { color: #4a4a4a; font-style: italic; }
+  .ab-pseudocode .pc-num { color: #b5cea8; }
+
+  .ab-legend {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin-top: 8px; font-size: 11px; color: #777;
+  }
+  .ab-legend-item { display: flex; align-items: center; gap: 5px; }
+  .ab-legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .ab-legend-gold { width: 12px; height: 12px; border-radius: 50%; border: 2px solid gold; background: #333; }
+</style>
+
+<div class="ab-page">
+  <div class="ab-header">
+    <h1>Chess Alpha-Beta Iterative Deepening</h1>
+    <p>Alpha-beta pruning with iterative deepening — Stockfish's core search strategy. Alpha tracks the maximizer's best guarantee; Beta the minimizer's. Branches outside the window are pruned.</p>
+  </div>
+
+  <div class="ab-controls">
+    <button id="ab-reset">Reset</button>
+    <button id="ab-back">&#8592; Step</button>
+    <button id="ab-play">Play</button>
+    <button id="ab-fwd">Step &#8594;</button>
+    <div class="ab-speed-wrap">
+      Speed: <input type="range" id="ab-speed" min="1" max="10" value="4" style="width:80px">
+    </div>
+    <div class="ab-frame-info" id="ab-frame-info">Frame 0 / 0</div>
+  </div>
+
+  <div class="ab-main">
+    <div class="ab-viz-col">
+      <div class="ab-depth-badge">
+        Depth limit: <span id="ab-depth-val">—</span>
+        &nbsp;|&nbsp; &alpha;: <span id="ab-alpha-val" style="color:#5a9fd4">-&#8734;</span>
+        &nbsp;|&nbsp; &beta;: <span id="ab-beta-val" style="color:#e67e22">+&#8734;</span>
+      </div>
+      <div id="ab-svg-wrap"></div>
+      <div class="ab-narration" id="ab-narration">—</div>
+      <div class="ab-legend">
+        <div class="ab-legend-item"><div class="ab-legend-dot" style="background:#444"></div>unvisited</div>
+        <div class="ab-legend-item"><div class="ab-legend-dot" style="background:#e6d700"></div>expanding</div>
+        <div class="ab-legend-item"><div class="ab-legend-dot" style="background:#5a9fd4"></div>visited (max)</div>
+        <div class="ab-legend-item"><div class="ab-legend-dot" style="background:#2ecc71"></div>visited (min)</div>
+        <div class="ab-legend-item"><div class="ab-legend-dot" style="background:#e74c3c"></div>pruned</div>
+        <div class="ab-legend-item"><div class="ab-legend-gold"></div>best from prev depth</div>
+      </div>
+    </div>
+    <div class="ab-code-col">
+      <div class="ab-pseudocode" id="ab-pseudocode"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── Tree structure: branching factor 3, depth 3 ─── */
+  /* Node 0 = root (MAX), depth 1 = MIN, depth 2 = MAX, depth 3 = leaves */
+  /* Precomputed leaf evals (index into LEAVES array): */
+  var LEAF_EVALS = [3, 5, 2, 9, 0, 7, 4, 8, 1, -2, 6, 3, 2, -1, 5, 4, 7, 2,
+                    8, 3, 6, 1, 4, 9, 5, 0, 7];
+
+  var BRANCH = 3;
+  var MAX_DEPTH_TREE = 3;
+  var MAX_DEPTH_LIMIT = 2; /* show two iterations */
+
+  function nodeDepth(id) {
+    if (id === 0) return 0;
+    var d = 0, n = id;
+    while (n > 0) { n = Math.floor((n - 1) / BRANCH); d++; }
+    return d;
+  }
+  function childrenOf(id) {
+    if (nodeDepth(id) >= MAX_DEPTH_TREE) return [];
+    return [BRANCH * id + 1, BRANCH * id + 2, BRANCH * id + 3];
+  }
+  function isLeaf(id) { return nodeDepth(id) === MAX_DEPTH_TREE; }
+  function leafEval(id) {
+    var leaves = [];
+    function gatherLeaves(n) {
+      if (isLeaf(n)) { leaves.push(n); return; }
+      childrenOf(n).forEach(gatherLeaves);
+    }
+    gatherLeaves(0);
+    var idx = leaves.indexOf(id);
+    return LEAF_EVALS[idx % LEAF_EVALS.length];
+  }
+  function allNodes() {
+    var list = [], q = [0];
+    while (q.length) { var n = q.shift(); list.push(n); childrenOf(n).forEach(function(c) { q.push(c); }); }
+    return list;
+  }
+  var ALL_NODES = allNodes();
+
+  /* ── Pseudocode ────────────────────────────────────── */
+  var PSEUDO = [
+    { text: '<span class="pc-kw">function</span> <span class="pc-fn">IDDFS</span>(pos, maxDepth):', line: 0 },
+    { text: '  <span class="pc-kw">for</span> depth = <span class="pc-num">1</span> <span class="pc-kw">to</span> maxDepth:', line: 1 },
+    { text: '    best = <span class="pc-fn">alphaBeta</span>(pos, depth,', line: 2 },
+    { text: '              -&#8734;, +&#8734;, MAX)', line: 3 },
+    { text: '', line: -1 },
+    { text: '<span class="pc-kw">function</span> <span class="pc-fn">alphaBeta</span>(node, depth,', line: 4 },
+    { text: '                  alpha, beta, player):', line: 5 },
+    { text: '  <span class="pc-kw">if</span> depth == <span class="pc-num">0</span>: <span class="pc-kw">return</span> <span class="pc-fn">eval</span>(node)', line: 6 },
+    { text: '  <span class="pc-kw">if</span> player == MAX:', line: 7 },
+    { text: '    val = -&#8734;', line: 8 },
+    { text: '    <span class="pc-kw">for</span> child <span class="pc-kw">in</span> node.children:', line: 9 },
+    { text: '      val = max(val, <span class="pc-fn">alphaBeta</span>(', line: 10 },
+    { text: '              child, depth-1,', line: 11 },
+    { text: '              alpha, beta, MIN))', line: 12 },
+    { text: '      alpha = max(alpha, val)', line: 13 },
+    { text: '      <span class="pc-kw">if</span> alpha >= beta: <span class="pc-kw">break</span> <span class="pc-cm">// beta cutoff</span>', line: 14 },
+    { text: '    <span class="pc-kw">return</span> val', line: 15 },
+    { text: '  <span class="pc-kw">else</span>: <span class="pc-cm">// MIN player</span>', line: 16 },
+    { text: '    val = +&#8734;', line: 17 },
+    { text: '    <span class="pc-kw">for</span> child <span class="pc-kw">in</span> node.children:', line: 18 },
+    { text: '      val = min(val, <span class="pc-fn">alphaBeta</span>(', line: 19 },
+    { text: '              child, depth-1,', line: 20 },
+    { text: '              alpha, beta, MAX))', line: 21 },
+    { text: '      beta = min(beta, val)', line: 22 },
+    { text: '      <span class="pc-kw">if</span> beta <= alpha: <span class="pc-kw">break</span> <span class="pc-cm">// alpha cutoff</span>', line: 23 },
+    { text: '    <span class="pc-kw">return</span> val', line: 24 }
+  ];
+
+  /* ── Frame computation ─────────────────────────────── */
+  var frames = [];
+  var INF = Infinity;
+
+  function fmt(v) {
+    if (v === INF) return '+∞';
+    if (v === -INF) return '-∞';
+    return String(v);
+  }
+
+  function alphaBeta(nodeId, depth, depthLimit, alpha, beta, isMax, nodeStates, prunedSet, goldNode) {
+    nodeStates[nodeId] = 'expanding';
+    var playerLine = isMax ? 7 : 16;
+    frames.push({
+      depthLimit: depthLimit, nodeStates: clone(nodeStates), prunedSet: clone(prunedSet),
+      goldNode: goldNode, activeLine: playerLine,
+      alpha: alpha, beta: beta,
+      narration: (isMax ? 'MAX' : 'MIN') + ' node — alpha=' + fmt(alpha) + ' beta=' + fmt(beta)
+    });
+
+    if (depth === 0 || isLeaf(nodeId)) {
+      var ev = leafEval(nodeId);
+      frames.push({
+        depthLimit: depthLimit, nodeStates: clone(nodeStates), prunedSet: clone(prunedSet),
+        goldNode: goldNode, activeLine: 6,
+        alpha: alpha, beta: beta,
+        narration: 'Leaf eval = ' + ev
+      });
+      nodeStates[nodeId] = isMax ? 'visited-max' : 'visited-min';
+      return ev;
+    }
+
+    var val = isMax ? -INF : INF;
+    var ch = childrenOf(nodeId);
+
+    frames.push({
+      depthLimit: depthLimit, nodeStates: clone(nodeStates), prunedSet: clone(prunedSet),
+      goldNode: goldNode, activeLine: isMax ? 9 : 18,
+      alpha: alpha, beta: beta,
+      narration: 'Expanding ' + ch.length + ' children'
+    });
+
+    var pruned = false;
+    for (var i = 0; i < ch.length; i++) {
+      if (pruned) {
+        prunedSet[ch[i]] = true;
+        function markSubtree(n) {
+          prunedSet[n] = true;
+          nodeStates[n] = 'pruned';
+          childrenOf(n).forEach(markSubtree);
+        }
+        markSubtree(ch[i]);
+        frames.push({
+          depthLimit: depthLimit, nodeStates: clone(nodeStates), prunedSet: clone(prunedSet),
+          goldNode: goldNode, activeLine: isMax ? 14 : 23,
+          alpha: alpha, beta: beta,
+          narration: (isMax ? 'Beta' : 'Alpha') + ' cutoff — pruning remaining siblings'
+        });
+        continue;
+      }
+
+      var childVal = alphaBeta(ch[i], depth - 1, depthLimit, alpha, beta, !isMax, nodeStates, prunedSet, goldNode);
+
+      if (isMax) {
+        val = Math.max(val, childVal);
+        alpha = Math.max(alpha, val);
+        frames.push({
+          depthLimit: depthLimit, nodeStates: clone(nodeStates), prunedSet: clone(prunedSet),
+          goldNode: goldNode, activeLine: 13,
+          alpha: alpha, beta: beta,
+          narration: 'Update alpha = ' + fmt(alpha)
+        });
+        if (alpha >= beta) { pruned = true; }
+      } else {
+        val = Math.min(val, childVal);
+        beta = Math.min(beta, val);
+        frames.push({
+          depthLimit: depthLimit, nodeStates: clone(nodeStates), prunedSet: clone(prunedSet),
+          goldNode: goldNode, activeLine: 22,
+          alpha: alpha, beta: beta,
+          narration: 'Update beta = ' + fmt(beta)
+        });
+        if (beta <= alpha) { pruned = true; }
+      }
+    }
+
+    nodeStates[nodeId] = isMax ? 'visited-max' : 'visited-min';
+    frames.push({
+      depthLimit: depthLimit, nodeStates: clone(nodeStates), prunedSet: clone(prunedSet),
+      goldNode: goldNode, activeLine: isMax ? 15 : 24,
+      alpha: alpha, beta: beta,
+      narration: 'Return ' + fmt(val) + ' from ' + (isMax ? 'MAX' : 'MIN') + ' node'
+    });
+    return val;
+  }
+
+  function buildFrames() {
+    frames = [];
+    var prevBestNode = null;
+    for (var dl = 1; dl <= MAX_DEPTH_LIMIT; dl++) {
+      var ns = {};
+      ALL_NODES.forEach(function(n) { ns[n] = 'unvisited'; });
+      var pruned = {};
+      frames.push({
+        depthLimit: dl, nodeStates: clone(ns), prunedSet: {},
+        goldNode: prevBestNode, activeLine: 1,
+        alpha: -INF, beta: INF,
+        narration: 'Starting depth-' + dl + ' iteration'
+      });
+      alphaBeta(0, dl, dl, -INF, INF, true, ns, pruned, prevBestNode);
+      prevBestNode = 1; /* simplified: first child is "best" from this depth */
+    }
+  }
+
+  function clone(obj) {
+    var o = {};
+    Object.keys(obj).forEach(function(k) { o[k] = obj[k]; });
+    return o;
+  }
+
+  buildFrames();
+
+  /* ── D3 Setup ─────────────────────────────────────── */
+  var W = 520, H = 380;
+  var svg = d3.select('#ab-svg-wrap').append('svg')
+    .attr('viewBox', '0 0 ' + W + ' ' + H);
+
+  function buildHierarchy() {
+    function node(id) {
+      var obj = { id: id, children: [] };
+      childrenOf(id).forEach(function(c) { obj.children.push(node(c)); });
+      return obj;
+    }
+    return node(0);
+  }
+
+  var treeData = buildHierarchy();
+  var treeLayout = d3.tree().size([W - 60, H - 80]);
+  var root = d3.hierarchy(treeData);
+  treeLayout(root);
+
+  var g = svg.append('g').attr('transform', 'translate(30,50)');
+
+  var linkSel = g.selectAll('.ab-link')
+    .data(root.links())
+    .enter().append('line')
+    .attr('class', 'ab-link')
+    .attr('x1', function(d) { return d.source.x; })
+    .attr('y1', function(d) { return d.source.y; })
+    .attr('x2', function(d) { return d.target.x; })
+    .attr('y2', function(d) { return d.target.y; })
+    .attr('stroke', '#333').attr('stroke-width', 1.5);
+
+  var nodeSel = g.selectAll('.ab-node')
+    .data(root.descendants())
+    .enter().append('circle')
+    .attr('class', 'ab-node')
+    .attr('cx', function(d) { return d.x; })
+    .attr('cy', function(d) { return d.y; })
+    .attr('r', 11)
+    .attr('fill', '#444').attr('stroke', '#222').attr('stroke-width', 1.5);
+
+  /* MAX/MIN label per node */
+  g.selectAll('.ab-role')
+    .data(root.descendants())
+    .enter().append('text')
+    .attr('class', 'ab-role')
+    .attr('x', function(d) { return d.x; })
+    .attr('y', function(d) { return d.y + 4; })
+    .attr('text-anchor', 'middle')
+    .attr('font-size', '7px')
+    .attr('fill', '#999')
+    .text(function(d) { return nodeDepth(d.data.id) % 2 === 0 ? 'M' : 'm'; });
+
+  /* Leaf eval labels */
+  g.selectAll('.ab-eval')
+    .data(root.descendants().filter(function(d) { return isLeaf(d.data.id); }))
+    .enter().append('text')
+    .attr('x', function(d) { return d.x; })
+    .attr('y', function(d) { return d.y + 26; })
+    .attr('text-anchor', 'middle')
+    .attr('font-size', '10px')
+    .attr('fill', '#555')
+    .text(function(d) { return leafEval(d.data.id); });
+
+  /* ── Pseudocode render ─────────────────────────────── */
+  var pcEl = document.getElementById('ab-pseudocode');
+  pcEl.innerHTML = PSEUDO.map(function(p, i) {
+    return '<span class="pc-line" data-line="' + p.line + '">' + (p.text || '&nbsp;') + '</span>';
+  }).join('');
+
+  /* ── Colors ─────────────────────────────────────────── */
+  var COLOR = {
+    'unvisited': '#444',
+    'expanding': '#e6d700',
+    'visited-max': '#5a9fd4',
+    'visited-min': '#2ecc71',
+    'pruned': '#e74c3c'
+  };
+
+  /* ── State ────────────────────────────────────────── */
+  var curFrame = 0;
+  var playing = false;
+  var timer = null;
+
+  function applyFrame(f) {
+    var ns = f.nodeStates;
+    var ps = f.prunedSet || {};
+
+    nodeSel
+      .attr('fill', function(d) { return COLOR[ns[d.data.id]] || '#444'; })
+      .attr('stroke', function(d) { return d.data.id === f.goldNode ? 'gold' : '#222'; })
+      .attr('stroke-width', function(d) { return d.data.id === f.goldNode ? 3 : 1.5; });
+
+    linkSel
+      .attr('stroke', function(d) {
+        return ps[d.target.data.id] ? '#3a1a1a' : '#333';
+      })
+      .attr('stroke-dasharray', function(d) {
+        return ps[d.target.data.id] ? '4,3' : null;
+      });
+
+    document.getElementById('ab-depth-val').textContent = f.depthLimit;
+    document.getElementById('ab-alpha-val').textContent = fmt(f.alpha);
+    document.getElementById('ab-beta-val').textContent = fmt(f.beta);
+    document.getElementById('ab-narration').textContent = f.narration || '—';
+    document.getElementById('ab-frame-info').textContent =
+      'Frame ' + (curFrame + 1) + ' / ' + frames.length;
+
+    document.querySelectorAll('.pc-line').forEach(function(el) {
+      var ln = parseInt(el.dataset.line, 10);
+      el.classList.toggle('active', f.activeLine === ln);
+    });
+  }
+
+  function fmt(v) {
+    if (v === Infinity) return '+∞';
+    if (v === -Infinity) return '-∞';
+    return String(v);
+  }
+
+  function go(n) {
+    curFrame = Math.max(0, Math.min(frames.length - 1, n));
+    applyFrame(frames[curFrame]);
+    updateButtons();
+  }
+
+  function updateButtons() {
+    document.getElementById('ab-back').disabled = curFrame === 0;
+    document.getElementById('ab-fwd').disabled = curFrame === frames.length - 1;
+    document.getElementById('ab-play').textContent = playing ? 'Pause' : 'Play';
+  }
+
+  function startPlay() {
+    playing = true;
+    updateButtons();
+    function tick() {
+      if (curFrame >= frames.length - 1) { stopPlay(); return; }
+      go(curFrame + 1);
+      var speed = parseInt(document.getElementById('ab-speed').value, 10);
+      timer = setTimeout(tick, Math.round(1200 / speed));
+    }
+    timer = setTimeout(tick, Math.round(1200 / parseInt(document.getElementById('ab-speed').value, 10)));
+  }
+
+  function stopPlay() {
+    playing = false;
+    clearTimeout(timer);
+    updateButtons();
+  }
+
+  document.getElementById('ab-reset').addEventListener('click', function() { stopPlay(); go(0); });
+  document.getElementById('ab-back').addEventListener('click', function() { stopPlay(); go(curFrame - 1); });
+  document.getElementById('ab-fwd').addEventListener('click', function() { stopPlay(); go(curFrame + 1); });
+  document.getElementById('ab-play').addEventListener('click', function() {
+    if (playing) { stopPlay(); } else { startPlay(); }
+  });
+
+  go(0);
+})();
+</script>
