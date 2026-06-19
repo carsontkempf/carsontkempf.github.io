@@ -431,6 +431,7 @@
         console.log('[ENGINE-DIAGNOSTIC] [ANALYSIS-LOCAL-START] Starting Stockfish search');
         self.analysisLines = [];
         var linesByMultiPV = {};
+        var lastAnalysisDisplayDepth = 0;
         if (window.engineViz) window.engineViz.clear();
 
         self.engine.startContinuousAnalysis(currentFen, function(analysis) {
@@ -462,17 +463,20 @@
                 if (analysis.pv) {
                     if (window.engineViz) window.engineViz.update(analysis, currentFen);
                 }
-                if (analysis.pv && (analysis.depth >= 10 || analysis.scoreType === 'mate')) {
+                if (analysis.pv) {
+                    var curDepth = analysis.depth || 0;
                     linesByMultiPV[multipv] = {
-                        depth: analysis.depth,
+                        depth: curDepth,
                         score: analysis.score,
                         scoreType: analysis.scoreType,
                         scoreValue: analysis.scoreValue,
                         pv: analysis.pv,
                         nodes: analysis.nodes
                     };
-
-                    self.displayAnalysisLines(linesByMultiPV);
+                    if (multipv === 1 && (curDepth > lastAnalysisDisplayDepth || analysis.scoreType === 'mate')) {
+                        lastAnalysisDisplayDepth = curDepth;
+                        self.displayAnalysisLines(linesByMultiPV);
+                    }
                 }
         }, 1);
     };
