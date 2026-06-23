@@ -1,0 +1,13 @@
+{
+  "name": "sim-dc",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "sim_dc_bg.wasm",
+    "sim_dc.js"
+  ],
+  "main": "sim_dc.js",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

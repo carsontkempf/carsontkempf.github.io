@@ -1,0 +1,49 @@
+---
+layout: simulation
+title: "Module 2: Wire Properties & Voltage Drop"
+wasm_module: sim_wires
+next_module: /physics/rc-dynamics
+---
+
+<h3>Purpose</h3>
+<h2>This Is What Artifact Validates</h2>
+<p>Every wire in an aerospace vehicle must be sized correctly. Too thin: it overheats or drops too much voltage. Too thick: wasted mass (at $10,000/kg to orbit, every gram matters). This simulation IS the core physics behind Artifact's constraint engine.</p>
+
+<h3>The Physics</h3>
+<h2>Voltage Drop</h2>
+<p><code>V_drop = I * R_wire</code></p>
+<p><code>R_wire = rho * L / A</code> (resistivity * length / area)</p>
+<p>Round-trip: signal must travel TO the load AND return. L = 2 * one-way distance.</p>
+
+<h2>Temperature Derating</h2>
+<p><code>R(T) = R(20C) * [1 + 0.00393 * (T - 20)]</code></p>
+<p>Copper resistance increases ~0.4% per degree C. At 85C ambient, resistance is 26% higher than rated.</p>
+
+<h2>The Design Rule (AS50881)</h2>
+<p><code>Max voltage drop: 3% of bus voltage</code></p>
+<p>For a 28V bus: max 0.84V drop. For a 5V logic bus: max 0.15V drop.</p>
+<p><code>Wire must handle 1.5x rated current without exceeding temperature limit</code></p>
+
+<h3>Try It</h3>
+<p>Adjust current, length, temperature, and bus voltage. The table shows which wire gauges pass and which fail. The BEST gauge is the thinnest (lightest) wire that still meets all constraints.</p>
+
+<div class="insight-box">
+<strong>Key Insight:</strong> This calculation runs for EVERY wire in a harness design. A satellite might have 500+ wires. Artifact automates this -- checking voltage drop, temperature, and weight for all of them simultaneously, flagging violations instantly. The physics is simple. The SCALE is what requires tooling.
+</div>
+
+<h3>Historical</h3>
+<div class="history-box">
+<strong>TWA Flight 800 (1996)</strong><br>
+Fuel tank wiring degraded over 25 years of service. A short circuit ignited fuel vapors. 230 people died. The FAA mandated complete rewiring inspections and new wire standards (EWIS rules) for all commercial aircraft. This event is WHY wire sizing and routing standards exist in their current rigorous form.
+</div>
+
+<div class="history-box">
+<strong>Apollo 11 (1969)</strong><br>
+30+ miles of wire, total mass 15kg. Every wire hand-selected, hand-routed, hand-inspected. No digital tools. The calculations you see in this simulation were done BY HAND for every single wire run on the spacecraft.
+</div>
+
+<h3>References</h3>
+<p>SAE AS50881 Section 3 (Wire Sizing & Current Derating)</p>
+<p>NASA-STD-8739.4 Section 5 (Harness Design)</p>
+<p>MIL-HDBK-454 Guideline 1 (Wire Selection)</p>
+<p>MIL-W-22759 (Aerospace Wire Specification)</p>

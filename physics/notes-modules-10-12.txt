@@ -1,0 +1,281 @@
+================================================================
+MODULE 10: ORBITAL MECHANICS
+================================================================
+
+1. DEFINITIONS
+   1.1 Orbit
+       - Path of an object under gravitational influence of a central body
+       - Characterized by 6 orbital elements (shape, orientation, position)
+       - Q: What shape is an orbit? (Ellipse -- circle is special case)
+
+   1.2 Orbital Elements (Keplerian)
+       - a: semi-major axis (size)
+       - e: eccentricity (shape: 0=circle, 0<e<1=ellipse)
+       - i: inclination (tilt relative to equator)
+       - RAAN: right ascension of ascending node (rotation of orbit plane)
+       - omega: argument of periapsis (orientation within orbit plane)
+       - nu: true anomaly (position along orbit)
+       - Q: LEO (ISS) a ~ 6780 km, GEO a ~ 42164 km. What altitude is GEO? (35,786 km)
+
+   1.3 Orbital Velocity
+       - Circular: v = sqrt(mu/r) where mu = G*M_earth = 3.986e14 m^3/s^2
+       - LEO (~400km): v ~ 7.67 km/s (17,000 mph)
+       - Q: Why does lower orbit = faster speed? (Stronger gravity, need more centripetal force)
+
+   1.4 Period
+       - T = 2*pi * sqrt(a^3/mu)
+       - LEO: ~90 minutes
+       - GEO: ~24 hours (why geostationary works)
+       - Q: Double the altitude. How does period change? (Increases by factor 2*sqrt(2) ~ 2.83)
+
+2. KEPLER'S LAWS
+   2.1 First: orbits are ellipses with central body at one focus
+   2.2 Second: line from body to satellite sweeps equal areas in equal times
+       - Faster at perigee (closest), slower at apogee (farthest)
+   2.3 Third: T^2 proportional to a^3
+       - Universal: applies to all satellites of same central body
+
+3. MANEUVERS
+   3.1 Hohmann Transfer
+       - Most fuel-efficient transfer between two circular orbits
+       - Two burns: one to enter transfer ellipse, one to circularize
+       - delta-v1 = v_transfer_perigee - v_circular_1
+       - delta-v2 = v_circular_2 - v_transfer_apogee
+       - Q: Transfer from 400km to 35786km LEO to GEO. Total delta-v? (~3.9 km/s)
+
+   3.2 Plane Change
+       - Changing inclination is EXPENSIVE (proportional to velocity * sin(angle_change))
+       - Most efficient at apogee (where velocity is lowest)
+       - Q: Why do we launch from near equator? (Free velocity from Earth rotation + avoids expensive plane changes)
+
+   3.3 Station-Keeping
+       - Small burns to maintain orbit against perturbations (drag, solar pressure, J2)
+       - LEO: atmospheric drag lowers orbit (ISS reboosts every few weeks)
+       - GEO: solar/lunar gravity perturbs inclination (need N-S stationkeeping)
+
+4. WHY THIS MATTERS FOR WIRING
+   - Orbit determines thermal environment (eclipse duration, solar intensity)
+   - Orbit determines radiation environment (affects wire insulation degradation)
+   - Orbit determines communication windows (drives antenna pointing requirements)
+   - Orbit determines power budget (eclipse = battery only, sunlit = solar panels)
+   - Q: In a 90-minute LEO orbit with 35 minutes of eclipse, what fraction of time is battery-powered? (39%)
+
+5. GROUND TRACK & COMMUNICATION
+   - Ground track: path traced on Earth's surface by sub-satellite point
+   - Communication window: time satellite is above horizon from ground station
+   - LEO satellite over a ground station: typically 5-10 minutes per pass
+   - All data must be downlinked in those windows (drives data bus and antenna wiring)
+
+6. HISTORICAL
+   - Johannes Kepler (1571-1630): discovered three laws of planetary motion
+       - Took 20 years of computation from Tycho Brahe's observations
+       - "I have attested it as true in my deepest soul" -- on discovering elliptical orbits
+   - Isaac Newton (1643-1727): explained WHY Kepler's laws work (gravity)
+       - Principia Mathematica (1687): universal gravitation + calculus
+   - Konstantin Tsiolkovsky (1857-1935): rocket equation, space station concepts
+       - "Earth is the cradle of humanity, but one cannot stay in the cradle forever"
+   - Sputnik (1957): first artificial satellite, 96-minute orbit, 65-degree inclination
+   - Apollo 8 (1968): first humans in lunar orbit
+       - Required precise orbital mechanics to reach Moon and return safely
+   - GPS constellation: 24+ satellites in 6 orbital planes at 20,200 km
+       - Orbital mechanics determines coverage geometry
+
+7. REFERENCES
+   - Curtis, Orbital Mechanics for Engineering Students, Ch 1-4
+   - Wertz, Space Mission Analysis and Design (SMAD), Ch 5-6
+   - Bate, Mueller & White, Fundamentals of Astrodynamics
+   - MIT OCW 16.346 (Astrodynamics)
+
+
+================================================================
+MODULE 11: EVOLUTIONARY OPTIMIZATION FOR WIRE ROUTING
+================================================================
+
+1. DEFINITIONS
+   1.1 Genetic Algorithm (GA)
+       - Optimization method inspired by biological evolution
+       - Population of candidate solutions
+       - Selection: better solutions more likely to reproduce
+       - Crossover: combine parts of two parent solutions
+       - Mutation: random small changes to maintain diversity
+       - Q: Why is this good for wire routing? (Many constraints, huge search space, no gradient available)
+
+   1.2 Fitness Function
+       - Quantifies how good a candidate solution is
+       - For wire routing: f = w1*weight + w2*EMI_violations + w3*thermal_violations + w4*length
+       - Lower is better (minimization)
+       - Multi-objective: may have Pareto front of trade-offs
+
+   1.3 Chromosome (Encoding)
+       - How a solution is represented as data the GA can manipulate
+       - Wire routing: sequence of waypoints for each harness segment
+       - Or: assignment of wires to harness bundles (combinatorial)
+       - Q: If 50 wires can be in any of 5 bundles, how many combinations? (5^50 ~ 10^34)
+
+   1.4 Constraint Handling
+       - Hard constraints: must be satisfied (wire gauge >= minimum for current)
+       - Soft constraints: penalized in fitness (minimize voltage drop)
+       - Penalty method: add large penalty to fitness for each violation
+       - Repair method: fix violations after crossover/mutation
+
+2. THE WIRE ROUTING PROBLEM
+   2.1 Given:
+       - Set of wires (source pin, destination pin, signal type, current)
+       - Set of connectors (pin capacities, locations)
+       - Physical layout (bays, trays, bulkheads, routing paths)
+       - Constraints: EMI separation, thermal limits, bend radius, weight budget
+   2.2 Find:
+       - Assignment of wires to harness bundles
+       - Routing path for each bundle through the vehicle
+       - Minimizing: total weight + total length + EMI violations
+   2.3 This is NP-hard (no polynomial-time exact solution exists)
+       - Exhaustive search impossible for real systems (thousands of wires)
+       - GAs find "good enough" solutions in reasonable time
+
+3. GA IMPLEMENTATION
+   3.1 Encoding: each chromosome = array of bundle assignments + route waypoints
+   3.2 Initialization: random valid assignments (respecting hard constraints)
+   3.3 Selection: tournament selection (pick k random, keep best)
+   3.4 Crossover: uniform crossover for bundle assignment, order crossover for routes
+   3.5 Mutation: swap wire between bundles, perturb waypoint position
+   3.6 Termination: fixed generations, or convergence (no improvement for N generations)
+   3.7 Typical parameters: population 100-500, generations 500-2000, crossover rate 0.8, mutation rate 0.05
+
+4. MULTI-OBJECTIVE OPTIMIZATION
+   4.1 Often no single best solution -- trade-offs between weight, EMI, thermal
+   4.2 Pareto front: set of solutions where no objective can be improved without worsening another
+   4.3 NSGA-II: popular multi-objective GA (Non-dominated Sorting GA)
+   4.4 Engineer picks preferred solution from Pareto front based on priorities
+   4.5 Q: If solution A weighs less but has worse EMI than solution B, which is better? (Neither -- both are Pareto-optimal. Engineer decides priority.)
+
+5. WHY THIS IS "WHAT A SENIOR DEV COULDN'T DO"
+   - Most wire routing in industry is manual (engineer draws paths by hand)
+   - Tools like Capital Harness assist but don't optimize
+   - Applying evolutionary computation to wire routing is RESEARCH-LEVEL
+   - You're combining: graph theory + physics simulation + optimization theory + domain knowledge
+   - The result: provably better harness designs (lighter, shorter, fewer violations)
+   - This is the kind of feature Artifact's AI copilot would implement
+
+6. HISTORICAL
+   - Charles Darwin (1809-1882): theory of evolution by natural selection (1859)
+   - John Holland (1929-2015): invented genetic algorithms (1960s-70s)
+       - "Adaptation in Natural and Artificial Systems" (1975)
+   - Hans-Paul Schwefel (1940-): evolution strategies (1960s, Germany)
+   - David Goldberg (1953-): popularized GAs for engineering (1989 textbook)
+   - Wire routing optimization: first attempts in PCB layout (1980s-90s)
+       - Aerospace harness optimization is still largely manual -- opportunity is NOW
+
+7. REFERENCES
+   - Eiben & Smith, Introduction to Evolutionary Computing, Ch 1-5
+   - Goldberg, Genetic Algorithms in Search, Optimization and Machine Learning
+   - Deb, Multi-Objective Optimization using Evolutionary Algorithms (NSGA-II)
+   - Holland, Adaptation in Natural and Artificial Systems
+
+
+================================================================
+MODULE 12: CAPSTONE -- CUBESAT EWIS DESIGN
+================================================================
+
+1. THE PROJECT
+   1.1 Design a complete Electrical Wiring Interconnect System for a 3U CubeSat
+   1.2 Subsystems:
+       - EPS (Electrical Power System): solar panels, batteries, regulators
+       - OBC (On-Board Computer): processor, memory, data buses
+       - ADCS (Attitude Determination & Control): magnetorquers, sun sensors, gyros
+       - COMM (Communications): transceiver, antenna, amplifier
+       - Payload (camera or science instrument)
+       - Thermal (heaters, thermistors)
+
+2. SYSTEM ARCHITECTURE (L0)
+   2.1 Power bus topology
+       - 3.3V regulated for digital logic
+       - 5V for sensors
+       - Unregulated battery bus (3.0-4.2V from Li-ion cells)
+       - Solar panel input (variable, max ~8V for 3U panels)
+   2.2 Data bus topology
+       - I2C for slow sensors (100kHz-400kHz)
+       - SPI for fast peripherals (up to 10MHz)
+       - UART for ground communication interface
+   2.3 Redundancy decisions
+       - Dual-string EPS (two battery packs, cross-strapped)
+       - Single-string payload (acceptable risk for science mission)
+       - Critical: OBC watchdog timer resets system if software hangs
+
+3. LOGICAL WIRING (L1)
+   3.1 Pin-to-pin connection list (from-to table)
+       - Example: EPS connector J1 pin 3 -> OBC connector J2 pin 7 (3.3V power)
+       - Total: ~52 wire connections across 8 connectors
+   3.2 Signal assignment rules
+       - Power pins: largest gauge contacts (size 20, 7.5A rated)
+       - Data pins: size 22 contacts (5A rated, only carrying mA)
+       - Grounds: dedicated return for each subsystem
+       - Spares: 2 per connector minimum
+
+4. PHYSICAL HARNESS (L2)
+   4.1 Bundle grouping
+       - Group by routing path (wires that travel together)
+       - Separate power harness from signal harness (EMI)
+       - Typical: 3-5 harness segments in a 3U CubeSat
+   4.2 Wire selection
+       - Apply Module 2: voltage drop for each run
+       - Apply Module 8: thermal derating for bundle size
+       - Select AWG: usually 24-28 for signals, 20-22 for power
+   4.3 Routing
+       - CubeSat frame has specific routing channels along rails
+       - Minimum bend radius: 10x wire diameter
+       - Tie-down points every 3 inches (NASA-STD-8739.4)
+
+5. ANALYSIS LAYER
+   5.1 Voltage drop analysis (Module 2)
+       - For EVERY power wire: compute V_drop = I * R_wire
+       - Verify: drop < 3% of bus voltage at all loads
+   5.2 Thermal analysis (Module 8)
+       - For each harness segment: compute bundle center temperature
+       - Verify: no wire exceeds its insulation rating
+   5.3 EMI analysis (Module 4)
+       - Verify: power and signal wires meet separation requirements
+       - Verify: sensitive signals are shielded where required
+   5.4 Redundancy analysis (Module 5)
+       - Verify: no single connector failure kills the mission
+       - Verify: redundant power paths are physically separated
+   5.5 Weight budget
+       - Sum all wire weight (mass per meter * length)
+       - Compare to allocation (typically 5-10% of total spacecraft mass)
+       - 3U CubeSat total ~4kg, wiring allocation ~200-400g
+
+6. OPTIMIZATION (Module 11)
+   6.1 Apply genetic algorithm to:
+       - Wire-to-bundle assignment (minimize weight + EMI violations)
+       - Route selection (minimize total harness length)
+       - AWG selection (minimize weight while meeting voltage drop + thermal)
+   6.2 Constraints:
+       - All voltage drops < 3%
+       - All temperatures < wire rating
+       - All bundles meet EMI separation
+       - Total weight < 400g budget
+   6.3 Show: optimized design vs naive design (expected 15-25% weight savings)
+
+7. DELIVERABLES (WHAT APPEARS ON THE WEBSITE)
+   7.1 Interactive 3D CubeSat model with clickable subsystems
+   7.2 Connection table (sortable, filterable)
+   7.3 Harness routing visualization (color-coded by bundle)
+   7.4 Analysis results dashboard (pass/fail per wire)
+   7.5 Live optimization: watch GA improve fitness over generations
+   7.6 Design decision write-ups explaining WHY each choice was made
+
+8. HISTORICAL
+   - CubeSat standard: created 1999 by Bob Twiggs (Stanford) and Jordi Puig-Suari (Cal Poly)
+       - Originally for university education, now used for real missions
+       - Standard: 10cm x 10cm x 10cm = 1U. Mass < 1.33 kg per U.
+   - First CubeSat launches: 2003 (6 satellites on one rocket)
+   - Planet Labs: operates 200+ CubeSats for daily Earth imaging
+       - Each one has a complete EWIS designed per these principles
+   - NASA JPL MarCO (2018): first CubeSats to deep space (Mars)
+       - Demonstrated CubeSat-class wiring can survive interplanetary environment
+
+9. REFERENCES
+   - Space Vehicle Design (Griffin & French), Ch 10-12
+   - Spacecraft Systems Engineering (Fortescue), Ch 9 (Harness), Ch 10 (Power)
+   - NASA CubeSat 101 (free PDF from NASA.gov)
+   - Cal Poly CubeSat Design Specification (CDS)
+   - SAE AS50881 + NASA-STD-8739.4 (full compliance for capstone)

@@ -1,0 +1,65 @@
+---
+layout: simulation
+title: "Module 1: DC Circuit Fundamentals"
+wasm_module: sim_dc
+next_module: /physics/wire-properties
+---
+
+<h3>Purpose</h3>
+<h2>Why Every Aerospace Engineer Starts Here</h2>
+<p>Every wire in a satellite, aircraft, or rocket carries current governed by three laws discovered in the 1800s. A 28V power bus on a spacecraft is just a voltage divider at scale. Artifact's constraint engine checks these laws across 10,000 connections simultaneously.</p>
+
+<h3>The Physics</h3>
+<h2>Ohm's Law</h2>
+<p><code>V = I * R</code></p>
+<p>Voltage equals current times resistance. If you know any two, you can find the third. This single equation governs every wire sizing decision in aerospace.</p>
+
+<h2>Kirchhoff's Current Law (KCL)</h2>
+<p><code>Sum of currents at any node = 0</code></p>
+<p>Charge is conserved. What flows in must flow out. Every connector pin is a node. Every wire junction is a node.</p>
+
+<h2>Kirchhoff's Voltage Law (KVL)</h2>
+<p><code>Sum of voltages around any closed loop = 0</code></p>
+<p>Energy is conserved. The voltage "used up" across resistors equals the voltage supplied by sources.</p>
+
+<h3>Try It</h3>
+<p>Use the sliders to adjust the source voltage and resistor values. Watch how current and voltage distribute according to KVL and KCL. This is a voltage divider -- the most fundamental circuit in electronics.</p>
+<p><code>V_out = V_in * R2 / (R1 + R2)</code></p>
+
+<div class="insight-box">
+<strong>Key Insight:</strong> A wire harness IS a circuit. Every connector is a node (KCL applies). Every wire run is a branch (KVL applies). The circuit solver you see here is fundamentally the same algorithm Artifact runs when it validates a complete wiring diagram -- just scaled to thousands of nodes.
+</div>
+
+<h3>Historical Perspective</h3>
+
+<div class="history-box">
+<strong>Georg Ohm (1789-1854)</strong><br>
+Published V=IR in 1827. Rejected by the scientific establishment for decades. Had to resign his teaching position. Vindicated posthumously -- the unit "Ohm" now bears his name.
+</div>
+
+<div class="history-box">
+<strong>Gustav Kirchhoff (1824-1887)</strong><br>
+Formulated KCL and KVL as a 21-year-old student in 1845. Also co-invented spectroscopy (identified elements in the Sun by their light). His circuit laws enabled ALL modern electrical engineering.
+</div>
+
+<div class="history-box">
+<strong>Why 28V DC?</strong><br>
+Military and aerospace systems standardized on 28V DC in WWII. The compromise: high enough voltage to keep wire currents (and wire weight) low, low enough to avoid dangerous arcing at altitude. Apollo, Shuttle, ISS, and most military aircraft still use 28V DC primary buses.
+</div>
+
+<h3>Study Notes (Harvard Format)</h3>
+<p><strong>Definitions to memorize:</strong></p>
+<p><code>Voltage</code> = energy per unit charge (J/C = Volts)</p>
+<p><code>Current</code> = charge flow rate (C/s = Amperes)</p>
+<p><code>Resistance</code> = opposition to flow (V/A = Ohms)</p>
+<p><code>Power</code> = energy rate (V*I = Watts)</p>
+
+<p><strong>Questions to answer by hand:</strong></p>
+<p>1. 28V source, 1k + 2k series: what is V_out?</p>
+<p>2. Three 100-ohm resistors in parallel: total resistance?</p>
+<p>3. AS50881 allows max 3% voltage drop on a 28V bus. What is the max drop in volts?</p>
+
+<h3>References</h3>
+<p>Alexander & Sadiku, <em>Fundamentals of Electric Circuits</em>, Ch 1-3</p>
+<p>AllAboutCircuits.com/textbook/direct-current/</p>
+<p>SAE AS50881 (Wiring Aerospace Vehicles)</p>

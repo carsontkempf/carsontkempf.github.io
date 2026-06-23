@@ -1,0 +1,13 @@
+{
+  "name": "sim-connectors",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "sim_connectors_bg.wasm",
+    "sim_connectors.js"
+  ],
+  "main": "sim_connectors.js",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

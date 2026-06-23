@@ -1,0 +1,13 @@
+{
+  "name": "sim-orbital",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "sim_orbital_bg.wasm",
+    "sim_orbital.js"
+  ],
+  "main": "sim_orbital.js",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

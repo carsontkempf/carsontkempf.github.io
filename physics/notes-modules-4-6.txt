@@ -1,0 +1,229 @@
+================================================================
+MODULE 4: SIGNAL INTEGRITY & EMI
+================================================================
+
+1. DEFINITIONS
+   1.1 Electromagnetic Interference (EMI)
+       - Unwanted electrical noise coupling from one circuit to another
+       - Sources: switching power supplies, motors, digital clocks, lightning
+       - Victims: sensitive analog signals, communication links, navigation sensors
+       - Q: Why is EMI worse at higher frequencies?
+
+   1.2 Crosstalk
+       - Signal coupling between adjacent wires via capacitance (electric field) or mutual inductance (magnetic field)
+       - Capacitive: dominant at high impedance, high frequency
+       - Inductive: dominant at low impedance, high current
+       - Q: Two parallel wires 1cm apart for 5m. How much coupling?
+
+   1.3 Shielding Effectiveness (SE)
+       - SE = 20*log10(E_unshielded / E_shielded) in dB
+       - Good shield: SE > 60dB (1000:1 reduction)
+       - Depends on: material, thickness, frequency, apertures (holes)
+       - Q: 40dB shielding means noise reduced by what factor? (100x)
+
+   1.4 Common Mode vs Differential Mode
+       - Differential: signal travels on one wire, returns on another (intended)
+       - Common mode: noise appears equally on both wires relative to ground (unintended)
+       - Twisted pairs reject common-mode noise (each twist cancels the previous)
+
+2. EMI CONTROL TECHNIQUES
+   2.1 Separation: keep noisy wires away from sensitive wires
+       - AS50881 requires minimum separation distances by category
+       - Category 1 (power): separate from Category 3 (signal) by >2 inches
+   2.2 Shielding: surround sensitive wires with conductive layer
+       - Braid: 85-95% coverage, flexible
+       - Foil: 100% coverage but fragile
+       - Must be grounded at one or both ends (depends on frequency)
+   2.3 Twisted pair: reject magnetic field coupling
+       - More twists per foot = better rejection
+       - Standard: 2-4 twists per inch for aerospace
+   2.4 Filtering: block noise at the source or receiver
+       - Ferrite beads, capacitors to ground, LC filters
+   2.5 Grounding: provide low-impedance return path
+       - Single-point ground (low freq) vs multi-point ground (high freq)
+
+3. AEROSPACE STANDARDS
+   3.1 MIL-STD-461G: EMI requirements for military electronics
+       - CE102: conducted emissions on power leads (150kHz-10MHz)
+       - RE102: radiated emissions (10kHz-18GHz)
+       - CS114: conducted susceptibility (bulk cable injection)
+       - RS103: radiated susceptibility (electric field)
+   3.2 DO-160G: environmental conditions for airborne equipment
+       - Section 20: RF susceptibility
+       - Section 21: emission of RF energy
+   3.3 Q: What happens if a wire harness fails EMI testing? (Redesign: add shielding, increase separation, add filtering. Costs months.)
+
+4. CALCULATION: CROSSTALK BETWEEN PARALLEL WIRES
+   - Mutual capacitance: C_m ~ pi*epsilon/ln(d/r) per meter
+   - d = separation, r = wire radius
+   - Coupled voltage: V_crosstalk = Z_victim * C_m * L * dV_source/dt
+   - Q: For a 1MHz clock signal (5V, 1ns rise), 10cm parallel run, 1cm separation: estimate crosstalk
+
+5. HISTORICAL
+   - James Clerk Maxwell (1831-1879): unified electricity and magnetism (Maxwell's equations, 1865)
+       - Predicted electromagnetic waves travel at speed of light
+       - Foundation of ALL EMI theory
+   - Heinrich Hertz (1857-1894): first to produce and detect radio waves (1887)
+       - Proved Maxwell's prediction experimentally
+   - Nikola Tesla (1856-1943): AC power, radio, wireless transmission
+       - His work on resonance is directly relevant to EMI (resonant structures amplify noise)
+   - EMI in aerospace: Apollo 12 struck by lightning at launch (1969)
+       - Momentarily lost all telemetry. Recovered by resetting flight computer.
+       - Led to comprehensive lightning protection standards for all future spacecraft
+
+6. REFERENCES
+   - Henry Ott, Electromagnetic Compatibility Engineering, Ch 1-5
+   - MIL-STD-461G (free from everyspec.com)
+   - MIL-HDBK-454 Guideline 19 (EMI Control)
+   - NASA-HDBK-4001 (Electrical Grounding Architecture)
+
+
+================================================================
+MODULE 5: POWER DISTRIBUTION & REDUNDANCY
+================================================================
+
+1. DEFINITIONS
+   1.1 Power Bus
+       - Conductor (wire or bus bar) that distributes power from source to loads
+       - Primary bus: main power (solar panels or generators)
+       - Secondary bus: regulated, distributed to subsystems
+       - Essential bus: stays powered even during faults (critical loads only)
+
+   1.2 Redundancy
+       - Single-fault tolerant: system survives any one failure
+       - Dual-fault tolerant: survives any two failures (human-rated spacecraft)
+       - Q: ISS has quad-redundant power channels. Why?
+
+   1.3 Single Point Failure (SPF)
+       - Any single component whose failure causes mission loss
+       - SPF analysis: trace every power path. If ONE wire/fuse/relay fails and kills the mission, it's an SPF.
+       - Q: A sensor has one power wire from one fuse on one bus. Is this an SPF? (Yes)
+
+   1.4 Circuit Protection
+       - Fuses: one-time overcurrent protection (blow and require replacement)
+       - Circuit breakers: resettable overcurrent protection
+       - Current limiters: electronic, active protection
+       - Q: Why do spacecraft prefer electronic protection over fuses? (Can't replace a fuse in orbit)
+
+2. BUS ARCHITECTURES
+   2.1 Centralized: one power distribution unit (PDU), all loads branch from it
+       - Simple, but PDU is an SPF
+   2.2 Distributed: multiple PDUs, loads spread across them
+       - More wiring but more survivable
+   2.3 Ring bus: power can flow in either direction around a loop
+       - Any single cut still delivers power to all loads
+   2.4 Cross-strapping: connect redundant buses so either can power critical loads
+       - Standard in spacecraft: Bus A and Bus B, critical loads on both
+
+3. POWER BUDGET
+   - Total generation must exceed total consumption (with margin)
+   - Margin: typically 10-20% for spacecraft, 30% during eclipse
+   - Load profile: varies with mission phase (launch, cruise, science, comm)
+   - Q: 6 subsystems averaging 5W each, 28V bus. Total current? (30W / 28V = 1.07A)
+   - Q: If solar panels produce 60W and loads consume 45W, what margin? (33%)
+
+4. FAILURE MODE ANALYSIS
+   - Open circuit: wire breaks, current stops (load loses power)
+   - Short circuit: insulation failure, current spikes (protection device activates)
+   - Intermittent: connection loosens, power flickers (hardest to diagnose)
+   - Cascading failure: one failure overloads adjacent circuits, causing more failures
+   - Q: A short on Bus A trips its fuse. All Bus A loads die. If comm is only on Bus A, what happens? (Loss of communication -- design error)
+
+5. HISTORICAL
+   - Apollo 13 (1970): oxygen tank explosion severed primary power bus
+       - Crew survived because Lunar Module had INDEPENDENT power system
+       - Redundancy saved three lives
+   - Hubble Space Telescope: two solar array wings, two battery sets, cross-strapped buses
+       - Any single power failure: full science continues
+   - Mars Polar Lander (1999): lost due to premature engine shutdown
+       - Spurious signal on a single wire interpreted as touchdown
+       - Single-point failure in sensing, not power, but same analysis discipline
+
+6. REFERENCES
+   - Space Vehicle Design (Griffin & French), Ch 10 (Power Systems)
+   - Spacecraft Systems Engineering (Fortescue), Ch 10
+   - NASA Systems Engineering Handbook SP-2016-6105, Section 6.3
+   - MIL-STD-1576 (Electroexplosive Subsystem Safety)
+
+
+================================================================
+MODULE 6: CONNECTORS & PIN-LEVEL DESIGN
+================================================================
+
+1. DEFINITIONS
+   1.1 Connector
+       - Mechanical device that joins two wire bundles while maintaining electrical contact
+       - Mating pair: plug (male pins) and receptacle (female sockets)
+       - Contact: individual metal element (pin or socket) that carries one signal
+
+   1.2 Pin Assignment
+       - Mapping of signals/power to specific pin positions in a connector
+       - Must consider: current capacity per pin, separation of power from signal, spare allocation
+       - Q: Why leave spare pins? (Future modifications without new connectors)
+
+   1.3 Contact Resistance
+       - Resistance of the metal-to-metal junction at a pin
+       - Typically 1-10 milliohms for aerospace connectors
+       - Increases with age, vibration, contamination
+       - At high current: P = I^2 * R_contact -> heating
+
+   1.4 Keying / Polarization
+       - Mechanical features that prevent mating the wrong connector
+       - Prevents catastrophic cross-wiring (e.g., power into signal pin)
+
+2. AEROSPACE CONNECTOR TYPES
+   2.1 MIL-DTL-38999 (most common aerospace circular connector)
+       - Bayonet or threaded coupling
+       - Environmental sealing (waterproof, pressurized)
+       - Contact sizes: 22 (signal, 5A), 20 (7.5A), 16 (13A), 12 (23A)
+       - Shell sizes: 9 (5 contacts) to 25 (128 contacts)
+       - Q: A connector with sixty 22-size contacts. Max total current if all loaded? (60 * 5A = 300A theoretical, but derated for bundling)
+
+   2.2 D-Sub (older, commercial)
+       - Trapezoidal shell, 9 to 50 pins
+       - Lower vibration resistance than MIL-38999
+       - Used in avionics for legacy interfaces
+
+   2.3 Molex / Nano connectors
+       - Very small, lightweight
+       - Used inside spacecraft where vibration is low but space is tight
+
+   2.4 RF Connectors (SMA, TNC, N-type)
+       - For coaxial (shielded) cables carrying radio frequency signals
+       - Impedance-matched (50 or 75 ohms)
+       - Critical for communication and radar systems
+
+3. PIN ASSIGNMENT RULES
+   3.1 Power pins: locate near shell (shortest path to ground shield)
+   3.2 Sensitive signals: center of connector (maximum separation from shell/power)
+   3.3 Return/ground: adjacent to every signal (minimize loop area for EMI)
+   3.4 Spares: minimum 10-20% spare contacts for future growth
+   3.5 No adjacent high-current and low-signal pins (crosstalk)
+   3.6 Document EVERYTHING: pin-out drawing is a controlled document
+
+4. CONSTRAINT CHECKING (WHAT ARTIFACT DOES)
+   - For each connector:
+     * Total current through all pins <= connector rating (derated for temperature)
+     * No single pin exceeds its contact rating
+     * Power and signal separation meets EMI requirements
+     * All grounds assigned and connected
+     * Spare count meets minimum
+     * Mating connector pin-out matches (plug to receptacle)
+   - For the system:
+     * Every signal has a source and destination (no orphan pins)
+     * Redundant signals on separate connectors (no SPF at connector level)
+     * Wire gauge compatible with contact size (can't crimp 12AWG into size-22 contact)
+
+5. HISTORICAL
+   - Cannon Electric (now ITT): invented the circular connector for WWII aircraft
+       - The "Cannon plug" became MIL-C-5015, ancestor of MIL-DTL-38999
+   - Apollo connectors: zero-g rated, vibration tested to 20g, thermal cycled -150C to +120C
+       - Each connector hand-inspected under microscope before flight
+   - Challenger (1986): not a connector failure, but O-ring (similar interface problem)
+       - Interface design -- where two systems meet -- is where most failures occur
+
+6. REFERENCES
+   - MIL-DTL-38999 specification (everyspec.com)
+   - SAE AS50881 Section 4 (Connector Installation)
+   - NASA-STD-8739.4 Section 8 (Connector Assembly)
+   - Spacecraft Systems Engineering (Fortescue), Ch 9 (Harness Design)

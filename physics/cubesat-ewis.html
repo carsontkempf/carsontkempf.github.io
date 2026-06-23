@@ -1,0 +1,22 @@
+---
+layout: simulation
+title: "Module 12: CubeSat EWIS (Capstone)"
+wasm_module: sim_capstone
+---
+<h3>Purpose</h3>
+<h2>Everything Together</h2>
+<p>A complete Electrical Wiring Interconnect System for a 3U CubeSat. This integrates EVERY previous module: DC analysis, wire sizing, EMI separation, power distribution, connectors, thermal analysis, and evolutionary routing -- on one real system.</p>
+<h3>The System</h3>
+<h2>Subsystems</h2>
+<p><code>EPS: Solar panels + batteries + regulators (28V -> 5V/3.3V)</code></p>
+<p><code>OBC: Processor + memory + I2C/SPI buses</code></p>
+<p><code>ADCS: Magnetorquers + sun sensors + gyros</code></p>
+<p><code>COMM: Transceiver + antenna + amplifier</code></p>
+<p><code>Payload: Camera or science instrument</code></p>
+<h2>Design Decisions</h2>
+<p>8 connectors | ~52 wires | Dual-string power | AS50881 compliant</p>
+<div class="insight-box"><strong>Key Insight:</strong> This project IS what Artifact was built to design. You just designed it from first principles with your own tools. The physics is the same at CubeSat scale or full-aircraft scale -- only the wire count changes (52 vs 50,000).</div>
+<h3>Historical</h3>
+<div class="history-box"><strong>CubeSat Standard (1999)</strong><br>Created by Bob Twiggs (Stanford) and Jordi Puig-Suari (Cal Poly). Originally for education. Now used for real missions. Planet Labs operates 200+ CubeSats for daily Earth imaging. NASA JPL MarCO (2018): first CubeSats to deep space.</div>
+<h3>References</h3>
+<p>NASA CubeSat 101 (free PDF) | Cal Poly CDS Specification | SAE AS50881 + NASA-STD-8739.4</p>

@@ -1,0 +1,13 @@
+{
+  "name": "sim-emi",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "sim_emi_bg.wasm",
+    "sim_emi.js"
+  ],
+  "main": "sim_emi.js",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

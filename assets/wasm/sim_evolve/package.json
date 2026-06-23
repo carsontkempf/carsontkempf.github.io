@@ -1,0 +1,13 @@
+{
+  "name": "sim-evolve",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "sim_evolve_bg.wasm",
+    "sim_evolve.js"
+  ],
+  "main": "sim_evolve.js",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

@@ -1,0 +1,22 @@
+---
+layout: simulation
+title: "Module 3: RC/RL Dynamics & Time Constants"
+wasm_module: sim_rc
+next_module: /physics/emi-shielding
+---
+<h3>Purpose</h3>
+<h2>Introducing Time Into Circuits</h2>
+<p>Real circuits don't change instantly. Capacitors charge, inductors resist change. The time constant tau = RC governs how fast. This is the foundation of ALL dynamic systems -- the bridge from static circuits to control theory.</p>
+<h3>The Physics</h3>
+<h2>RC Charging</h2>
+<p><code>V(t) = V_final * (1 - e^{-t/tau})</code></p>
+<p><code>tau = R * C</code> (time constant in seconds)</p>
+<p>At t = 1*tau: 63.2% charged. At t = 5*tau: 99.3% (settled).</p>
+<h2>Connection to Control Systems</h2>
+<p><code>G(s) = 1/(tau*s + 1)</code> -- this IS a first-order system.</p>
+<p>Corbin's fuel metering valve (Chapter 4): tau_FMV = 0.03s -- an RC-like response.</p>
+<div class="insight-box"><strong>Key Insight:</strong> Every first-order control system behaves like an RC circuit. Master the time constant here, and you understand 60% of control engineering.</div>
+<h3>Historical</h3>
+<div class="history-box"><strong>Oliver Heaviside (1850-1925)</strong><br>Self-taught, invented the math for analyzing circuits with time (Laplace transforms, impedance). The first transatlantic telegraph cable (1858) FAILED because of RC time constants -- too long, too much capacitance, signals smeared.</div>
+<h3>References</h3>
+<p>Alexander & Sadiku, Ch 7-8 | Feynman Lectures Vol II, Ch 22-23 | AllAboutCircuits.com/textbook/direct-current/chpt-16/</p>

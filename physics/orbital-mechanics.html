@@ -1,0 +1,22 @@
+---
+layout: simulation
+title: "Module 10: Orbital Mechanics"
+wasm_module: sim_orbital
+next_module: /physics/evolutionary-routing
+---
+<h3>Purpose</h3>
+<h2>Why Orbits Matter for Wiring</h2>
+<p>Orbit determines thermal environment (eclipse duration), radiation (insulation degradation), and communication windows (antenna pointing). This simulation shows orbital parameters and Hohmann transfer maneuvers.</p>
+<h3>The Physics</h3>
+<h2>Orbital Velocity</h2>
+<p><code>v = sqrt(mu/r), mu = 3.986e14 m^3/s^2</code></p>
+<h2>Period</h2>
+<p><code>T = 2*pi * sqrt(a^3/mu)</code></p>
+<h2>Hohmann Transfer (delta-v)</h2>
+<p><code>dv1 = v_transfer_perigee - v_circular_1</code></p>
+<p><code>dv2 = v_circular_2 - v_transfer_apogee</code></p>
+<div class="insight-box"><strong>Key Insight:</strong> A LEO satellite in 90-minute orbit spends ~35 minutes in eclipse every orbit. During eclipse: no solar power, battery only, thermal extremes. This drives the power bus design and wire thermal ratings.</div>
+<h3>Historical</h3>
+<div class="history-box"><strong>Johannes Kepler (1571-1630)</strong><br>20 years computing orbits from Tycho Brahe's data. Discovered elliptical orbits. <strong>Apollo 8 (1968)</strong>: first humans in lunar orbit. Required precise orbital mechanics to get there and back.</div>
+<h3>References</h3>
+<p>Curtis, Orbital Mechanics for Engineering Students, Ch 1-4 | Bate/Mueller/White, Fundamentals of Astrodynamics</p>

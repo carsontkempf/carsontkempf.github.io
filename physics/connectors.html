@@ -1,0 +1,20 @@
+---
+layout: simulation
+title: "Module 6: Connectors & Pin-Level Design"
+wasm_module: sim_connectors
+next_module: /physics/control-systems
+---
+<h3>Purpose</h3>
+<h2>Where Systems Meet</h2>
+<p>Connectors are the INTERFACE between subsystems. Pin assignment determines what signal goes where. Wrong assignment = catastrophic cross-wiring. This visualization shows a MIL-DTL-38999 connector with proper pin categorization.</p>
+<h3>The Design Rules</h3>
+<h2>Pin Assignment (AS50881)</h2>
+<p><code>Power pins: near shell (shortest ground path)</code></p>
+<p><code>Signals: center (max separation from power)</code></p>
+<p><code>Grounds: adjacent to every signal</code></p>
+<p><code>Spares: minimum 10-20% for future growth</code></p>
+<div class="insight-box"><strong>Key Insight:</strong> Pin assignment is the CORE of what Artifact does. Every pin, every connector, every signal -- checked for current capacity, EMI separation, spare count, and mating compatibility. This is the heart of EWIS design.</div>
+<h3>Historical</h3>
+<div class="history-box"><strong>Cannon Electric (1940s)</strong><br>Invented the circular connector for WWII aircraft. The "Cannon plug" became MIL-C-5015, ancestor of today's MIL-DTL-38999. Every military and space vehicle since uses descendants of this design.</div>
+<h3>References</h3>
+<p>MIL-DTL-38999 (everyspec.com) | SAE AS50881 Section 4 | NASA-STD-8739.4 Section 8</p>

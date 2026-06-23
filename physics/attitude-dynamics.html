@@ -1,0 +1,21 @@
+---
+layout: simulation
+title: "Module 9: Rotational Dynamics & Attitude"
+wasm_module: sim_attitude
+next_module: /physics/orbital-mechanics
+---
+<h3>Purpose</h3>
+<h2>How Spacecraft Point</h2>
+<p>Quaternion dynamics, reaction wheels, and keep-out constraints. This is Chapter 3 of Corbin's dissertation -- proving a spacecraft's boresight NEVER enters a dangerous cone during maneuvers.</p>
+<h3>The Physics</h3>
+<h2>Euler's Equation</h2>
+<p><code>omega_dot = J^{-1} * (-omega x J*omega + tau)</code></p>
+<h2>Quaternion Kinematics</h2>
+<p><code>q_dot = 0.5 * H(q) * omega</code></p>
+<h2>Lyapunov Function (Corbin's Eq 3.11)</h2>
+<p><code>V = Kp*sigma^2 + 0.5*omega^T*J*omega + Kp*(1-q0)^2</code></p>
+<div class="insight-box"><strong>Key Insight:</strong> If V(x) <= 18.26, the boresight is GUARANTEED safe. No simulation needed. This is formal verification applied to real hardware (ASTROS at Georgia Tech).</div>
+<h3>Historical</h3>
+<div class="history-box"><strong>William Rowan Hamilton (1805-1865)</strong><br>Invented quaternions in 1843. Carved i^2=j^2=k^2=ijk=-1 into a bridge in Dublin. <strong>Hubble</strong>: 0.007 arcsecond pointing -- like hitting a dime 200 miles away.</div>
+<h3>References</h3>
+<p>Wertz, Spacecraft Attitude Determination and Control | Corbin Klett dissertation, Chapter 3 | MIT OCW 16.346</p>

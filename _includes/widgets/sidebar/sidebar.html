@@ -9,6 +9,7 @@
       <li><a href="{{ '/ai/' | relative_url }}" class="ai-link">AI & Algorithms</a></li>
       <li><a href="{{ '/apps/' | relative_url }}" class="apps-link">Apps</a></li>
       <li><a href="{{ '/authorization/' | relative_url }}" class="authorization-link">Authorization Management</a></li>
+      <li><a href="{{ '/physics/' | relative_url }}" class="physics-link">Physics</a></li>
     </ul>
   </div>
 
@@ -47,9 +48,28 @@
     {% assign current_section = "apps" %}
     {% assign section_category = "Apps" %}
     {% assign section_title = "Apps" %}
+  {% elsif page.url contains '/physics/' %}
+    {% assign current_section = "physics" %}
   {% endif %}
   
-  {% if current_section != "none" %}
+  {% if current_section == "physics" %}
+    <h2>Physics Modules</h2>
+    <ul class="nav-list">
+      <li><a href="{{ '/physics/' | relative_url }}">Overview</a></li>
+      <li><a href="{{ '/physics/dc-circuits' | relative_url }}">1: DC Circuit Fundamentals</a></li>
+      <li><a href="{{ '/physics/wire-properties' | relative_url }}">2: Wire Properties</a></li>
+      <li><a href="{{ '/physics/rc-dynamics' | relative_url }}">3: RC/RL Dynamics</a></li>
+      <li><a href="{{ '/physics/emi-shielding' | relative_url }}">4: Signal Integrity & EMI</a></li>
+      <li><a href="{{ '/physics/power-distribution' | relative_url }}">5: Power Distribution</a></li>
+      <li><a href="{{ '/physics/connectors' | relative_url }}">6: Connectors & Pin Design</a></li>
+      <li><a href="{{ '/physics/control-systems' | relative_url }}">7: Control Systems (PID)</a></li>
+      <li><a href="{{ '/physics/thermal-analysis' | relative_url }}">8: Thermal Analysis</a></li>
+      <li><a href="{{ '/physics/attitude-dynamics' | relative_url }}">9: Rotational Dynamics</a></li>
+      <li><a href="{{ '/physics/orbital-mechanics' | relative_url }}">10: Orbital Mechanics</a></li>
+      <li><a href="{{ '/physics/evolutionary-routing' | relative_url }}">11: Evolutionary Optimization</a></li>
+      <li><a href="{{ '/physics/cubesat-ewis' | relative_url }}">12: CubeSat EWIS</a></li>
+    </ul>
+  {% elsif current_section != "none" %}
     {% comment %}
     Show only current section posts when on section dashboard or viewing a section post
     {% endcomment %}
@@ -68,7 +88,7 @@
     {% comment %}
     Show all categories except dashboard categories when not on dashboard pages
     {% endcomment %}
-    {% assign dashboard_categories = "Essays,LangChain,Extensions,AI,Apps" | split: "," %}
+    {% assign dashboard_categories = "Essays,LangChain,Extensions,AI,Apps,Physics" | split: "," %}
     {% for category in site.categories %}
       {% unless dashboard_categories contains category[0] %}
         <h2>{{ category[0] }}</h2>

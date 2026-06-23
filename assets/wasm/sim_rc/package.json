@@ -1,0 +1,13 @@
+{
+  "name": "sim-rc",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "sim_rc_bg.wasm",
+    "sim_rc.js"
+  ],
+  "main": "sim_rc.js",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

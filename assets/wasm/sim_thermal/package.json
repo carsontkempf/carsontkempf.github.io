@@ -1,0 +1,13 @@
+{
+  "name": "sim-thermal",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "sim_thermal_bg.wasm",
+    "sim_thermal.js"
+  ],
+  "main": "sim_thermal.js",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

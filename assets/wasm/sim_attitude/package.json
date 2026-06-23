@@ -1,0 +1,13 @@
+{
+  "name": "sim-attitude",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "sim_attitude_bg.wasm",
+    "sim_attitude.js"
+  ],
+  "main": "sim_attitude.js",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

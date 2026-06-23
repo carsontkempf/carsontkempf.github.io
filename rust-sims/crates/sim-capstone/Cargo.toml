@@ -1,0 +1,26 @@
+[package]
+name = "sim-capstone"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+sim-core = { path = "../sim-core" }
+wasm-bindgen = "0.2.100"
+web-sys = { version = "0.3.77", features = [
+    "CanvasRenderingContext2d",
+    "Document",
+    "Element",
+    "HtmlCanvasElement",
+    "HtmlInputElement",
+    "HtmlElement",
+    "Window",
+    "Event",
+    "EventTarget",
+] }
+js-sys = "0.3.77"

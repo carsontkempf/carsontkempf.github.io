@@ -1,0 +1,20 @@
+---
+layout: simulation
+title: "Module 8: Thermal Analysis"
+wasm_module: sim_thermal
+next_module: /physics/attitude-dynamics
+---
+<h3>Purpose</h3>
+<h2>Heat Kills Wires</h2>
+<p>Current through resistance generates heat (I^2*R). In a wire bundle, center wires are hottest -- surrounded by other hot wires with no cooling path. This simulation shows the thermal gradient in a harness cross-section.</p>
+<h3>The Physics</h3>
+<h2>Joule Heating</h2>
+<p><code>P = I^2 * R (Watts per meter)</code></p>
+<h2>Bundle Derating (AS50881)</h2>
+<p><code>1-3 wires: factor 1.0 | 4-7: 0.8 | 8-19: 0.7 | 20-39: 0.5 | 40+: 0.4</code></p>
+<p>Wire max temp = ambient + rise. Must stay below insulation rating (150C for M22759/34).</p>
+<div class="insight-box"><strong>Key Insight:</strong> Thermal analysis is one of Artifact's key differentiators over legacy tools. Most ECAD tools DON'T compute harness thermal -- they just check wire gauge. Artifact computes bundle center temperature for every harness segment.</div>
+<h3>Historical</h3>
+<div class="history-box"><strong>James Prescott Joule (1818-1889)</strong><br>Discovered P=I^2*R (1841). Also established conservation of energy. In space, there's NO convective cooling -- wires can only radiate heat (Stefan-Boltzmann law).</div>
+<h3>References</h3>
+<p>Spacecraft Thermal Control Handbook (Gilmore), Ch 1-3 | SAE AS50881 Section 3 | NASA-STD-8739.4 Section 5</p>

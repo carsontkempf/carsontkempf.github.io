@@ -1,0 +1,17 @@
+[workspace]
+members = [
+    "crates/sim-core",
+    "crates/sim-dc",
+    "crates/sim-wires",
+    "crates/sim-rc",
+    "crates/sim-emi",
+    "crates/sim-power",
+    "crates/sim-connectors",
+    "crates/sim-pid",
+    "crates/sim-thermal",
+    "crates/sim-attitude",
+    "crates/sim-orbital",
+    "crates/sim-evolve",
+    "crates/sim-capstone",
+]
+resolver = "2"

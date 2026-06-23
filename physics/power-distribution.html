@@ -1,0 +1,20 @@
+---
+layout: simulation
+title: "Module 5: Power Distribution & Redundancy"
+wasm_module: sim_power
+next_module: /physics/connectors
+---
+<h3>Purpose</h3>
+<h2>What Happens When Things Fail</h2>
+<p>In aerospace, things WILL fail. The question is: does the mission survive? Power distribution architecture determines single-point failures. Click "Blow Fuse" to simulate failures and see the impact.</p>
+<h3>The Physics</h3>
+<h2>Redundancy</h2>
+<p><code>Single-fault tolerant: survives any ONE failure</code></p>
+<p><code>Dual-fault tolerant: survives any TWO failures (human-rated)</code></p>
+<h2>Power Budget</h2>
+<p><code>Total generation > Total consumption + margin (10-30%)</code></p>
+<div class="insight-box"><strong>Key Insight:</strong> Single-point failure analysis traces every power path. If ONE wire/fuse/connector failure kills the mission, it's a design error. Artifact's redundancy checking automates this analysis.</div>
+<h3>Historical</h3>
+<div class="history-box"><strong>Apollo 13 (1970)</strong><br>Oxygen tank explosion severed primary power bus. Crew survived ONLY because the Lunar Module had an independent power system. Redundancy saved three lives.</div>
+<h3>References</h3>
+<p>Space Vehicle Design (Griffin & French), Ch 10 | NASA SE Handbook SP-2016-6105 | MIL-STD-1576</p>

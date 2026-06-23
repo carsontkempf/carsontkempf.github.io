@@ -1,0 +1,13 @@
+{
+  "name": "sim-wires",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "sim_wires_bg.wasm",
+    "sim_wires.js"
+  ],
+  "main": "sim_wires.js",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

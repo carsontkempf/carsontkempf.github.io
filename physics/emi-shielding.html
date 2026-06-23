@@ -1,0 +1,21 @@
+---
+layout: simulation
+title: "Module 4: Signal Integrity & EMI"
+wasm_module: sim_emi
+next_module: /physics/power-distribution
+---
+<h3>Purpose</h3>
+<h2>When Wires Talk to Each Other (Unwanted)</h2>
+<p>Electromagnetic interference is the enemy of clean signals. Adjacent wires couple noise through electric and magnetic fields. Shielding and separation are the defenses. MIL-STD-461 sets the rules.</p>
+<h3>The Physics</h3>
+<h2>Capacitive Crosstalk</h2>
+<p><code>V_coupled ~ C_mutual * L * dV/dt</code></p>
+<p>Faster signals + longer parallel runs + closer wires = more coupling.</p>
+<h2>Shielding</h2>
+<p><code>SE(dB) = 20*log10(E_unshielded / E_shielded)</code></p>
+<p>40dB = 100x noise reduction. 60dB = 1000x.</p>
+<div class="insight-box"><strong>Key Insight:</strong> EMI separation rules are WHY wire harness routing matters. You can't just bundle everything together. Artifact's constraint engine checks separation distances between signal categories automatically.</div>
+<h3>Historical</h3>
+<div class="history-box"><strong>Apollo 12 (1969)</strong><br>Struck by lightning 36 seconds after launch. Lost all telemetry momentarily. Flight controller John Aaron saved the mission by calling "SCE to AUX" from memory. Led to comprehensive lightning/EMI protection standards.</div>
+<h3>References</h3>
+<p>Henry Ott, EMC Engineering, Ch 1-5 | MIL-STD-461G (everyspec.com) | MIL-HDBK-454 Guideline 19</p>

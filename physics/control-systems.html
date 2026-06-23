@@ -1,0 +1,22 @@
+---
+layout: simulation
+title: "Module 7: Control Systems (PID)"
+wasm_module: sim_pid
+next_module: /physics/thermal-analysis
+---
+<h3>Purpose</h3>
+<h2>Corbin's World: Making Systems Behave</h2>
+<p>A PID controller drives a system to its setpoint. Tune the gains: too low = slow, too high = oscillation. This is EXACTLY what Corbin's dissertation addresses -- can we PROVE which gains are stable?</p>
+<h3>The Physics</h3>
+<h2>PID Controller</h2>
+<p><code>u = Kp*e + Ki*integral(e) + Kd*de/dt</code></p>
+<p>Kp: proportional (spring-like, reacts to current error)</p>
+<p>Ki: integral (eliminates steady-state offset)</p>
+<p>Kd: derivative (damping, prevents overshoot)</p>
+<h2>Stability</h2>
+<p>Stable: output settles to setpoint. Unstable: output grows or oscillates forever.</p>
+<div class="insight-box"><strong>Key Insight:</strong> Corbin's Chapter 4 studies EXACTLY this: a PI controller (Kp + Ki/s) on a gas turbine engine. Backlash causes limit cycling. His verification task: PROVE which (Kp, Ki) values are safe. Drag the sliders to feel the problem.</div>
+<h3>Historical</h3>
+<div class="history-box"><strong>James Watt (1736-1819)</strong><br>Centrifugal governor for steam engines -- first feedback controller. <strong>Rudolf Kalman (1930-2016)</strong>: state-space theory + Kalman filter. Apollo navigation used the Kalman filter to reach the Moon.</div>
+<h3>References</h3>
+<p>Nise, Control Systems Engineering, Ch 1-6 | Corbin Klett dissertation, Ch 3-4 | MIT OCW 6.302</p>

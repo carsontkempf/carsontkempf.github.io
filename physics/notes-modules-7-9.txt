@@ -1,0 +1,243 @@
+================================================================
+MODULE 7: CONTROL SYSTEMS (PID)
+================================================================
+
+1. DEFINITIONS
+   1.1 Control System
+       - A system that regulates its own behavior using feedback
+       - Open-loop: no feedback (toaster timer)
+       - Closed-loop: measures output, compares to desired, corrects (thermostat)
+       - Q: Is cruise control open or closed loop? (Closed -- measures speed, adjusts throttle)
+
+   1.2 Plant
+       - The physical system being controlled
+       - Examples: motor (input=voltage, output=speed), aircraft (input=elevator, output=pitch)
+       - Described by transfer function G(s) or state-space matrices (A,B,C,D)
+
+   1.3 Error Signal
+       - e(t) = desired - actual = r(t) - y(t)
+       - The controller acts on this error to drive it toward zero
+       - Q: If desired temperature is 72F and actual is 68F, error? (+4F)
+
+   1.4 PID Controller
+       - C(s) = Kp + Ki/s + Kd*s
+       - Proportional: reacts to current error (spring-like)
+       - Integral: reacts to accumulated past error (eliminates steady-state offset)
+       - Derivative: reacts to rate of change (damping, prevents overshoot)
+       - Q: Which term eliminates steady-state error? (Integral)
+       - Q: Which term prevents overshoot? (Derivative)
+
+2. TRANSFER FUNCTIONS
+   2.1 First-order: G(s) = K / (tau*s + 1)
+       - One time constant, no oscillation
+       - Step response: y(t) = K*(1 - e^{-t/tau})
+       - This IS an RC circuit (Module 3)
+   2.2 Second-order: G(s) = omega_n^2 / (s^2 + 2*zeta*omega_n*s + omega_n^2)
+       - Two parameters: natural frequency (omega_n) and damping ratio (zeta)
+       - zeta < 1: oscillates (underdamped)
+       - zeta = 1: fastest without oscillation (critically damped)
+       - zeta > 1: slow, no oscillation (overdamped)
+       - Q: Satellite reaction wheel controller has zeta=0.7. Oscillates? (Slightly -- standard design choice)
+
+3. STABILITY
+   3.1 Stable: output stays bounded for bounded input (all poles in left half-plane)
+   3.2 Unstable: output grows without bound (any pole in right half-plane)
+   3.3 Marginally stable: sustained oscillation, never decays (poles on imaginary axis)
+   3.4 Gain margin: how much gain can increase before instability
+   3.5 Phase margin: how much phase lag can increase before instability
+   3.6 Q: A system oscillates with constant amplitude forever. Stable, unstable, or marginal? (Marginal)
+
+4. CONNECTION TO CORBIN'S DISSERTATION
+   - His Chapter 4: PI controller for gas turbine fan speed
+       - C(s) = Kp + Ki/s cascaded with engine dynamics
+       - Backlash in the loop causes limit cycling (marginally stable)
+       - The verification task: PROVE which gains (Kp, Ki) keep the system stable
+   - His Chapter 3: PD controller for spacecraft attitude
+       - tau = -Kp*sigma - Kd*omega
+       - Lyapunov function proves stability: V = Kp*sigma^2 + 0.5*omega^T*J*omega
+   - His main insight: formal verification replaces simulation-based gain tuning
+
+5. TUNING METHODS
+   5.1 Ziegler-Nichols: increase Kp until sustained oscillation, then set Ki and Kd from table
+   5.2 Root locus: plot poles as gain varies, choose gain for desired damping
+   5.3 Frequency response (Bode): set gain/phase margins to specification
+   5.4 Modern: state-space LQR (optimal gains from cost function) -- this is what Corbin uses
+
+6. HISTORICAL
+   - James Watt (1736-1819): centrifugal governor for steam engines (first feedback controller)
+   - Nikolai Minorsky (1885-1970): invented PID control for ship steering (1922)
+       - Observed human helmsmen use P, I, and D intuitively
+   - Nyquist (1932): stability criterion from frequency response
+   - Bode (1940): gain/phase plots for design (still used daily)
+   - Rudolf Kalman (1930-2016): state-space theory, Kalman filter, LQR optimal control
+       - Apollo navigation used the Kalman filter -- enabled Moon landing
+
+7. REFERENCES
+   - Nise, Control Systems Engineering, Ch 1-6
+   - Ogata, Modern Control Engineering, Ch 5 (transient response)
+   - MIT OCW 6.302 (Feedback Systems)
+   - Corbin Klett dissertation, Ch 3 (spacecraft PD), Ch 4 (engine PI)
+
+
+================================================================
+MODULE 8: THERMAL ANALYSIS
+================================================================
+
+1. DEFINITIONS
+   1.1 Joule Heating (I^2*R)
+       - Current through resistance generates heat: P = I^2 * R (Watts)
+       - Wire temperature rises until heat generation = heat dissipation
+       - Q: 10A through 0.1 ohm wire. Heat generated? (10W per meter!)
+
+   1.2 Thermal Resistance
+       - Analogous to electrical resistance: R_thermal = delta_T / P (C/Watt)
+       - Heat flows from hot to cold, like current flows from high to low voltage
+       - Wire insulation acts as thermal resistance (traps heat)
+
+   1.3 Ambient Temperature
+       - The environment temperature surrounding the wire
+       - Space: sunlit side +120C, shadow side -150C (extreme range!)
+       - Aircraft: engine bay up to 260C, pressurized cabin ~25C
+       - Q: Why does ambient matter? (Higher ambient = less temperature rise allowed before limit)
+
+   1.4 Derating
+       - Reducing the allowed current below the wire's rated maximum
+       - Reasons: high ambient temp, bundled wires (reduced cooling), altitude (less air cooling)
+       - Derating factor: multiply rated current by factor < 1.0
+       - Q: Wire rated 10A in free air. Derating factor in a 20-wire bundle = 0.5. Allowed current? (5A)
+
+2. BUNDLE HEATING
+   2.1 Wires in a harness bundle heat each other
+       - Center wires are hottest (surrounded by other hot wires, no cooling)
+       - Outer wires cooler (can radiate/convect to environment)
+   2.2 Bundle derating factors (from AS50881):
+       - 1-3 wires: factor 1.0 (no derating)
+       - 4-7 wires: factor 0.8
+       - 8-19 wires: factor 0.7
+       - 20-39 wires: factor 0.5
+       - 40+: factor 0.4
+   2.3 Q: A harness has 25 power wires each rated 8A. Derated current? (8 * 0.5 = 4A max each)
+
+3. THERMAL CALCULATION
+   - Wire temp rise: delta_T = P * R_thermal
+   - P = I^2 * R_wire (per unit length)
+   - R_thermal depends on: insulation thickness, surrounding air/vacuum, bundling
+   - Max temp = ambient + delta_T. Must be < wire insulation rating.
+   - Example: M22759/34 rated 150C. Ambient 85C. Max rise = 65C.
+   - If delta_T would be 80C at full current: must derate or use larger wire.
+
+4. SPACECRAFT-SPECIFIC THERMAL
+   4.1 Vacuum: no convection! Only radiation and conduction
+       - Wires cool only by radiating (Stefan-Boltzmann: P = epsilon*sigma*A*T^4)
+       - Much worse cooling than in atmosphere
+   4.2 Eclipse cycling: satellite goes from full sun to full shadow every 90 minutes (LEO)
+       - Wires thermally cycle thousands of times per year
+       - Fatigue of solder joints and crimp connections
+   4.3 Heaters: sometimes wires need to be HEATED to prevent freezing
+       - Thermostatically controlled heater circuits keep components above minimum operating temp
+
+5. ARTIFACT'S PHYSICS SIMULATION LAYER
+   - For each wire in a harness: compute I^2*R heating
+   - For bundle: sum all wire heating, apply thermal model for center temperature
+   - Check: T_center < min(all wire ratings in bundle)
+   - Flag violations: "Wire J4-pin12 exceeds thermal limit in harness segment H3"
+   - This is one of Artifact's key differentiators vs legacy tools (which don't compute thermal)
+
+6. HISTORICAL
+   - James Prescott Joule (1818-1889): discovered heating effect of current (1841)
+       - P = I^2*R is "Joule's first law"
+       - Also established conservation of energy (first law of thermodynamics)
+   - Josef Stefan (1835-1893) & Ludwig Boltzmann (1844-1906): radiation law
+       - P = sigma*T^4 governs all spacecraft thermal design
+   - Columbia disaster (2003): not thermal-electrical, but thermal protection failure
+       - Demonstrates consequence of thermal analysis errors in aerospace
+
+7. REFERENCES
+   - Spacecraft Thermal Control Handbook (Gilmore), Ch 1-3
+   - SAE AS50881 Section 3 (Current Derating)
+   - NASA-STD-8739.4 Section 5 (Harness Design)
+   - MIL-HDBK-454 Guideline 2 (Thermal Management)
+
+
+================================================================
+MODULE 9: ROTATIONAL DYNAMICS & ATTITUDE CONTROL
+================================================================
+
+1. DEFINITIONS
+   1.1 Attitude
+       - The orientation of a spacecraft relative to a reference frame
+       - 3 degrees of freedom: roll, pitch, yaw (or equivalent parameterization)
+       - Q: How many numbers to describe attitude? (Minimum 3, but quaternions use 4 for singularity-free)
+
+   1.2 Quaternion
+       - 4-component attitude representation: q = [w, x, y, z], ||q|| = 1
+       - Avoids gimbal lock (singularity in Euler angles)
+       - Rotation: v_rotated = q * v * q^{-1} (quaternion sandwich product)
+       - Q: Why not just use 3 angles? (Euler angles have singularity at 90 degrees -- gimbal lock)
+
+   1.3 Angular Velocity (omega)
+       - Rate of rotation: omega = [omega_x, omega_y, omega_z] rad/s
+       - Body-fixed frame (rotates with the spacecraft)
+       - Q: ISS rotates once per orbit (90 min). omega? (2*pi/5400 = 0.00116 rad/s)
+
+   1.4 Moment of Inertia (J)
+       - Rotational analog of mass: resistance to angular acceleration
+       - 3x3 symmetric matrix (products of inertia off-diagonal)
+       - Euler's equation: J * omega_dot = tau - omega x (J*omega)
+       - Q: Why does the cross-product term matter? (Gyroscopic coupling between axes)
+
+   1.5 Reaction Wheel
+       - Spinning flywheel that exchanges angular momentum with spacecraft
+       - Spin up wheel -> spacecraft rotates opposite direction (Newton's 3rd law)
+       - Typical: 4 wheels (3 axes + 1 redundant) in pyramid configuration
+       - Q: If all wheels saturate (max speed), what happens? (Can't control attitude -- need thrusters to desaturate)
+
+2. EQUATIONS OF MOTION
+   2.1 Euler's rotational equation:
+       omega_dot = J^{-1} * (-omega x J*omega + tau_control + tau_disturbance)
+   2.2 Quaternion kinematics:
+       q_dot = 0.5 * H(q) * omega
+       where H(q) is the 4x3 kinematic matrix (Eq 3.7 in Corbin's thesis)
+   2.3 Combined state: x = [q, omega] (7 states for full attitude dynamics)
+
+3. CONTROL
+   3.1 PD control (Corbin's Eq 3.8):
+       tau = omega x J*omega - Kp*sigma - Kd*omega
+       sigma = [q_x, q_y, q_z] (vector part of quaternion = attitude error)
+   3.2 Lyapunov function (Eq 3.11):
+       V = Kp*sigma^T*sigma + 0.5*omega^T*J*omega + Kp*(1-q_w)^2
+       V decreasing -> system stable -> reaches target attitude
+   3.3 Q: What does each term in V represent?
+       - Kp*sigma^2: "penalty" for being rotated away from target
+       - 0.5*omega^T*J*omega: rotational kinetic energy
+       - Kp*(1-q_w)^2: ensures we go to the short rotation (not 360-degree way around)
+
+4. CONSTRAINTS (KEEP-OUT CONES)
+   - Telescope must never point optics at the Sun
+   - Star tracker must see stars (not blocked by Earth or Sun)
+   - Antenna must face ground station during communication passes
+   - Mathematically: cos(theta) = safe_dir^T * R(q) * boresight >= cos(theta_max)
+   - The safe set C = {x | V(x) <= gamma} must be entirely within constraint region
+
+5. CONNECTION TO CORBIN'S WORK
+   - Chapter 3 is entirely about this system
+   - He proves: if V(x) <= 18.26, the boresight NEVER enters the keep-out cone
+   - He implements RTA: if primary controller tries to leave the safe set, backup takes over
+   - Hardware demonstration on ASTROS platform at Georgia Tech
+
+6. HISTORICAL
+   - Leonhard Euler (1707-1783): Euler's equations of rigid body rotation
+       - Among the most prolific mathematicians in history (886 publications)
+   - William Rowan Hamilton (1805-1865): invented quaternions (1843)
+       - Carved the formula i^2 = j^2 = k^2 = ijk = -1 into a bridge in Dublin
+   - Sputnik (1957): first satellite, uncontrolled tumbling after batteries died
+   - Hubble (1990): reaction wheels provide 0.007 arcsecond pointing accuracy
+       - That's like pointing a laser at a dime 200 miles away
+   - James Webb (2022): deployed sunshield creating permanent keep-out cone
+       - Attitude control must GUARANTEE optics never face Sun, or $10B instrument destroyed
+
+7. REFERENCES
+   - Wertz, Spacecraft Attitude Determination and Control, Ch 1-4
+   - Sidi, Spacecraft Dynamics and Control, Ch 3-5
+   - Corbin Klett dissertation, Chapter 3 (entire chapter)
+   - MIT OCW 16.346 (Astrodynamics)

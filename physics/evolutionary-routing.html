@@ -1,0 +1,24 @@
+---
+layout: simulation
+title: "Module 11: Evolutionary Optimization for Routing"
+wasm_module: sim_evolve
+next_module: /physics/cubesat-ewis
+---
+<h3>Purpose</h3>
+<h2>What a Senior Developer Couldn't Do</h2>
+<p>Wire routing with simultaneous constraints (weight, EMI, thermal) is NP-hard. No exact solution exists. Genetic algorithms EVOLVE good solutions. Click "Step 10 Generations" to watch fitness improve as the algorithm finds better bundle assignments.</p>
+<h3>The Algorithm</h3>
+<h2>Genetic Algorithm</h2>
+<p><code>1. Population of candidate bundle assignments</code></p>
+<p><code>2. Evaluate fitness (lower = better)</code></p>
+<p><code>3. Select parents (tournament)</code></p>
+<p><code>4. Crossover + mutation -> children</code></p>
+<p><code>5. Repeat until convergence</code></p>
+<h2>Fitness Function</h2>
+<p><code>f = total_length + 2 * EMI_conflicts</code></p>
+<p>Colors show bundle assignment. The optimizer separates conflicting wires into different bundles.</p>
+<div class="insight-box"><strong>Key Insight:</strong> This is RESEARCH-LEVEL work. Most wire routing in industry is manual. Applying evolutionary computation to harness optimization is the kind of feature Artifact's AI copilot would implement. You just built a prototype of it.</div>
+<h3>Historical</h3>
+<div class="history-box"><strong>John Holland (1929-2015)</strong><br>Invented genetic algorithms (1970s). "Adaptation in Natural and Artificial Systems" (1975). Wire routing optimization first attempted for PCB layout in the 1980s. Aerospace harness optimization is still largely MANUAL -- the opportunity is now.</div>
+<h3>References</h3>
+<p>Eiben & Smith, Introduction to Evolutionary Computing | Goldberg, Genetic Algorithms in Search | Deb, Multi-Objective Optimization (NSGA-II)</p>

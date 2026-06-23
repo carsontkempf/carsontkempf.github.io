@@ -1,0 +1,13 @@
+{
+  "name": "sim-pid",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "sim_pid_bg.wasm",
+    "sim_pid.js"
+  ],
+  "main": "sim_pid.js",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
