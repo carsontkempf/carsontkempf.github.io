@@ -10,8 +10,7 @@
 (function() {
   'use strict';
 
-  // Configuration - will be injected by Jekyll/Liquid templates
-  const TENANT_URL = '{{ site.learn.tenant_url }}' || 'https://ctklearn.carsontkempf.workers.dev/api/auth';
+  const TENANT_URL = 'https://cloudprototype.org/api/auth';
 
   // Check if AuthSDK is loaded
   if (typeof AuthSDK === 'undefined') {
@@ -120,9 +119,24 @@
     async isAuthenticated() {
       try {
         const session = await auth.getSession();
-        const isAuthed = !!session?.data?.user;
-        console.log('[Auth Service] Authentication check:', isAuthed);
-        return isAuthed;
+        if (session?.data?.user) {
+          console.log('[Auth Service] Authentication check: true (session)');
+          return true;
+        }
+        // Fallback: trust stored token+user from login redirect
+        const token = localStorage.getItem('learn_auth_token');
+        const storedUser = localStorage.getItem('learn_auth_user');
+        if (token && storedUser) {
+          try {
+            const user = JSON.parse(storedUser);
+            if (user?.email) {
+              console.log('[Auth Service] Authentication check: true (localStorage)');
+              return true;
+            }
+          } catch(e) {}
+        }
+        console.log('[Auth Service] Authentication check: false');
+        return false;
       } catch (err) {
         console.error('[Auth Service] Auth check error:', err);
         return false;
@@ -144,6 +158,15 @@
         if (session?.data?.user) {
           sessionCache = session.data;
           return session.data.user;
+        }
+
+        // Fallback: use stored user from login redirect
+        const storedUser = localStorage.getItem('learn_auth_user');
+        if (storedUser) {
+          try {
+            const user = JSON.parse(storedUser);
+            if (user?.email) return user;
+          } catch(e) {}
         }
 
         return null;
