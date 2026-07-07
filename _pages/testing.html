@@ -5,190 +5,315 @@ permalink: /testing/
 ---
 
 <style>
-  .testing-wrap { max-width: 900px; margin: 0 auto; }
+/* ── Theme-aware custom properties ───────────────────────────── */
+:root,
+html[data-theme="light"],
+html[data-theme="lr"] {
+  --t-bg:          #ffffff;
+  --t-row-bg:      #f7f7f9;
+  --t-border:      #d8d8e0;
+  --t-text:        #2d2d3a;
+  --t-muted:       #5a5a72;
+  --t-head-bg:     #ededf5;
+  --t-head-text:   #444460;
+  --t-tab-bg:      #ededf5;
+  --t-tab-text:    #555570;
+  --t-tab-active-bg:     rgba(99,102,241,0.12);
+  --t-tab-active-border: #6366f1;
+  --t-tab-active-text:   #4338ca;
+  --t-btn-bg:      #4f46e5;
+  --t-btn-text:    #ffffff;
+  --t-run-bg:      rgba(99,102,241,0.1);
+  --t-run-border:  rgba(99,102,241,0.35);
+  --t-run-text:    #4338ca;
+  --t-banner-bg:   rgba(217,119,6,0.1);
+  --t-banner-border: rgba(217,119,6,0.4);
+  --t-banner-text: #92400e;
+  --t-pass-bg:     rgba(22,163,74,0.1);  --t-pass-text:  #166534;
+  --t-fail-bg:     rgba(220,38,38,0.1);  --t-fail-text:  #991b1b;
+  --t-skip-bg:     rgba(99,102,241,0.1); --t-skip-text:  #4338ca;
+  --t-exp-bg:      rgba(22,163,74,0.08); --t-exp-text:   #166534;
+  --t-run-badge-bg: rgba(180,83,9,0.1);  --t-run-badge-text: #92400e;
+  --t-pend-bg:     rgba(100,116,139,0.1);--t-pend-text:  #475569;
+  --t-detail-ok:   #166534;
+  --t-detail-err:  #991b1b;
+  --t-detail-muted:#5a5a72;
+}
 
-  /* Login gate */
-  .login-banner {
-    background: rgba(234,179,8,0.15);
-    border: 1px solid rgba(234,179,8,0.4);
-    border-radius: 6px;
-    padding: 12px 16px;
-    margin-bottom: 24px;
-    font-size: 14px;
-    color: #fef08a;
-  }
-  .login-banner a { color: #fde047; text-decoration: underline; }
+html[data-theme="dark"] {
+  --t-bg:          rgba(255,255,255,0.04);
+  --t-row-bg:      rgba(255,255,255,0.03);
+  --t-border:      rgba(255,255,255,0.1);
+  --t-text:        #d1d5db;
+  --t-muted:       #9ca3af;
+  --t-head-bg:     rgba(255,255,255,0.07);
+  --t-head-text:   #9ca3af;
+  --t-tab-bg:      rgba(255,255,255,0.05);
+  --t-tab-text:    rgba(255,255,255,0.55);
+  --t-tab-active-bg:     rgba(99,102,241,0.3);
+  --t-tab-active-border: #6366f1;
+  --t-tab-active-text:   #ffffff;
+  --t-btn-bg:      #4f46e5;
+  --t-btn-text:    #ffffff;
+  --t-run-bg:      rgba(99,102,241,0.2);
+  --t-run-border:  rgba(99,102,241,0.4);
+  --t-run-text:    #a5b4fc;
+  --t-banner-bg:   rgba(234,179,8,0.15);
+  --t-banner-border: rgba(234,179,8,0.4);
+  --t-banner-text: #fef08a;
+  --t-pass-bg:     rgba(34,197,94,0.2);  --t-pass-text:  #4ade80;
+  --t-fail-bg:     rgba(239,68,68,0.2);  --t-fail-text:  #f87171;
+  --t-skip-bg:     rgba(99,102,241,0.2); --t-skip-text:  #a5b4fc;
+  --t-exp-bg:      rgba(34,197,94,0.15); --t-exp-text:   #86efac;
+  --t-run-badge-bg: rgba(234,179,8,0.25);--t-run-badge-text: #fde047;
+  --t-pend-bg:     rgba(107,114,128,0.3);--t-pend-text:  #9ca3af;
+  --t-detail-ok:   #4ade80;
+  --t-detail-err:  #f87171;
+  --t-detail-muted:#6b7280;
+}
 
-  /* Tabs */
-  .tab-bar {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-  }
-  .tab-btn {
-    padding: 6px 18px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 4px;
-    color: rgba(255,255,255,0.55);
-    cursor: pointer;
-    font-size: 13px;
-  }
-  .tab-btn.active {
-    background: rgba(99,102,241,0.3);
-    border-color: #6366f1;
-    color: #fff;
-  }
+/* ── Layout ──────────────────────────────────────────────────── */
+.testing-wrap { max-width: 960px; margin: 0 auto; }
 
-  /* Test table */
-  .test-panel { margin-bottom: 32px; }
-  .test-panel h3 { font-size: 16px; margin-bottom: 6px; color: #e5e7eb; }
-  .panel-desc { font-size: 13px; color: #9ca3af; margin-bottom: 16px; }
+.login-banner {
+  background: var(--t-banner-bg);
+  border: 1px solid var(--t-banner-border);
+  color: var(--t-banner-text);
+  border-radius: 6px;
+  padding: 11px 15px;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+.login-banner a { color: inherit; font-weight: 600; text-decoration: underline; }
 
-  .run-all-btn {
-    padding: 7px 20px;
-    background: #4f46e5;
-    border: none;
-    border-radius: 4px;
-    color: #fff;
-    font-size: 13px;
-    cursor: pointer;
-    margin-bottom: 16px;
-  }
-  .run-all-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+/* ── Tabs ────────────────────────────────────────────────────── */
+.tab-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 22px; }
+.tab-btn {
+  padding: 6px 18px;
+  background: var(--t-tab-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 4px;
+  color: var(--t-tab-text);
+  cursor: pointer;
+  font-size: 13px;
+}
+.tab-btn.active {
+  background: var(--t-tab-active-bg);
+  border-color: var(--t-tab-active-border);
+  color: var(--t-tab-active-text);
+  font-weight: 600;
+}
 
-  table.test-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    background: rgba(255,255,255,0.03);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  table.test-table th {
-    background: rgba(255,255,255,0.06);
-    text-align: left;
-    padding: 8px 12px;
-    color: #9ca3af;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  table.test-table td {
-    padding: 9px 12px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    color: #d1d5db;
-    vertical-align: top;
-  }
-  .badge {
-    display: inline-block;
-    padding: 2px 9px;
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .badge-pending  { background: rgba(107,114,128,0.3); color: #9ca3af; }
-  .badge-running  { background: rgba(234,179,8,0.25);  color: #fde047; }
-  .badge-pass     { background: rgba(34,197,94,0.2);   color: #4ade80; }
-  .badge-fail     { background: rgba(239,68,68,0.2);   color: #f87171; }
-  .badge-skip     { background: rgba(99,102,241,0.2);  color: #a5b4fc; }
-  .badge-expected { background: rgba(34,197,94,0.15);  color: #86efac; }
+/* ── Test panel ──────────────────────────────────────────────── */
+.test-panel { margin-bottom: 28px; }
+.test-panel h3 { font-size: 15px; margin-bottom: 4px; color: var(--t-text); }
+.panel-desc { font-size: 12px; color: var(--t-muted); margin-bottom: 14px; }
 
-  .detail { color: #6b7280; font-size: 11px; margin-top: 3px; word-break: break-all; }
-  .detail.ok  { color: #4ade80; }
-  .detail.err { color: #f87171; }
+.run-all-btn {
+  padding: 7px 18px;
+  background: var(--t-btn-bg);
+  color: var(--t-btn-text);
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  margin-bottom: 14px;
+}
+.run-all-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .run-btn {
-    padding: 3px 10px;
-    background: rgba(99,102,241,0.2);
-    border: 1px solid rgba(99,102,241,0.4);
-    border-radius: 3px;
-    color: #a5b4fc;
-    cursor: pointer;
-    font-size: 11px;
-  }
-  .run-btn:hover { background: rgba(99,102,241,0.35); }
+table.test-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--t-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+table.test-table th {
+  background: var(--t-head-bg);
+  color: var(--t-head-text);
+  text-align: left;
+  padding: 7px 11px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+table.test-table td {
+  padding: 8px 11px;
+  border-top: 1px solid var(--t-border);
+  color: var(--t-text);
+  vertical-align: top;
+}
+table.test-table tr:nth-child(even) td { background: var(--t-row-bg); }
+
+.badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-pending  { background: var(--t-pend-bg);     color: var(--t-pend-text); }
+.badge-running  { background: var(--t-run-badge-bg); color: var(--t-run-badge-text); }
+.badge-pass     { background: var(--t-pass-bg);      color: var(--t-pass-text); }
+.badge-fail     { background: var(--t-fail-bg);      color: var(--t-fail-text); }
+.badge-skip     { background: var(--t-skip-bg);      color: var(--t-skip-text); }
+.badge-expected { background: var(--t-exp-bg);       color: var(--t-exp-text); }
+
+.detail     { font-size: 11px; margin-top: 3px; word-break: break-all; color: var(--t-detail-muted); }
+.detail.ok  { color: var(--t-detail-ok); }
+.detail.err { color: var(--t-detail-err); }
+
+.run-btn {
+  padding: 3px 10px;
+  background: var(--t-run-bg);
+  border: 1px solid var(--t-run-border);
+  border-radius: 3px;
+  color: var(--t-run-text);
+  cursor: pointer;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* ── Debug log — always dark terminal ────────────────────────── */
+.debug-wrap {
+  margin-top: 32px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.debug-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1e1e2e;
+  padding: 8px 14px;
+}
+.debug-header span { color: #cdd6f4; font-size: 13px; font-weight: 600; }
+.debug-header-btns { display: flex; gap: 8px; }
+.debug-ctrl-btn {
+  padding: 3px 12px;
+  background: #313244;
+  border: 1px solid #45475a;
+  border-radius: 3px;
+  color: #cdd6f4;
+  font-size: 11px;
+  cursor: pointer;
+}
+.debug-ctrl-btn:hover { background: #45475a; }
+#debug-log {
+  background: #1e1e2e;
+  padding: 10px 14px;
+  max-height: 500px;
+  overflow-y: auto;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+.dl-entry { margin-bottom: 5px; }
+.dl-ts    { color: #585b70; }
+.dl-tab   { color: #89b4fa; }
+.dl-info  { color: #89dceb; }
+.dl-success { color: #a6e3a1; }
+.dl-error { color: #f38ba8; }
+.dl-warn  { color: #f9e2af; }
+.dl-req   { color: #89dceb; }
+.dl-resp  { color: #cba6f7; }
+.dl-data {
+  color: #cdd6f4;
+  background: #181825;
+  border-left: 2px solid #45475a;
+  padding: 4px 10px;
+  margin: 2px 0 4px 16px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  border-radius: 2px;
+  font-size: 10.5px;
+}
+.dl-empty { color: #585b70; font-style: italic; }
 </style>
 
 <div class="testing-wrap">
   <div id="login-banner" class="login-banner" style="display:none">
-    Not logged in — bearer token tests will fail.
+    Not logged in — token-dependent tests will fail.
     <a href="/login/">Log in</a> first, then return here.
   </div>
 
   <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('auth-sdk', this)">Auth SDK</button>
-    <button class="tab-btn" onclick="switchTab('cors', this)">CORS</button>
-    <button class="tab-btn" onclick="switchTab('roles', this)">Roles</button>
-    <button class="tab-btn" onclick="switchTab('storage', this)">Storage</button>
-    <button class="tab-btn" onclick="switchTab('sdk-proxy', this)">SDK Proxy</button>
+    <button class="tab-btn active" onclick="switchTab('auth-sdk',this)">Auth SDK</button>
+    <button class="tab-btn" onclick="switchTab('cors',this)">CORS</button>
+    <button class="tab-btn" onclick="switchTab('roles',this)">Roles</button>
+    <button class="tab-btn" onclick="switchTab('storage',this)">Storage</button>
+    <button class="tab-btn" onclick="switchTab('sdk-proxy',this)">SDK Proxy</button>
   </div>
 
-  <!-- ═══ AUTH SDK ═══ -->
+  <!-- AUTH SDK -->
   <div id="tab-auth-sdk" class="tab-section">
     <div class="test-panel">
       <h3>Auth SDK</h3>
-      <p class="panel-desc">Verifies the learn-auth-sdk is loaded, the bearer token is present and valid, and cloudprototype.org accepts it.</p>
+      <p class="panel-desc">Verifies SDK is loaded, bearer token is present and valid, and cloudprototype.org accepts it. Tests both BetterAuth and custom session endpoints to compare role field behavior.</p>
       <button class="run-all-btn" onclick="runAll('auth-sdk')">Run All</button>
-      <table class="test-table">
-        <thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
-        <tbody id="tbody-auth-sdk"></tbody>
-      </table>
+      <table class="test-table"><thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-auth-sdk"></tbody></table>
     </div>
   </div>
 
-  <!-- ═══ CORS ═══ -->
+  <!-- CORS -->
   <div id="tab-cors" class="tab-section" style="display:none">
     <div class="test-panel">
       <h3>CORS</h3>
-      <p class="panel-desc">Verifies cloudprototype.org sends correct CORS headers so static sites on any origin can make authenticated requests.</p>
+      <p class="panel-desc">Verifies cloudprototype.org sends correct CORS headers so static sites on any origin can make authenticated requests. Checks both /api/auth/get-session and /api/session (custom).</p>
       <button class="run-all-btn" onclick="runAll('cors')">Run All</button>
-      <table class="test-table">
-        <thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
-        <tbody id="tbody-cors"></tbody>
-      </table>
+      <table class="test-table"><thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-cors"></tbody></table>
     </div>
   </div>
 
-  <!-- ═══ ROLES ═══ -->
+  <!-- ROLES -->
   <div id="tab-roles" class="tab-section" style="display:none">
     <div class="test-panel">
       <h3>Roles</h3>
-      <p class="panel-desc">Verifies role/permission data is returned via bearer token — no cookies, pure cross-origin SDK auth.</p>
+      <p class="panel-desc">Verifies role/permission data works via bearer token. No cookies — pure cross-origin SDK auth. Shows diagnostic dump of user ID, role, and field presence.</p>
       <button class="run-all-btn" onclick="runAll('roles')">Run All</button>
-      <table class="test-table">
-        <thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
-        <tbody id="tbody-roles"></tbody>
-      </table>
+      <table class="test-table"><thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-roles"></tbody></table>
     </div>
   </div>
 
-  <!-- ═══ STORAGE ═══ -->
+  <!-- STORAGE -->
   <div id="tab-storage" class="tab-section" style="display:none">
     <div class="test-panel">
       <h3>Storage</h3>
-      <p class="panel-desc">Verifies D1/R2/KV backend bindings are healthy. Endpoints return 200 for admin, 401/403 for regular users — both count as reachable.</p>
+      <p class="panel-desc">Verifies D1/R2/KV bindings are reachable. 200=success, 401/403=auth gate (expected), 5xx=server error, network error=CORS blocked. Check debug log for full response headers.</p>
       <button class="run-all-btn" onclick="runAll('storage')">Run All</button>
-      <table class="test-table">
-        <thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
-        <tbody id="tbody-storage"></tbody>
-      </table>
+      <table class="test-table"><thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-storage"></tbody></table>
     </div>
   </div>
 
-  <!-- ═══ SDK PROXY ═══ -->
+  <!-- SDK PROXY -->
   <div id="tab-sdk-proxy" class="tab-section" style="display:none">
     <div class="test-panel">
       <h3>SDK Proxy</h3>
-      <p class="panel-desc">Verifies the learn-secrets-sdk proxy endpoint is reachable cross-origin and can forward requests.</p>
+      <p class="panel-desc">Verifies the learn-secrets-sdk proxy endpoint is reachable cross-origin and forwards requests correctly.</p>
       <button class="run-all-btn" onclick="runAll('sdk-proxy')">Run All</button>
-      <table class="test-table">
-        <thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
-        <tbody id="tbody-sdk-proxy"></tbody>
-      </table>
+      <table class="test-table"><thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-sdk-proxy"></tbody></table>
     </div>
+  </div>
+
+  <!-- DEBUG LOG -->
+  <div class="debug-wrap">
+    <div class="debug-header">
+      <span>Debug Log</span>
+      <div class="debug-header-btns">
+        <button class="debug-ctrl-btn" id="copy-btn" onclick="copyLog()">Copy All</button>
+        <button class="debug-ctrl-btn" onclick="clearLog()">Clear</button>
+      </div>
+    </div>
+    <div id="debug-log"><div class="dl-empty">Run tests to see verbose output here.</div></div>
   </div>
 </div>
 
@@ -196,148 +321,233 @@ permalink: /testing/
 const BASE = 'https://cloudprototype.org';
 const APP_ID = 'VtI8BSvhxAwNIIDR';
 
+// ── Token helpers ──────────────────────────────────────────────
+
 function getToken() {
   return localStorage.getItem('learn_auth_token') || sessionStorage.getItem('learn_auth_token') || null;
 }
 
-function decodeJwtPayload(token) {
-  try { return JSON.parse(atob(token.split('.')[1])); } catch { return null; }
+function bearerHeaders(extra) {
+  const t = getToken();
+  const h = Object.assign({}, extra);
+  if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
 }
 
-// ── State ──────────────────────────────────────────────────────────────────
+function maskToken(t) {
+  if (!t) return '(none)';
+  return t.slice(0,8) + '...' + t.slice(-4) + ' (' + t.length + ' chars)';
+}
+
+// ── Debug log ──────────────────────────────────────────────────
+
+const LOG = [];
+let currentTab = 'auth-sdk';
+
+function log(level, message, data) {
+  const ts = new Date().toLocaleTimeString();
+  LOG.push({ ts: ts, tab: currentTab, level: level, message: message, data: data ? JSON.stringify(data, null, 2) : null });
+  renderLog();
+}
+
+function renderLog() {
+  const el = document.getElementById('debug-log');
+  if (!LOG.length) { el.innerHTML = '<div class="dl-empty">No log entries.</div>'; return; }
+  el.innerHTML = LOG.map(function(e) {
+    const cls = { info:'dl-info', success:'dl-success', error:'dl-error', warn:'dl-warn', request:'dl-req', response:'dl-resp' }[e.level] || 'dl-info';
+    const label = e.level.toUpperCase();
+    const dataHtml = e.data ? '\n<div class="dl-data">' + e.data.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' : '';
+    return '<div class="dl-entry"><span class="dl-ts">[' + e.ts + ']</span> <span class="dl-tab">[' + e.tab + ']</span> <span class="' + cls + '">[' + label + '] ' + e.message.replace(/</g,'&lt;') + '</span>' + dataHtml + '</div>';
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function copyLog() {
+  const text = LOG.map(function(e) {
+    return '[' + e.ts + '][' + e.tab + '][' + e.level.toUpperCase() + '] ' + e.message + (e.data ? '\n' + e.data : '');
+  }).join('\n\n');
+  navigator.clipboard.writeText(text).then(function() {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = 'Copy All'; }, 1500);
+  });
+}
+
+function clearLog() { LOG.length = 0; renderLog(); }
+
+// ── Fetch wrapper with verbose logging ─────────────────────────
+
+async function vfetch(url, opts) {
+  const method = opts.method || 'GET';
+  const safeHdrs = Object.assign({}, opts.headers || {});
+  if (safeHdrs['Authorization']) safeHdrs['Authorization'] = 'Bearer [MASKED]';
+  log('request', method + ' ' + url, { headers: safeHdrs, body: opts.body || null });
+
+  let res, rawText;
+  try {
+    res = await fetch(url, opts);
+    rawText = await res.text();
+  } catch (e) {
+    log('error', 'Network error: ' + e.message, { url: url, error: e.message });
+    throw e;
+  }
+
+  let data;
+  try { data = JSON.parse(rawText); } catch { data = rawText; }
+
+  const hdrs = {};
+  res.headers.forEach(function(v, k) { hdrs[k] = v; });
+  log('response', 'HTTP ' + res.status + ' ' + url, { status: res.status, headers: hdrs, body: rawText.slice(0, 3000) });
+
+  res._data = data;
+  res._text = rawText;
+  return res;
+}
+
+// ── Shared cache ───────────────────────────────────────────────
+
+const cache = {};
+
+// ── Test definitions ───────────────────────────────────────────
 
 const TESTS = {
   'auth-sdk': [
-    { id: 1, name: 'SDK object available (window.authService)', fn: testSdkObject },
-    { id: 2, name: 'Bearer token present in localStorage / sessionStorage', fn: testTokenPresent },
-    { id: 3, name: 'Token not expired (JWT exp check)', fn: testTokenExpiry },
-    { id: 4, name: 'GET /api/auth/get-session with Bearer → 200 + user', fn: testGetSession },
-    { id: 5, name: 'Response contains user.email', fn: testSessionEmail },
-    { id: 6, name: 'Response contains user.role', fn: testSessionRole },
+    { id:1, name:'SDK object available (window.authService)',              fn: testSdkObject },
+    { id:2, name:'Bearer token present in localStorage / sessionStorage',  fn: testTokenPresent },
+    { id:3, name:'Token not expired (JWT exp check — opaque token = skip)',fn: testTokenExpiry },
+    { id:4, name:'GET /api/auth/get-session with Bearer → 200 + user',    fn: testGetSession },
+    { id:5, name:'Response contains user.email',                           fn: testSessionEmail },
+    { id:6, name:'Response contains user.role',                            fn: testSessionRole },
+    { id:7, name:'Full session response dump (all fields in debug log)',   fn: testSessionDump },
+    { id:8, name:'Compare /api/session vs /api/auth/get-session — role',  fn: testSessionCompare },
   ],
-  cors: [
-    { id: 1, name: 'OPTIONS preflight /api/auth/get-session — not blocked', fn: testCorsPreflightSession },
-    { id: 2, name: 'Access-Control-Allow-Origin header present', fn: testCorsAllowOrigin },
-    { id: 3, name: 'Access-Control-Allow-Headers includes Authorization', fn: testCorsAllowHeaders },
-    { id: 4, name: 'OPTIONS preflight /api/sdk/proxy — not blocked', fn: testCorsPreflightProxy },
-    { id: 5, name: 'Auth endpoint reachable without token (200/401, not network error)', fn: testEndpointReachable },
+  'cors': [
+    { id:1, name:'OPTIONS preflight /api/auth/get-session — not blocked', fn: testCorsPreflightSession },
+    { id:2, name:'Access-Control-Allow-Origin header present',             fn: testCorsAllowOrigin },
+    { id:3, name:'Access-Control-Allow-Headers includes Authorization',    fn: testCorsAllowHeaders },
+    { id:4, name:'OPTIONS preflight /api/sdk/proxy — not blocked',        fn: testCorsPreflightProxy },
+    { id:5, name:'Auth endpoint reachable without token (200/401 not blocked)', fn: testEndpointReachable },
+    { id:6, name:'Full OPTIONS response headers dump (in debug log)',      fn: testCorsHeadersDump },
+    { id:7, name:'OPTIONS /api/session — allows Authorization header',    fn: testCorsSessionAuth },
   ],
-  roles: [
-    { id: 1, name: 'Bearer session: GET /api/auth/get-session → 200 + user', fn: testRolesSession },
-    { id: 2, name: 'user.role present in session response', fn: testRolesRoleField },
-    { id: 3, name: 'Admin check: /api/auth/admin/list-users (200=admin, 403=expected)', fn: testRolesAdmin },
-    { id: 4, name: 'Non-admin rejection is clean JSON 403 (not CORS error / 500)', fn: testRolesCleanReject },
+  'roles': [
+    { id:1, name:'Bearer session: GET /api/auth/get-session → 200 + user',fn: testRolesSession },
+    { id:2, name:'user.role present in session response',                  fn: testRolesRoleField },
+    { id:3, name:'Admin check: /api/auth/admin/list-users (200=admin, 403=expected)', fn: testRolesAdmin },
+    { id:4, name:'Non-admin rejection is clean JSON 403 (not CORS/500)',  fn: testRolesCleanReject },
+    { id:5, name:'Role diagnostic: user ID, email, role, all fields',     fn: testRolesDiagnostic },
+    { id:6, name:'Admin: find spamington607@gmail.com role in user list', fn: testFindSpamington },
   ],
-  storage: [
-    { id: 1, name: 'D1 read: GET /api/test-d1 reachable', fn: testD1 },
-    { id: 2, name: 'R2 read: GET /api/test-r2 reachable', fn: testR2 },
-    { id: 3, name: 'KV read: GET /api/test-kv reachable', fn: testKV },
+  'storage': [
+    { id:1, name:'D1 read: GET /api/test-d1 reachable',                   fn: testD1 },
+    { id:2, name:'R2 read: GET /api/test-r2 reachable',                   fn: testR2 },
+    { id:3, name:'KV read: GET /api/test-kv reachable',                   fn: testKV },
+    { id:4, name:'D1 CORS preflight — is CORS blocking storage tests?',   fn: testD1Cors },
   ],
   'sdk-proxy': [
-    { id: 1, name: 'OPTIONS preflight /api/sdk/proxy — not blocked', fn: testProxyPreflight },
-    { id: 2, name: 'Lichess health via proxy — POST returns response', fn: testProxyLichess },
-    { id: 3, name: 'Proxy response is valid JSON', fn: testProxyJson },
+    { id:1, name:'OPTIONS preflight /api/sdk/proxy — not blocked',        fn: testProxyPreflight },
+    { id:2, name:'Lichess health via proxy — POST returns response',       fn: testProxyLichess },
+    { id:3, name:'Proxy response is valid JSON',                           fn: testProxyJson },
   ],
 };
 
-// Cache cross-tab shared results so sequential tests can read them
-const cache = {};
-
-// ── Render ─────────────────────────────────────────────────────────────────
-
-function renderTbody(tab) {
-  const tbody = document.getElementById('tbody-' + tab);
-  tbody.innerHTML = TESTS[tab].map(t => `
-    <tr id="row-${tab}-${t.id}">
-      <td style="color:#6b7280;width:28px">${t.id}</td>
-      <td>${t.name}</td>
-      <td><span class="badge badge-pending" id="badge-${tab}-${t.id}">pending</span></td>
-      <td><div class="detail" id="detail-${tab}-${t.id}"></div></td>
-      <td><button class="run-btn" onclick="runOne('${tab}',${t.id})">Run</button></td>
-    </tr>`).join('');
-}
-
-function setResult(tab, id, status, detail) {
-  const badge = document.getElementById(`badge-${tab}-${id}`);
-  const detailEl = document.getElementById(`detail-${tab}-${id}`);
-  badge.className = 'badge badge-' + status;
-  badge.textContent = status === 'expected' ? 'expected' : status;
-  if (detailEl) {
-    detailEl.textContent = detail || '';
-    detailEl.className = 'detail' + (status === 'pass' || status === 'expected' ? ' ok' : status === 'fail' ? ' err' : '');
-  }
-}
-
-function setBadgeRunning(tab, id) {
-  const badge = document.getElementById(`badge-${tab}-${id}`);
-  if (badge) { badge.className = 'badge badge-running'; badge.textContent = 'running'; }
-}
-
-// ── Test functions ─────────────────────────────────────────────────────────
+// ── Auth SDK tests ─────────────────────────────────────────────
 
 async function testSdkObject() {
+  log('info', 'Checking window.authService existence');
   if (typeof window.authService !== 'undefined') return [true, 'window.authService found'];
-  return [false, 'window.authService not defined — check learn-auth-sdk.js is loaded'];
+  return [false, 'window.authService not defined — check that learn-auth-sdk.js is loaded in head.html'];
 }
 
 async function testTokenPresent() {
-  const t = getToken();
-  if (t) { cache.token = t; return [true, 'Token found (' + t.length + ' chars)']; }
+  const ls = localStorage.getItem('learn_auth_token');
+  const ss = sessionStorage.getItem('learn_auth_token');
+  log('info', 'localStorage token: ' + maskToken(ls));
+  log('info', 'sessionStorage token: ' + maskToken(ss));
+  const t = ls || ss;
+  if (t) { cache.token = t; return [true, maskToken(t)]; }
   return [false, 'No learn_auth_token in localStorage or sessionStorage'];
 }
 
 async function testTokenExpiry() {
   const t = getToken();
-  if (!t) return [null, 'skip — no token'];
-  const payload = decodeJwtPayload(t);
-  if (!payload) return [false, 'Could not decode JWT payload'];
-  if (!payload.exp) return [null, 'No exp field in token (not a standard JWT)'];
-  const exp = new Date(payload.exp * 1000);
-  const now = new Date();
-  if (exp > now) return [true, 'Expires ' + exp.toLocaleString()];
-  return [false, 'Token expired at ' + exp.toLocaleString()];
+  if (!t) return [false, 'No token'];
+  const parts = t.split('.');
+  if (parts.length !== 3) {
+    log('info', 'Token has ' + parts.length + ' parts — opaque (not a standard JWT). Expiry is validated server-side only.');
+    return ['skip', 'Opaque token (' + parts.length + ' segment' + (parts.length !== 1 ? 's' : '') + ') — expiry checked server-side'];
+  }
+  try {
+    const payload = JSON.parse(atob(parts[1]));
+    log('info', 'JWT payload decoded', payload);
+    if (!payload.exp) return ['skip', 'No exp field in JWT payload'];
+    const exp = new Date(payload.exp * 1000);
+    const ok = exp > new Date();
+    return [ok, (ok ? 'Expires ' : 'EXPIRED ') + exp.toLocaleString()];
+  } catch (e) {
+    return [false, 'Could not decode JWT payload: ' + e.message];
+  }
 }
 
 async function testGetSession() {
   const t = getToken();
   if (!t) return [false, 'No token — log in first'];
   try {
-    const res = await fetch(BASE + '/api/auth/get-session', {
-      headers: { Authorization: 'Bearer ' + t }
-    });
-    const data = await res.json().catch(() => null);
-    cache.session = data;
-    if (res.ok && data?.user) return [true, 'HTTP ' + res.status + ' — user: ' + data.user.email];
-    return [false, 'HTTP ' + res.status + ' — ' + (data?.message || JSON.stringify(data))];
+    const res = await vfetch(BASE + '/api/auth/get-session', { headers: bearerHeaders() });
+    cache.betterAuthSession = res._data;
+    if (res.ok && res._data && res._data.user) return [true, 'HTTP ' + res.status + ' — user: ' + res._data.user.email];
+    return [false, 'HTTP ' + res.status + ' — ' + (res._data && res._data.message ? res._data.message : res._text.slice(0,120))];
   } catch (e) { return [false, 'Network error: ' + e.message]; }
 }
 
 async function testSessionEmail() {
-  const s = cache.session;
+  const s = cache.betterAuthSession;
   if (!s) return [null, 'skip — run test 4 first'];
-  if (s.user?.email) return [true, s.user.email];
+  if (s.user && s.user.email) return [true, s.user.email];
   return [false, 'user.email missing from session response'];
 }
 
 async function testSessionRole() {
-  const s = cache.session;
+  const s = cache.betterAuthSession;
   if (!s) return [null, 'skip — run test 4 first'];
-  const role = s.user?.role;
-  if (role != null) return [true, 'role = ' + role];
-  return [false, 'user.role missing or null in session response'];
+  const role = s.user && s.user.role;
+  if (role != null && role !== '') return [true, 'role = "' + role + '"'];
+  log('warn', 'user.role is null/empty in /api/auth/get-session. BetterAuth built-in endpoint may not include additionalFields. Test 8 compares with /api/session which fetches role from PocketBase.', s.user || {});
+  return [false, 'user.role = ' + JSON.stringify(role) + ' — see debug log and run test 8'];
 }
 
-// CORS ──────────────────────────────────────────────────────────────────────
+async function testSessionDump() {
+  const s = cache.betterAuthSession;
+  if (!s) return [null, 'skip — run test 4 first'];
+  log('info', 'Full /api/auth/get-session response', s);
+  const fields = s.user ? Object.keys(s.user) : [];
+  return [true, 'Logged to debug — fields: ' + (fields.join(', ') || '(none)')];
+}
+
+async function testSessionCompare() {
+  const t = getToken();
+  if (!t) return [false, 'No token'];
+  try {
+    const res = await vfetch(BASE + '/api/session', { headers: bearerHeaders() });
+    cache.customSession = res._data;
+    const baRole  = (cache.betterAuthSession && cache.betterAuthSession.user && cache.betterAuthSession.user.role != null) ? cache.betterAuthSession.user.role : '(null)';
+    const custRole = (res._data && res._data.user && res._data.user.role != null) ? res._data.user.role : '(null)';
+    log('info', 'Role comparison between endpoints', { '/api/auth/get-session': baRole, '/api/session (custom)': custRole });
+    if (custRole !== '(null)') return [true, '/api/session has role="' + custRole + '" | /api/auth/get-session has role=' + baRole];
+    return [false, 'Both endpoints return role=null — role may not be set in PocketBase for this user'];
+  } catch (e) { return [false, 'Network error on /api/session: ' + e.message]; }
+}
+
+// ── CORS tests ─────────────────────────────────────────────────
 
 async function testCorsPreflightSession() {
   try {
-    const res = await fetch(BASE + '/api/auth/get-session', {
+    const res = await vfetch(BASE + '/api/auth/get-session', {
       method: 'OPTIONS',
-      mode: 'cors',
       headers: { 'Access-Control-Request-Method': 'GET', 'Access-Control-Request-Headers': 'authorization' }
     });
     cache.corsSessionRes = res;
-    return [true, 'Preflight returned HTTP ' + res.status];
+    return [true, 'Preflight HTTP ' + res.status];
   } catch (e) { return [false, 'Blocked or network error: ' + e.message]; }
 }
 
@@ -345,75 +555,101 @@ async function testCorsAllowOrigin() {
   const res = cache.corsSessionRes;
   if (!res) return [null, 'skip — run test 1 first'];
   const h = res.headers.get('access-control-allow-origin');
-  if (h) return [true, 'Access-Control-Allow-Origin: ' + h];
-  return [false, 'Header absent — cross-origin requests will be blocked'];
+  if (h) return [true, 'Allow-Origin: ' + h];
+  return [false, 'Header absent — cross-origin requests will be blocked by browser'];
 }
 
 async function testCorsAllowHeaders() {
   const res = cache.corsSessionRes;
   if (!res) return [null, 'skip — run test 1 first'];
   const h = (res.headers.get('access-control-allow-headers') || '').toLowerCase();
-  if (h.includes('authorization')) return [true, 'Includes authorization'];
-  return [false, 'authorization not in Allow-Headers: ' + (h || '(missing)')];
+  log('info', 'Access-Control-Allow-Headers value: "' + (h || '(missing)') + '"');
+  if (h.includes('authorization')) return [true, 'Authorization is in allowed headers'];
+  return [false, '"authorization" not in Allow-Headers: "' + h + '"'];
 }
 
 async function testCorsPreflightProxy() {
   try {
-    const res = await fetch(BASE + '/api/sdk/' + APP_ID + '/proxy', {
+    const res = await vfetch(BASE + '/api/sdk/' + APP_ID + '/proxy', {
       method: 'OPTIONS',
-      mode: 'cors',
       headers: { 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type,authorization' }
     });
-    return [true, 'Preflight returned HTTP ' + res.status];
-  } catch (e) { return [false, 'Blocked or network error: ' + e.message]; }
+    return [true, 'Preflight HTTP ' + res.status];
+  } catch (e) { return [false, 'Blocked: ' + e.message]; }
 }
 
 async function testEndpointReachable() {
   try {
-    const res = await fetch(BASE + '/api/auth/get-session', { mode: 'cors' });
+    const res = await vfetch(BASE + '/api/auth/get-session', { headers: {} });
     const ok = res.status === 200 || res.status === 401 || res.status === 403;
-    return [ok, 'HTTP ' + res.status + (ok ? ' (reachable)' : ' (unexpected)')];
+    return [ok, 'HTTP ' + res.status + (ok ? ' (reachable)' : ' (unexpected status)')];
+  } catch (e) { return [false, 'Network error — endpoint unreachable or CORS: ' + e.message]; }
+}
+
+async function testCorsHeadersDump() {
+  let res = cache.corsSessionRes;
+  if (!res) {
+    try {
+      res = await vfetch(BASE + '/api/auth/get-session', {
+        method: 'OPTIONS',
+        headers: { 'Access-Control-Request-Method': 'GET', 'Access-Control-Request-Headers': 'authorization' }
+      });
+      cache.corsSessionRes = res;
+    } catch (e) { return [false, e.message]; }
+  }
+  const hdrs = {};
+  res.headers.forEach(function(v, k) { hdrs[k] = v; });
+  log('info', 'Full OPTIONS /api/auth/get-session response headers', hdrs);
+  return [true, Object.keys(hdrs).length + ' headers — logged to debug'];
+}
+
+async function testCorsSessionAuth() {
+  try {
+    const res = await vfetch(BASE + '/api/session', {
+      method: 'OPTIONS',
+      headers: { 'Access-Control-Request-Method': 'GET', 'Access-Control-Request-Headers': 'authorization' }
+    });
+    const hdrs = {};
+    res.headers.forEach(function(v, k) { hdrs[k] = v; });
+    log('info', '/api/session OPTIONS response headers', hdrs);
+    const h = (res.headers.get('access-control-allow-headers') || '').toLowerCase();
+    if (h.includes('authorization')) return [true, '/api/session allows Authorization — Bearer tokens can reach it cross-origin'];
+    return [false, '/api/session does NOT allow Authorization. Header: "' + h + '"'];
   } catch (e) { return [false, 'Network error: ' + e.message]; }
 }
 
-// Roles ─────────────────────────────────────────────────────────────────────
+// ── Roles tests ────────────────────────────────────────────────
 
 async function testRolesSession() {
   const t = getToken();
-  if (!t) return [false, 'No token — log in first'];
+  if (!t) return [false, 'No token'];
   try {
-    const res = await fetch(BASE + '/api/auth/get-session', {
-      headers: { Authorization: 'Bearer ' + t }
-    });
-    const data = await res.json().catch(() => null);
-    cache.rolesSession = data;
-    if (res.ok && data?.user) return [true, 'user: ' + data.user.email];
-    return [false, 'HTTP ' + res.status + ' — ' + (data?.message || '')];
+    const res = await vfetch(BASE + '/api/auth/get-session', { headers: bearerHeaders() });
+    cache.rolesSession = res._data;
+    if (res.ok && res._data && res._data.user) return [true, 'user: ' + res._data.user.email];
+    return [false, 'HTTP ' + res.status];
   } catch (e) { return [false, 'Network error: ' + e.message]; }
 }
 
 async function testRolesRoleField() {
-  const s = cache.rolesSession;
+  const s = cache.rolesSession || cache.customSession;
   if (!s) return [null, 'skip — run test 1 first'];
-  const role = s.user?.role;
-  if (role != null) return [true, 'role = ' + role];
-  return [false, 'user.role missing — roles may not be configured for this user'];
+  const role = s.user && s.user.role;
+  if (role != null && role !== '') return [true, 'role = "' + role + '"'];
+  log('warn', 'user.role is null or empty. The role field may not be set in PocketBase for this user, OR the endpoint does not return it. Run Auth SDK test 8 to compare endpoints.', { user: s.user });
+  return [false, 'user.role = ' + JSON.stringify(role)];
 }
 
 async function testRolesAdmin() {
   const t = getToken();
   if (!t) return [false, 'No token'];
   try {
-    const res = await fetch(BASE + '/api/auth/admin/list-users?limit=1', {
-      headers: { Authorization: 'Bearer ' + t }
-    });
-    cache.adminRes = res;
+    const res = await vfetch(BASE + '/api/auth/admin/list-users?limit=1', { headers: bearerHeaders() });
     cache.adminStatus = res.status;
-    const data = await res.json().catch(() => null);
-    cache.adminData = data;
-    if (res.status === 200) return [true, 'Admin — returned ' + (data?.users?.length ?? '?') + ' user(s)'];
+    cache.adminData = res._data;
+    if (res.status === 200) return [true, 'Admin access confirmed'];
     if (res.status === 403) return ['expected', 'Non-admin (403) — expected for regular users'];
-    return [false, 'HTTP ' + res.status + ' — ' + (data?.message || '')];
+    return [false, 'HTTP ' + res.status];
   } catch (e) { return [false, 'Network error: ' + e.message]; }
 }
 
@@ -422,38 +658,90 @@ async function testRolesCleanReject() {
   if (status == null) return [null, 'skip — run test 3 first'];
   if (status === 200) return [true, 'Admin user — no rejection to test'];
   if (status === 403) {
-    const data = cache.adminData;
-    if (data && typeof data === 'object') return [true, 'Clean JSON 403 response'];
-    return [false, '403 but response was not valid JSON'];
+    const d = cache.adminData;
+    if (d && typeof d === 'object') return [true, 'Clean JSON 403: ' + JSON.stringify(d).slice(0,80)];
+    return [false, '403 but response is not valid JSON'];
   }
   return [false, 'Unexpected status ' + status];
 }
 
-// Storage ───────────────────────────────────────────────────────────────────
+async function testRolesDiagnostic() {
+  const s = cache.rolesSession || cache.betterAuthSession || cache.customSession;
+  if (!s || !s.user) return [null, 'skip — run Roles test 1 or Auth SDK test 4 first'];
+  const u = s.user;
+  const diag = {
+    id: u.id,
+    email: u.email,
+    name: u.name || null,
+    role: u.role,
+    roleIsNull: u.role == null,
+    roleIsEmpty: u.role === '',
+    roleIsUndefined: typeof u.role === 'undefined',
+    allFields: Object.keys(u)
+  };
+  log('info', 'Role diagnostic for current user', diag);
+  return [true, 'role=' + JSON.stringify(u.role) + ' | fields: ' + Object.keys(u).join(', ')];
+}
 
-async function storageTest(endpoint) {
-  const t = getToken();
-  const headers = t ? { Authorization: 'Bearer ' + t } : {};
+async function testFindSpamington() {
+  if (cache.adminStatus !== 200) {
+    return ['skip', 'Requires admin — current user is not admin or test 3 not run yet'];
+  }
   try {
-    const res = await fetch(BASE + endpoint, { headers, mode: 'cors' });
-    const data = await res.json().catch(() => null);
-    const reachable = res.status < 500;
-    const label = res.status === 200 ? 'success' : res.status === 401 ? 'no auth (401)' : res.status === 403 ? 'no access (403)' : 'HTTP ' + res.status;
-    return [reachable, label + (data?.message ? ' — ' + data.message : '')];
+    const res = await vfetch(BASE + '/api/auth/admin/list-users?limit=200', { headers: bearerHeaders() });
+    const users = (res._data && res._data.users) ? res._data.users : [];
+    const spam = users.filter(function(u) { return u.email === 'spamington607@gmail.com'; })[0];
+    if (!spam) {
+      log('warn', 'spamington607@gmail.com not found in user list', { total: users.length, emails: users.map(function(u) { return u.email; }) });
+      return [false, 'Not found among ' + users.length + ' users — see debug log for full list'];
+    }
+    log('info', 'spamington607@gmail.com found', { id: spam.id, email: spam.email, role: spam.role, createdAt: spam.createdAt });
+    return [true, 'Found — role=' + JSON.stringify(spam.role) + ' | id=' + spam.id];
   } catch (e) { return [false, 'Network error: ' + e.message]; }
+}
+
+// ── Storage tests ──────────────────────────────────────────────
+
+async function storageTest(path) {
+  try {
+    const res = await vfetch(BASE + path, { headers: bearerHeaders() });
+    const reachable = res.status < 500;
+    const label = { 200:'success', 401:'no auth (401 — reachable)', 403:'no access (403 — reachable)' }[res.status] || 'HTTP ' + res.status;
+    return [reachable, label];
+  } catch (e) {
+    log('error', path + ' fetch failed — likely CORS (no headers on this endpoint) or endpoint 404', { error: e.message });
+    return [false, 'Network error (CORS or 404): ' + e.message];
+  }
 }
 
 async function testD1() { return storageTest('/api/test-d1'); }
 async function testR2() { return storageTest('/api/test-r2'); }
 async function testKV() { return storageTest('/api/test-kv'); }
 
-// SDK Proxy ─────────────────────────────────────────────────────────────────
+async function testD1Cors() {
+  try {
+    const res = await vfetch(BASE + '/api/test-d1', {
+      method: 'OPTIONS',
+      headers: { 'Access-Control-Request-Method': 'GET', 'Access-Control-Request-Headers': 'authorization' }
+    });
+    const hdrs = {};
+    res.headers.forEach(function(v, k) { hdrs[k] = v; });
+    log('info', '/api/test-d1 OPTIONS headers', hdrs);
+    const acao = res.headers.get('access-control-allow-origin');
+    if (!acao) return [false, 'No Access-Control-Allow-Origin — CORS is blocking storage endpoint'];
+    return [true, 'CORS OK — Allow-Origin: ' + acao];
+  } catch (e) {
+    log('error', '/api/test-d1 OPTIONS completely blocked — endpoint has no CORS support at all', { error: e.message });
+    return [false, 'OPTIONS blocked — no CORS on storage endpoint: ' + e.message];
+  }
+}
+
+// ── SDK Proxy tests ────────────────────────────────────────────
 
 async function testProxyPreflight() {
   try {
-    const res = await fetch(BASE + '/api/sdk/' + APP_ID + '/proxy', {
+    const res = await vfetch(BASE + '/api/sdk/' + APP_ID + '/proxy', {
       method: 'OPTIONS',
-      mode: 'cors',
       headers: { 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type' }
     });
     return [true, 'Preflight HTTP ' + res.status];
@@ -461,61 +749,97 @@ async function testProxyPreflight() {
 }
 
 async function testProxyLichess() {
-  const t = getToken();
-  const headers = { 'Content-Type': 'application/json' };
-  if (t) headers.Authorization = 'Bearer ' + t;
   try {
-    const res = await fetch(BASE + '/api/sdk/' + APP_ID + '/proxy', {
+    const res = await vfetch(BASE + '/api/sdk/' + APP_ID + '/proxy', {
       method: 'POST',
-      headers,
+      headers: bearerHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ endpoint: '/api', method: 'GET' })
     });
-    cache.proxyRes = res;
-    cache.proxyText = await res.text().catch(() => '');
+    cache.proxyText = res._text;
     return [res.ok, 'HTTP ' + res.status];
   } catch (e) { return [false, 'Network error: ' + e.message]; }
 }
 
 async function testProxyJson() {
-  const text = cache.proxyText;
-  if (text == null) return [null, 'skip — run test 2 first'];
-  try { JSON.parse(text); return [true, text.slice(0, 80)]; }
-  catch { return [false, 'Response is not valid JSON: ' + text.slice(0, 80)]; }
+  if (cache.proxyText == null) return [null, 'skip — run test 2 first'];
+  try { JSON.parse(cache.proxyText); return [true, cache.proxyText.slice(0,80)]; }
+  catch { return [false, 'Not valid JSON: ' + cache.proxyText.slice(0,80)]; }
 }
 
-// ── Runner ─────────────────────────────────────────────────────────────────
+// ── Runner ─────────────────────────────────────────────────────
+
+function setResult(tab, id, status, detail) {
+  const badge = document.getElementById('badge-' + tab + '-' + id);
+  const detEl  = document.getElementById('detail-' + tab + '-' + id);
+  if (!badge) return;
+  badge.className = 'badge badge-' + status;
+  badge.textContent = status === 'expected' ? 'expected' : status;
+  if (detEl) {
+    detEl.textContent = detail || '';
+    detEl.className = 'detail' + (status === 'pass' || status === 'expected' ? ' ok' : status === 'fail' ? ' err' : '');
+  }
+}
 
 async function runOne(tab, id) {
-  const test = TESTS[tab].find(t => t.id === id);
+  const test = TESTS[tab] && TESTS[tab].filter(function(t) { return t.id === id; })[0];
   if (!test) return;
-  setBadgeRunning(tab, id);
-  const [ok, detail] = await test.fn();
+  const badge = document.getElementById('badge-' + tab + '-' + id);
+  if (badge) { badge.className = 'badge badge-running'; badge.textContent = 'running'; }
+  currentTab = tab;
+  log('info', '--- ' + test.name + ' ---');
+  let ok, detail;
+  try {
+    const result = await test.fn();
+    ok = result[0]; detail = result[1];
+  } catch (e) {
+    log('error', 'Test threw exception: ' + e.message, { stack: e.stack });
+    ok = false; detail = 'Exception: ' + e.message;
+  }
   const status = ok === true ? 'pass' : ok === false ? 'fail' : ok === 'expected' ? 'expected' : 'skip';
+  log(status === 'pass' || status === 'expected' ? 'success' : status === 'fail' ? 'error' : 'warn',
+      'Result: ' + status.toUpperCase() + (detail ? ' — ' + detail : ''));
   setResult(tab, id, status, detail);
 }
 
 async function runAll(tab) {
-  const btn = document.querySelector(`#tab-${tab} .run-all-btn`);
+  const btn = document.querySelector('#tab-' + tab + ' .run-all-btn');
   if (btn) btn.disabled = true;
-  for (const t of TESTS[tab]) {
-    await runOne(tab, t.id);
+  currentTab = tab;
+  log('info', '=== Run All: ' + tab + ' ===');
+  for (var i = 0; i < TESTS[tab].length; i++) {
+    await runOne(tab, TESTS[tab][i].id);
   }
   if (btn) btn.disabled = false;
 }
 
-// ── Tab switching ──────────────────────────────────────────────────────────
+// ── Tab switching ──────────────────────────────────────────────
 
-function switchTab(tab, btnEl) {
-  document.querySelectorAll('.tab-section').forEach(el => el.style.display = 'none');
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab-section').forEach(function(s) { s.style.display = 'none'; });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
   document.getElementById('tab-' + tab).style.display = '';
-  btnEl.classList.add('active');
+  el.classList.add('active');
+  currentTab = tab;
 }
 
-// ── Init ───────────────────────────────────────────────────────────────────
+// ── Render rows ────────────────────────────────────────────────
+
+function renderTbody(tab) {
+  const tbody = document.getElementById('tbody-' + tab);
+  if (!tbody) return;
+  tbody.innerHTML = TESTS[tab].map(function(t) {
+    return '<tr>' +
+      '<td style="color:var(--t-muted);width:24px">' + t.id + '</td>' +
+      '<td>' + t.name + '</td>' +
+      '<td><span class="badge badge-pending" id="badge-' + tab + '-' + t.id + '">pending</span></td>' +
+      '<td><div class="detail" id="detail-' + tab + '-' + t.id + '"></div></td>' +
+      '<td><button class="run-btn" onclick="runOne(\'' + tab + '\',' + t.id + ')">Run</button></td>' +
+      '</tr>';
+  }).join('');
+}
+
+// ── Init ───────────────────────────────────────────────────────
 
 Object.keys(TESTS).forEach(renderTbody);
-
-const token = getToken();
-if (!token) document.getElementById('login-banner').style.display = '';
+if (!getToken()) document.getElementById('login-banner').style.display = '';
 </script>
