@@ -277,7 +277,7 @@ permalink: /authorization/
     <div id="auth0-login-prompt" style="display: none;">
       <h2>Access Denied</h2>
       <p>You must be logged in with appropriate permissions to view this page.</p>
-      <button onclick="authService.login()" class="login-btn">Log In</button>
+      <button onclick="window.location.href='/login/'" class="login-btn">Log In</button>
     </div>
   </main>
   </div>
