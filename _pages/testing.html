@@ -1,379 +1,521 @@
 ---
 layout: page
-title: SDK Proxy Testing
+title: Auth Testing
 permalink: /testing/
 ---
 
-<link rel="stylesheet" href="/assets/css/testing.css">
+<style>
+  .testing-wrap { max-width: 900px; margin: 0 auto; }
 
-<div id="testing-content">
-  <p style="margin-bottom: 2rem; color: #666;">
-    Test the learn-secrets-sdk npm package with real API integrations.
-    All requests are logged with verbose debug output below.
-  </p>
+  /* Login gate */
+  .login-banner {
+    background: rgba(234,179,8,0.15);
+    border: 1px solid rgba(234,179,8,0.4);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    color: #fef08a;
+  }
+  .login-banner a { color: #fde047; text-decoration: underline; }
 
-  <!-- SDK Info Panel -->
-  <div class="test-panel">
-    <h3>SDK Configuration</h3>
-    <div class="config-display">
-      <div class="config-item">
-        <span class="config-key">Package:</span>
-        <span class="config-value">learn-secrets-sdk@1.4.0</span>
-      </div>
-      <div class="config-item">
-        <span class="config-key">Proxy URL:</span>
-        <span class="config-value">https://cloudprototype.org</span>
-      </div>
-      <div class="config-item">
-        <span class="config-key">Auth Method:</span>
-        <span class="config-value">Zero-Config (Origin-based)</span>
-      </div>
-      <div class="config-item">
-        <span class="config-key">Rate Limit:</span>
-        <span class="config-value">100 requests/minute</span>
-      </div>
-    </div>
-    <div id="sdk-status" class="checking">SDK not initialized</div>
+  /* Tabs */
+  .tab-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 6px 18px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .tab-btn.active {
+    background: rgba(99,102,241,0.3);
+    border-color: #6366f1;
+    color: #fff;
+  }
+
+  /* Test table */
+  .test-panel { margin-bottom: 32px; }
+  .test-panel h3 { font-size: 16px; margin-bottom: 6px; color: #e5e7eb; }
+  .panel-desc { font-size: 13px; color: #9ca3af; margin-bottom: 16px; }
+
+  .run-all-btn {
+    padding: 7px 20px;
+    background: #4f46e5;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 16px;
+  }
+  .run-all-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  table.test-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  table.test-table th {
+    background: rgba(255,255,255,0.06);
+    text-align: left;
+    padding: 8px 12px;
+    color: #9ca3af;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  table.test-table td {
+    padding: 9px 12px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    color: #d1d5db;
+    vertical-align: top;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-pending  { background: rgba(107,114,128,0.3); color: #9ca3af; }
+  .badge-running  { background: rgba(234,179,8,0.25);  color: #fde047; }
+  .badge-pass     { background: rgba(34,197,94,0.2);   color: #4ade80; }
+  .badge-fail     { background: rgba(239,68,68,0.2);   color: #f87171; }
+  .badge-skip     { background: rgba(99,102,241,0.2);  color: #a5b4fc; }
+  .badge-expected { background: rgba(34,197,94,0.15);  color: #86efac; }
+
+  .detail { color: #6b7280; font-size: 11px; margin-top: 3px; word-break: break-all; }
+  .detail.ok  { color: #4ade80; }
+  .detail.err { color: #f87171; }
+
+  .run-btn {
+    padding: 3px 10px;
+    background: rgba(99,102,241,0.2);
+    border: 1px solid rgba(99,102,241,0.4);
+    border-radius: 3px;
+    color: #a5b4fc;
+    cursor: pointer;
+    font-size: 11px;
+  }
+  .run-btn:hover { background: rgba(99,102,241,0.35); }
+</style>
+
+<div class="testing-wrap">
+  <div id="login-banner" class="login-banner" style="display:none">
+    Not logged in — bearer token tests will fail.
+    <a href="/login/">Log in</a> first, then return here.
   </div>
 
-  <!-- Interactive API Test Console -->
-  <div class="test-panel">
-    <h3>Interactive API Test Console</h3>
-    <p style="color: #666; margin-bottom: 1rem;">
-      Select from pre-configured test scenarios. All values are auto-populated - no manual entry required.
-    </p>
-
-    <div class="console-container">
-      <div class="console-controls">
-        <div class="form-group">
-          <label for="scenario-select">Test Scenario</label>
-          <select id="scenario-select" class="scenario-select">
-            <optgroup label="Lichess API">
-              <option value="lichess-account">Lichess: Get Account Info</option>
-              <option value="lichess-status">Lichess: Server Status</option>
-              <option value="lichess-games">Lichess: Current Games</option>
-              <option value="lichess-profile">Lichess: User Profile</option>
-              <option value="lichess-leaderboard">Lichess: Top Players</option>
-            </optgroup>
-            <optgroup label="NewsAPI">
-              <option value="news-headlines">NewsAPI: Top Headlines</option>
-              <option value="news-everything">NewsAPI: Search Everything</option>
-              <option value="news-sources">NewsAPI: News Sources</option>
-            </optgroup>
-            <optgroup label="Other APIs">
-              <option value="spotify-profile">Spotify: User Profile</option>
-            </optgroup>
-          </select>
-        </div>
-
-        <div id="scenario-details" class="scenario-details">
-          <!-- Populated by JavaScript -->
-        </div>
-
-        <button id="run-test-btn" class="btn btn-primary">Run Test</button>
-      </div>
-
-      <div class="console-output">
-        <div class="result-section">
-          <h4>Result</h4>
-          <div id="test-result-status"></div>
-          <div id="test-result-data"></div>
-        </div>
-      </div>
-    </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('auth-sdk', this)">Auth SDK</button>
+    <button class="tab-btn" onclick="switchTab('cors', this)">CORS</button>
+    <button class="tab-btn" onclick="switchTab('roles', this)">Roles</button>
+    <button class="tab-btn" onclick="switchTab('storage', this)">Storage</button>
+    <button class="tab-btn" onclick="switchTab('sdk-proxy', this)">SDK Proxy</button>
   </div>
 
-  <!-- Rate Limit Panel -->
-  <div class="test-panel">
-    <h3>Rate Limit Status</h3>
-    <div class="rate-limit-panel">
-      <div id="rate-limit-display">
-        <span class="rate-remaining">--</span> / <span class="rate-limit">--</span> requests remaining
-        <br>
-        <span class="rate-reset">Resets: --</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- CORS Diagnostics Panel -->
-  <div class="test-panel">
-    <h3>CORS Diagnostics</h3>
-    <p style="color: #666; margin-bottom: 1rem;">
-      Test CORS preflight and analyze network communication issues. Run this if you see CORS errors in the console.
-    </p>
-    <button id="diagnose-cors-btn" class="btn btn-primary">Run CORS Diagnostics</button>
-    <button id="diagnose-cors-enhanced-btn" class="btn btn-secondary" style="margin-left: 0.5rem;">Run Enhanced CORS Test</button>
-    <div style="margin-top: 1rem;">
-      <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">What This Tests:</h4>
-      <ul style="color: #666; font-size: 0.9rem; line-height: 1.8; margin-left: 1.5rem;">
-        <li>OPTIONS preflight request to proxy endpoint</li>
-        <li>Access-Control-Allow-Origin header presence</li>
-        <li>Access-Control-Allow-Headers validation</li>
-        <li>Simple GET request (no preflight)</li>
-        <li>Network connectivity to cloudprototype.org</li>
-        <li>Server-side CORS configuration verification</li>
-      </ul>
-      <p style="color: #e67e22; font-size: 0.9rem; margin-top: 0.5rem;">
-        Note: Results appear in the Debug Output panel below and browser console (F12).
-      </p>
-    </div>
-  </div>
-
-  <!-- Secrets Configuration Diagnostics Panel -->
-  <div class="test-panel">
-    <h3>Secrets Configuration Diagnostics</h3>
-    <p style="color: #666; margin-bottom: 1rem;">
-      Diagnose secrets configuration issues. This will check if your API keys are properly configured and provide actionable recommendations.
-    </p>
-    <div class="form-group" style="margin-bottom: 1rem;">
-      <label for="diagnostic-key-name">Secret Name to Check:</label>
-      <input type="text" id="diagnostic-key-name" value="lichess" placeholder="e.g., lichess, spotify, news" style="width: 100%; padding: 0.5rem; margin-top: 0.25rem; border: 1px solid #ced4da; border-radius: 4px;">
-    </div>
-    <button id="diagnose-secrets-btn" class="btn btn-primary">Diagnose Secrets Configuration</button>
-    <div style="margin-top: 1rem;">
-      <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">What This Checks:</h4>
-      <ul style="color: #666; font-size: 0.9rem; line-height: 1.8; margin-left: 1.5rem;">
-        <li>Whether the secret exists in the project</li>
-        <li>All available secret names in the project</li>
-        <li>Secret configuration (provider, base_url, auth headers)</li>
-        <li>SDK token origin configuration</li>
-        <li>Project access expiration status</li>
-        <li>Actionable recommendations to fix issues</li>
-      </ul>
-      <div id="secrets-diagnostic-result" style="margin-top: 1rem; display: none;">
-        <!-- Results will be populated here -->
-      </div>
+  <!-- ═══ AUTH SDK ═══ -->
+  <div id="tab-auth-sdk" class="tab-section">
+    <div class="test-panel">
+      <h3>Auth SDK</h3>
+      <p class="panel-desc">Verifies the learn-auth-sdk is loaded, the bearer token is present and valid, and cloudprototype.org accepts it.</p>
+      <button class="run-all-btn" onclick="runAll('auth-sdk')">Run All</button>
+      <table class="test-table">
+        <thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-auth-sdk"></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- Systematic Test Framework Panel -->
-  <div class="test-panel">
-    <h3>Systematic Test Framework</h3>
-    <p style="color: #666; margin-bottom: 1rem;">
-      Comprehensive multi-layer diagnostic test suite. Runs 18+ tests across 5 layers to identify all configuration and connectivity issues.
-    </p>
-
-    <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 1rem; margin-bottom: 1rem;">
-      <h4 style="font-size: 1rem; margin: 0 0 0.5rem 0;">Test Layers:</h4>
-      <ul style="color: #666; font-size: 0.9rem; line-height: 1.8; margin: 0; padding-left: 1.5rem;">
-        <li><strong>Layer 1:</strong> Network Connectivity (DNS, SSL, HTTP reachability)</li>
-        <li><strong>Layer 2:</strong> CORS Configuration (preflight, headers, policies)</li>
-        <li><strong>Layer 3:</strong> Authentication Flow (origin validation, tokens)</li>
-        <li><strong>Layer 4:</strong> Secrets Configuration (existence, structure)</li>
-        <li><strong>Layer 5:</strong> End-to-End Integration (full API calls)</li>
-      </ul>
-    </div>
-
-    <button id="run-systematic-tests-btn" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; font-weight: bold;">
-      Run Complete Systematic Test Suite
-    </button>
-
-    <div id="systematic-test-results" style="margin-top: 1rem; display: none;">
-      <!-- Results will be populated by JavaScript -->
-    </div>
-
-    <div style="margin-top: 1rem; padding: 1rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
-      <p style="margin: 0; color: #856404; font-size: 0.9rem;">
-        <strong>Note:</strong> This test suite runs 18+ automated tests and may take 30-60 seconds.
-        All results are logged to the Debug Output panel below with detailed diagnostics.
-      </p>
+  <!-- ═══ CORS ═══ -->
+  <div id="tab-cors" class="tab-section" style="display:none">
+    <div class="test-panel">
+      <h3>CORS</h3>
+      <p class="panel-desc">Verifies cloudprototype.org sends correct CORS headers so static sites on any origin can make authenticated requests.</p>
+      <button class="run-all-btn" onclick="runAll('cors')">Run All</button>
+      <table class="test-table">
+        <thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-cors"></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- Debug Log Panel -->
-  <div id="debug-panel" class="test-panel">
-    <h3>Debug Output (Verbose)</h3>
-    <div id="debug-log">
-      <div class="debug-entry info">
-        <div class="debug-timestamp">--</div>
-        <div class="debug-message">
-          <span class="debug-prefix">[SDK-TEST]</span> Waiting for module initialization...
-        </div>
-      </div>
+  <!-- ═══ ROLES ═══ -->
+  <div id="tab-roles" class="tab-section" style="display:none">
+    <div class="test-panel">
+      <h3>Roles</h3>
+      <p class="panel-desc">Verifies role/permission data is returned via bearer token — no cookies, pure cross-origin SDK auth.</p>
+      <button class="run-all-btn" onclick="runAll('roles')">Run All</button>
+      <table class="test-table">
+        <thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-roles"></tbody>
+      </table>
     </div>
-    <div class="debug-controls">
-      <button id="copy-log-btn" class="btn btn-secondary">Copy Log</button>
-      <button id="clear-log-btn" class="btn btn-secondary">Clear Log</button>
+  </div>
+
+  <!-- ═══ STORAGE ═══ -->
+  <div id="tab-storage" class="tab-section" style="display:none">
+    <div class="test-panel">
+      <h3>Storage</h3>
+      <p class="panel-desc">Verifies D1/R2/KV backend bindings are healthy. Endpoints return 200 for admin, 401/403 for regular users — both count as reachable.</p>
+      <button class="run-all-btn" onclick="runAll('storage')">Run All</button>
+      <table class="test-table">
+        <thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-storage"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ SDK PROXY ═══ -->
+  <div id="tab-sdk-proxy" class="tab-section" style="display:none">
+    <div class="test-panel">
+      <h3>SDK Proxy</h3>
+      <p class="panel-desc">Verifies the learn-secrets-sdk proxy endpoint is reachable cross-origin and can forward requests.</p>
+      <button class="run-all-btn" onclick="runAll('sdk-proxy')">Run All</button>
+      <table class="test-table">
+        <thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-sdk-proxy"></tbody>
+      </table>
     </div>
   </div>
 </div>
 
-<script src="/assets/js/learn-secrets-sdk.js"></script>
-<script src="/assets/js/sdk-tester-v2.js?v=20260608b"></script>
+<script>
+const BASE = 'https://cloudprototype.org';
+const APP_ID = 'VtI8BSvhxAwNIIDR';
 
-<style>
-/* Additional inline styles for testing page */
-#testing-content small {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: 0.85rem;
-  line-height: 1.4;
+function getToken() {
+  return localStorage.getItem('learn_auth_token') || sessionStorage.getItem('learn_auth_token') || null;
 }
 
-#testing-content p {
-  line-height: 1.6;
+function decodeJwtPayload(token) {
+  try { return JSON.parse(atob(token.split('.')[1])); } catch { return null; }
 }
 
-.rate-limit-panel {
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 4px;
-  text-align: center;
+// ── State ──────────────────────────────────────────────────────────────────
+
+const TESTS = {
+  'auth-sdk': [
+    { id: 1, name: 'SDK object available (window.authService)', fn: testSdkObject },
+    { id: 2, name: 'Bearer token present in localStorage / sessionStorage', fn: testTokenPresent },
+    { id: 3, name: 'Token not expired (JWT exp check)', fn: testTokenExpiry },
+    { id: 4, name: 'GET /api/auth/get-session with Bearer → 200 + user', fn: testGetSession },
+    { id: 5, name: 'Response contains user.email', fn: testSessionEmail },
+    { id: 6, name: 'Response contains user.role', fn: testSessionRole },
+  ],
+  cors: [
+    { id: 1, name: 'OPTIONS preflight /api/auth/get-session — not blocked', fn: testCorsPreflightSession },
+    { id: 2, name: 'Access-Control-Allow-Origin header present', fn: testCorsAllowOrigin },
+    { id: 3, name: 'Access-Control-Allow-Headers includes Authorization', fn: testCorsAllowHeaders },
+    { id: 4, name: 'OPTIONS preflight /api/sdk/proxy — not blocked', fn: testCorsPreflightProxy },
+    { id: 5, name: 'Auth endpoint reachable without token (200/401, not network error)', fn: testEndpointReachable },
+  ],
+  roles: [
+    { id: 1, name: 'Bearer session: GET /api/auth/get-session → 200 + user', fn: testRolesSession },
+    { id: 2, name: 'user.role present in session response', fn: testRolesRoleField },
+    { id: 3, name: 'Admin check: /api/auth/admin/list-users (200=admin, 403=expected)', fn: testRolesAdmin },
+    { id: 4, name: 'Non-admin rejection is clean JSON 403 (not CORS error / 500)', fn: testRolesCleanReject },
+  ],
+  storage: [
+    { id: 1, name: 'D1 read: GET /api/test-d1 reachable', fn: testD1 },
+    { id: 2, name: 'R2 read: GET /api/test-r2 reachable', fn: testR2 },
+    { id: 3, name: 'KV read: GET /api/test-kv reachable', fn: testKV },
+  ],
+  'sdk-proxy': [
+    { id: 1, name: 'OPTIONS preflight /api/sdk/proxy — not blocked', fn: testProxyPreflight },
+    { id: 2, name: 'Lichess health via proxy — POST returns response', fn: testProxyLichess },
+    { id: 3, name: 'Proxy response is valid JSON', fn: testProxyJson },
+  ],
+};
+
+// Cache cross-tab shared results so sequential tests can read them
+const cache = {};
+
+// ── Render ─────────────────────────────────────────────────────────────────
+
+function renderTbody(tab) {
+  const tbody = document.getElementById('tbody-' + tab);
+  tbody.innerHTML = TESTS[tab].map(t => `
+    <tr id="row-${tab}-${t.id}">
+      <td style="color:#6b7280;width:28px">${t.id}</td>
+      <td>${t.name}</td>
+      <td><span class="badge badge-pending" id="badge-${tab}-${t.id}">pending</span></td>
+      <td><div class="detail" id="detail-${tab}-${t.id}"></div></td>
+      <td><button class="run-btn" onclick="runOne('${tab}',${t.id})">Run</button></td>
+    </tr>`).join('');
 }
 
-#rate-limit-display {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: #333;
-}
-
-.rate-remaining {
-  color: #27ae60;
-  font-weight: bold;
-  font-size: 1.3rem;
-}
-
-.rate-limit {
-  color: #333;
-  font-weight: bold;
-  font-size: 1.3rem;
-}
-
-.rate-reset {
-  display: block;
-  margin-top: 0.5rem;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-/* Console Container Styles */
-.console-container {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
-@media (max-width: 768px) {
-  .console-container {
-    grid-template-columns: 1fr;
+function setResult(tab, id, status, detail) {
+  const badge = document.getElementById(`badge-${tab}-${id}`);
+  const detailEl = document.getElementById(`detail-${tab}-${id}`);
+  badge.className = 'badge badge-' + status;
+  badge.textContent = status === 'expected' ? 'expected' : status;
+  if (detailEl) {
+    detailEl.textContent = detail || '';
+    detailEl.className = 'detail' + (status === 'pass' || status === 'expected' ? ' ok' : status === 'fail' ? ' err' : '');
   }
 }
 
-.console-controls {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  padding: 1.5rem;
+function setBadgeRunning(tab, id) {
+  const badge = document.getElementById(`badge-${tab}-${id}`);
+  if (badge) { badge.className = 'badge badge-running'; badge.textContent = 'running'; }
 }
 
-.scenario-select {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 0.95rem;
-  background: white;
-  cursor: pointer;
+// ── Test functions ─────────────────────────────────────────────────────────
+
+async function testSdkObject() {
+  if (typeof window.authService !== 'undefined') return [true, 'window.authService found'];
+  return [false, 'window.authService not defined — check learn-auth-sdk.js is loaded'];
 }
 
-.scenario-details {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: white;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  font-size: 0.9rem;
+async function testTokenPresent() {
+  const t = getToken();
+  if (t) { cache.token = t; return [true, 'Token found (' + t.length + ' chars)']; }
+  return [false, 'No learn_auth_token in localStorage or sessionStorage'];
 }
 
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #f0f0f0;
+async function testTokenExpiry() {
+  const t = getToken();
+  if (!t) return [null, 'skip — no token'];
+  const payload = decodeJwtPayload(t);
+  if (!payload) return [false, 'Could not decode JWT payload'];
+  if (!payload.exp) return [null, 'No exp field in token (not a standard JWT)'];
+  const exp = new Date(payload.exp * 1000);
+  const now = new Date();
+  if (exp > now) return [true, 'Expires ' + exp.toLocaleString()];
+  return [false, 'Token expired at ' + exp.toLocaleString()];
 }
 
-.detail-row:last-child {
-  border-bottom: none;
+async function testGetSession() {
+  const t = getToken();
+  if (!t) return [false, 'No token — log in first'];
+  try {
+    const res = await fetch(BASE + '/api/auth/get-session', {
+      headers: { Authorization: 'Bearer ' + t }
+    });
+    const data = await res.json().catch(() => null);
+    cache.session = data;
+    if (res.ok && data?.user) return [true, 'HTTP ' + res.status + ' — user: ' + data.user.email];
+    return [false, 'HTTP ' + res.status + ' — ' + (data?.message || JSON.stringify(data))];
+  } catch (e) { return [false, 'Network error: ' + e.message]; }
 }
 
-.detail-label {
-  font-weight: 600;
-  color: #666;
+async function testSessionEmail() {
+  const s = cache.session;
+  if (!s) return [null, 'skip — run test 4 first'];
+  if (s.user?.email) return [true, s.user.email];
+  return [false, 'user.email missing from session response'];
 }
 
-.detail-value {
-  font-family: 'Courier New', monospace;
-  color: #2196F3;
-  text-align: right;
+async function testSessionRole() {
+  const s = cache.session;
+  if (!s) return [null, 'skip — run test 4 first'];
+  const role = s.user?.role;
+  if (role != null) return [true, 'role = ' + role];
+  return [false, 'user.role missing or null in session response'];
 }
 
-.detail-description {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #f0f0f0;
-  color: #666;
-  line-height: 1.5;
+// CORS ──────────────────────────────────────────────────────────────────────
+
+async function testCorsPreflightSession() {
+  try {
+    const res = await fetch(BASE + '/api/auth/get-session', {
+      method: 'OPTIONS',
+      mode: 'cors',
+      headers: { 'Access-Control-Request-Method': 'GET', 'Access-Control-Request-Headers': 'authorization' }
+    });
+    cache.corsSessionRes = res;
+    return [true, 'Preflight returned HTTP ' + res.status];
+  } catch (e) { return [false, 'Blocked or network error: ' + e.message]; }
 }
 
-.console-output {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  padding: 1.5rem;
+async function testCorsAllowOrigin() {
+  const res = cache.corsSessionRes;
+  if (!res) return [null, 'skip — run test 1 first'];
+  const h = res.headers.get('access-control-allow-origin');
+  if (h) return [true, 'Access-Control-Allow-Origin: ' + h];
+  return [false, 'Header absent — cross-origin requests will be blocked'];
 }
 
-.result-section h4 {
-  margin: 0 0 1rem 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #dee2e6;
-  color: #333;
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+async function testCorsAllowHeaders() {
+  const res = cache.corsSessionRes;
+  if (!res) return [null, 'skip — run test 1 first'];
+  const h = (res.headers.get('access-control-allow-headers') || '').toLowerCase();
+  if (h.includes('authorization')) return [true, 'Includes authorization'];
+  return [false, 'authorization not in Allow-Headers: ' + (h || '(missing)')];
 }
 
-#test-result-status {
-  margin-bottom: 1rem;
+async function testCorsPreflightProxy() {
+  try {
+    const res = await fetch(BASE + '/api/sdk/' + APP_ID + '/proxy', {
+      method: 'OPTIONS',
+      mode: 'cors',
+      headers: { 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type,authorization' }
+    });
+    return [true, 'Preflight returned HTTP ' + res.status];
+  } catch (e) { return [false, 'Blocked or network error: ' + e.message]; }
 }
 
-#test-result-data {
-  background: white;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  padding: 1rem;
-  max-height: 400px;
-  overflow-y: auto;
-  font-family: 'Courier New', monospace;
-  font-size: 0.85rem;
+async function testEndpointReachable() {
+  try {
+    const res = await fetch(BASE + '/api/auth/get-session', { mode: 'cors' });
+    const ok = res.status === 200 || res.status === 401 || res.status === 403;
+    return [ok, 'HTTP ' + res.status + (ok ? ' (reachable)' : ' (unexpected)')];
+  } catch (e) { return [false, 'Network error: ' + e.message]; }
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 0.35rem 0.75rem;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-transform: uppercase;
+// Roles ─────────────────────────────────────────────────────────────────────
+
+async function testRolesSession() {
+  const t = getToken();
+  if (!t) return [false, 'No token — log in first'];
+  try {
+    const res = await fetch(BASE + '/api/auth/get-session', {
+      headers: { Authorization: 'Bearer ' + t }
+    });
+    const data = await res.json().catch(() => null);
+    cache.rolesSession = data;
+    if (res.ok && data?.user) return [true, 'user: ' + data.user.email];
+    return [false, 'HTTP ' + res.status + ' — ' + (data?.message || '')];
+  } catch (e) { return [false, 'Network error: ' + e.message]; }
 }
 
-.status-untested {
-  background: #e9ecef;
-  color: #6c757d;
+async function testRolesRoleField() {
+  const s = cache.rolesSession;
+  if (!s) return [null, 'skip — run test 1 first'];
+  const role = s.user?.role;
+  if (role != null) return [true, 'role = ' + role];
+  return [false, 'user.role missing — roles may not be configured for this user'];
 }
 
-.status-loading {
-  background: #fff3cd;
-  color: #856404;
+async function testRolesAdmin() {
+  const t = getToken();
+  if (!t) return [false, 'No token'];
+  try {
+    const res = await fetch(BASE + '/api/auth/admin/list-users?limit=1', {
+      headers: { Authorization: 'Bearer ' + t }
+    });
+    cache.adminRes = res;
+    cache.adminStatus = res.status;
+    const data = await res.json().catch(() => null);
+    cache.adminData = data;
+    if (res.status === 200) return [true, 'Admin — returned ' + (data?.users?.length ?? '?') + ' user(s)'];
+    if (res.status === 403) return ['expected', 'Non-admin (403) — expected for regular users'];
+    return [false, 'HTTP ' + res.status + ' — ' + (data?.message || '')];
+  } catch (e) { return [false, 'Network error: ' + e.message]; }
 }
 
-.status-success {
-  background: #d4edda;
-  color: #155724;
+async function testRolesCleanReject() {
+  const status = cache.adminStatus;
+  if (status == null) return [null, 'skip — run test 3 first'];
+  if (status === 200) return [true, 'Admin user — no rejection to test'];
+  if (status === 403) {
+    const data = cache.adminData;
+    if (data && typeof data === 'object') return [true, 'Clean JSON 403 response'];
+    return [false, '403 but response was not valid JSON'];
+  }
+  return [false, 'Unexpected status ' + status];
 }
 
-.status-error {
-  background: #f8d7da;
-  color: #721c24;
+// Storage ───────────────────────────────────────────────────────────────────
+
+async function storageTest(endpoint) {
+  const t = getToken();
+  const headers = t ? { Authorization: 'Bearer ' + t } : {};
+  try {
+    const res = await fetch(BASE + endpoint, { headers, mode: 'cors' });
+    const data = await res.json().catch(() => null);
+    const reachable = res.status < 500;
+    const label = res.status === 200 ? 'success' : res.status === 401 ? 'no auth (401)' : res.status === 403 ? 'no access (403)' : 'HTTP ' + res.status;
+    return [reachable, label + (data?.message ? ' — ' + data.message : '')];
+  } catch (e) { return [false, 'Network error: ' + e.message]; }
 }
-</style>
+
+async function testD1() { return storageTest('/api/test-d1'); }
+async function testR2() { return storageTest('/api/test-r2'); }
+async function testKV() { return storageTest('/api/test-kv'); }
+
+// SDK Proxy ─────────────────────────────────────────────────────────────────
+
+async function testProxyPreflight() {
+  try {
+    const res = await fetch(BASE + '/api/sdk/' + APP_ID + '/proxy', {
+      method: 'OPTIONS',
+      mode: 'cors',
+      headers: { 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type' }
+    });
+    return [true, 'Preflight HTTP ' + res.status];
+  } catch (e) { return [false, 'Blocked: ' + e.message]; }
+}
+
+async function testProxyLichess() {
+  const t = getToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (t) headers.Authorization = 'Bearer ' + t;
+  try {
+    const res = await fetch(BASE + '/api/sdk/' + APP_ID + '/proxy', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ endpoint: '/api', method: 'GET' })
+    });
+    cache.proxyRes = res;
+    cache.proxyText = await res.text().catch(() => '');
+    return [res.ok, 'HTTP ' + res.status];
+  } catch (e) { return [false, 'Network error: ' + e.message]; }
+}
+
+async function testProxyJson() {
+  const text = cache.proxyText;
+  if (text == null) return [null, 'skip — run test 2 first'];
+  try { JSON.parse(text); return [true, text.slice(0, 80)]; }
+  catch { return [false, 'Response is not valid JSON: ' + text.slice(0, 80)]; }
+}
+
+// ── Runner ─────────────────────────────────────────────────────────────────
+
+async function runOne(tab, id) {
+  const test = TESTS[tab].find(t => t.id === id);
+  if (!test) return;
+  setBadgeRunning(tab, id);
+  const [ok, detail] = await test.fn();
+  const status = ok === true ? 'pass' : ok === false ? 'fail' : ok === 'expected' ? 'expected' : 'skip';
+  setResult(tab, id, status, detail);
+}
+
+async function runAll(tab) {
+  const btn = document.querySelector(`#tab-${tab} .run-all-btn`);
+  if (btn) btn.disabled = true;
+  for (const t of TESTS[tab]) {
+    await runOne(tab, t.id);
+  }
+  if (btn) btn.disabled = false;
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+
+function switchTab(tab, btnEl) {
+  document.querySelectorAll('.tab-section').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).style.display = '';
+  btnEl.classList.add('active');
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+
+Object.keys(TESTS).forEach(renderTbody);
+
+const token = getToken();
+if (!token) document.getElementById('login-banner').style.display = '';
+</script>
