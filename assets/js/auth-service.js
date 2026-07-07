@@ -120,12 +120,13 @@
       try {
         const session = await auth.getSession();
         if (session?.data?.user) {
+          sessionCache = session.data;
           console.log('[Auth Service] Authentication check: true (session)');
           return true;
         }
         // Fallback: trust stored token+user from login redirect
-        const token = localStorage.getItem('learn_auth_token');
-        const storedUser = localStorage.getItem('learn_auth_user');
+        const token = localStorage.getItem('learn_auth_token') || sessionStorage.getItem('learn_auth_token');
+        const storedUser = localStorage.getItem('learn_auth_user') || sessionStorage.getItem('learn_auth_user');
         if (token && storedUser) {
           try {
             const user = JSON.parse(storedUser);

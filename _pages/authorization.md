@@ -211,7 +211,7 @@ permalink: /authorization/
   <div class="auth0-container">
     <header class="auth0-header">
       <h1>{{ page.title }}</h1>
-      <p>Manage Auth0 user identities and roles</p>
+      <p>Manage Learn user identities and roles</p>
     </header>
 
     <div class="nav-section">
@@ -284,68 +284,23 @@ permalink: /authorization/
 </div>
 
 <script>
-// Netlify Functions API Base URLs (primary and fallback)
-const NETLIFY_API_BASES = [
-  'https://carsontkempf.netlify.app/.netlify/functions',
-  'https://resonant-cheesecake-638dd1.netlify.app/.netlify/functions'
-];
-let currentApiBaseIndex = 0;
+const LEARN_API = 'https://cloudprototype.org/api/auth';
+let userCache = [];
 
-// Helper function to make fetch requests with automatic fallback on CORS errors
-async function fetchWithFallback(endpoint, options = {}) {
-  const functionName = endpoint.split('/').pop();
-
-  for (let i = currentApiBaseIndex; i < NETLIFY_API_BASES.length; i++) {
-    const baseUrl = NETLIFY_API_BASES[i];
-    const url = `${baseUrl}/${functionName}`;
-
-    console.log(`[FETCH-FALLBACK] Attempt ${i + 1}/${NETLIFY_API_BASES.length}: ${url}`);
-
-    try {
-      const response = await fetch(url, options);
-
-      // If successful, update current index for future calls
-      if (response.ok || response.status === 401 || response.status === 403) {
-        if (i !== currentApiBaseIndex) {
-          console.log(`[FETCH-FALLBACK] Switched to fallback URL: ${baseUrl}`);
-          currentApiBaseIndex = i;
-        }
-        return response;
-      }
-
-      console.log(`[FETCH-FALLBACK] Response status ${response.status}, trying next URL...`);
-    } catch (error) {
-      console.error(`[FETCH-FALLBACK] Error with ${baseUrl}:`, error.message);
-
-      // Check if it's a CORS error
-      if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
-        console.log(`[FETCH-FALLBACK] CORS error detected, trying next URL...`);
-        continue;
-      }
-
-      // If it's not a CORS error and we're on the last URL, throw
-      if (i === NETLIFY_API_BASES.length - 1) {
-        throw error;
-      }
-    }
-  }
-
-  throw new Error('All Netlify API endpoints failed');
+function getUserToken() {
+  return sessionStorage.getItem('learn_auth_token') || localStorage.getItem('learn_auth_token') || null;
 }
 
 window.addEventListener('auth:ready', async function(event) {
-  const isAuthenticated = event.detail?.isAuthenticated;
-
-  if (!isAuthenticated) {
+  if (!event.detail?.isAuthenticated) {
     document.getElementById('auth0-login-prompt').style.display = 'block';
     return;
   }
-
   try {
     const user = await window.authService.getUser();
     await checkAdminPermissions(user);
-  } catch (error) {
-    console.error('[AUTH-USERS] Error checking authentication:', error);
+  } catch (err) {
+    console.error('[AUTHZ] Error checking authentication:', err);
     document.getElementById('auth0-login-prompt').style.display = 'block';
   }
 });
@@ -355,365 +310,133 @@ async function checkAdminPermissions(user) {
     document.getElementById('auth0-login-prompt').style.display = 'block';
     return;
   }
-
   const role = (user.role || '').toLowerCase();
-  const roles = (user.roles || []).map(r => r.toLowerCase());
   const isSiteOwner = user.email === 'carsontkempf@gmail.com' || user.email === 'ctkfdp@umsystem.edu';
-  const isAdmin = role === 'admin' || roles.includes('admin') || isSiteOwner;
-
+  const isAdmin = role === 'admin' || isSiteOwner;
   if (isAdmin) {
     document.getElementById('auth0-content-wrapper').style.display = 'block';
     await loadAllUsers();
-    await loadAllRoles();
+    loadAllRoles();
   } else {
     document.getElementById('auth0-login-prompt').style.display = 'block';
   }
 }
 
-// Helper to get user access token for API calls
-async function getUserToken() {
-  try {
-    const session = await window.authService.getSession();
-    return session?.session?.id ?? null;
-  } catch (error) {
-    console.error('Error getting user token:', error);
-    return null;
-  }
-}
-
-// Load all users from Auth0 via Netlify Function
 async function loadAllUsers() {
+  const token = getUserToken();
+  if (!token) {
+    document.getElementById('users-list').innerHTML = '<p>Unable to get access token</p>';
+    return;
+  }
   try {
-    console.log('[AUTH0-USERS] loadAllUsers: Getting user token...');
-    const token = await getUserToken();
-    if (!token) {
-      console.error('[AUTH0-USERS] loadAllUsers: Failed to get user token');
-      document.getElementById('users-list').innerHTML = '<p>Unable to get access token</p>';
+    const res = await fetch(LEARN_API + '/admin/list-users?limit=100', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      document.getElementById('users-list').innerHTML = '<p>Error loading users (' + res.status + '): ' + (data.message || '') + '</p>';
       return;
     }
-    console.log('[AUTH0-USERS] loadAllUsers: Token obtained, length:', token.length);
-
-    console.log('[AUTH0-USERS] loadAllUsers: Calling function: auth0-get-users');
-
-    const response = await fetchWithFallback('auth0-get-users', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
-
-    console.log('[AUTH0-USERS] loadAllUsers: Response status:', response.status);
-    console.log('[AUTH0-USERS] loadAllUsers: Response headers:', Object.fromEntries(response.headers.entries()));
-
-    if (response.ok) {
-      const users = await response.json();
-      console.log('[AUTH0-USERS] loadAllUsers: Successfully loaded', users.length, 'users');
-      displayUsers(users);
-    } else {
-      const contentType = response.headers.get('content-type');
-      let error;
-      if (contentType && contentType.includes('application/json')) {
-        error = await response.json();
-      } else {
-        const text = await response.text();
-        console.error('[AUTH0-USERS] loadAllUsers: Non-JSON response (first 500 chars):', text.substring(0, 500));
-        error = { message: 'Non-JSON response received', status: response.status };
-      }
-      console.error('[AUTH0-USERS] loadAllUsers: Error loading users:', error);
-      document.getElementById('users-list').innerHTML = `<p>Error loading users (Status: ${response.status})</p>`;
-    }
-  } catch (error) {
-    console.error('[AUTH0-USERS] loadAllUsers: Exception:', error);
-    document.getElementById('users-list').innerHTML = '<p>Error loading users - check console</p>';
+    userCache = data.users || [];
+    displayUsers(userCache);
+  } catch (err) {
+    console.error('[AUTHZ] loadAllUsers error:', err);
+    document.getElementById('users-list').innerHTML = '<p>Error loading users</p>';
   }
 }
 
-// Display users in the grid
 function displayUsers(users) {
   const usersList = document.getElementById('users-list');
-
-  if (users.length === 0) {
-    usersList.innerHTML = '<p>No users found</p>';
-    return;
-  }
-
-  const userCards = users.map((user) => {
-    const roles = user.roles || [];
-    const rolesHtml = roles.length > 0
-      ? `<div class="user-roles">${roles.map(role => `<span class="role-badge">${role.name}</span>`).join('')}</div>`
-      : '<p>No roles assigned</p>';
-
-    return `
-      <div class="user-card">
-        <h4>${user.name || 'No name'}</h4>
-        <p><strong>Email:</strong> ${user.email}</p>
-        <p><strong>Provider:</strong> ${user.identities[0]?.connection || 'Unknown'}</p>
-        <p><strong>Created:</strong> ${new Date(user.created_at).toLocaleDateString()}</p>
-        ${rolesHtml}
-      </div>
-    `;
-  });
-
-  usersList.innerHTML = userCards.join('');
+  if (!users.length) { usersList.innerHTML = '<p>No users found</p>'; return; }
+  usersList.innerHTML = users.map(function(user) {
+    return '<div class="user-card"><h4>' + (user.name || 'No name') + '</h4>' +
+      '<p><strong>Email:</strong> ' + user.email + '</p>' +
+      '<p><strong>Role:</strong> <span class="role-badge">' + (user.role || 'user') + '</span></p>' +
+      '<p><strong>Created:</strong> ' + new Date(user.createdAt).toLocaleDateString() + '</p></div>';
+  }).join('');
 }
 
-// Load all roles from Auth0 via Netlify Function
-async function loadAllRoles() {
-  try {
-    console.log('[AUTH0-USERS] loadAllRoles: Getting user token...');
-    const token = await getUserToken();
-    if (!token) {
-      console.error('[AUTH0-USERS] loadAllRoles: Failed to get user token');
-      document.getElementById('all-roles-list').innerHTML = '<p>Unable to get access token</p>';
-      return;
-    }
-
-    console.log('[AUTH0-USERS] loadAllRoles: Calling function: auth0-get-roles');
-
-    const response = await fetchWithFallback('auth0-get-roles', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
-
-    console.log('[AUTH0-USERS] loadAllRoles: Response status:', response.status);
-    console.log('[AUTH0-USERS] loadAllRoles: Response headers:', Object.fromEntries(response.headers.entries()));
-
-    if (response.ok) {
-      const roles = await response.json();
-      console.log('[AUTH0-USERS] loadAllRoles: Successfully loaded', roles.length, 'roles');
-      displayRoles(roles);
-      populateRoleSelect(roles);
-    } else {
-      const contentType = response.headers.get('content-type');
-      let error;
-      if (contentType && contentType.includes('application/json')) {
-        error = await response.json();
-      } else {
-        const text = await response.text();
-        console.error('[AUTH0-USERS] loadAllRoles: Non-JSON response (first 500 chars):', text.substring(0, 500));
-        error = { message: 'Non-JSON response received', status: response.status };
-      }
-      console.error('[AUTH0-USERS] loadAllRoles: Error loading roles:', error);
-      document.getElementById('all-roles-list').innerHTML = `<p>Error loading roles (Status: ${response.status})</p>`;
-    }
-  } catch (error) {
-    console.error('[AUTH0-USERS] loadAllRoles: Exception:', error);
-    document.getElementById('all-roles-list').innerHTML = '<p>Error loading roles - check console</p>';
-  }
+function loadAllRoles() {
+  const roles = [
+    { name: 'admin', description: 'Full admin access' },
+    { name: 'user', description: 'Standard user (default)' },
+    { name: 'premium', description: 'Premium tier access' },
+    { name: 'writer', description: 'Content writer access' }
+  ];
+  displayRoles(roles);
+  populateRoleSelect(roles);
 }
 
-// Display roles
 function displayRoles(roles) {
   const rolesList = document.getElementById('all-roles-list');
-
-  if (roles.length === 0) {
-    rolesList.innerHTML = '<p>No roles found</p>';
-    return;
-  }
-
-  const rolesHtml = roles.map(role => `
-    <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 6px; border-left: 3px solid #3498db;">
-      <strong>${role.name}</strong> (ID: ${role.id})<br>
-      <small>${role.description || 'No description'}</small>
-    </div>
-  `).join('');
-
-  rolesList.innerHTML = rolesHtml;
+  rolesList.innerHTML = roles.map(function(role) {
+    return '<div style="margin-bottom:15px;padding:10px;background:white;border-radius:6px;border-left:3px solid #3498db;">' +
+      '<strong>' + role.name + '</strong><br><small>' + role.description + '</small></div>';
+  }).join('');
 }
 
-// Populate role selection dropdown
 function populateRoleSelect(roles) {
   const select = document.getElementById('role-selection');
-  select.innerHTML = roles.map(role =>
-    `<option value="${role.id}">${role.name}</option>`
-  ).join('');
+  select.innerHTML = roles.map(function(role) {
+    return '<option value="' + role.name + '">' + role.name + '</option>';
+  }).join('');
 }
 
-// Role Management Functions
 async function assignRoleToUser() {
   const email = document.getElementById('user-email-role').value;
-  const roleId = document.getElementById('role-selection').value;
-
-  if (!email || !roleId) {
-    alert('Please enter both email and select a role');
-    return;
-  }
-
-  try {
-    console.log('[AUTH0-USERS] assignRoleToUser: Assigning role', roleId, 'to', email);
-    const token = await getUserToken();
-    if (!token) {
-      console.error('[AUTH0-USERS] assignRoleToUser: Failed to get user token');
-      alert('Unable to get access token');
-      return;
-    }
-
-    console.log('[AUTH0-USERS] assignRoleToUser: Calling function: auth0-assign-role');
-
-    const response = await fetchWithFallback('auth0-assign-role', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, roleId })
-    });
-
-    console.log('[AUTH0-USERS] assignRoleToUser: Response status:', response.status);
-
-    const contentType = response.headers.get('content-type');
-    let result;
-    if (contentType && contentType.includes('application/json')) {
-      result = await response.json();
-    } else {
-      const text = await response.text();
-      console.error('[AUTH0-USERS] assignRoleToUser: Non-JSON response:', text.substring(0, 500));
-      result = { error: 'Non-JSON response received' };
-    }
-
-    if (response.ok) {
-      console.log('[AUTH0-USERS] assignRoleToUser: Success');
-      alert(result.message || `Role successfully assigned to ${email}`);
-      document.getElementById('user-email-role').value = '';
-      await loadAllUsers();
-    } else {
-      console.error('[AUTH0-USERS] assignRoleToUser: Error:', result);
-      alert(`Error: ${result.error || 'Failed to assign role'}`);
-    }
-
-  } catch (error) {
-    console.error('[AUTH0-USERS] assignRoleToUser: Exception:', error);
-    alert('Error assigning role - check console');
+  const role = document.getElementById('role-selection').value;
+  if (!email || !role) { alert('Enter email and select a role'); return; }
+  const token = getUserToken();
+  if (!token) { alert('Not authenticated'); return; }
+  if (!userCache.length) await loadAllUsers();
+  const user = userCache.find(function(u) { return u.email === email; });
+  if (!user) { alert('User not found — refresh user list first'); return; }
+  const res = await fetch(LEARN_API + '/admin/set-role', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: user.id, role: role })
+  });
+  if (res.ok) {
+    alert('Role "' + role + '" assigned to ' + email);
+    document.getElementById('user-email-role').value = '';
+    await loadAllUsers();
+  } else {
+    const e = await res.json().catch(function() { return {}; });
+    alert('Error: ' + (e.message || res.status));
   }
 }
 
 async function removeRoleFromUser() {
   const email = document.getElementById('user-email-role').value;
-  const roleId = document.getElementById('role-selection').value;
-
-  if (!email || !roleId) {
-    alert('Please enter both email and select a role');
-    return;
-  }
-
-  try {
-    console.log('[AUTH0-USERS] removeRoleFromUser: Removing role', roleId, 'from', email);
-    const token = await getUserToken();
-    if (!token) {
-      console.error('[AUTH0-USERS] removeRoleFromUser: Failed to get user token');
-      alert('Unable to get access token');
-      return;
-    }
-
-    console.log('[AUTH0-USERS] removeRoleFromUser: Calling function: auth0-remove-role');
-
-    const response = await fetchWithFallback('auth0-remove-role', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, roleId })
-    });
-
-    console.log('[AUTH0-USERS] removeRoleFromUser: Response status:', response.status);
-
-    const contentType = response.headers.get('content-type');
-    let result;
-    if (contentType && contentType.includes('application/json')) {
-      result = await response.json();
-    } else {
-      const text = await response.text();
-      console.error('[AUTH0-USERS] removeRoleFromUser: Non-JSON response:', text.substring(0, 500));
-      result = { error: 'Non-JSON response received' };
-    }
-
-    if (response.ok) {
-      console.log('[AUTH0-USERS] removeRoleFromUser: Success');
-      alert(result.message || `Role successfully removed from ${email}`);
-      document.getElementById('user-email-role').value = '';
-      await loadAllUsers();
-    } else {
-      console.error('[AUTH0-USERS] removeRoleFromUser: Error:', result);
-      alert(`Error: ${result.error || 'Failed to remove role'}`);
-    }
-
-  } catch (error) {
-    console.error('[AUTH0-USERS] removeRoleFromUser: Exception:', error);
-    alert('Error removing role - check console');
+  if (!email) { alert('Enter user email'); return; }
+  const token = getUserToken();
+  if (!token) { alert('Not authenticated'); return; }
+  if (!userCache.length) await loadAllUsers();
+  const user = userCache.find(function(u) { return u.email === email; });
+  if (!user) { alert('User not found — refresh user list first'); return; }
+  const res = await fetch(LEARN_API + '/admin/set-role', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: user.id, role: 'user' })
+  });
+  if (res.ok) {
+    alert('Role reset to "user" for ' + email);
+    document.getElementById('user-email-role').value = '';
+    await loadAllUsers();
+  } else {
+    const e = await res.json().catch(function() { return {}; });
+    alert('Error: ' + (e.message || res.status));
   }
 }
 
 async function lookupUserRoles() {
   const email = document.getElementById('lookup-email').value;
-  if (!email) {
-    alert('Please enter an email');
-    return;
-  }
-
-  try {
-    console.log('[AUTH0-USERS] lookupUserRoles: Looking up user:', email);
-    const token = await getUserToken();
-    if (!token) {
-      console.error('[AUTH0-USERS] lookupUserRoles: Failed to get user token');
-      alert('Unable to get access token');
-      return;
-    }
-
-    console.log('[AUTH0-USERS] lookupUserRoles: Calling function: auth0-get-users');
-
-    const response = await fetchWithFallback('auth0-get-users', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
-
-    console.log('[AUTH0-USERS] lookupUserRoles: Response status:', response.status);
-
-    if (!response.ok) {
-      console.error('[AUTH0-USERS] lookupUserRoles: Failed to fetch users');
-      document.getElementById('user-lookup-results').innerHTML = '<p>Error fetching users</p>';
-      return;
-    }
-
-    const users = await response.json();
-    console.log('[AUTH0-USERS] lookupUserRoles: Searching for user in', users.length, 'users');
-    const user = users.find(u => u.email === email);
-
-    if (!user) {
-      console.log('[AUTH0-USERS] lookupUserRoles: User not found');
-      document.getElementById('user-lookup-results').innerHTML = '<p>User not found</p>';
-      return;
-    }
-
-    console.log('[AUTH0-USERS] lookupUserRoles: Found user with', (user.roles || []).length, 'roles');
-    const roles = user.roles || [];
-
-    document.getElementById('user-lookup-results').innerHTML = `
-      <h4>User: ${user.email}</h4>
-      <p><strong>User ID:</strong> ${user.user_id}</p>
-      <p><strong>Name:</strong> ${user.name}</p>
-      <p><strong>Connection:</strong> ${user.identities[0]?.connection || 'Unknown'}</p>
-      <h5>Assigned Roles:</h5>
-      ${roles.length > 0 ?
-        `<ul>${roles.map(role => `<li>${role.name} (ID: ${role.id})</li>`).join('')}</ul>` :
-        '<p>No roles assigned</p>'
-      }
-    `;
-
-  } catch (error) {
-    console.error('[AUTH0-USERS] lookupUserRoles: Exception:', error);
-    document.getElementById('user-lookup-results').innerHTML = '<p>Error looking up user</p>';
-  }
+  if (!email) { alert('Enter an email'); return; }
+  if (!userCache.length) await loadAllUsers();
+  const user = userCache.find(function(u) { return u.email === email; });
+  document.getElementById('user-lookup-results').innerHTML = user
+    ? '<h4>' + user.email + '</h4><p>Role: <strong>' + (user.role || 'user') + '</strong></p><p>ID: ' + user.id + '</p>'
+    : '<p>User not found</p>';
 }
 
 </script>
