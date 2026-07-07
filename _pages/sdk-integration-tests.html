@@ -17,7 +17,7 @@ no_auth: true
   .fail { color: #ef4444; }
   .pending { color: #6b7280; }
   .running { color: #facc15; }
-  .detail { color: #9ca3af; font-size: 12px; margin-top: 4px; word-break: break-all; }
+  .detail { color: #9ca3af; font-size: 11px; margin-top: 4px; word-break: break-all; white-space: pre-wrap; font-family: monospace; }
   .summary { margin-top: 16px; padding: 12px 16px; background: #1a1a1a; border-radius: 6px; color: #e5e7eb; font-size: 13px; }
   button#run-btn { margin-bottom: 16px; padding: 10px 24px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-family: monospace; }
   button#run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -80,26 +80,38 @@ function setRunning(id) {
   s.textContent = 'running';
 }
 
+// --- Helpers ---
+
+function dumpHeaders(res) {
+  const e = [...res.headers.entries()];
+  return e.length ? e.map(([k, v]) => `  ${k}: ${v}`).join('\n') : '  (none exposed by browser)';
+}
+
 // --- Test implementations ---
 
 async function testH1NoCors() {
-  const res = await fetch(`${API_BASE}/api/login`, {
+  const url = `${API_BASE}/api/login`;
+  const res = await fetch(url, {
     method: 'OPTIONS',
     headers: { Origin: 'https://evil.example.com', 'Access-Control-Request-Method': 'POST' }
   });
   const acao = res.headers.get('Access-Control-Allow-Origin');
-  if (!acao || acao === 'null') return [true, 'No ACAO header on /api/login OPTIONS (correct)'];
-  return [false, `ACAO header present: ${acao} — H1 not fully patched`];
+  const acac = res.headers.get('Access-Control-Allow-Credentials');
+  const detail = `URL: ${url}\nStatus: ${res.status}\nACAO: ${acao}\nACAC: ${acac}\nAll headers:\n${dumpHeaders(res)}`;
+  if (!acao || acao === 'null') return [true, `No ACAO header on /api/login OPTIONS (correct)\n${detail}`];
+  return [false, `ACAO present: "${acao}" — must be absent on /api/login\n${detail}`];
 }
 
 async function testH1SdkCors() {
-  const res = await fetch(`${API_BASE}/api/sdk/${APP_ID}/proxy`, {
+  const url = `${API_BASE}/api/sdk/${APP_ID}/proxy`;
+  const res = await fetch(url, {
     method: 'OPTIONS',
     headers: { Origin: 'https://carsontkempf.github.io', 'Access-Control-Request-Method': 'POST' }
   });
   const acao = res.headers.get('Access-Control-Allow-Origin');
-  if (acao) return [true, `ACAO present on SDK proxy: ${acao}`];
-  return [false, 'No ACAO on /api/sdk/ — CORS patch may have over-narrowed'];
+  const detail = `URL: ${url}\nStatus: ${res.status}\nAll headers:\n${dumpHeaders(res)}`;
+  if (acao) return [true, `ACAO: ${acao}\n${detail}`];
+  return [false, `No ACAO on SDK proxy — CORS patch may have over-narrowed\n${detail}`];
 }
 
 async function testH4NoLocalStorage() {
@@ -125,16 +137,18 @@ async function testH4SessionStorage() {
 }
 
 async function testL2MaskEmail() {
-  // We can only check the response format indirectly — just verify the endpoint exists and responds
-  const res = await fetch(`${AUTH_BASE}/cli/authorize/send-code`, {
+  const url = `${AUTH_BASE}/cli/authorize/send-code`;
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: 'https://carsontkempf.github.io' },
     body: JSON.stringify({ device_code: 'test_invalid' })
   });
-  // 400 = endpoint exists, processed request (even if invalid device code)
-  // 404 = endpoint missing
-  if (res.status === 404) return [false, 'send-code endpoint not found (404)'];
-  return [true, `Endpoint exists (status ${res.status}), L2 mask applied server-side`];
+  let body = '';
+  try { body = await res.text(); } catch (_) {}
+  const detail = `URL: ${url}\nStatus: ${res.status}\nBody: ${body.slice(0, 400)}`;
+  if (res.status === 404) return [false, `Endpoint not found (404)\n${detail}`];
+  if (res.status === 500) return [false, `Server error (500) — check worker logs\n${detail}`];
+  return [true, `Endpoint exists (${res.status}), L2 mask applied server-side\n${detail}`];
 }
 
 async function testM2RefreshEndpoint() {
@@ -171,15 +185,24 @@ async function testRateLimitHeader() {
 }
 
 async function testVersion() {
-  const res = await fetch(`${API_BASE}/api/version`);
-  if (!res.ok) return [false, `Version endpoint returned ${res.status}`];
-  const data = await res.json();
-  const ver = data.version || '';
-  const [major, minor] = ver.split('.').map(Number);
-  if (major > 2 || (major === 2 && minor >= 6)) {
-    return [true, `Version: ${ver} (>= 2.6.0)`];
+  const url = `${API_BASE}/api/version`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return [false, `Status: ${res.status}\nURL: ${url}\nHeaders:\n${dumpHeaders(res)}`];
+    const data = await res.json();
+    const ver = data.version || '';
+    const detail = `URL: ${url}\nRaw response: ${JSON.stringify(data)}`;
+    const [major, minor] = ver.split('.').map(Number);
+    if (major > 2 || (major === 2 && minor >= 6)) return [true, `Version: ${ver} (>= 2.6.0)\n${detail}`];
+    return [false, `Version ${ver} < 2.6.0\n${detail}`];
+  } catch (e) {
+    let reachable = false;
+    try { await fetch(url, { mode: 'no-cors' }); reachable = true; } catch (_) {}
+    const cause = reachable
+      ? 'Endpoint reachable but CORS blocked — /api/version not in CORS allowlist'
+      : 'Endpoint unreachable — network error or wrong URL';
+    return [false, `Exception: ${e.message}\nURL: ${url}\nDiagnosis: ${cause}`];
   }
-  return [false, `Version: ${ver} — expected >= 2.6.0`];
 }
 
 // --- Runner ---
