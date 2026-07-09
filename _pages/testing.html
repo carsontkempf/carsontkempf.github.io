@@ -437,6 +437,9 @@ const TESTS = {
     { id:4, name:'Non-admin rejection is clean JSON 403 (not CORS/500)',  fn: testRolesCleanReject },
     { id:5, name:'Role diagnostic: user ID, email, role, all fields',     fn: testRolesDiagnostic },
     { id:6, name:'Admin: find spamington607@gmail.com role in user list', fn: testFindSpamington },
+    { id:7, name:'PocketBase debug: admin auth + raw record + PATCH + re-fetch', fn: testPbDebugRole },
+    { id:8, name:'bootstrap-role: storedRole from actual PB response',    fn: testBootstrapVerify },
+    { id:9, name:'/api/session: show roleError field if PB fails',        fn: testSessionRoleError },
   ],
   'storage': [
     { id:1, name:'D1 read: GET /api/test-d1 reachable',                   fn: testD1 },
@@ -697,6 +700,72 @@ async function testFindSpamington() {
     }
     log('info', 'spamington607@gmail.com found', { id: spam.id, email: spam.email, role: spam.role, createdAt: spam.createdAt });
     return [true, 'Found — role=' + JSON.stringify(spam.role) + ' | id=' + spam.id];
+  } catch (e) { return [false, 'Network error: ' + e.message]; }
+}
+
+async function testPbDebugRole() {
+  try {
+    const res = await vfetch(BASE + '/api/admin/debug-pb-role?email=spamington607@gmail.com');
+    const d = res._data || {};
+    log('info', 'debug-pb-role steps', d.steps || []);
+    const steps = d.steps || [];
+    const authStep   = steps.find(function(s) { return s.step === 'admin_auth'; });
+    const fetchStep  = steps.find(function(s) { return s.step === 'fetch_user'; });
+    const setStep    = steps.find(function(s) { return s.step === 'set_role'; });
+    const verifyStep = steps.find(function(s) { return s.step === 'verify'; });
+    if (!authStep || !authStep.ok) {
+      return [false, 'PB admin auth FAILED: ' + (authStep && authStep.error || 'no step returned')];
+    }
+    if (!fetchStep || !fetchStep.ok) {
+      return [false, 'PB fetch_user FAILED: ' + (fetchStep && fetchStep.error || 'no step')];
+    }
+    if (!fetchStep.found) {
+      return [false, 'User not found in app_users'];
+    }
+    const hasRoleField = fetchStep.fields && fetchStep.fields.indexOf('role') !== -1;
+    const storedRole   = setStep && setStep.storedRole;
+    const afterRole    = verifyStep && verifyStep.roleAfterUpdate;
+    log('info', 'PB record fields', { fields: fetchStep.fields, roleBeforeSet: fetchStep.roleField, storedRole: storedRole, roleAfterUpdate: afterRole });
+    if (!hasRoleField) {
+      return [false, 'role field NOT in app_users schema — fields: ' + (fetchStep.fields || []).join(', ')];
+    }
+    if (storedRole === '(missing from response)' || afterRole === '(missing)') {
+      return [false, 'role field exists in schema but PATCH did not persist — storedRole=' + storedRole + ' afterUpdate=' + afterRole];
+    }
+    return [true, 'PB ok — role field exists, storedRole="' + storedRole + '", afterUpdate="' + afterRole + '"'];
+  } catch (e) { return [false, 'Network error: ' + e.message]; }
+}
+
+async function testBootstrapVerify() {
+  try {
+    const res = await vfetch(BASE + '/api/admin/bootstrap-role', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, bearerHeaders()),
+      body: JSON.stringify({ email: 'spamington607@gmail.com', role: 'admin' })
+    });
+    const d = res._data || {};
+    log('info', 'bootstrap-role response', d);
+    if (!d.success) return [false, 'Failed: ' + (d.error || d.detail || JSON.stringify(d))];
+    if (d.storedRole === null || d.storedRole === undefined) {
+      return [false, 'storedRole=null — PB did not persist role. allFields: ' + (d.allFields || []).join(', ')];
+    }
+    return [true, 'storedRole="' + d.storedRole + '" | requestedRole="' + d.requestedRole + '" | allFields: ' + (d.allFields || []).join(', ')];
+  } catch (e) { return [false, 'Network error: ' + e.message]; }
+}
+
+async function testSessionRoleError() {
+  try {
+    const res = await vfetch(BASE + '/api/session', { headers: bearerHeaders() });
+    const d = res._data || {};
+    log('info', '/api/session full response', d);
+    const role = d.user && d.user.role;
+    const roleError = d.roleError || null;
+    if (roleError) {
+      log('error', '/api/session roleError', { roleError: roleError, role: role });
+      return [false, 'roleError: ' + roleError];
+    }
+    if (role) return [true, 'role="' + role + '" (no roleError)'];
+    return [false, 'role=null and no roleError — check PB debug test 7'];
   } catch (e) { return [false, 'Network error: ' + e.message]; }
 }
 
