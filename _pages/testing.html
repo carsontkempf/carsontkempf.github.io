@@ -247,6 +247,8 @@ table.test-table tr:nth-child(even) td { background: var(--t-row-bg); }
     <button class="tab-btn" onclick="switchTab('roles',this)">Roles</button>
     <button class="tab-btn" onclick="switchTab('storage',this)">Storage</button>
     <button class="tab-btn" onclick="switchTab('sdk-proxy',this)">SDK Proxy</button>
+    <button class="tab-btn" onclick="switchTab('music',this)">Music</button>
+    <button class="tab-btn" onclick="switchTab('github',this)">GitHub</button>
   </div>
 
   <!-- AUTH SDK -->
@@ -301,6 +303,28 @@ table.test-table tr:nth-child(even) td { background: var(--t-row-bg); }
       <button class="run-all-btn" onclick="runAll('sdk-proxy')">Run All</button>
       <table class="test-table"><thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
         <tbody id="tbody-sdk-proxy"></tbody></table>
+    </div>
+  </div>
+
+  <!-- MUSIC -->
+  <div id="tab-music" class="tab-section" style="display:none">
+    <div class="test-panel">
+      <h3>Music APIs</h3>
+      <p class="panel-desc">Tests Apple Music token generation and Spotify client credentials via the secrets proxy. All secrets are stored server-side — no keys in client code.</p>
+      <button class="run-all-btn" onclick="runAll('music')">Run All</button>
+      <table class="test-table"><thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-music"></tbody></table>
+    </div>
+  </div>
+
+  <!-- GITHUB -->
+  <div id="tab-github" class="tab-section" style="display:none">
+    <div class="test-panel">
+      <h3>GitHub API</h3>
+      <p class="panel-desc">Tests GitHub API connectivity using the stored token from the secrets proxy. Checks rate limit and authenticated identity.</p>
+      <button class="run-all-btn" onclick="runAll('github')">Run All</button>
+      <table class="test-table"><thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-github"></tbody></table>
     </div>
   </div>
 
@@ -451,6 +475,18 @@ const TESTS = {
     { id:1, name:'OPTIONS preflight /api/sdk/proxy — not blocked',        fn: testProxyPreflight },
     { id:2, name:'Lichess health via proxy — POST returns response',       fn: testProxyLichess },
     { id:3, name:'Proxy response is valid JSON',                           fn: testProxyJson },
+  ],
+  'music': [
+    { id:1, name:'Apple Music: GET /api/tokens/apple-music → token present',     fn: testAppleMusicToken },
+    { id:2, name:'Apple Music: token is valid 3-part JWT',                        fn: testAppleMusicTokenValid },
+    { id:3, name:'Spotify debug: all steps pass (admin auth → secrets → token → api)', fn: testSpotifyDebug },
+    { id:4, name:'Spotify: get_token step — client credentials exchange ok',      fn: testSpotifyToken },
+    { id:5, name:'Spotify: test_api step — categories endpoint returns data',     fn: testSpotifyApi },
+  ],
+  'github': [
+    { id:1, name:'GitHub debug: all 5 steps pass (auth → project → token → rate limit → whoami)', fn: testGithubDebug },
+    { id:2, name:'GitHub: whoami step — token is valid, login returned',          fn: testGithubAuth },
+    { id:3, name:'GitHub: rate_limit step — show remaining/limit',                fn: testGithubRateLimit },
   ],
 };
 
@@ -833,6 +869,102 @@ async function testProxyJson() {
   if (cache.proxyText == null) return [null, 'skip — run test 2 first'];
   try { JSON.parse(cache.proxyText); return [true, cache.proxyText.slice(0,80)]; }
   catch { return [false, 'Not valid JSON: ' + cache.proxyText.slice(0,80)]; }
+}
+
+// ── Music tests ────────────────────────────────────────────────
+
+async function testAppleMusicToken() {
+  try {
+    const res = await vfetch(BASE + '/api/tokens/apple-music', {});
+    const d = res._data || {};
+    log('info', 'Apple Music token response', { status: res.status, hasToken: !!d.token, error: d.error || null });
+    if (!res.ok || !d.token) {
+      return [false, 'HTTP ' + res.status + ' — ' + (d.error || d.message || 'no token in response')];
+    }
+    cache.appleMusicToken = d.token;
+    return [true, 'Token received (' + d.token.length + ' chars)'];
+  } catch (e) { return [false, 'Network error: ' + e.message]; }
+}
+
+async function testAppleMusicTokenValid() {
+  const t = cache.appleMusicToken;
+  if (!t) return [null, 'skip — run test 1 first'];
+  const parts = t.split('.');
+  log('info', 'Apple Music JWT structure', { parts: parts.length, header: parts[0] ? parts[0].slice(0,20) + '...' : null });
+  if (parts.length === 3) return [true, 'Valid 3-part JWT'];
+  return [false, 'Expected 3 JWT segments, got ' + parts.length];
+}
+
+async function testSpotifyDebug() {
+  try {
+    const res = await vfetch(BASE + '/api/admin/debug-spotify', {});
+    const d = res._data || {};
+    const steps = d.steps || [];
+    log('info', 'Spotify debug steps', steps);
+    const failed = steps.filter(function(s) { return !s.ok; });
+    cache.spotifySteps = steps;
+    if (failed.length) {
+      return [false, 'Failed steps: ' + failed.map(function(s) { return s.step + '(' + (s.error || 'not ok') + ')'; }).join(', ')];
+    }
+    return [true, steps.length + ' steps all ok'];
+  } catch (e) { return [false, 'Network error: ' + e.message]; }
+}
+
+async function testSpotifyToken() {
+  const steps = cache.spotifySteps;
+  if (!steps) return [null, 'skip — run test 3 first'];
+  const s = steps.find(function(s) { return s.step === 'get_token'; });
+  if (!s) return [false, 'get_token step missing from response'];
+  log('info', 'Spotify get_token step', s);
+  if (!s.ok) return [false, 'get_token failed — HTTP ' + s.httpStatus + ': ' + (s.error || 'unknown')];
+  return [true, 'token_type=' + s.tokenType + ' expires_in=' + s.expiresIn + 's'];
+}
+
+async function testSpotifyApi() {
+  const steps = cache.spotifySteps;
+  if (!steps) return [null, 'skip — run test 3 first'];
+  const s = steps.find(function(s) { return s.step === 'test_api'; });
+  if (!s) return [false, 'test_api step missing from response'];
+  log('info', 'Spotify test_api step', s);
+  if (!s.ok) return [false, 'test_api failed — HTTP ' + s.httpStatus + ': ' + (s.error || 'unknown')];
+  return [true, 'HTTP ' + s.httpStatus + ' — itemCount=' + s.itemCount];
+}
+
+// ── GitHub tests ───────────────────────────────────────────────
+
+async function testGithubDebug() {
+  try {
+    const res = await vfetch(BASE + '/api/admin/debug-github', {});
+    const d = res._data || {};
+    const steps = d.steps || [];
+    log('info', 'GitHub debug steps', steps);
+    const failed = steps.filter(function(s) { return !s.ok; });
+    cache.githubSteps = steps;
+    if (failed.length) {
+      return [false, 'Failed steps: ' + failed.map(function(s) { return s.step + '(' + (s.error || 'not ok') + ')'; }).join(', ')];
+    }
+    return [true, steps.length + ' steps all ok'];
+  } catch (e) { return [false, 'Network error: ' + e.message]; }
+}
+
+async function testGithubAuth() {
+  const steps = cache.githubSteps;
+  if (!steps) return [null, 'skip — run test 1 first'];
+  const s = steps.find(function(s) { return s.step === 'whoami'; });
+  if (!s) return [false, 'whoami step missing from response'];
+  log('info', 'GitHub whoami step', s);
+  if (!s.ok) return [false, 'whoami failed — HTTP ' + s.httpStatus + ': ' + (s.error || 'unknown')];
+  return [true, 'login=' + s.login + (s.name ? ' (' + s.name + ')' : '') + (s.scopes ? ' scopes=[' + s.scopes + ']' : '')];
+}
+
+async function testGithubRateLimit() {
+  const steps = cache.githubSteps;
+  if (!steps) return [null, 'skip — run test 1 first'];
+  const s = steps.find(function(s) { return s.step === 'rate_limit'; });
+  if (!s) return [false, 'rate_limit step missing from response'];
+  log('info', 'GitHub rate_limit step', s);
+  if (!s.ok) return [false, 'rate_limit failed — HTTP ' + s.httpStatus + ': ' + (s.error || 'unknown')];
+  return [true, 'remaining=' + s.remaining + '/' + s.limit + ' resets=' + (s.resetAt || 'unknown')];
 }
 
 // ── Runner ─────────────────────────────────────────────────────
