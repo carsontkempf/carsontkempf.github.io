@@ -482,6 +482,8 @@ const TESTS = {
     { id:3, name:'Spotify debug: all steps pass (admin auth → secrets → token → api)', fn: testSpotifyDebug },
     { id:4, name:'Spotify: get_token step — client credentials exchange ok',      fn: testSpotifyToken },
     { id:5, name:'Spotify: test_api step — categories endpoint returns data',     fn: testSpotifyApi },
+    { id:6, name:'Spotify anon: /.netlify/functions/spotify-anon-token returns accessToken', fn: testSpotifyAnonToken },
+    { id:7, name:'Spotify anon: fetch playlist 37i9dQZF1E4nRfrCEsvZkU returns name', fn: testSpotifyAnonPlaylist },
   ],
   'github': [
     { id:1, name:'GitHub debug: all 5 steps pass (auth → project → token → rate limit → whoami)', fn: testGithubDebug },
@@ -928,6 +930,29 @@ async function testSpotifyApi() {
   log('info', 'Spotify test_api step', s);
   if (!s.ok) return [false, 'test_api failed — HTTP ' + s.httpStatus + ': ' + (s.error || 'unknown')];
   return [true, 'HTTP ' + s.httpStatus + ' — itemCount=' + s.itemCount];
+}
+
+async function testSpotifyAnonToken() {
+  log('info', 'REQUEST GET /.netlify/functions/spotify-anon-token');
+  const res = await fetch('/.netlify/functions/spotify-anon-token');
+  const data = await res.json().catch(function() { return {}; });
+  log('info', 'RESPONSE status=' + res.status + ' hasAccessToken=' + !!data.accessToken, data);
+  cache.anonSpotifyToken = data.accessToken || null;
+  if (!data.accessToken) return [false, 'No accessToken — body: ' + JSON.stringify(data).slice(0, 200)];
+  return [true, 'accessToken=' + data.accessToken.slice(0, 8) + '... expiresAt=' + data.accessTokenExpirationTimestampMs];
+}
+
+async function testSpotifyAnonPlaylist() {
+  if (!cache.anonSpotifyToken) return [null, 'skip — run test 6 first'];
+  var playlistId = '37i9dQZF1E4nRfrCEsvZkU';
+  log('info', 'REQUEST GET https://api.spotify.com/v1/playlists/' + playlistId);
+  var res = await fetch('https://api.spotify.com/v1/playlists/' + playlistId, {
+    headers: { Authorization: 'Bearer ' + cache.anonSpotifyToken }
+  });
+  var data = await res.json().catch(function() { return {}; });
+  log('info', 'RESPONSE status=' + res.status + ' name=' + data.name, data);
+  if (!res.ok || !data.name) return [false, (data.error && data.error.message) || 'status ' + res.status];
+  return [true, 'name=' + data.name + ' total=' + (data.tracks && data.tracks.total) + ' firstTrack=' + (data.tracks && data.tracks.items && data.tracks.items[0] && data.tracks.items[0].track && data.tracks.items[0].track.name)];
 }
 
 // ── GitHub tests ───────────────────────────────────────────────
