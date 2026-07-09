@@ -705,7 +705,7 @@ async function testFindSpamington() {
 
 async function testPbDebugRole() {
   try {
-    const res = await vfetch(BASE + '/api/admin/debug-pb-role?email=spamington607@gmail.com');
+    const res = await vfetch(BASE + '/api/admin/debug-pb-role?email=spamington607@gmail.com', {});
     const d = res._data || {};
     log('info', 'debug-pb-role steps', d.steps || []);
     const steps = d.steps || [];
