@@ -1,0 +1,89 @@
+<!-- Admin Testing FAB - Only visible to authenticated admin users -->
+<a id="admin-testing-fab" href="/testing/" class="admin-testing-fab" style="display: none;" title="Testing Dashboard">
+  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+  </svg>
+</a>
+
+<style>
+  .admin-testing-fab {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9999;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  .admin-testing-fab:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .admin-testing-fab:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+  }
+
+  .admin-testing-fab svg {
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  (function () {
+    'use strict';
+
+    function showFab() {
+      var fab = document.getElementById('admin-testing-fab');
+      if (fab) fab.style.display = 'flex';
+    }
+
+    async function checkAdmin() {
+      // Wait for authService to be available
+      if (typeof window.authService === 'undefined') return;
+
+      try {
+        var isAuthed = await window.authService.isAuthenticated();
+        if (!isAuthed) return;
+
+        var isAdmin = await window.authService.hasRole('admin');
+        if (isAdmin) {
+          showFab();
+        }
+      } catch (e) {
+        // Silently fail - button just won't show
+      }
+    }
+
+    // Listen for auth:ready event (fired by auth-service.js after init)
+    window.addEventListener('auth:ready', function (e) {
+      if (e.detail && e.detail.isAuthenticated) {
+        checkAdmin();
+      }
+    });
+
+    // Also try on DOMContentLoaded in case auth:ready already fired
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(checkAdmin, 500);
+      });
+    } else {
+      setTimeout(checkAdmin, 500);
+    }
+  })();
+</script>

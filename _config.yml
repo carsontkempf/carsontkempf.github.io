@@ -26,7 +26,8 @@ url: "https://carsontkempf.github.io" # the base hostname & protocol for your si
 repository: "carsontkempf/carsontkempf.github.io"
 github_username:  carsontkempf
 author: Carson Kempf
-version: 1.1.70
+version: 1.1.72
+logo: /assets/img/favicons/android-chrome-512x512.png
 
 safe: false
 show_downloads: false

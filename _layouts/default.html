@@ -36,6 +36,7 @@
     <script defer src="{{ '/assets/js/env-config.js' | relative_url }}"></script>
     {% unless page.no_auth %}
     <script defer src="{{ '/assets/js/auth.js' | relative_url }}"></script>
+    {% include components/ui/admin-testing-fab.html %}
     {% endunless %}
     <script defer src="{{ '/assets/js/apple-music-service.js' | relative_url }}"></script>
   </body>
