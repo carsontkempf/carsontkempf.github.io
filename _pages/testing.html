@@ -482,7 +482,7 @@ const TESTS = {
     { id:3, name:'Spotify debug: all steps pass (admin auth → secrets → token → api)', fn: testSpotifyDebug },
     { id:4, name:'Spotify: get_token step — client credentials exchange ok',      fn: testSpotifyToken },
     { id:5, name:'Spotify: test_api step — categories endpoint returns data',     fn: testSpotifyApi },
-    { id:6, name:'Spotify anon: /.netlify/functions/spotify-anon-token returns accessToken', fn: testSpotifyAnonToken },
+    { id:6, name:'Spotify token: cloudprototype.org/api/tokens/spotify-anon returns accessToken', fn: testSpotifyAnonToken },
     { id:7, name:'Spotify anon: fetch playlist 37i9dQZF1E4nRfrCEsvZkU returns name', fn: testSpotifyAnonPlaylist },
   ],
   'github': [
@@ -933,8 +933,8 @@ async function testSpotifyApi() {
 }
 
 async function testSpotifyAnonToken() {
-  log('info', 'REQUEST GET /.netlify/functions/spotify-anon-token');
-  const res = await fetch('/.netlify/functions/spotify-anon-token');
+  log('info', 'REQUEST GET https://cloudprototype.org/api/tokens/spotify-anon');
+  const res = await fetch('https://cloudprototype.org/api/tokens/spotify-anon');
   const data = await res.json().catch(function() { return {}; });
   log('info', 'RESPONSE status=' + res.status + ' hasAccessToken=' + !!data.accessToken, data);
   cache.anonSpotifyToken = data.accessToken || null;
