@@ -368,7 +368,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Wait for Auth0 to be ready, then auto-connect
-    document.addEventListener('authReady', async () => {
+    window.addEventListener('auth:ready', async (event) => {
         if (window.authService && window.authService.isAuthenticated) {
             const hasAccess = window.authService.hasRole(['Admin', 'Writer']);
             if (hasAccess) {

@@ -30,12 +30,12 @@ async function waitForAuth() {
 
         const checkAuth = () => {
             if (window.authService && window.authService.hasRole) {
-                document.removeEventListener('authReady', checkAuth);
+                window.removeEventListener('auth:ready', checkAuth);
                 resolve(window.authService);
             }
         };
 
-        document.addEventListener('authReady', checkAuth);
+        window.addEventListener('auth:ready', checkAuth);
 
         // Fallback timeout check
         const interval = setInterval(() => {

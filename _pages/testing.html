@@ -1021,6 +1021,18 @@ async function testMusicKitConfigure() {
   var token = cache.appleMusicEnvToken || cache.appleMusicToken;
   if (!token) return [null, 'skip — no developer token (run tests 1 and 10 first)'];
   try {
+    await new Promise(function(resolve, reject) {
+      if (typeof window.MusicKit.configure === 'function') return resolve();
+      var timeout = setTimeout(function() { reject(new Error('musickitloaded timed out after 10s')); }, 10000);
+      document.addEventListener('musickitloaded', function() {
+        clearTimeout(timeout);
+        resolve();
+      }, { once: true });
+    });
+  } catch(e) {
+    return [false, 'MusicKit never became ready: ' + e.message];
+  }
+  try {
     await MusicKit.configure({
       developerToken: token,
       app: { name: 'TestDiag', build: '1.0.0', version: '1.0.0' },

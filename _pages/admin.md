@@ -97,7 +97,7 @@ async function submitManualPat() {
     }
 }
 
-document.addEventListener('authReady', async () => {
+window.addEventListener('auth:ready', async (event) => {
     const isAuthenticated = window.authService?.isAuthenticated;
 
     if (!isAuthenticated) {
