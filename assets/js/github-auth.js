@@ -408,5 +408,9 @@ function updateGitHubUI(connected, errorMessage = null) {
             status.textContent = errorMessage || 'Not connected';
             status.style.color = '#dc3545';
         }
+        const patForm = document.getElementById('github-pat-form');
+        if (patForm && errorMessage && errorMessage.includes('not configured')) {
+            patForm.style.display = 'block';
+        }
     }
 }

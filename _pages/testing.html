@@ -249,6 +249,7 @@ table.test-table tr:nth-child(even) td { background: var(--t-row-bg); }
     <button class="tab-btn" onclick="switchTab('sdk-proxy',this)">SDK Proxy</button>
     <button class="tab-btn" onclick="switchTab('music',this)">Music</button>
     <button class="tab-btn" onclick="switchTab('github',this)">GitHub</button>
+    <button class="tab-btn" onclick="switchTab('admin',this)">Admin</button>
   </div>
 
   <!-- AUTH SDK -->
@@ -325,6 +326,17 @@ table.test-table tr:nth-child(even) td { background: var(--t-row-bg); }
       <button class="run-all-btn" onclick="runAll('github')">Run All</button>
       <table class="test-table"><thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
         <tbody id="tbody-github"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="tab-admin" class="tab-section" style="display:none">
+    <div class="test-panel">
+      <h3>Admin Page</h3>
+      <p class="panel-desc">Diagnoses the /admin GitHub connection flow. Tests auth status, PAT retrieval from PocketBase, repo access, and push permissions. Must be logged in to github.io first.</p>
+      <button class="run-all-btn" onclick="runAll('admin')">Run All</button>
+      <table class="test-table"><thead><tr><th>#</th><th>Test</th><th>Status</th><th>Detail</th><th></th></tr></thead>
+        <tbody id="tbody-admin"></tbody></table>
     </div>
   </div>
 
@@ -494,6 +506,13 @@ const TESTS = {
     { id:1, name:'GitHub debug: all 5 steps pass (auth → project → token → rate limit → whoami)', fn: testGithubDebug },
     { id:2, name:'GitHub: whoami step — token is valid, login returned',          fn: testGithubAuth },
     { id:3, name:'GitHub: rate_limit step — show remaining/limit',                fn: testGithubRateLimit },
+  ],
+  'admin': [
+    { id:1, name:'Admin: user is authenticated (authService.isAuthenticated)',              fn: testAdminAuth },
+    { id:2, name:'Admin: GET /api/proxy/github-token returns token (PAT in PocketBase)',   fn: testAdminGithubToken },
+    { id:3, name:'Admin: GitHub PAT valid — repo access via GitHub API',                   fn: testAdminGithubAccess },
+    { id:4, name:'Admin: _posts/ listable on gh-pages branch',                             fn: testAdminListPosts },
+    { id:5, name:'Admin: push access confirmed (permissions.push = true)',                  fn: testAdminPushAccess },
   ],
 };
 
@@ -986,15 +1005,15 @@ async function testAppleMusicEnvConfig() {
   log('info', 'envConfig Apple Music', {
     envConfigExists: !!envCfg,
     hasFn: hasFn,
-    hasToken: !!(cfg && cfg.developerToken),
-    tokenLength: cfg && cfg.developerToken ? cfg.developerToken.length : 0,
-    tokenPreview: cfg && cfg.developerToken ? cfg.developerToken.slice(0, 30) + '...' : null
+    hasToken: !!(cfg && cfg.developer_token),
+    tokenLength: cfg && cfg.developer_token ? cfg.developer_token.length : 0,
+    tokenPreview: cfg && cfg.developer_token ? cfg.developer_token.slice(0, 30) + '...' : null
   });
   if (!envCfg) return [false, 'window.envConfig is undefined — env-config.js not loaded'];
   if (!hasFn) return [false, 'getAppleMusicConfig() method missing from envConfig'];
-  if (!cfg || !cfg.developerToken) return [false, 'developerToken missing — check _data/apple_music_token.yml'];
-  cache.appleMusicEnvToken = cfg.developerToken;
-  return [true, 'token present (' + cfg.developerToken.length + ' chars)'];
+  if (!cfg || !cfg.developer_token) return [false, 'developer_token missing — check env-config'];
+  cache.appleMusicEnvToken = cfg.developer_token;
+  return [true, 'token present (' + cfg.developer_token.length + ' chars)'];
 }
 
 async function testMusicKitConfigure() {
@@ -1117,6 +1136,63 @@ async function runAll(tab) {
     await runOne(tab, TESTS[tab][i].id);
   }
   if (btn) btn.disabled = false;
+}
+
+// ── Admin tests ────────────────────────────────────────────────
+
+var adminGithubToken = null;
+var adminRepoData = null;
+
+async function testAdminAuth() {
+  var svc = window.authService;
+  if (!svc) return [false, 'window.authService not found'];
+  if (!svc.isAuthenticated) return ['skip', 'not authenticated — log in to github.io first'];
+  var user = await svc.getUser();
+  log('info', 'auth user', { email: user && user.email, role: user && user.role });
+  return [true, 'authenticated as ' + ((user && user.email) || 'unknown')];
+}
+
+async function testAdminGithubToken() {
+  var token = localStorage.getItem('learn_auth_token');
+  if (!token) return ['skip', 'no learn_auth_token in localStorage — log in first'];
+  var res = await fetch('https://cloudprototype.org/api/proxy/github-token', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  var body = await res.json();
+  log('info', 'github token response', { status: res.status, hasToken: !!body.token, error: body.error });
+  if (!res.ok) return [false, res.status + ': ' + (body.error || 'error') + ' — PAT not stored in PocketBase'];
+  adminGithubToken = body.token;
+  return [true, 'token received (' + body.token.length + ' chars)'];
+}
+
+async function testAdminGithubAccess() {
+  if (!adminGithubToken) return ['skip', 'run test 2 first'];
+  var res = await fetch('https://api.github.com/repos/carsontkempf/carsontkempf.github.io', {
+    headers: { 'Authorization': 'Bearer ' + adminGithubToken, 'Accept': 'application/vnd.github+json' }
+  });
+  var data = await res.json();
+  log('info', 'repo data', { status: res.status, permissions: data.permissions });
+  if (!res.ok) return [false, 'GitHub API ' + res.status + ': ' + (data.message || 'error')];
+  adminRepoData = data;
+  return [true, 'accessible, perms: ' + JSON.stringify(data.permissions)];
+}
+
+async function testAdminListPosts() {
+  if (!adminGithubToken) return ['skip', 'run test 2 first'];
+  var res = await fetch('https://api.github.com/repos/carsontkempf/carsontkempf.github.io/contents/_posts?ref=gh-pages', {
+    headers: { 'Authorization': 'Bearer ' + adminGithubToken, 'Accept': 'application/vnd.github+json' }
+  });
+  var data = await res.json();
+  if (!res.ok) return [false, 'GitHub API ' + res.status + ': ' + (data.message || 'error')];
+  var files = Array.isArray(data) ? data : [];
+  log('info', '_posts listing', { count: files.length, sample: files.slice(0, 3).map(function(f) { return f.name; }) });
+  return [true, files.length + ' items in _posts/'];
+}
+
+async function testAdminPushAccess() {
+  if (!adminRepoData) return ['skip', 'run test 3 first'];
+  var hasPush = !!(adminRepoData.permissions && adminRepoData.permissions.push);
+  return [hasPush, hasPush ? 'push confirmed' : 'no push — token is read-only'];
 }
 
 // ── Tab switching ──────────────────────────────────────────────

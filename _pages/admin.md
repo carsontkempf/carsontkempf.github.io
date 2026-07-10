@@ -15,6 +15,14 @@ permalink: /admin/
 <div id="admin-content-wrapper" style="display: none;">
     <div id="github-auth-section" style="background: rgba(0, 0, 0, 0.03); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: center;">
         <p id="github-status" style="font-size: 1rem; color: #666; margin: 0;">Connecting to GitHub...</p>
+        <div id="github-pat-form" style="display:none; margin-top:1rem; text-align:left;">
+            <p style="font-size:0.85rem; color:#666; margin-bottom:0.5rem;">
+                GitHub token not configured. Enter a Personal Access Token with <code>repo</code> scope:
+            </p>
+            <input type="password" id="github-pat-input" placeholder="ghp_..."
+                   style="width:100%; padding:0.5rem; margin-bottom:0.5rem; border:1px solid #ccc; border-radius:4px; font-size:0.9rem; box-sizing:border-box;">
+            <button onclick="submitManualPat()">Connect with PAT</button>
+        </div>
     </div>
 
     <div id="admin-tabs" style="display: none;">
@@ -74,6 +82,21 @@ permalink: /admin/
 </div>
 
 <script>
+async function submitManualPat() {
+    const pat = document.getElementById('github-pat-input').value.trim();
+    if (!pat) return;
+    const status = document.getElementById('github-status');
+    status.textContent = 'Connecting...';
+    status.style.color = '#666';
+    try {
+        await window.githubService.login(pat);
+        updateGitHubUI(true);
+    } catch (e) {
+        status.textContent = e.message;
+        status.style.color = '#dc3545';
+    }
+}
+
 document.addEventListener('authReady', async () => {
     const isAuthenticated = window.authService?.isAuthenticated;
 

@@ -783,14 +783,12 @@ function initializeServices() {
 async function initializeAppleMusicService() {
     try {
         console.log('Starting Apple Music service initialization...');
-        const appleMusicConfig = window.envConfig.getAppleMusicConfig();
-        if (appleMusicConfig && appleMusicConfig.developer_token) {
-            await window.appleMusicService.initialize(appleMusicConfig.developer_token);
-            console.log('Apple Music service initialized successfully');
-            updateAppleMusicUI();
-        } else {
-            console.warn('Apple Music developer token not configured');
-        }
+        const tokenRes = await fetch('https://cloudprototype.org/api/tokens/apple-music');
+        const tokenData = await tokenRes.json();
+        if (!tokenData.token) throw new Error('Failed to fetch Apple Music developer token from server');
+        await window.appleMusicService.initialize(tokenData.token);
+        console.log('Apple Music service initialized successfully');
+        updateAppleMusicUI();
     } catch (error) {
         console.error('Failed to initialize Apple Music:', error);
     }

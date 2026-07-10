@@ -74,26 +74,20 @@ class AppleMusicService {
     }
 
     /**
-     * Wait for MusicKit to be loaded
+     * Wait for MusicKit to be loaded and configure() to be available.
+     * MusicKit v1 CDN sets window.MusicKit as a stub immediately but only
+     * attaches configure() after firing the 'musickitloaded' event on document.
      */
     async waitForMusicKit() {
-        const maxAttempts = 50;
-        let attempts = 0;
-        
         return new Promise((resolve, reject) => {
-            const checkMusicKit = () => {
-                attempts++;
-                console.log(`Checking MusicKit attempt ${attempts}: available=${!!window.MusicKit}`);
-                
-                if (window.MusicKit) {
-                    resolve();
-                } else if (attempts >= maxAttempts) {
-                    reject(new Error('MusicKit failed to load'));
-                } else {
-                    setTimeout(checkMusicKit, 100);
-                }
-            };
-            checkMusicKit();
+            if (window.MusicKit && typeof window.MusicKit.configure === 'function') {
+                return resolve();
+            }
+            const timeout = setTimeout(() => reject(new Error('MusicKit failed to load')), 10000);
+            document.addEventListener('musickitloaded', () => {
+                clearTimeout(timeout);
+                resolve();
+            }, { once: true });
         });
     }
 
