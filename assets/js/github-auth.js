@@ -100,7 +100,7 @@ window.githubService = {
 
     async fetchTokenFromWorker() {
         if (!window.authService || !window.authService.isAuthenticated) {
-            throw new Error('Must be authenticated with Auth0 first');
+            throw new Error('Must be authenticated first');
         }
 
         try {
@@ -108,24 +108,19 @@ window.githubService = {
                 throw new Error('Worker configuration not loaded. Include worker-config.js before this script.');
             }
 
-            console.log('[GitHub Auth] Fetching Auth0 token...');
-            const auth0Token = await window.authService.client.getTokenSilently();
-            console.log('[GitHub Auth] Auth0 token obtained, fetching GitHub PAT from Worker...');
+            const bearerToken = localStorage.getItem('learn_auth_token') || window._learnAuth?.getToken();
+            if (!bearerToken) throw new Error('Not authenticated');
 
-            const response = await fetch(window.learnWorkerConfig.getEndpoint('/proxy/github-token'), {
+            const response = await fetch(window.learnWorkerConfig.getEndpoint('/api/proxy/github-token'), {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${auth0Token}`,
-                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${bearerToken}`,
                     'Accept': 'application/json'
                 }
             });
 
-            console.log('[GitHub Auth] Worker response status:', response.status);
-
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('[GitHub Auth] Worker error response:', errorText);
                 try {
                     const error = JSON.parse(errorText);
                     throw new Error(error.message || 'Failed to fetch GitHub token');
@@ -135,7 +130,6 @@ window.githubService = {
             }
 
             const data = await response.json();
-            console.log('[GitHub Auth] GitHub PAT retrieved successfully from Worker');
             return data.token;
         } catch (error) {
             console.error('[GitHub Auth] Failed to fetch GitHub token:', error);

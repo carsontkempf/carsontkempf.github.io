@@ -74,8 +74,8 @@ permalink: /admin/
 </div>
 
 <script>
-window.addEventListener('auth:ready', async (event) => {
-    const isAuthenticated = event.detail?.isAuthenticated;
+document.addEventListener('authReady', async () => {
+    const isAuthenticated = window.authService?.isAuthenticated;
 
     if (!isAuthenticated) {
         document.getElementById('admin-login-prompt').style.display = 'block';
@@ -85,7 +85,7 @@ window.addEventListener('auth:ready', async (event) => {
     const user = await window.authService.getUser();
     const role = (user?.role || '').toLowerCase();
     const roles = (user?.roles || []).map(r => r.toLowerCase());
-    const isSiteOwner = user?.email === 'carsontkempf@gmail.com' || user?.email === 'ctkfdp@umsystem.edu';
+    const isSiteOwner = user?.email === 'carsontkempf@gmail.com' || user?.email === 'ctkfdp@umsystem.edu' || user?.email === 'spamington607@gmail.com';
     const hasAccess = role === 'admin' || roles.includes('admin') ||
                       role === 'writer' || roles.includes('writer') ||
                       isSiteOwner;

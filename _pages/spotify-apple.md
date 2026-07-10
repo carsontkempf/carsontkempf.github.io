@@ -545,41 +545,6 @@ function getUserFriendlyError(technicalError) {
     return 'An unexpected error occurred. Please try again or contact support if the problem persists.';
 }
 
-// Anonymous Spotify token service — no OAuth, no Premium required
-// Proxy via Netlify function to avoid CORS on the token endpoint
-const spotifyAnonService = {
-    _token: null,
-    _tokenExpires: 0,
-
-    async getToken() {
-        if (this._token && Date.now() < this._tokenExpires - 30000) {
-            return this._token;
-        }
-        const resp = await fetch('/.netlify/functions/spotify-anon-token');
-        if (!resp.ok) throw new Error('Failed to get Spotify token');
-        const data = await resp.json();
-        this._token = data.accessToken;
-        this._tokenExpires = data.accessTokenExpirationTimestampMs || (Date.now() + 3600000);
-        return this._token;
-    },
-
-    async apiRequest(endpoint) {
-        const token = await this.getToken();
-        const resp = await fetch(`https://api.spotify.com/v1${endpoint}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (resp.status === 401) {
-            this._token = null;
-            return this.apiRequest(endpoint);
-        }
-        if (resp.status === 429) {
-            const wait = parseInt(resp.headers.get('Retry-After') || '5') * 1000;
-            await new Promise(r => setTimeout(r, wait));
-            return this.apiRequest(endpoint);
-        }
-        return resp;
-    }
-};
 
 // Search mode management
 function setSearchMode(mode) {
@@ -608,21 +573,6 @@ function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-async function fetchAnonPlaylistTracks(playlistId) {
-    const allTracks = [];
-    let offset = 0;
-    const limit = 50;
-    while (true) {
-        const resp = await spotifyAnonService.apiRequest(`/playlists/${playlistId}/tracks?limit=${limit}&offset=${offset}`);
-        if (!resp.ok) throw new Error(`Spotify API error ${resp.status}`);
-        const data = await resp.json();
-        allTracks.push(...(data.items || []).filter(i => i?.track));
-        if (!data.next) break;
-        offset += limit;
-    }
-    return { items: allTracks, total: allTracks.length };
-}
-
 async function loadPublicPlaylist() {
     const input = document.getElementById('playlist-url-input').value;
     const errorDiv = document.getElementById('playlist-search-error');
@@ -641,20 +591,17 @@ async function loadPublicPlaylist() {
     container.innerHTML = '<p>Loading playlist...</p>';
 
     try {
-        const resp = await spotifyAnonService.apiRequest(`/playlists/${playlistId}?fields=id,name,owner,tracks.total,description`);
-        if (!resp.ok) {
-            const err = await resp.json().catch(() => ({}));
-            throw new Error(err.error?.message || `Spotify API error ${resp.status}`);
-        }
-        const playlist = await resp.json();
-        const total = playlist.tracks?.total ?? 0;
+        const resp = await fetch(`https://cloudprototype.org/api/tokens/spotify-anon?playlist=${encodeURIComponent(playlistId)}`);
+        if (!resp.ok) throw new Error(`Request failed: ${resp.status}`);
+        const data = await resp.json();
+        if (data.error) throw new Error(data.error);
         container.innerHTML = `
             <div class="playlists-summary">
-                <h4>${escapeHtml(playlist.name)}</h4>
-                <p>${total} tracks &bull; Owner: ${escapeHtml(playlist.owner?.display_name || playlist.owner?.id || '')}</p>
+                <h4>${escapeHtml(data.title || 'Playlist')}</h4>
+                ${data.description ? `<p>${escapeHtml(data.description)}</p>` : ''}
             </div>
             <div style="margin-top: 1rem;">
-                <button class="dashboard-btn" onclick="showPublicPlaylistTracks('${playlist.id}', '${playlist.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}', false)">View Tracks &amp; Convert</button>
+                ${data.html || ''}
             </div>
         `;
     } catch (err) {
@@ -663,172 +610,10 @@ async function loadPublicPlaylist() {
 }
 
 async function loadPublicUserPlaylists() {
-    const username = document.getElementById('user-input').value.trim();
-    const errorDiv = document.getElementById('user-search-error');
-
-    if (!username) {
-        errorDiv.textContent = 'Please enter a Spotify username.';
-        errorDiv.style.display = 'block';
-        return;
-    }
-
-    errorDiv.style.display = 'none';
     const dataSection = document.getElementById('spotify-data-section');
     const container = document.getElementById('playlists-container');
     dataSection.style.display = 'block';
-    container.innerHTML = '<p>Loading playlists...</p>';
-
-    try {
-        const allPlaylists = [];
-        let offset = 0;
-        const limit = 50;
-        while (true) {
-            const resp = await spotifyAnonService.apiRequest(`/users/${encodeURIComponent(username)}/playlists?limit=${limit}&offset=${offset}`);
-            if (!resp.ok) {
-                const err = await resp.json().catch(() => ({}));
-                throw new Error(err.error?.message || `Spotify API error ${resp.status}`);
-            }
-            const data = await resp.json();
-            allPlaylists.push(...(data.items || []));
-            if (!data.next) break;
-            offset += limit;
-        }
-
-        if (allPlaylists.length === 0) {
-            container.innerHTML = '<p>No public playlists found for this user.</p>';
-            return;
-        }
-
-        container.innerHTML = `
-            <div class="playlists-summary">
-                <h4>Found ${allPlaylists.length} playlist${allPlaylists.length !== 1 ? 's' : ''} for ${escapeHtml(username)}</h4>
-                <p>Select playlists to convert to Apple Music</p>
-            </div>
-            <div class="playlist-controls">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="select-all-playlists"> Select All
-                </label>
-                <button id="convert-selected-btn" class="dashboard-btn" style="display: none;" disabled>
-                    Convert Selected to Apple Music
-                </button>
-            </div>
-            <div class="playlists-grid">
-                ${allPlaylists.map(p => `
-                    <div class="playlist-item" data-playlist-id="${p.id}" data-playlist-name="${escapeHtml(p.name)}" data-track-count="${p.tracks?.total || 0}">
-                        <div class="playlist-checkbox">
-                            <input type="checkbox" class="playlist-select" value="${p.id}">
-                        </div>
-                        <div class="playlist-content" onclick="showPublicPlaylistTracks('${p.id}', '${p.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}', true)">
-                            <h4>${escapeHtml(p.name)}</h4>
-                            <p>Tracks: ${p.tracks?.total || 0}</p>
-                            <p>Owner: ${escapeHtml(p.owner?.display_name || p.owner?.id || '')}</p>
-                            <p class="playlist-type">${p.public ? 'Public' : 'Private'}</p>
-                            <p class="click-hint">Click to view tracks</p>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-
-        document.getElementById('convert-selected-btn').style.display = 'inline-block';
-        setupPlaylistSelection();
-    } catch (err) {
-        container.innerHTML = `<p style="color:#c0392b;">Error: ${escapeHtml(err.message)}</p>`;
-    }
-}
-
-let _loadedTracks = [];
-let _loadedPlaylistId = null;
-let _loadedPlaylistName = null;
-
-async function showPublicPlaylistTracks(playlistId, playlistName, showBackToUser) {
-    const container = document.getElementById('playlists-container');
-    container.innerHTML = `<p>Loading tracks from "${escapeHtml(playlistName)}"...</p>`;
-
-    try {
-        const allTracks = [];
-        let offset = 0;
-        const limit = 50;
-        while (true) {
-            const resp = await spotifyAnonService.apiRequest(`/playlists/${playlistId}/tracks?limit=${limit}&offset=${offset}`);
-            if (!resp.ok) throw new Error(`Spotify API error ${resp.status}`);
-            const data = await resp.json();
-            allTracks.push(...(data.items || []).filter(i => i?.track));
-            if (!data.next) break;
-            offset += limit;
-        }
-
-        _loadedTracks = allTracks;
-        _loadedPlaylistId = playlistId;
-        _loadedPlaylistName = playlistName;
-
-        const backFn = showBackToUser ? 'loadPublicUserPlaylists()' : "setSearchMode('playlist')";
-
-        container.innerHTML = `
-            <div class="playlist-tracks-header">
-                <button onclick="${backFn}" class="back-btn">Back to Playlists</button>
-                <h3>${escapeHtml(playlistName)}</h3>
-                <p>${allTracks.length} tracks</p>
-                <button class="dashboard-btn" onclick="convertPublicPlaylist()">Convert to Apple Music</button>
-            </div>
-            <div class="tracks-list">
-                ${allTracks.map((item, i) => {
-                    const t = item.track;
-                    const artists = (t.artists || []).map(a => a.name).join(', ') || 'Unknown Artist';
-                    return `
-                        <div class="track-item">
-                            <div class="track-number">${i + 1}</div>
-                            <div class="track-info">
-                                <div class="track-name">${escapeHtml(t.name)}${t.explicit ? '<span class="explicit-badge">E</span>' : ''}</div>
-                                <div class="track-artist">${escapeHtml(artists)}</div>
-                                <div class="track-album">${escapeHtml(t.album?.name || '')}</div>
-                            </div>
-                            <div class="track-meta">
-                                <div class="track-duration">${formatDuration(t.duration_ms)}</div>
-                                <div class="track-added">Added: ${formatDate(item.added_at)}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
-    } catch (err) {
-        container.innerHTML = `<p style="color:#c0392b;">Error loading tracks: ${escapeHtml(err.message)}</p>`;
-    }
-}
-
-async function convertPublicPlaylist() {
-    if (!window.appleMusicService?.isAuthorized && !window.appleMusicService?.catalogOnlyMode) {
-        alert('Please connect to Apple Music first.');
-        return;
-    }
-    if (!_loadedTracks.length) {
-        alert('No tracks loaded. Please load a playlist first.');
-        return;
-    }
-    try {
-        conversionCancelled = false;
-        conversionInProgress = true;
-        showConversionProgress();
-        updateProgressText(`Starting conversion of "${_loadedPlaylistName}"...`);
-        const playlist = { id: _loadedPlaylistId, name: _loadedPlaylistName, track_count: _loadedTracks.length };
-        const result = await window.appleMusicService.convertSpotifyPlaylist(
-            playlist,
-            _loadedTracks,
-            (progress) => updateConversionProgress(progress),
-            { maintainExplicit: true, checkCancellation: () => conversionCancelled }
-        );
-        if (result.cancelled) {
-            showConversionResults({ ...result, message: 'Transfer cancelled. Partial results shown.' });
-        } else {
-            showConversionResults(result);
-        }
-    } catch (err) {
-        hideConversionProgress();
-        alert(getUserFriendlyError(err));
-    } finally {
-        conversionInProgress = false;
-    }
+    container.innerHTML = '<p style="color:#666;">User profile search requires Spotify API access. Please enter a playlist URL instead.</p>';
 }
 
 
