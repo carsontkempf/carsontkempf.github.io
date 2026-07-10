@@ -484,6 +484,11 @@ const TESTS = {
     { id:5, name:'Spotify: oembed_health.title present',                          fn: testSpotifyOembedTitle },
     { id:6, name:'Spotify proxy: /api/tokens/spotify-anon health check returns ok', fn: testSpotifyAnonToken },
     { id:7, name:'Spotify oEmbed: playlist 37i9dQZF1E4nRfrCEsvZkU returns title', fn: testSpotifyAnonPlaylist },
+    { id:8,  name:'Apple Music: window.MusicKit CDN loaded',                          fn: testMusicKitLoaded },
+    { id:9,  name:'Apple Music: window.appleMusicService instance exists',             fn: testAppleMusicServiceExists },
+    { id:10, name:'Apple Music: window.envConfig.getAppleMusicConfig() returns token', fn: testAppleMusicEnvConfig },
+    { id:11, name:'Apple Music: MusicKit.configure() with JWT — no throw',             fn: testMusicKitConfigure },
+    { id:12, name:'Apple Music: MusicKit.getInstance() usable after configure',        fn: testMusicKitInstance },
   ],
   'github': [
     { id:1, name:'GitHub debug: all 5 steps pass (auth → project → token → rate limit → whoami)', fn: testGithubDebug },
@@ -948,6 +953,87 @@ async function testSpotifyAnonPlaylist() {
   log('info', 'RESPONSE status=' + res.status + ' title=' + data.title, data);
   if (!res.ok || !data.title) return [false, 'No title — ' + JSON.stringify(data).slice(0, 200)];
   return [true, 'title=' + data.title];
+}
+
+async function testMusicKitLoaded() {
+  var loaded = typeof window.MusicKit !== 'undefined';
+  log('info', 'MusicKit CDN status', {
+    windowMusicKit: loaded,
+    type: typeof window.MusicKit,
+    keys: loaded ? Object.keys(window.MusicKit).slice(0, 10) : []
+  });
+  if (!loaded) return [false, 'window.MusicKit is undefined — CDN script may be blocked'];
+  return [true, 'MusicKit loaded, version=' + (window.MusicKit.version || 'unknown')];
+}
+
+async function testAppleMusicServiceExists() {
+  var svc = window.appleMusicService;
+  log('info', 'appleMusicService status', {
+    exists: !!svc,
+    isInitialized: svc ? svc.isInitialized : null,
+    isAuthorized: svc ? svc.isAuthorized : null,
+    hasMusicKit: svc ? !!svc.musicKit : null,
+    hasDeveloperToken: svc ? !!svc.developerToken : null
+  });
+  if (!svc) return [false, 'window.appleMusicService is undefined — apple-music-service.js not loaded'];
+  return [true, 'exists, isInitialized=' + svc.isInitialized + ' isAuthorized=' + svc.isAuthorized];
+}
+
+async function testAppleMusicEnvConfig() {
+  var envCfg = window.envConfig;
+  var hasFn = envCfg && typeof envCfg.getAppleMusicConfig === 'function';
+  var cfg = hasFn ? envCfg.getAppleMusicConfig() : null;
+  log('info', 'envConfig Apple Music', {
+    envConfigExists: !!envCfg,
+    hasFn: hasFn,
+    hasToken: !!(cfg && cfg.developerToken),
+    tokenLength: cfg && cfg.developerToken ? cfg.developerToken.length : 0,
+    tokenPreview: cfg && cfg.developerToken ? cfg.developerToken.slice(0, 30) + '...' : null
+  });
+  if (!envCfg) return [false, 'window.envConfig is undefined — env-config.js not loaded'];
+  if (!hasFn) return [false, 'getAppleMusicConfig() method missing from envConfig'];
+  if (!cfg || !cfg.developerToken) return [false, 'developerToken missing — check _data/apple_music_token.yml'];
+  cache.appleMusicEnvToken = cfg.developerToken;
+  return [true, 'token present (' + cfg.developerToken.length + ' chars)'];
+}
+
+async function testMusicKitConfigure() {
+  if (typeof window.MusicKit === 'undefined') return [null, 'skip — MusicKit not loaded (test 8)'];
+  var token = cache.appleMusicEnvToken || cache.appleMusicToken;
+  if (!token) return [null, 'skip — no developer token (run tests 1 and 10 first)'];
+  try {
+    await MusicKit.configure({
+      developerToken: token,
+      app: { name: 'TestDiag', build: '1.0.0', version: '1.0.0' },
+      debug: true,
+      suppressErrorDialog: true
+    });
+    log('info', 'MusicKit.configure() succeeded');
+    cache.musicKitConfigured = true;
+    return [true, 'configure() completed without error'];
+  } catch (e) {
+    log('info', 'MusicKit.configure() threw', { message: e.message, name: e.name, stack: e.stack });
+    cache.musicKitConfigured = false;
+    return [false, 'configure() threw: ' + e.name + ': ' + e.message];
+  }
+}
+
+async function testMusicKitInstance() {
+  if (!cache.musicKitConfigured) return [null, 'skip — MusicKit not configured (test 11)'];
+  try {
+    var music = MusicKit.getInstance();
+    log('info', 'MusicKit.getInstance()', {
+      exists: !!music,
+      isAuthorized: music ? music.isAuthorized : null,
+      authorizationStatus: music ? music.authorizationStatus : null,
+      hasAuthorize: music ? typeof music.authorize === 'function' : null
+    });
+    if (!music) return [false, 'getInstance() returned null/undefined'];
+    return [true, 'instance ok, isAuthorized=' + music.isAuthorized + ' authStatus=' + music.authorizationStatus];
+  } catch (e) {
+    log('info', 'MusicKit.getInstance() threw', { message: e.message });
+    return [false, 'getInstance() threw: ' + e.message];
+  }
 }
 
 // ── GitHub tests ───────────────────────────────────────────────

@@ -99,19 +99,27 @@ window.githubService = {
     },
 
     async fetchTokenFromWorker() {
+        console.log('[GitHub Auth] fetchTokenFromWorker: start');
+        console.log('[GitHub Auth] authService exists:', !!window.authService, 'isAuthenticated:', window.authService?.isAuthenticated);
+
         if (!window.authService || !window.authService.isAuthenticated) {
             throw new Error('Must be authenticated first');
         }
 
         try {
+            console.log('[GitHub Auth] learnWorkerConfig exists:', !!window.learnWorkerConfig);
             if (!window.learnWorkerConfig) {
                 throw new Error('Worker configuration not loaded. Include worker-config.js before this script.');
             }
 
             const bearerToken = localStorage.getItem('learn_auth_token') || window._learnAuth?.getToken();
-            if (!bearerToken) throw new Error('Not authenticated');
+            console.log('[GitHub Auth] bearer token present:', !!bearerToken, 'length:', bearerToken?.length || 0);
+            if (!bearerToken) throw new Error('Not authenticated — learn_auth_token not in localStorage');
 
-            const response = await fetch(window.learnWorkerConfig.getEndpoint('/api/proxy/github-token'), {
+            const endpoint = window.learnWorkerConfig.getEndpoint('/api/proxy/github-token');
+            console.log('[GitHub Auth] fetching endpoint:', endpoint);
+
+            const response = await fetch(endpoint, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${bearerToken}`,
@@ -119,20 +127,24 @@ window.githubService = {
                 }
             });
 
+            console.log('[GitHub Auth] response status:', response.status, response.statusText);
+
             if (!response.ok) {
                 const errorText = await response.text();
+                console.error('[GitHub Auth] error body:', errorText);
                 try {
                     const error = JSON.parse(errorText);
-                    throw new Error(error.message || 'Failed to fetch GitHub token');
+                    throw new Error(error.error || error.message || 'Failed to fetch GitHub token');
                 } catch (parseError) {
-                    throw new Error(`Failed to fetch GitHub token. Status: ${response.status}, Response: ${errorText}`);
+                    throw new Error(`Failed to fetch GitHub token. Status: ${response.status}, Body: ${errorText}`);
                 }
             }
 
             const data = await response.json();
+            console.log('[GitHub Auth] token received, length:', data.token?.length || 0);
             return data.token;
         } catch (error) {
-            console.error('[GitHub Auth] Failed to fetch GitHub token:', error);
+            console.error('[GitHub Auth] fetchTokenFromWorker failed:', error.message);
             throw error;
         }
     },
@@ -382,6 +394,11 @@ function updateGitHubUI(connected, errorMessage = null) {
     if (connected) {
         authSection.style.display = 'none';
         if (tabs) tabs.style.display = 'block';
+
+        // Init editor now that the textarea is visible
+        if (window.articleManager && !window.articleManager.editor) {
+            window.articleManager.initEditor();
+        }
 
         // Load data
         if (window.videoManager) window.videoManager.loadVideos();

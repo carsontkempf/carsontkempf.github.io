@@ -104,11 +104,6 @@ document.addEventListener('authReady', async () => {
 
     document.getElementById('admin-content-wrapper').style.display = 'block';
 
-    // Initialize markdown editor on page load since it's the default tab
-    if (window.articleManager && !window.articleManager.editor) {
-        window.articleManager.initEditor();
-    }
-
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
