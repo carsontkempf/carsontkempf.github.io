@@ -479,9 +479,9 @@ const TESTS = {
   'music': [
     { id:1, name:'Apple Music: GET /api/tokens/apple-music → token present',     fn: testAppleMusicToken },
     { id:2, name:'Apple Music: token is valid 3-part JWT',                        fn: testAppleMusicTokenValid },
-    { id:3, name:'Spotify debug: all steps pass (admin auth → secrets → token → api)', fn: testSpotifyDebug },
-    { id:4, name:'Spotify: get_token step — client credentials exchange ok',      fn: testSpotifyToken },
-    { id:5, name:'Spotify: test_api step — categories endpoint returns data',     fn: testSpotifyApi },
+    { id:3, name:'Spotify debug: all steps pass (admin auth → project → oembed)', fn: testSpotifyDebug },
+    { id:4, name:'Spotify: oembed_health step — oEmbed call returns data',        fn: testSpotifyOembedHealth },
+    { id:5, name:'Spotify: oembed_health.title present',                          fn: testSpotifyOembedTitle },
     { id:6, name:'Spotify proxy: /api/tokens/spotify-anon health check returns ok', fn: testSpotifyAnonToken },
     { id:7, name:'Spotify oEmbed: playlist 37i9dQZF1E4nRfrCEsvZkU returns title', fn: testSpotifyAnonPlaylist },
   ],
@@ -912,24 +912,23 @@ async function testSpotifyDebug() {
   } catch (e) { return [false, 'Network error: ' + e.message]; }
 }
 
-async function testSpotifyToken() {
+async function testSpotifyOembedHealth() {
   const steps = cache.spotifySteps;
   if (!steps) return [null, 'skip — run test 3 first'];
-  const s = steps.find(function(s) { return s.step === 'get_token'; });
-  if (!s) return [false, 'get_token step missing from response'];
-  log('info', 'Spotify get_token step', s);
-  if (!s.ok) return [false, 'get_token failed — HTTP ' + s.httpStatus + ': ' + (s.error || 'unknown')];
-  return [true, 'token_type=' + s.tokenType + ' expires_in=' + s.expiresIn + 's'];
+  const s = steps.find(function(s) { return s.step === 'oembed_health'; });
+  if (!s) return [false, 'oembed_health step missing from response'];
+  log('info', 'Spotify oembed_health step', s);
+  if (!s.ok) return [false, 'oembed_health failed: ' + (s.error || 'not ok')];
+  return [true, 'provider=' + s.provider_name];
 }
 
-async function testSpotifyApi() {
+async function testSpotifyOembedTitle() {
   const steps = cache.spotifySteps;
   if (!steps) return [null, 'skip — run test 3 first'];
-  const s = steps.find(function(s) { return s.step === 'test_api'; });
-  if (!s) return [false, 'test_api step missing from response'];
-  log('info', 'Spotify test_api step', s);
-  if (!s.ok) return [false, 'test_api failed — HTTP ' + s.httpStatus + ': ' + (s.error || 'unknown')];
-  return [true, 'HTTP ' + s.httpStatus + ' — itemCount=' + s.itemCount];
+  const s = steps.find(function(s) { return s.step === 'oembed_health'; });
+  if (!s || !s.title) return [false, 'title missing from oembed_health step'];
+  log('info', 'Spotify oembed_health title', { title: s.title });
+  return [true, 'title=' + s.title];
 }
 
 async function testSpotifyAnonToken() {
