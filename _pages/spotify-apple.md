@@ -935,6 +935,27 @@ function updateConvertButtonState() {
     }
 }
 
+// Fetch Spotify playlist tracks via Learn Worker (client credentials, no user OAuth)
+async function fetchAnonPlaylistTracks(playlistId) {
+    var res = await fetch('https://cloudprototype.org/api/spotify/tracks?playlist=' + encodeURIComponent(playlistId));
+    if (!res.ok) throw new Error('Failed to fetch tracks: ' + res.status);
+    var data = await res.json();
+    if (data.error) throw new Error(data.error);
+    var items = (data.tracks || []).map(function(t) {
+        return {
+            track: {
+                name: t.title,
+                artists: [{ name: t.artist }],
+                album: { name: t.album },
+                external_ids: { isrc: t.isrc },
+                explicit: t.explicit,
+                id: t.spotify_id
+            }
+        };
+    });
+    return { items: items };
+}
+
 // Convert selected playlists to Apple Music
 async function convertSelectedPlaylists() {
     if (!window.appleMusicService.isAuthorized && !window.appleMusicService.catalogOnlyMode) {

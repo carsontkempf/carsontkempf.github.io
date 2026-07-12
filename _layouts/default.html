@@ -30,6 +30,16 @@
     </div>
 
     <!-- MusicKit JS for Apple Music integration -->
+    <!-- Inline (non-deferred) to capture musickitloaded before any deferred script runs -->
+    <script>
+    window._mkReady = false;
+    window._mkWaiters = [];
+    document.addEventListener('musickitloaded', function() {
+        window._mkReady = true;
+        window._mkWaiters.forEach(function(fn) { fn(); });
+        window._mkWaiters = [];
+    }, { once: true });
+    </script>
     <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js" defer></script>
 
     <!-- Load env-config first to initialize credentials before other scripts -->

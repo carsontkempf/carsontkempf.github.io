@@ -501,6 +501,9 @@ const TESTS = {
     { id:10, name:'Apple Music: window.envConfig.getAppleMusicConfig() returns token', fn: testAppleMusicEnvConfig },
     { id:11, name:'Apple Music: MusicKit.configure() with JWT — no throw',             fn: testMusicKitConfigure },
     { id:12, name:'Apple Music: MusicKit.getInstance() usable after configure',        fn: testMusicKitInstance },
+    { id:13, name:'Apple Music: _mkReady flag + configure() available at page load?',  fn: testMkReadyFlag },
+    { id:14, name:'Apple Music: MusicKit.configure() directly (no wait)',              fn: testMusicKitDirectConfigure },
+    { id:15, name:'Apple Music: authorize() available on MusicKit instance?',          fn: testMusicKitAuthorizeAvailable },
   ],
   'github': [
     { id:1, name:'GitHub debug: all 5 steps pass (auth → project → token → rate limit → whoami)', fn: testGithubDebug },
@@ -1063,6 +1066,51 @@ async function testMusicKitInstance() {
     return [true, 'instance ok, isAuthorized=' + music.isAuthorized + ' authStatus=' + music.authorizationStatus];
   } catch (e) {
     log('info', 'MusicKit.getInstance() threw', { message: e.message });
+    return [false, 'getInstance() threw: ' + e.message];
+  }
+}
+
+async function testMkReadyFlag() {
+  var ready = window._mkReady === true;
+  var configureFn = typeof window.MusicKit !== 'undefined' && typeof window.MusicKit.configure === 'function';
+  log('info', 'MusicKit readiness', { _mkReady: window._mkReady, configureAvailable: configureFn });
+  if (ready && configureFn) return [true, '_mkReady=true and configure() is a function — CDN loaded fully'];
+  if (ready && !configureFn) return [false, '_mkReady=true but configure() still not a function (unexpected)'];
+  if (!ready && configureFn) return [true, '_mkReady=false but configure() IS a function — CDN loaded (flag not yet set?)'];
+  return [false, '_mkReady=false and configure() not a function — musickitloaded never fired (CDN issue)'];
+}
+
+async function testMusicKitDirectConfigure() {
+  if (typeof window.MusicKit === 'undefined') return [null, 'skip — MusicKit not loaded (test 8)'];
+  if (typeof window.MusicKit.configure !== 'function') {
+    return [false, 'MusicKit.configure is not a function — full library not loaded, musickitloaded never fired'];
+  }
+  var token = cache.appleMusicEnvToken || cache.appleMusicToken;
+  if (!token) return [null, 'skip — no developer token (run tests 1 and 10 first)'];
+  try {
+    await MusicKit.configure({
+      developerToken: token,
+      app: { name: 'TestDirect', build: '1.0.0', version: '1.0.0' },
+      suppressErrorDialog: true
+    });
+    cache.musicKitConfigured = true;
+    log('info', 'Direct configure() succeeded');
+    return [true, 'configure() works without waiting — CDN loaded fully at page start'];
+  } catch (e) {
+    return [false, 'configure() threw: ' + e.name + ': ' + e.message];
+  }
+}
+
+async function testMusicKitAuthorizeAvailable() {
+  if (!cache.musicKitConfigured) return [null, 'skip — MusicKit not configured (tests 11 or 14)'];
+  try {
+    var music = MusicKit.getInstance();
+    var hasAuthorize = music && typeof music.authorize === 'function';
+    log('info', 'MusicKit instance authorize() availability', { hasAuthorize: hasAuthorize, isAuthorized: music && music.isAuthorized });
+    if (!music) return [false, 'getInstance() returned null'];
+    if (!hasAuthorize) return [false, 'authorize() not a function — instance is not fully initialized'];
+    return [true, 'authorize() is a function, instance is ready'];
+  } catch (e) {
     return [false, 'getInstance() threw: ' + e.message];
   }
 }

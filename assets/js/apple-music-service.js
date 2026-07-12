@@ -80,14 +80,21 @@ class AppleMusicService {
      */
     async waitForMusicKit() {
         return new Promise((resolve, reject) => {
-            if (window.MusicKit && typeof window.MusicKit.configure === 'function') {
+            if (window._mkReady || (window.MusicKit && typeof window.MusicKit.configure === 'function')) {
                 return resolve();
             }
-            const timeout = setTimeout(() => reject(new Error('MusicKit failed to load')), 10000);
-            document.addEventListener('musickitloaded', () => {
-                clearTimeout(timeout);
-                resolve();
-            }, { once: true });
+            const timeout = setTimeout(() => reject(new Error('MusicKit failed to load after 10s')), 10000);
+            const done = () => { clearTimeout(timeout); clearInterval(poll); resolve(); };
+            if (Array.isArray(window._mkWaiters)) {
+                window._mkWaiters.push(done);
+            } else {
+                document.addEventListener('musickitloaded', done, { once: true });
+            }
+            const poll = setInterval(function() {
+                if (window._mkReady || (window.MusicKit && typeof window.MusicKit.configure === 'function')) {
+                    done();
+                }
+            }, 250);
         });
     }
 
