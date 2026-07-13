@@ -1,3 +1,29 @@
+## CDN Script Event Listener Rule
+
+When integrating any CDN library that fires an initialization event (e.g. `musickitloaded` for MusicKit, `onYouTubeIframeAPIReady`, etc.):
+
+* ALWAYS place the event listener in an **inline (non-deferred) script** BEFORE the CDN `<script defer>` tag
+* NEVER rely on a deferred or module script to catch events fired by a deferred CDN script — they execute in order and the CDN fires its event during its own execution, so subsequent deferred listeners miss it
+* Use a **flag + queue pattern**: set a `window._xxxReady` flag and flush a `window._xxxWaiters[]` array when the event fires; deferred code checks the flag on load
+* Add a polling fallback (e.g. `setInterval` every 250ms) in case the CDN loads after the listener was registered but before the flag check runs
+
+Example layout:
+```html
+<!-- INLINE: registers listener during HTML parsing, before any defer runs -->
+<script>
+window._xxxReady = false;
+window._xxxWaiters = [];
+document.addEventListener('xxxloaded', function() {
+    window._xxxReady = true;
+    window._xxxWaiters.forEach(function(fn) { fn(); });
+    window._xxxWaiters = [];
+}, { once: true });
+</script>
+<script src="https://cdn.example.com/library.js" defer></script>
+```
+
+---
+
 ## Version Management
 
 * Version is tracked in `_config.yml` under the `version` key
