@@ -460,6 +460,17 @@ permalink: /spotify-apple/
         <h3>Apple Music Connected</h3>
         <div id="apple-music-user-info"></div>
         <button id="apple-music-disconnect-btn" class="dashboard-btn secondary">Disconnect Apple Music</button>
+
+        <div id="spotify-url-transfer" style="margin-top: 20px; border-top: 1px solid rgba(128,128,128,0.3); padding-top: 20px;">
+          <h4 style="margin-bottom: 8px;">Transfer Spotify Playlist</h4>
+          <p style="margin-bottom: 12px; opacity: 0.75;">Paste a Spotify playlist URL to transfer it directly to Apple Music.</p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <input type="text" id="spotify-playlist-url" placeholder="https://open.spotify.com/playlist/..." style="flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid rgba(128,128,128,0.4); border-radius: 6px; background: rgba(128,128,128,0.08); color: inherit; font-size: 14px;">
+            <button id="load-spotify-playlist-btn" class="dashboard-btn">Load Tracks</button>
+          </div>
+          <div id="spotify-playlist-info" style="display: none; margin-top: 10px; font-size: 14px;"></div>
+          <button id="transfer-spotify-playlist-btn" class="dashboard-btn" style="display: none; margin-top: 12px;">Transfer to Apple Music</button>
+        </div>
       </div>
     </div>
 
@@ -871,6 +882,65 @@ window.addEventListener('auth:ready', async (event) => {
             } catch (error) {
                 console.error('Apple Music disconnect failed:', error);
             }
+        });
+
+        // Spotify URL → Apple Music transfer
+        var _urlPlaylistData = null;
+        function extractSpotifyPlaylistId(url) {
+            var m = url.match(/playlist\/([a-zA-Z0-9]+)/);
+            return m ? m[1] : url.trim();
+        }
+        document.getElementById('load-spotify-playlist-btn').addEventListener('click', async function() {
+            var url = document.getElementById('spotify-playlist-url').value.trim();
+            if (!url) { alert('Please enter a Spotify playlist URL'); return; }
+            var playlistId = extractSpotifyPlaylistId(url);
+            var btn = this;
+            var infoDiv = document.getElementById('spotify-playlist-info');
+            btn.disabled = true;
+            btn.textContent = 'Loading...';
+            infoDiv.style.display = 'none';
+            _urlPlaylistData = null;
+            document.getElementById('transfer-spotify-playlist-btn').style.display = 'none';
+            try {
+                var data = await fetchAnonPlaylistTracks(playlistId);
+                _urlPlaylistData = { id: playlistId, name: 'Spotify Playlist', trackCount: data.items.length, items: data.items };
+                infoDiv.textContent = data.items.length + ' tracks loaded — ready to transfer';
+                infoDiv.style.display = 'block';
+                document.getElementById('transfer-spotify-playlist-btn').style.display = 'inline-block';
+            } catch (e) {
+                infoDiv.textContent = 'Error: ' + e.message;
+                infoDiv.style.display = 'block';
+            }
+            btn.disabled = false;
+            btn.textContent = 'Load Tracks';
+        });
+        document.getElementById('transfer-spotify-playlist-btn').addEventListener('click', async function() {
+            if (!_urlPlaylistData) return;
+            if (!window.appleMusicService.isAuthorized) { alert('Please connect to Apple Music first'); return; }
+            conversionCancelled = false;
+            conversionInProgress = true;
+            showConversionProgress();
+            try {
+                var result = await window.appleMusicService.convertSpotifyPlaylist(
+                    _urlPlaylistData,
+                    _urlPlaylistData.items,
+                    function(progress) {
+                        var pct = Math.round((progress.current / progress.total) * 100);
+                        document.getElementById('progress-fill').style.width = pct + '%';
+                        updateProgressText('Transferring track ' + progress.current + ' of ' + progress.total + '...');
+                    },
+                    { maintainExplicit: true, checkCancellation: function() { return conversionCancelled; } }
+                );
+                if (!result.cancelled) {
+                    showConversionResults(result);
+                } else {
+                    hideConversionProgress();
+                }
+            } catch (e) {
+                hideConversionProgress();
+                alert('Transfer failed: ' + e.message);
+            }
+            conversionInProgress = false;
         });
 
         document.getElementById('cancel-conversion-btn').addEventListener('click', (e) => {

@@ -1010,13 +1010,12 @@ async function testAppleMusicEnvConfig() {
     hasFn: hasFn,
     hasToken: !!(cfg && cfg.developer_token),
     tokenLength: cfg && cfg.developer_token ? cfg.developer_token.length : 0,
-    tokenPreview: cfg && cfg.developer_token ? cfg.developer_token.slice(0, 30) + '...' : null
+    note: 'hardcoded token intentionally removed — token always fetched from API (test 1)'
   });
   if (!envCfg) return [false, 'window.envConfig is undefined — env-config.js not loaded'];
   if (!hasFn) return [false, 'getAppleMusicConfig() method missing from envConfig'];
-  if (!cfg || !cfg.developer_token) return [false, 'developer_token missing — check env-config'];
-  cache.appleMusicEnvToken = cfg.developer_token;
-  return [true, 'token present (' + cfg.developer_token.length + ' chars)'];
+  // developer_token is intentionally empty — API token from test 1 is used instead
+  return [true, 'envConfig loaded, team_id=' + (cfg && cfg.team_id) + ' (token fetched from API, not hardcoded)'];
 }
 
 async function testMusicKitConfigure() {
@@ -1025,12 +1024,16 @@ async function testMusicKitConfigure() {
   if (!token) return [null, 'skip — no developer token (run tests 1 and 10 first)'];
   try {
     await new Promise(function(resolve, reject) {
-      if (typeof window.MusicKit.configure === 'function') return resolve();
+      if (window._mkReady || typeof window.MusicKit.configure === 'function') return resolve();
       var timeout = setTimeout(function() { reject(new Error('musickitloaded timed out after 10s')); }, 10000);
-      document.addEventListener('musickitloaded', function() {
-        clearTimeout(timeout);
-        resolve();
-      }, { once: true });
+      function onReady() { clearTimeout(timeout); resolve(); }
+      document.addEventListener('musickitloaded', onReady, { once: true });
+      window.addEventListener('musickitloaded', onReady, { once: true });
+      var poll = setInterval(function() {
+        if (window._mkReady || typeof window.MusicKit.configure === 'function') {
+          clearTimeout(timeout); clearInterval(poll); resolve();
+        }
+      }, 250);
     });
   } catch(e) {
     return [false, 'MusicKit never became ready: ' + e.message];

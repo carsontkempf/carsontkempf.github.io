@@ -37,25 +37,26 @@ class AppleMusicService {
             // Wait for MusicKit to be loaded
             await this.waitForMusicKit();
 
-            // Configure MusicKit
-            await MusicKit.configure({
+            // Configure MusicKit (v3: configure() is async and returns the instance)
+            this.musicKit = await MusicKit.configure({
                 developerToken: developerToken,
                 app: {
                     name: 'Spotify Apple Integration',
                     build: '1.0.0',
                     version: '1.0.0'
                 },
-                debug: true, // Enable debug mode
-                suppressErrorDialog: true // Suppress error dialogs to catch them programmatically
+                debug: true,
+                suppressErrorDialog: true
             });
-
-            this.musicKit = MusicKit.getInstance();
+            if (!this.musicKit || !this.musicKit.authorize) {
+                this.musicKit = MusicKit.getInstance();
+            }
             this.isInitialized = true;
 
             console.log('Apple Music service initialized successfully');
 
-            // Set up event listeners
-            this.musicKit.addEventListener(MusicKit.Events.authorizationStatusDidChange, (event) => {
+            // Set up event listeners (use string name — MusicKit.Events may not exist before configure)
+            this.musicKit.addEventListener('authorizationStatusDidChange', (event) => {
                 this.handleAuthStatusChange(event.authorizationStatus);
             });
 
