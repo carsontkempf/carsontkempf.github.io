@@ -71,22 +71,18 @@ permalink: /trivia/
         <div id="error-message" class="error-toast" style="display:none;"></div>
         <div id="point-result" class="point-result" style="display:none;"></div>
 
-        <!-- AUTH SCREEN (Supabase trivia auth) -->
+        <!-- AUTH SCREEN (display name setup) -->
         <div id="screen-auth" class="screen active">
             <div class="lobby-container">
                 <h1>Trivia Tennis</h1>
-                <p class="subtitle">Login or create a trivia account</p>
+                <p class="subtitle">Choose a display name to get started</p>
                 <div class="form-group">
-                    <label for="auth-username">Username</label>
-                    <input type="text" id="auth-username" placeholder="Username" maxlength="20" autocomplete="username" inputmode="text">
-                </div>
-                <div class="form-group">
-                    <label for="auth-password">Password</label>
-                    <input type="password" id="auth-password" placeholder="Password" maxlength="50" autocomplete="current-password">
+                    <label for="auth-username">Display Name</label>
+                    <input type="text" id="auth-username" placeholder="Display Name" maxlength="20" autocomplete="nickname" inputmode="text">
                 </div>
                 <div class="mode-buttons">
-                    <button id="btn-login" class="btn btn-primary btn-full btn-tall">Login</button>
-                    <button id="btn-register" class="btn btn-secondary btn-full">Create Account</button>
+                    <button id="btn-login" class="btn btn-primary btn-full btn-tall">Play</button>
+                    <button id="btn-register" class="btn btn-secondary btn-full" style="display:none"></button>
                 </div>
             </div>
         </div>
@@ -276,8 +272,7 @@ permalink: /trivia/
     })();
     </script>
 
-    <!-- Supabase + Game Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Game Scripts -->
     <script src="/trivia/tennis.js"></script>
     <script src="/trivia/wheel.js"></script>
     <script src="/trivia/sync.js"></script>

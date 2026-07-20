@@ -89,11 +89,10 @@ class TriviaGame {
 
     async doLogin() {
         const username = document.getElementById("auth-username").value.trim();
-        const password = document.getElementById("auth-password").value.trim();
-        if (!username || !password) { this.showError("Enter username and password"); return; }
-        
+        if (!username) { this.showError("Enter a display name"); return; }
+
         try {
-            await this.sync.login(username, password);
+            await this.sync.login(username);
             this.showScreen("dashboard");
             this.loadDashboard();
         } catch (e) {
@@ -102,19 +101,7 @@ class TriviaGame {
     }
 
     async doRegister() {
-        const username = document.getElementById("auth-username").value.trim();
-        const password = document.getElementById("auth-password").value.trim();
-        if (!username || !password) { this.showError("Enter username and password"); return; }
-        if (username.length < 3) { this.showError("Username must be at least 3 characters"); return; }
-        if (password.length < 4) { this.showError("Password must be at least 4 characters"); return; }
-        
-        try {
-            await this.sync.register(username, password);
-            this.showScreen("dashboard");
-            this.loadDashboard();
-        } catch (e) {
-            this.showError(e.message);
-        }
+        return this.doLogin();
     }
 
     doLogout() {

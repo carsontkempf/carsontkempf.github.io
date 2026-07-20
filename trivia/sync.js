@@ -1,413 +1,175 @@
-/**
- * Supabase Sync Module with User Authentication
- * 
- * Tables:
- * - users: id, username, password_hash, stats, created_at
- * - matches: id, state, player1_id, player2_id, status, winner_id, created_at, updated_at
- * 
- * Password hashing uses SHA-256 (client-side). Not bank-grade security
- * but fine for a 2-player trivia game.
- */
-
-const SUPABASE_CONFIG = {
-    url: "https://nknnujvxnrzludjcmwcm.supabase.co",
-    anonKey: "sb_publishable_Mn86sx3dw37IL4pisCv4Ug_C_mBM8Y4"
-};
+const BASE_URL = 'https://cloudprototype.org';
 
 class GameSync {
-    constructor() {
-        this.supabase = null;
-        this.matchId = null;
-        this.subscription = null;
-        this.onStateChange = null;
-        this.currentUser = null; // { id, username, stats }
-    }
+	constructor() {
+		this.matchId = null;
+		this.onStateChange = null;
+		this.currentUser = null;
+		this._pollInterval = null;
+	}
 
-    async init() {
-        if (SUPABASE_CONFIG.url === "YOUR_SUPABASE_URL") {
-            throw new Error("Supabase not configured");
-        }
-        this.supabase = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-    }
+	getToken() {
+		return (
+			localStorage.getItem('learn_auth_token') ||
+			sessionStorage.getItem('learn_auth_token') ||
+			null
+		);
+	}
 
-    // ========================
-    // AUTH
-    // ========================
+	async apiFetch(path, options = {}) {
+		const token = this.getToken();
+		const res = await fetch(`${BASE_URL}${path}`, {
+			...options,
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+				...(options.headers || {})
+			}
+		});
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			throw new Error(err.error || `Request failed: ${res.status}`);
+		}
+		return res.json();
+	}
 
-    /**
-     * Hash password client-side with SHA-256.
-     */
-    async hashPassword(password) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(password + "_trivia_tennis_salt");
-        const hash = await crypto.subtle.digest("SHA-256", data);
-        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, "0")).join("");
-    }
+	async init() {
+		const token = this.getToken();
+		if (!token) throw new Error('Not authenticated with learn platform');
+	}
 
-    /**
-     * Register a new user. Returns user object or throws.
-     */
-    async register(username, password) {
-        const hash = await this.hashPassword(password);
-        
-        const { data, error } = await this.supabase
-            .from("users")
-            .insert({ username: username.toLowerCase(), password_hash: hash })
-            .select()
-            .single();
-        
-        if (error) {
-            if (error.code === "23505") throw new Error("Username already taken");
-            throw new Error("Registration failed: " + error.message);
-        }
-        
-        this.currentUser = { id: data.id, username: data.username, stats: data.stats };
-        localStorage.setItem("trivia_user", JSON.stringify(this.currentUser));
-        return this.currentUser;
-    }
+	async login(username) {
+		const data = await this.apiFetch('/api/trivia/me');
+		const player = data.player;
+		if (username && username !== player.username) {
+			await this.apiFetch('/api/trivia/me', {
+				method: 'PUT',
+				body: JSON.stringify({ display_name: username })
+			});
+			player.username = username;
+		}
+		this.currentUser = { id: player.id, username: player.username, stats: player.stats || {} };
+		localStorage.setItem('trivia_user', JSON.stringify(this.currentUser));
+		return this.currentUser;
+	}
 
-    /**
-     * Login with username/password. Returns user object or throws.
-     */
-    async login(username, password) {
-        const hash = await this.hashPassword(password);
-        
-        const { data, error } = await this.supabase
-            .from("users")
-            .select("*")
-            .eq("username", username.toLowerCase())
-            .eq("password_hash", hash)
-            .single();
-        
-        if (error || !data) throw new Error("Invalid username or password");
-        
-        this.currentUser = { id: data.id, username: data.username, stats: data.stats };
-        localStorage.setItem("trivia_user", JSON.stringify(this.currentUser));
-        return this.currentUser;
-    }
+	async register(username) {
+		return this.login(username);
+	}
 
-    /**
-     * Try to restore session from localStorage.
-     */
-    async restoreSession() {
-        const stored = localStorage.getItem("trivia_user");
-        if (!stored) return null;
-        
-        try {
-            const user = JSON.parse(stored);
-            // Verify user still exists and refresh stats
-            const { data, error } = await this.supabase
-                .from("users")
-                .select("*")
-                .eq("id", user.id)
-                .single();
-            
-            if (error || !data) {
-                localStorage.removeItem("trivia_user");
-                return null;
-            }
-            
-            this.currentUser = { id: data.id, username: data.username, stats: data.stats };
-            localStorage.setItem("trivia_user", JSON.stringify(this.currentUser));
-            return this.currentUser;
-        } catch (e) {
-            localStorage.removeItem("trivia_user");
-            return null;
-        }
-    }
+	async restoreSession() {
+		try {
+			const data = await this.apiFetch('/api/trivia/me');
+			const player = data.player;
+			this.currentUser = { id: player.id, username: player.username, stats: player.stats || {} };
+			localStorage.setItem('trivia_user', JSON.stringify(this.currentUser));
+			return this.currentUser;
+		} catch (e) {
+			localStorage.removeItem('trivia_user');
+			return null;
+		}
+	}
 
-    /**
-     * Logout.
-     */
-    logout() {
-        this.currentUser = null;
-        localStorage.removeItem("trivia_user");
-    }
+	logout() {
+		this.currentUser = null;
+		localStorage.removeItem('trivia_user');
+	}
 
-    // ========================
-    // MATCH MANAGEMENT
-    // ========================
+	async createMatch(initialState) {
+		const data = await this.apiFetch('/api/trivia/matches', {
+			method: 'POST',
+			body: JSON.stringify({ state: initialState })
+		});
+		this.matchId = data.code;
+		this.subscribe();
+		return this.matchId;
+	}
 
-    generateCode() {
-        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        let code = "";
-        for (let i = 0; i < 6; i++) {
-            code += chars[Math.floor(Math.random() * chars.length)];
-        }
-        return code;
-    }
+	async joinMatch(code) {
+		this.matchId = code.toUpperCase();
+		const data = await this.apiFetch(`/api/trivia/matches/${this.matchId}/join`, {
+			method: 'POST'
+		});
+		this.subscribe();
+		return data.state;
+	}
 
-    /**
-     * Create a new match.
-     */
-    async createMatch(initialState) {
-        if (!this.currentUser) throw new Error("Not logged in");
-        this.matchId = this.generateCode();
-        
-        const { error } = await this.supabase
-            .from("matches")
-            .insert({
-                id: this.matchId,
-                state: initialState,
-                player1_id: this.currentUser.id,
-                status: "waiting"
-            });
-        
-        if (error) throw new Error("Failed to create match: " + error.message);
-        this.subscribe();
-        return this.matchId;
-    }
+	async resumeMatch(matchId) {
+		this.matchId = matchId.toUpperCase();
+		const data = await this.apiFetch(`/api/trivia/matches/${this.matchId}`);
+		this.subscribe();
+		return data.match;
+	}
 
-    /**
-     * Join an existing match.
-     */
-    async joinMatch(code) {
-        if (!this.currentUser) throw new Error("Not logged in");
-        this.matchId = code.toUpperCase();
-        
-        const { data, error } = await this.supabase
-            .from("matches")
-            .select("*")
-            .eq("id", this.matchId)
-            .single();
-        
-        if (error || !data) throw new Error("Match not found: " + this.matchId);
-        if (data.status !== "waiting") throw new Error("Match already in progress or finished");
-        if (data.player1_id === this.currentUser.id) throw new Error("Cannot join your own match");
-        
-        // Set player2
-        const { error: updateErr } = await this.supabase
-            .from("matches")
-            .update({ player2_id: this.currentUser.id, status: "playing" })
-            .eq("id", this.matchId);
-        
-        if (updateErr) throw new Error("Failed to join: " + updateErr.message);
-        
-        this.subscribe();
-        return data.state;
-    }
+	async getMyMatches() {
+		const data = await this.apiFetch('/api/trivia/matches');
+		return data.matches || [];
+	}
 
-    /**
-     * Resume an existing match.
-     */
-    async resumeMatch(matchId) {
-        this.matchId = matchId;
-        
-        const { data, error } = await this.supabase
-            .from("matches")
-            .select("*")
-            .eq("id", this.matchId)
-            .single();
-        
-        if (error || !data) throw new Error("Match not found");
-        
-        this.subscribe();
-        return data;
-    }
+	async forfeitMatch(matchId) {
+		await this.apiFetch(`/api/trivia/matches/${matchId.toUpperCase()}/forfeit`, {
+			method: 'POST'
+		});
+	}
 
-    /**
-     * Get all matches for current user (active + finished).
-     */
-    async getMyMatches() {
-        if (!this.currentUser) return [];
-        
-        const { data, error } = await this.supabase
-            .from("matches")
-            .select("*")
-            .or(`player1_id.eq.${this.currentUser.id},player2_id.eq.${this.currentUser.id}`)
-            .order("updated_at", { ascending: false });
-        
-        if (error) return [];
-        return data || [];
-    }
+	async writeState(state) {
+		if (!this.matchId) throw new Error('No active match');
+		await this.apiFetch(`/api/trivia/matches/${this.matchId}`, {
+			method: 'PUT',
+			body: JSON.stringify({ state })
+		});
+	}
 
-    /**
-     * Get all open matches waiting for a player 2.
-     */
-    async getOpenMatches() {
-        if (!this.currentUser) return [];
-        
-        const { data, error } = await this.supabase
-            .from("matches")
-            .select("*")
-            .eq("status", "waiting")
-            .neq("player1_id", this.currentUser.id)
-            .order("created_at", { ascending: false });
-        
-        if (error) return [];
-        return data || [];
-    }
+	async readState() {
+		if (!this.matchId) return null;
+		const data = await this.apiFetch(`/api/trivia/matches/${this.matchId}`);
+		return data.match?.state || null;
+	}
 
-    /**
-     * Forfeit a match.
-     */
-    async forfeitMatch(matchId) {
-        if (!this.currentUser) throw new Error("Not logged in");
-        
-        const { data, error } = await this.supabase
-            .from("matches")
-            .select("*")
-            .eq("id", matchId)
-            .single();
-        
-        if (error || !data) throw new Error("Match not found");
-        
-        // Determine winner (the other player)
-        const winnerId = data.player1_id === this.currentUser.id ? data.player2_id : data.player1_id;
-        
-        const state = data.state || {};
-        state.status = "forfeited";
-        state.forfeitedBy = this.currentUser.id;
-        
-        await this.supabase
-            .from("matches")
-            .update({ status: "forfeited", winner_id: winnerId, state: state, updated_at: new Date().toISOString() })
-            .eq("id", matchId);
-        
-        // Update stats
-        await this.updateUserStats(this.currentUser.id, "forfeit");
-        if (winnerId) await this.updateUserStats(winnerId, "win");
-    }
+	async updateUserStats(userId, event, categoryData) {
+		await this.apiFetch('/api/trivia/stats', {
+			method: 'POST',
+			body: JSON.stringify({ event, categoryData })
+		});
+		if (this.currentUser) {
+			const s = {
+				wins: 0,
+				losses: 0,
+				forfeits: 0,
+				total_questions: 0,
+				correct_answers: 0,
+				category_stats: {},
+				...this.currentUser.stats
+			};
+			if (event === 'win') s.wins++;
+			else if (event === 'loss') s.losses++;
+			else if (event === 'forfeit') s.forfeits++;
+			this.currentUser.stats = s;
+			localStorage.setItem('trivia_user', JSON.stringify(this.currentUser));
+		}
+	}
 
-    /**
-     * Write match state.
-     */
-    async writeState(state) {
-        if (!this.matchId) throw new Error("No active match");
-        
-        const updates = { state: state, updated_at: new Date().toISOString() };
-        if (state.status === "finished") {
-            updates.status = "finished";
-            // Determine winner
-            if (state.tennisState && state.tennisState.winner) {
-                const winnerId = state.tennisState.winner === 1
-                    ? (await this.getMatchPlayers()).player1_id
-                    : (await this.getMatchPlayers()).player2_id;
-                updates.winner_id = winnerId;
-            }
-        }
-        
-        const { error } = await this.supabase
-            .from("matches")
-            .update(updates)
-            .eq("id", this.matchId);
-        
-        if (error) throw new Error("Failed to update: " + error.message);
-    }
+	async getUsername(userId) {
+		return userId ? userId.slice(0, 8) : 'Unknown';
+	}
 
-    async getMatchPlayers() {
-        const { data } = await this.supabase
-            .from("matches")
-            .select("player1_id, player2_id")
-            .eq("id", this.matchId)
-            .single();
-        return data || {};
-    }
+	subscribe() {
+		this.disconnect();
+		this._pollInterval = setInterval(async () => {
+			if (!this.matchId || !this.onStateChange) return;
+			try {
+				const state = await this.readState();
+				if (state) this.onStateChange(state);
+			} catch (e) {
+				// ignore transient poll errors
+			}
+		}, 2500);
+	}
 
-    /**
-     * Read the current match state.
-     */
-    async readState() {
-        if (!this.matchId) return null;
-        const { data, error } = await this.supabase
-            .from("matches")
-            .select("state")
-            .eq("id", this.matchId)
-            .single();
-        if (error || !data) return null;
-        return data.state;
-    }
-
-    // ========================
-    // USER STATS
-    // ========================
-
-    /**
-     * Update user stats after a match event.
-     */
-    async updateUserStats(userId, event, categoryData) {
-        const { data } = await this.supabase
-            .from("users")
-            .select("stats")
-            .eq("id", userId)
-            .single();
-        
-        if (!data) return;
-        const stats = data.stats || { wins: 0, losses: 0, forfeits: 0, total_questions: 0, correct_answers: 0, category_stats: {} };
-        
-        if (event === "win") stats.wins++;
-        else if (event === "loss") stats.losses++;
-        else if (event === "forfeit") stats.forfeits++;
-        
-        if (categoryData) {
-            stats.total_questions += categoryData.total || 0;
-            stats.correct_answers += categoryData.correct || 0;
-            if (categoryData.category) {
-                if (!stats.category_stats[categoryData.category]) {
-                    stats.category_stats[categoryData.category] = { total: 0, correct: 0 };
-                }
-                stats.category_stats[categoryData.category].total += categoryData.total || 0;
-                stats.category_stats[categoryData.category].correct += categoryData.correct || 0;
-            }
-        }
-        
-        await this.supabase
-            .from("users")
-            .update({ stats: stats })
-            .eq("id", userId);
-        
-        // Update local cache
-        if (this.currentUser && this.currentUser.id === userId) {
-            this.currentUser.stats = stats;
-            localStorage.setItem("trivia_user", JSON.stringify(this.currentUser));
-        }
-    }
-
-    /**
-     * Get a username by user ID.
-     */
-    async getUsername(userId) {
-        if (!userId) return "Unknown";
-        const { data } = await this.supabase
-            .from("users")
-            .select("username")
-            .eq("id", userId)
-            .single();
-        return data ? data.username : "Unknown";
-    }
-
-    // ========================
-    // REALTIME
-    // ========================
-
-    subscribe() {
-        if (this.subscription) {
-            this.supabase.removeChannel(this.subscription);
-        }
-        
-        this.subscription = this.supabase
-            .channel("match-" + this.matchId)
-            .on(
-                "postgres_changes",
-                {
-                    event: "UPDATE",
-                    schema: "public",
-                    table: "matches",
-                    filter: `id=eq.${this.matchId}`
-                },
-                (payload) => {
-                    if (payload.new && payload.new.state && this.onStateChange) {
-                        this.onStateChange(payload.new.state);
-                    }
-                }
-            )
-            .subscribe();
-    }
-
-    disconnect() {
-        if (this.subscription) {
-            this.supabase.removeChannel(this.subscription);
-            this.subscription = null;
-        }
-    }
+	disconnect() {
+		if (this._pollInterval) {
+			clearInterval(this._pollInterval);
+			this._pollInterval = null;
+		}
+	}
 }
