@@ -528,16 +528,29 @@ class TriviaGame {
 
     pickAndShowQuestion(category) {
         const difficulty = this.getAdaptiveDifficulty();
+        
+        // Step 1: Try category + difficulty
         let available = (this.questionsByCategory[category] || [])
             .filter(q => !this.usedQuestionIds.has(q.id) && q.difficulty === difficulty);
+        
+        // Step 2: Try category, any difficulty
         if (available.length === 0) {
             available = (this.questionsByCategory[category] || [])
                 .filter(q => !this.usedQuestionIds.has(q.id));
         }
+        
+        // Step 3: If ALL questions in this category are used, reset only this category's used IDs
         if (available.length === 0) {
-            available = this.questions.filter(q => !this.usedQuestionIds.has(q.id));
-            if (available.length === 0) { this.usedQuestionIds.clear(); return this.pickAndShowQuestion(category); }
+            const catQuestions = this.questionsByCategory[category] || [];
+            for (const q of catQuestions) {
+                this.usedQuestionIds.delete(q.id);
+            }
+            available = catQuestions.filter(q => q.difficulty === difficulty);
+            if (available.length === 0) available = catQuestions;
         }
+        
+        // Guaranteed: pick from THIS category only
+        if (available.length === 0) return; // Should never happen unless category has 0 questions
         this.showQuestion(available[Math.floor(Math.random() * available.length)]);
     }
 
