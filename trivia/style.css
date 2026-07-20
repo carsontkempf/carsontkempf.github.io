@@ -1,0 +1,1243 @@
+/* Trivia Tennis - Mobile-First Vertical Layout */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
+:root {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --surface-2: #0f3460;
+    --primary: #e94560;
+    --primary-hover: #ff6b6b;
+    --primary-active: #c23050;
+    --secondary: #533483;
+    --secondary-active: #3f2766;
+    --text: #eaeaea;
+    --text-dim: #a0a0a0;
+    --correct: #4CAF50;
+    --wrong: #f44336;
+    --border: #2a2a4a;
+    /* Safe area insets for notched phones */
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+}
+
+html {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--sat) var(--sar) var(--sab) var(--sal);
+    -webkit-user-select: none;
+    user-select: none;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Allow selection in inputs */
+input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* ===========================
+   SCREENS - Full viewport vertical
+   =========================== */
+.screen {
+    display: none;
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 24px 16px;
+    margin: 0 auto;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* ===========================
+   LOBBY
+   =========================== */
+.lobby-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+}
+
+.lobby-container h1 {
+    font-size: 2.4em;
+    margin-bottom: 0;
+    background: linear-gradient(135deg, var(--primary), #ff9a9e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--text-dim);
+    margin-bottom: 1.5em;
+    font-size: 1em;
+}
+
+/* ===========================
+   FORM ELEMENTS - Touch optimized
+   =========================== */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-dim);
+    font-size: 0.95em;
+}
+
+.form-group input[type="text"] {
+    width: 100%;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 18px; /* 16px+ prevents iOS zoom on focus */
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-group input[type="text"]:focus {
+    border-color: var(--primary);
+}
+
+/* Join code special styling */
+#join-code {
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 6px;
+    font-size: 22px;
+    font-weight: 700;
+    font-family: monospace;
+}
+
+/* Pass device phase */
+#phase-pass-device .waiting-turn h3 {
+    font-size: 1.4em;
+    margin-bottom: 8px;
+}
+
+/* ===========================
+   MATCH OPTIONS TOGGLES
+   =========================== */
+.match-options {
+    margin: 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.option-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.option-label {
+    font-size: 0.95em;
+    color: var(--text-dim);
+    font-weight: 600;
+}
+
+.option-toggle {
+    display: flex;
+    background: var(--surface);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    flex-shrink: 1;
+}
+
+.opt-btn {
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 0.8em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 40px;
+    white-space: nowrap;
+    flex: 1;
+    text-align: center;
+}
+
+.opt-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.opt-btn:active:not(.active) {
+    background: var(--surface-2);
+}
+
+/* ===========================
+   TOGGLE SWITCH - Touch friendly
+   =========================== */
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding: 12px 0;
+}
+
+.toggle-label {
+    font-size: 1em;
+    color: var(--text-dim);
+}
+
+.toggle-switch {
+    position: relative;
+    width: 56px;
+    height: 32px;
+    display: inline-block;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 32px;
+    transition: background 0.3s;
+    cursor: pointer;
+}
+
+.toggle-slider::before {
+    content: "";
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: var(--primary);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(24px);
+}
+
+/* ===========================
+   BUTTONS - Large, easy to tap
+   =========================== */
+.btn {
+    padding: 16px 28px;
+    border: none;
+    border-radius: 14px;
+    font-size: 1.1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+    min-height: 56px; /* Minimum 56px touch target */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+.btn-full {
+    width: 100%;
+}
+
+.btn-tall {
+    min-height: 64px;
+    font-size: 1.2em;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:active:not(:disabled) {
+    background: var(--primary-active);
+}
+
+.btn-secondary {
+    background: var(--secondary);
+    color: white;
+}
+
+.btn-secondary:active:not(:disabled) {
+    background: var(--secondary-active);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    min-height: 48px;
+    font-size: 0.95em;
+}
+
+.btn-ghost:active {
+    background: rgba(233, 69, 96, 0.1);
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.lobby-actions {
+    margin-top: 1em;
+}
+
+.mode-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 2em;
+}
+
+/* ===========================
+   DASHBOARD
+   =========================== */
+.dash-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dash-header h2 {
+    font-size: 1.3em;
+}
+
+.dash-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.stat-pill {
+    flex: 1 1 55px;
+    min-width: 55px;
+    max-width: 100%;
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 8px 4px;
+    text-align: center;
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.stat-num {
+    display: block;
+    font-size: 1.1em;
+    font-weight: 800;
+    color: var(--primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stat-lbl {
+    font-size: 0.65em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.dash-category-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cat-stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cat-stat-name {
+    width: 90px;
+    font-size: 0.8em;
+    color: var(--text-dim);
+    flex-shrink: 0;
+}
+
+.cat-stat-pct {
+    width: 36px;
+    text-align: right;
+    font-size: 0.8em;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+.dash-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.section-title {
+    font-size: 1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 8px;
+}
+
+/* Match Cards */
+.match-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.match-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    overflow: hidden;
+}
+
+.match-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    gap: 8px;
+}
+
+.match-opponent {
+    font-weight: 700;
+    font-size: 0.95em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+.match-score {
+    font-weight: 800;
+    font-size: 1.1em;
+    color: var(--primary);
+}
+
+.match-card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.match-status {
+    font-size: 0.8em;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+
+.status-waiting { background: rgba(255,152,0,0.15); color: #ffa726; }
+.status-myturn { background: rgba(76,175,80,0.15); color: #81c784; }
+.status-theirturn { background: rgba(255,152,0,0.1); color: #ffb74d; }
+.status-won { background: rgba(76,175,80,0.2); color: #4CAF50; }
+.status-lost { background: rgba(244,67,54,0.15); color: #e57373; }
+.status-forfeit { background: rgba(156,39,176,0.15); color: #ba68c8; }
+
+.match-code-small {
+    font-family: monospace;
+    font-size: 0.75em;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+}
+
+.match-card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-sm {
+    min-height: 36px;
+    padding: 8px 16px;
+    font-size: 0.85em;
+}
+
+.create-section, .join-section {
+    margin: 1em 0;
+}
+
+.create-section h3, .join-section h3 {
+    margin-bottom: 12px;
+    font-size: 1.1em;
+}
+
+/* ===========================
+   DIVIDER
+   =========================== */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    color: var(--text-dim);
+    font-size: 0.9em;
+}
+
+.divider::before, .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.divider span {
+    padding: 0 16px;
+}
+
+/* ===========================
+   WAITING SCREEN
+   =========================== */
+.waiting-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.waiting-container h2 {
+    font-size: 1.5em;
+}
+
+.match-code {
+    font-size: 2.8em;
+    font-weight: 900;
+    letter-spacing: 8px;
+    margin: 12px 0;
+    padding: 20px 24px;
+    background: var(--surface);
+    border-radius: 16px;
+    border: 2px dashed var(--primary);
+    font-family: monospace;
+    width: 100%;
+}
+
+.hint {
+    color: var(--text-dim);
+    font-size: 0.95em;
+}
+
+.loading-dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.loading-dots span {
+    width: 12px;
+    height: 12px;
+    background: var(--primary);
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.5); opacity: 0.3; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+/* ===========================
+   GAME SCREEN - Compact vertical flow
+   =========================== */
+#screen-game {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    min-height: auto;
+    gap: 10px;
+    position: relative;
+}
+
+/* ===========================
+   TENNIS COURT BACKGROUND (subtle)
+   =========================== */
+.court-bg {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.04;
+    background:
+        /* Outer boundary */
+        linear-gradient(var(--correct), var(--correct)) 8% 5% / 84% 1px no-repeat,
+        linear-gradient(var(--correct), var(--correct)) 8% 95% / 84% 1px no-repeat,
+        linear-gradient(var(--correct), var(--correct)) 8% 5% / 1px 90% no-repeat,
+        linear-gradient(var(--correct), var(--correct)) 92% 5% / 1px 90% no-repeat,
+        /* Net (center horizontal) */
+        linear-gradient(var(--correct), var(--correct)) 8% 50% / 84% 2px no-repeat,
+        /* Service boxes */
+        linear-gradient(var(--correct), var(--correct)) 25% 5% / 1px 90% no-repeat,
+        linear-gradient(var(--correct), var(--correct)) 75% 5% / 1px 90% no-repeat,
+        /* Center service line */
+        linear-gradient(var(--correct), var(--correct)) 50% 20% / 1px 60% no-repeat,
+        /* Baselines midpoints */
+        linear-gradient(var(--correct), var(--correct)) 48% 5% / 4% 1px no-repeat,
+        linear-gradient(var(--correct), var(--correct)) 48% 95% / 4% 1px no-repeat;
+}
+
+#screen-game > *:not(.court-bg) {
+    position: relative;
+    z-index: 1;
+}
+
+/* ===========================
+   DIFFICULTY INDICATOR
+   =========================== */
+.difficulty-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.diff-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    opacity: 0.3;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.diff-dot.easy { background: #4CAF50; }
+.diff-dot.medium { background: #FF9800; }
+.diff-dot.hard { background: #f44336; }
+
+.diff-dot.active {
+    opacity: 1;
+    transform: scale(1.4);
+}
+
+/* ===========================
+   SCOREBOARD - Compact tennis style
+   =========================== */
+.scoreboard {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+}
+
+.score-row {
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    gap: 8px;
+}
+
+.score-row + .score-row {
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+}
+
+.player-col {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.player-name {
+    font-weight: 700;
+    font-size: 0.95em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.serve-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: transparent;
+    flex-shrink: 0;
+}
+
+.serve-dot.active {
+    background: var(--primary);
+}
+
+.sets-won {
+    background: var(--surface-2);
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1em;
+    flex-shrink: 0;
+}
+
+.set-scores {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.set-scores span {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85em;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.03);
+    border-radius: 4px;
+}
+
+.points {
+    width: 44px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    font-weight: 900;
+    color: var(--primary);
+    background: rgba(233, 69, 96, 0.08);
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.game-label {
+    text-align: center;
+    font-size: 0.85em;
+    color: var(--primary);
+    padding-top: 4px;
+    min-height: 1.2em;
+}
+
+/* ===========================
+   TURN INDICATOR
+   =========================== */
+.turn-indicator {
+    text-align: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1em;
+}
+
+.turn-indicator.my-turn {
+    background: rgba(76, 175, 80, 0.12);
+    color: var(--correct);
+    border: 1px solid rgba(76, 175, 80, 0.25);
+}
+
+.turn-indicator.their-turn {
+    background: rgba(255, 152, 0, 0.08);
+    color: #ffa726;
+    border: 1px solid rgba(255, 152, 0, 0.15);
+}
+
+.last-action {
+    text-align: center;
+    font-size: 0.85em;
+    color: var(--text-dim);
+    padding: 6px 12px;
+    min-height: 1.2em;
+}
+
+/* ===========================
+   GAME PHASES
+   =========================== */
+.game-phase {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+}
+
+.game-phase.active {
+    display: flex;
+}
+
+/* ===========================
+   WHEEL - Centered, fill width
+   =========================== */
+.wheel-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    padding: 16px 0;
+}
+
+#wheel-canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.btn-spin {
+    margin-top: auto;
+}
+
+/* ===========================
+   WAITING TURN
+   =========================== */
+.waiting-turn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 1.1em;
+    gap: 20px;
+}
+
+/* ===========================
+   QUESTION - Vertical stack
+   =========================== */
+#phase-question {
+    gap: 12px;
+}
+
+.question-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.category-badge {
+    background: var(--surface-2);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 700;
+}
+
+.difficulty-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    text-transform: capitalize;
+    font-weight: 600;
+}
+
+.difficulty-badge.easy { background: rgba(76, 175, 80, 0.15); color: #81c784; }
+.difficulty-badge.medium { background: rgba(255, 152, 0, 0.15); color: #ffb74d; }
+.difficulty-badge.hard { background: rgba(244, 67, 54, 0.15); color: #e57373; }
+
+.timer {
+    margin-left: auto;
+    font-weight: 800;
+    font-size: 1.4em;
+    color: var(--text);
+    min-width: 40px;
+    text-align: right;
+}
+
+.timer.urgent {
+    color: var(--wrong);
+    animation: pulse 0.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 1em;
+    line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* ===========================
+   ANSWER BUTTONS - Single column, large touch targets
+   =========================== */
+.answers-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.answer-btn {
+    padding: 18px 20px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    font-size: 1em;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.15s, background 0.15s;
+    text-align: left;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    line-height: 1.4;
+    /* Touch feedback */
+    -webkit-tap-highlight-color: transparent;
+}
+
+.answer-btn:active:not(:disabled):not(.correct):not(.wrong) {
+    transform: scale(0.97);
+    border-color: var(--primary);
+    background: var(--surface-2);
+}
+
+.answer-btn:disabled {
+    cursor: not-allowed;
+}
+
+.answer-btn.correct {
+    background: rgba(76, 175, 80, 0.2);
+    border-color: var(--correct);
+    color: var(--correct);
+    font-weight: 700;
+}
+
+.answer-btn.wrong {
+    background: rgba(244, 67, 54, 0.2);
+    border-color: var(--wrong);
+    color: var(--wrong);
+}
+
+/* ===========================
+   POINT RESULT OVERLAY
+   =========================== */
+.point-result {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 24px 48px;
+    border-radius: 16px;
+    font-size: 1.6em;
+    font-weight: 800;
+    z-index: 1000;
+    text-align: center;
+    animation: popIn 0.25s ease-out;
+    pointer-events: none;
+}
+
+.point-result.correct {
+    background: rgba(76, 175, 80, 0.95);
+    color: white;
+}
+
+.point-result.wrong {
+    background: rgba(244, 67, 54, 0.95);
+    color: white;
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* ===========================
+   RESULTS SCREEN
+   =========================== */
+.results-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.results-container h2 {
+    font-size: 1.6em;
+}
+
+.winner-display {
+    margin: 16px 0;
+}
+
+.winner-label {
+    display: block;
+    font-size: 0.9em;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+}
+
+.winner-name {
+    font-size: 2.2em;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.final-score {
+    font-size: 1.3em;
+    color: var(--text-dim);
+}
+
+.score-breakdown {
+    background: var(--surface);
+    padding: 16px 20px;
+    border-radius: 12px;
+    text-align: left;
+    width: 100%;
+    max-width: 300px;
+    font-family: monospace;
+    font-size: 0.95em;
+    color: var(--text-dim);
+    line-height: 1.8;
+}
+
+/* ===========================
+   ERROR TOAST
+   =========================== */
+.error-toast {
+    position: fixed;
+    top: calc(16px + var(--sat));
+    left: 16px;
+    right: 16px;
+    background: var(--wrong);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95em;
+    z-index: 2000;
+    text-align: center;
+}
+
+/* ===========================
+   DESKTOP ENHANCEMENT (optional, secondary)
+   =========================== */
+@media (min-width: 481px) {
+    .screen {
+        padding: 32px 24px;
+    }
+    
+    .lobby-container h1 {
+        font-size: 3em;
+    }
+
+    /* On larger screens, 2-col answers are fine */
+    .answers-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .answer-btn {
+        min-height: 64px;
+    }
+
+    .wheel-container {
+        padding: 24px 0;
+    }
+}
+
+/* Extra small phones (iPhone SE etc) */
+@media (max-height: 667px) {
+    .lobby-container h1 {
+        font-size: 2em;
+    }
+
+    .subtitle {
+        margin-bottom: 1em;
+    }
+
+    .question-card {
+        padding: 14px;
+        font-size: 1em;
+    }
+
+    .answer-btn {
+        padding: 14px 16px;
+        min-height: 48px;
+    }
+
+    .scoreboard {
+        padding: 8px 12px;
+    }
+
+    .score-row {
+        padding: 4px 0;
+    }
+}
+
+/* Landscape warning (optional) */
+@media (orientation: landscape) and (max-height: 500px) {
+    .screen {
+        min-height: auto;
+    }
+}
+
+/* ===========================
+   STATS SCREEN
+   =========================== */
+.stats-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.stats-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stats-header h2 {
+    font-size: 1.4em;
+}
+
+.stats-header .btn {
+    min-height: 44px;
+    padding: 10px 20px;
+    font-size: 0.9em;
+}
+
+.stats-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.stat-total {
+    font-size: 2.2em;
+    font-weight: 900;
+    text-align: center;
+    padding: 20px 0;
+    background: linear-gradient(135deg, var(--primary), #ff9a9e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-section {
+    margin-bottom: 24px;
+}
+
+.stat-section h3 {
+    font-size: 1em;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.stat-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stat-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-bar-label {
+    width: 100px;
+    font-size: 0.9em;
+    color: var(--text);
+    font-weight: 600;
+    text-transform: capitalize;
+    flex-shrink: 0;
+}
+
+.stat-bar-track {
+    flex: 1;
+    height: 24px;
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 0.6s ease-out;
+    min-width: 4px;
+}
+
+.stat-bar-value {
+    width: 50px;
+    text-align: right;
+    font-size: 0.85em;
+    color: var(--text-dim);
+    font-weight: 700;
+    flex-shrink: 0;
+}

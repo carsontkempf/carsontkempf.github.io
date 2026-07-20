@@ -1,0 +1,286 @@
+---
+layout: null
+permalink: /trivia/
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/trivia/manifest.json">
+    <link rel="apple-touch-icon" href="/trivia/icon-192.png">
+    <title>Trivia Tennis</title>
+    <link rel="stylesheet" href="/trivia/style.css">
+    <style>
+        /* Auth gate overlay */
+        #auth-gate {
+            position: fixed;
+            inset: 0;
+            background: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 24px;
+            text-align: center;
+        }
+        #auth-gate h1 {
+            font-size: 2em;
+            margin-bottom: 0.5em;
+            background: linear-gradient(135deg, #e94560, #ff9a9e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        #auth-gate p {
+            color: #a0a0a0;
+            margin-bottom: 1.5em;
+        }
+        #auth-gate .login-btn {
+            padding: 16px 48px;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            min-height: 56px;
+        }
+        #auth-gate .login-btn:active { transform: scale(0.96); background: #c23050; }
+        #auth-gate.hidden { display: none; }
+        #app-container { display: none; }
+        #app-container.visible { display: block; }
+    </style>
+</head>
+<body>
+    <!-- Auth Gate -->
+    <div id="auth-gate">
+        <h1>Trivia Tennis</h1>
+        <p>You need to be logged in to play</p>
+        <button class="login-btn" onclick="window.location.href='/login/?redirect=/trivia/'">Log In</button>
+    </div>
+
+    <!-- App Container (hidden until auth verified) -->
+    <div id="app-container">
+        <div id="error-message" class="error-toast" style="display:none;"></div>
+        <div id="point-result" class="point-result" style="display:none;"></div>
+
+        <!-- AUTH SCREEN (Supabase trivia auth) -->
+        <div id="screen-auth" class="screen active">
+            <div class="lobby-container">
+                <h1>Trivia Tennis</h1>
+                <p class="subtitle">Login or create a trivia account</p>
+                <div class="form-group">
+                    <label for="auth-username">Username</label>
+                    <input type="text" id="auth-username" placeholder="Username" maxlength="20" autocomplete="username" inputmode="text">
+                </div>
+                <div class="form-group">
+                    <label for="auth-password">Password</label>
+                    <input type="password" id="auth-password" placeholder="Password" maxlength="50" autocomplete="current-password">
+                </div>
+                <div class="mode-buttons">
+                    <button id="btn-login" class="btn btn-primary btn-full btn-tall">Login</button>
+                    <button id="btn-register" class="btn btn-secondary btn-full">Create Account</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="screen-dashboard" class="screen">
+            <div class="dash-container">
+                <div class="dash-header">
+                    <h2>Hey, <span id="dash-username">Player</span></h2>
+                    <button id="btn-logout" class="btn btn-ghost btn-sm">Logout</button>
+                </div>
+                <div class="dash-stats">
+                    <div class="stat-pill"><span class="stat-num" id="dash-wins">0</span><span class="stat-lbl">Wins</span></div>
+                    <div class="stat-pill"><span class="stat-num" id="dash-losses">0</span><span class="stat-lbl">Losses</span></div>
+                    <div class="stat-pill"><span class="stat-num" id="dash-forfeits">0</span><span class="stat-lbl">Forfeits</span></div>
+                    <div class="stat-pill"><span class="stat-num" id="dash-accuracy">0%</span><span class="stat-lbl">Accuracy</span></div>
+                    <div class="stat-pill"><span class="stat-num" id="dash-total-q">0</span><span class="stat-lbl">Questions</span></div>
+                </div>
+                <div id="dash-category-stats" class="dash-category-stats"></div>
+                <div class="dash-actions">
+                    <button id="btn-new-match" class="btn btn-primary btn-full">New Online Match</button>
+                    <button id="btn-local-mode" class="btn btn-ghost btn-full">Same Device (Local)</button>
+                    <button id="btn-refresh-dash" class="btn btn-ghost btn-full btn-sm">Refresh</button>
+                </div>
+                <h3 class="section-title">Your Matches</h3>
+                <div id="match-list" class="match-list">Loading...</div>
+            </div>
+        </div>
+
+        <!-- NEW MATCH SCREEN -->
+        <div id="screen-new-match" class="screen">
+            <div class="lobby-container">
+                <h2>New Match</h2>
+                <div class="match-options">
+                    <div class="option-row">
+                        <span class="option-label">Sets</span>
+                        <div class="option-toggle" id="sets-toggle">
+                            <button class="opt-btn active" data-val="1">1 Set</button>
+                            <button class="opt-btn" data-val="2">Best of 3</button>
+                            <button class="opt-btn" data-val="3">Best of 5</button>
+                        </div>
+                    </div>
+                    <div class="option-row">
+                        <span class="option-label">Tiebreaks</span>
+                        <div class="option-toggle" id="tiebreak-toggle">
+                            <button class="opt-btn active" data-val="off">Off</button>
+                            <button class="opt-btn" data-val="on">On</button>
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-create-online" class="btn btn-primary btn-full btn-tall">Create Match</button>
+                <div class="divider"><span>OR JOIN</span></div>
+                <div class="form-group">
+                    <input type="text" id="join-code-input" placeholder="ABCDEF" maxlength="6" autocomplete="off" inputmode="text" spellcheck="false">
+                </div>
+                <button id="btn-join-online" class="btn btn-secondary btn-full">Join by Code</button>
+                <button id="btn-back-dash" class="btn btn-ghost btn-full" style="margin-top:16px;">Back</button>
+            </div>
+        </div>
+
+        <!-- LOCAL SETUP -->
+        <div id="screen-setup-local" class="screen">
+            <div class="lobby-container">
+                <h2>Same Device</h2>
+                <p class="subtitle">Two players, one device</p>
+                <div class="form-group">
+                    <label for="local-p1-name">Player 1</label>
+                    <input type="text" id="local-p1-name" placeholder="Player 1 name" maxlength="20" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="local-p2-name">Player 2</label>
+                    <input type="text" id="local-p2-name" placeholder="Player 2 name" maxlength="20" autocomplete="off">
+                </div>
+                <div class="match-options">
+                    <div class="option-row">
+                        <span class="option-label">Sets</span>
+                        <div class="option-toggle" id="local-sets-toggle">
+                            <button class="opt-btn active" data-val="1">1 Set</button>
+                            <button class="opt-btn" data-val="2">Best of 3</button>
+                            <button class="opt-btn" data-val="3">Best of 5</button>
+                        </div>
+                    </div>
+                    <div class="option-row">
+                        <span class="option-label">Tiebreaks</span>
+                        <div class="option-toggle" id="local-tiebreak-toggle">
+                            <button class="opt-btn active" data-val="off">Off</button>
+                            <button class="opt-btn" data-val="on">On</button>
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-start-local" class="btn btn-primary btn-full btn-tall">Start Match</button>
+                <button class="btn btn-ghost btn-full" style="margin-top:12px;" onclick="game.showScreen('dashboard');game.loadDashboard();">Back</button>
+            </div>
+        </div>
+
+        <!-- WAITING FOR PLAYER 2 -->
+        <div id="screen-waiting" class="screen">
+            <div class="waiting-container">
+                <h2>Waiting for Player 2</h2>
+                <p class="hint">Share this code:</p>
+                <div class="match-code" id="match-code-display">------</div>
+                <p class="hint">They join with this code from their device</p>
+                <div class="loading-dots"><span></span><span></span><span></span></div>
+                <button class="btn btn-ghost btn-full" style="margin-top:24px;" onclick="game.showScreen('dashboard');game.loadDashboard();">Back to Dashboard</button>
+            </div>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="screen-game" class="screen">
+            <div class="court-bg"></div>
+            <div class="scoreboard">
+                <div class="score-row">
+                    <div class="player-col"><span class="serve-dot" id="p1-serve"></span><span class="player-name" id="p1-name">Player 1</span></div>
+                    <span class="sets-won" id="p1-sets-won">0</span>
+                    <div id="p1-set-scores" class="set-scores"></div>
+                    <span class="points" id="p1-points">0</span>
+                </div>
+                <div class="score-row">
+                    <div class="player-col"><span class="serve-dot" id="p2-serve"></span><span class="player-name" id="p2-name">Player 2</span></div>
+                    <span class="sets-won" id="p2-sets-won">0</span>
+                    <div id="p2-set-scores" class="set-scores"></div>
+                    <span class="points" id="p2-points">0</span>
+                </div>
+                <div class="game-label" id="game-label"></div>
+            </div>
+            <div class="difficulty-indicator"><span class="diff-dot easy"></span><span class="diff-dot medium active"></span><span class="diff-dot hard"></span></div>
+            <div id="turn-indicator" class="turn-indicator">Waiting...</div>
+            <div id="phase-spin" class="game-phase active">
+                <div class="wheel-container"><canvas id="wheel-canvas" width="300" height="300"></canvas></div>
+                <button id="btn-spin" class="btn btn-primary btn-full btn-tall">Spin the Wheel!</button>
+            </div>
+            <div id="phase-waiting-turn" class="game-phase">
+                <div class="waiting-turn"><p>Waiting for opponent...</p><div class="loading-dots"><span></span><span></span><span></span></div>
+                <button id="btn-refresh" class="btn btn-secondary btn-full" style="margin-top:24px;">Refresh</button></div>
+            </div>
+            <div id="phase-pass-device" class="game-phase">
+                <div class="waiting-turn"><h3>Pass the device!</h3><p style="margin:16px 0;">It's <strong id="pass-player-name">Player</strong>'s turn</p>
+                <button id="btn-ready" class="btn btn-primary btn-full btn-tall">I'm Ready!</button></div>
+            </div>
+            <div id="phase-question" class="game-phase">
+                <div class="question-header"><span class="category-badge" id="question-category">Category</span><span class="difficulty-badge" id="question-difficulty">easy</span><span class="timer" id="timer">15s</span></div>
+                <div class="question-card"><p id="question-text">Question goes here?</p></div>
+                <div id="answers-container" class="answers-container"></div>
+            </div>
+        </div>
+
+        <!-- RESULTS -->
+        <div id="screen-results" class="screen">
+            <div class="results-container">
+                <h2>Match Over!</h2>
+                <div class="winner-display"><span class="winner-label">Winner</span><span class="winner-name" id="winner-name">Player</span></div>
+                <div class="final-score" id="final-score">0 sets to 0</div>
+                <pre class="score-breakdown" id="score-breakdown"></pre>
+                <button class="btn btn-primary btn-full btn-tall" onclick="game.showScreen('dashboard');game.loadDashboard();">Back to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth SDK (site-level) -->
+    <script src="/assets/js/learn-auth-sdk.js"></script>
+    <script src="/assets/js/auth-service.js"></script>
+
+    <!-- Auth gate logic -->
+    <script>
+    (function() {
+        // Wait for site auth to be ready
+        window.addEventListener('auth:ready', async function(event) {
+            const isAuthenticated = event.detail?.isAuthenticated;
+            if (isAuthenticated) {
+                document.getElementById('auth-gate').classList.add('hidden');
+                document.getElementById('app-container').classList.add('visible');
+            }
+        });
+
+        // Fallback: check after 3 seconds in case auth:ready already fired
+        setTimeout(async function() {
+            if (window.authService && typeof window.authService.getUser === 'function') {
+                try {
+                    const user = await window.authService.getUser();
+                    if (user) {
+                        document.getElementById('auth-gate').classList.add('hidden');
+                        document.getElementById('app-container').classList.add('visible');
+                    }
+                } catch(e) {}
+            }
+        }, 3000);
+    })();
+    </script>
+
+    <!-- Supabase + Game Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="/trivia/tennis.js"></script>
+    <script src="/trivia/wheel.js"></script>
+    <script src="/trivia/sync.js"></script>
+    <script src="/trivia/app.js"></script>
+</body>
+</html>
