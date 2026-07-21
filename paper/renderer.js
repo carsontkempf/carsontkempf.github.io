@@ -167,7 +167,7 @@ class Renderer {
         for (const p of players) {
             if (!p.alive) continue;
             const { x, y } = this.worldToScreen(p.x, p.y);
-            const r = PLAYER_RADIUS * this.scale * 1.2;
+            const r = PLAYER_RADIUS * this.scale * 2.0;
 
             // Shadow
             ctx.beginPath();

@@ -4,7 +4,7 @@
  */
 
 const TOKEN_SPEED = PLAYER_SPEED * 0.8;
-const TOKEN_RADIUS = 20;
+const TOKEN_RADIUS = 60;
 const TOKEN_TRAIL_MAX = 15; // max trail points
 const TOKEN_COLORS = ["#ffd700", "#ff69b4", "#00ffcc"];
 const TOKEN_SYMBOLS = ["⭐", "💎", "🔥"];

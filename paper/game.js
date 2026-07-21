@@ -31,6 +31,7 @@ class Game {
         this.shop = null;
         this.tokenManager = new TokenManager();
         this.jackpot = new Jackpot();
+        this.toasts = new Toasts();
     }
 
     loadUserData(user) {
@@ -157,6 +158,7 @@ class Game {
 
         // Update all players
         for (const p of this.players) {
+            const prevKills = p.kills;
             const event = p.update(this.engine, this.players, dt);
             if (event === "fill") {
                 const { x, y } = this.renderer.worldToScreen(p.x, p.y);
@@ -169,6 +171,10 @@ class Game {
                 this.effects.spawnParticles(x, y, p.color, 20, "burst");
                 if (p.id === 0) this.effects.vibrate(100);
             }
+            // Kill toast
+            if (p.id === 0 && p.kills > prevKills) {
+                this.toasts.show("💀 Eliminated an opponent!", "#ff4757");
+            }
         }
 
         // Update AI
@@ -177,7 +183,17 @@ class Game {
         }
 
         // Update tokens
+        const prevCollected = this.tokenManager.collected.length;
         this.tokenManager.update(dt, this.players);
+        if (this.tokenManager.collected.length > prevCollected) {
+            const total = this.tokenManager.collected.length;
+            const spins = Math.floor(total / 3);
+            if (total % 3 === 0 && spins > 0) {
+                this.toasts.show(`🎰 Jackpot spin earned! (${spins} total)`, "#ffd700");
+            } else {
+                this.toasts.show(`✨ Token collected! (${total % 3}/3 for spin)`, "#ffd700");
+            }
+        }
 
         this.updateHUD();
     }
@@ -203,6 +219,8 @@ class Game {
         this.minimap.render(this.renderer.ctx, this.engine, this.players, this.renderer.screenW);
         this.jackpot.update();
         this.jackpot.render(this.renderer.ctx, this.renderer.screenW, this.renderer.screenH);
+        this.toasts.update(dt);
+        this.toasts.render(this.renderer.ctx, this.renderer.screenW, this.renderer.screenH);
     }
 
     updateHUD() {

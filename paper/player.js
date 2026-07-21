@@ -21,10 +21,11 @@ class Player {
         this.deathTimer = 0;
         this.trailCooldown = 0;
         this.hearts = 0; // respawn lives (0-3)
+        this.departurePoint = null; // where we left our territory
     }
 
     spawnTerritory(engine) {
-        engine.setTerritoryCircle(this.x, this.y, 250, this.id);
+        engine.setTerritoryCircle(this.x, this.y, 500, this.id);
     }
 
     /**
@@ -85,20 +86,32 @@ class Player {
         // Territory logic
         const inOwn = engine.isInTerritory(this.x, this.y, this.id);
 
-        if (inOwn && !this.isInOwnTerritory && this.trail.length > 3) {
+        if (inOwn && !this.isInOwnTerritory && this.trail.length > 1) {
+            // Add current position (inside territory) to close the loop
+            this.trail.push({ x: this.x, y: this.y });
+            // Also prepend the departure point if we have it
+            if (this.departurePoint) {
+                this.trail.unshift(this.departurePoint);
+            }
             engine.fillTerritory(this.id, this.trail);
             this.trail = [];
+            this.departurePoint = null;
             this.isInOwnTerritory = true;
             return "fill";
         } else if (inOwn) {
             this.isInOwnTerritory = true;
             return null;
         } else {
+            // Outside territory - add to trail
+            if (this.isInOwnTerritory) {
+                // Just leaving territory - save departure point
+                this.departurePoint = { x: prevX, y: prevY };
+            }
             this.isInOwnTerritory = false;
             this.trailCooldown -= dt;
             if (this.trailCooldown <= 0) {
                 this.trail.push({ x: this.x, y: this.y });
-                this.trailCooldown = 0.04;
+                this.trailCooldown = 0.02; // point every 20ms for smooth dense trail
             }
             return "trail";
         }
