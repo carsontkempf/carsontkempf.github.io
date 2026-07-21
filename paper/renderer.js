@@ -68,41 +68,46 @@ class Renderer {
     }
 
     /**
-     * Render territories as solid colored fills (no tiles/grid).
-     * Uses fillRect per grid cell but drawn as a continuous colored mass.
+     * Render territories as 3D raised colored surfaces.
      */
     renderTerritories(engine, players) {
         const ctx = this.ctx;
         const cellWorld = CELL_SIZE;
+        const cs = cellWorld * this.scale; // screen size per cell
+        const csY = cs * 0.85;
+        const raise = 2; // 3D raise height in pixels
 
-        // Pre-compute screen bounds for culling
-        // Approximate inverse transform to find visible world bounds
-        const invScale = 1 / (this.scale * 0.7);
-        const worldViewW = this.screenW * invScale;
-        const worldViewH = this.screenH * invScale / (Math.sin(this.isoAngle) * 0.5);
-
-        // Draw each player's territory as a solid mass
+        // Draw each player's territory
         for (const p of players) {
-            ctx.fillStyle = p.territoryColor;
-            ctx.beginPath();
-            let hasPoints = false;
-
+            // First pass: draw the raised "side" (3D depth)
+            const darkColor = this.darken(p.territoryColor, 0.5);
+            ctx.fillStyle = darkColor;
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
+                    const wx = gx * cellWorld + cellWorld / 2;
+                    const wy = gy * cellWorld + cellWorld / 2;
+                    const { x, y } = this.worldToScreen(wx, wy);
+                    if (x < -cs || x > this.screenW + cs || y < -csY || y > this.screenH + csY) continue;
 
-                    const wx = gx * cellWorld;
-                    const wy = gy * cellWorld;
-                    const { x, y } = this.worldToScreen(wx + cellWorld / 2, wy + cellWorld / 2);
+                    // Only draw side if no owned cell below
+                    const below = gy + 1 < GRID_RES ? engine.grid[gy + 1][gx] : -1;
+                    if (below !== p.id) {
+                        ctx.fillRect(x - cs / 2, y + csY / 2 - raise, cs, raise + 1);
+                    }
+                }
+            }
 
-                    // Cull
-                    if (x < -20 || x > this.screenW + 20 || y < -20 || y > this.screenH + 20) continue;
-
-                    // Draw as small rect (they overlap to form solid mass)
-                    const sw = cellWorld * this.scale;
-                    const sh = cellWorld * this.scale * 0.85;
-                    ctx.fillRect(x - sw / 2, y - sh / 2, sw, sh);
-                    hasPoints = true;
+            // Second pass: draw the top face
+            ctx.fillStyle = p.territoryColor;
+            for (let gy = 0; gy < GRID_RES; gy++) {
+                for (let gx = 0; gx < GRID_RES; gx++) {
+                    if (engine.grid[gy][gx] !== p.id) continue;
+                    const wx = gx * cellWorld + cellWorld / 2;
+                    const wy = gy * cellWorld + cellWorld / 2;
+                    const { x, y } = this.worldToScreen(wx, wy);
+                    if (x < -cs || x > this.screenW + cs || y < -csY || y > this.screenH + csY) continue;
+                    ctx.fillRect(x - cs / 2, y - csY / 2 - raise, cs + 0.5, csY + 0.5);
                 }
             }
         }

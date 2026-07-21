@@ -65,7 +65,7 @@ class AIController {
     }
 
     avoidWalls(p) {
-        const margin = 80;
+        const margin = 200;
         let steerX = 0, steerY = 0;
         if (p.x < margin) steerX += 1;
         if (p.x > WORLD_SIZE - margin) steerX -= 1;
@@ -82,7 +82,7 @@ class AIController {
         let bestAngle = null;
         let bestDist = Infinity;
         for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
-            for (let dist = 30; dist < 400; dist += 20) {
+            for (let dist = 60; dist < 1000; dist += 40) {
                 const tx = p.x + Math.cos(a) * dist;
                 const ty = p.y + Math.sin(a) * dist;
                 if (engine.isInTerritory(tx, ty, p.id)) {
@@ -100,7 +100,7 @@ class AIController {
     findEnemyTrail(allPlayers, p) {
         let bestAngle = null;
         let bestDist = Infinity;
-        const range = this.type === "aggressive" ? 600 : 400;
+        const range = this.type === "aggressive" ? 1200 : 800;
 
         // Prioritize human player (id=0)
         const sorted = [...allPlayers].sort((a, b) => (a.id === 0 ? -1 : 1));

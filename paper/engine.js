@@ -7,12 +7,12 @@
  * Trail is a list of points forming a smooth path.
  */
 
-const WORLD_SIZE = 3000; // world units
-const GRID_RES = 150; // territory grid resolution
+const WORLD_SIZE = 10000; // world units
+const GRID_RES = 200; // territory grid resolution
 const CELL_SIZE = WORLD_SIZE / GRID_RES;
 const GAME_DURATION = 120;
-const PLAYER_SPEED = 200; // units per second
-const PLAYER_RADIUS = 12;
+const PLAYER_SPEED = 300; // units per second (faster for bigger map)
+const PLAYER_RADIUS = 18;
 
 class Engine {
     constructor() {

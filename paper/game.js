@@ -125,7 +125,7 @@ class Game {
     }
 
     getSpawns(count) {
-        const m = 400;
+        const m = 1000;
         const c = WORLD_SIZE / 2;
         return [
             { x: m, y: m }, { x: WORLD_SIZE - m, y: WORLD_SIZE - m },
