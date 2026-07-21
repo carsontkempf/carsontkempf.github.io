@@ -33,25 +33,24 @@ class TriviaGame {
 
     async init() {
         await this.loadQuestions();
-        
+
         try {
             await this.sync.init();
             this.isOnline = true;
         } catch (e) {
-            console.warn("Supabase not available.", e);
+            console.warn("Offline mode.", e);
             this.isOnline = false;
         }
-        
+
         this.bindUI();
-        
-        // Try to restore session - trust localStorage cache first for instant load
+
+        // Fast path: trust cached session
         const cached = localStorage.getItem("trivia_user");
         if (cached && this.isOnline) {
             try {
                 this.sync.currentUser = JSON.parse(cached);
                 this.showScreen("dashboard");
                 this.loadDashboard();
-                // Verify in background (refresh stats silently)
                 this.sync.restoreSession().then(user => {
                     if (user) this.loadDashboard();
                     else { this.sync.currentUser = null; this.showScreen("auth"); }
@@ -61,7 +60,19 @@ class TriviaGame {
                 localStorage.removeItem("trivia_user");
             }
         }
-        
+
+        // No cache — auto-login via learn platform (site auth guarantees a valid token)
+        if (this.isOnline) {
+            try {
+                const user = await this.sync.restoreSession();
+                if (user) {
+                    this.showScreen("dashboard");
+                    this.loadDashboard();
+                    return;
+                }
+            } catch (e) {}
+        }
+
         this.showScreen("auth");
     }
 
