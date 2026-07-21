@@ -27,6 +27,8 @@ class Game {
         this.stats = { gamesPlayed: 0, wins: 0, kills: 0, totalTerritory: 0 };
         this.shop = null;
         this.charRenderer = null;
+        this.effects = new Effects();
+        this.minimap = new MiniMap();
     }
 
     /**
@@ -191,9 +193,29 @@ class Game {
             this.humanPlayer.setDirection(this.joystick.direction);
         }
 
-        // Tick all players
+        // Tick all players and handle events
         for (const p of this.players) {
-            p.tick(this.engine, this.players);
+            const event = p.tick(this.engine, this.players);
+            if (event === "fill" && this.renderer) {
+                const { x, y } = this.renderer.gridToScreen(p.x, p.y);
+                this.effects.addCaptureWave(x, y, p.color, 80);
+                this.effects.spawnParticles(x, y, p.color, 12, "sparkle");
+                if (p.id === 0) this.effects.vibrate(30);
+            } else if (event === "kill" && this.renderer) {
+                const { x, y } = this.renderer.gridToScreen(p.x, p.y);
+                this.effects.shake(6);
+                this.effects.spawnParticles(x, y, "#ff4757", 20, "burst");
+                if (p.id === 0) this.effects.vibrate(50);
+            } else if (event === "died" && this.renderer) {
+                const { x, y } = this.renderer.gridToScreen(p.x, p.y);
+                this.effects.shake(10);
+                this.effects.spawnParticles(x, y, p.color, 25, "burst");
+                if (p.id === 0) this.effects.vibrate(100);
+            } else if (event === "trail" && this.renderer && p.id === 0) {
+                // Subtle trail glow for human player
+                const { x, y } = this.renderer.gridToScreen(p.x, p.y);
+                this.effects.addTrailGlow(x, y, p.trailColor);
+            }
         }
 
         // Tick AI
@@ -208,12 +230,15 @@ class Game {
     gameRender(dt) {
         if (!this.renderer) return;
 
-        // Update character animations
+        // Update effects
+        this.effects.update(dt);
         if (this.charRenderer) this.charRenderer.update(dt);
 
-        // Camera follows human player
+        // Camera follows human player + screen shake offset
         this.renderer.setCameraTarget(this.humanPlayer.x, this.humanPlayer.y);
         this.renderer.updateCamera(dt);
+        this.renderer.cameraX += this.effects.shakeOffsetX;
+        this.renderer.cameraY += this.effects.shakeOffsetY;
 
         // Render grid
         this.renderer.clear();
@@ -224,9 +249,15 @@ class Game {
         const sorted = [...this.players].filter(p => p.alive).sort((a, b) => (a.y + a.x) - (b.y + b.x));
         for (const p of sorted) {
             const shape = p.shape || "cube";
-            const moving = true; // always moving in this game
+            const moving = true;
             this.charRenderer.draw(ctx, p.x, p.y, p.color, shape, moving, p.direction);
         }
+
+        // Render effects (particles, waves, glows)
+        this.effects.render(ctx);
+
+        // Render minimap
+        this.minimap.render(ctx, this.engine, this.players, this.renderer.screenW);
     }
 
     updateHUD() {
@@ -236,6 +267,22 @@ class Game {
         document.getElementById("hud-timer").textContent = `${min}:${sec}`;
         document.getElementById("hud-territory").textContent = this.engine.getTerritoryPercent(0) + "%";
         document.getElementById("hud-kills").textContent = this.humanPlayer.kills + " kills";
+
+        // Update leaderboard every 10 ticks (~1s)
+        if (Math.floor(this.engine.gameTime * TICK_RATE) % 10 === 0) {
+            const lb = this.players
+                .filter(p => p.alive)
+                .map(p => ({ name: p.name, pct: parseFloat(this.engine.getTerritoryPercent(p.id)), isMe: p.id === 0 }))
+                .sort((a, b) => b.pct - a.pct)
+                .slice(0, 4);
+
+            const lbEl = document.getElementById("hud-leaderboard");
+            if (lbEl) {
+                lbEl.innerHTML = lb.map(r =>
+                    `<div class="lb-row ${r.isMe ? 'me' : ''}"><span class="lb-name">${r.name}</span><span class="lb-pct">${r.pct}%</span></div>`
+                ).join("");
+            }
+        }
     }
 
     gameEnd() {
