@@ -1,0 +1,109 @@
+---
+layout: null
+permalink: /paper/
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Paper Conquest</title>
+    <link rel="stylesheet" href="/paper/style.css">
+</head>
+<body>
+    <!-- Auth Gate -->
+    <div id="auth-gate">
+        <h1>Paper Conquest</h1>
+        <p>You need to be logged in to play</p>
+        <button class="gate-btn" onclick="window.location.href='/login/?redirect=/paper/'">Log In</button>
+    </div>
+
+    <!-- App (hidden until authed) -->
+    <div id="app" class="hidden">
+        <!-- Menu Screen -->
+        <div id="screen-menu" class="screen active">
+            <div class="menu-container">
+                <h1 class="game-title">Paper Conquest</h1>
+                <p class="subtitle">Claim territory. Eliminate opponents.</p>
+                <div class="menu-buttons">
+                    <button id="btn-play" class="btn btn-primary btn-full btn-tall">Play</button>
+                    <button id="btn-shop" class="btn btn-secondary btn-full">Shop</button>
+                </div>
+                <div class="coin-display">
+                    <span class="coin-icon">●</span>
+                    <span id="menu-coins">0</span> coins
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Screen (pre-game) -->
+        <div id="screen-settings" class="screen">
+            <div class="menu-container">
+                <h2>Game Settings</h2>
+                <div class="setting-row">
+                    <span class="setting-label">AI Opponents</span>
+                    <div class="setting-toggle" id="ai-count-toggle">
+                        <button class="opt-btn" data-val="1">1</button>
+                        <button class="opt-btn" data-val="2">2</button>
+                        <button class="opt-btn active" data-val="3">3</button>
+                        <button class="opt-btn" data-val="4">4</button>
+                        <button class="opt-btn" data-val="5">5</button>
+                    </div>
+                </div>
+                <button id="btn-start-game" class="btn btn-primary btn-full btn-tall">Start Game</button>
+                <button id="btn-back-menu" class="btn btn-ghost btn-full">Back</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="screen-game" class="screen">
+            <canvas id="game-canvas"></canvas>
+            <!-- HUD -->
+            <div id="hud">
+                <div class="hud-top">
+                    <span id="hud-timer">2:00</span>
+                    <span id="hud-territory">0%</span>
+                    <span id="hud-kills">0 kills</span>
+                </div>
+            </div>
+            <!-- Virtual Joystick -->
+            <div id="joystick-zone"></div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="screen-results" class="screen">
+            <div class="menu-container">
+                <h2 id="result-title">Game Over</h2>
+                <div id="result-stats"></div>
+                <div id="result-coins" class="coin-earned"></div>
+                <button id="btn-play-again" class="btn btn-primary btn-full btn-tall">Play Again</button>
+                <button id="btn-results-menu" class="btn btn-ghost btn-full">Menu</button>
+            </div>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="screen-shop" class="screen">
+            <div class="menu-container">
+                <div class="shop-header">
+                    <h2>Shop</h2>
+                    <span class="coin-display"><span class="coin-icon">●</span> <span id="shop-coins">0</span></span>
+                </div>
+                <div id="shop-items" class="shop-grid"></div>
+                <button id="btn-shop-back" class="btn btn-ghost btn-full">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/paper/engine.js"></script>
+    <script src="/paper/renderer.js"></script>
+    <script src="/paper/player.js"></script>
+    <script src="/paper/ai.js"></script>
+    <script src="/paper/joystick.js"></script>
+    <script src="/paper/game.js"></script>
+</body>
+</html>

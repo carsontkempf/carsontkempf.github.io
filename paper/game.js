@@ -1,0 +1,202 @@
+/**
+ * Game - Main controller. Ties engine, renderer, players, AI, and UI together.
+ */
+
+const PLAYER_COLORS = ["#00d2ff", "#ff4757", "#2ed573", "#ffa502", "#7b2ff7", "#ff6b81"];
+const AI_NAMES = ["Bot Alpha", "Bot Beta", "Bot Gamma", "Bot Delta", "Bot Epsilon"];
+
+class Game {
+    constructor() {
+        this.engine = new Engine();
+        this.renderer = null;
+        this.joystick = null;
+        this.players = [];
+        this.humanPlayer = null;
+        this.aiControllers = [];
+        this.aiCount = 3;
+        this.state = "menu"; // menu, settings, playing, results
+    }
+
+    init() {
+        this.bindUI();
+        this.showScreen("menu");
+
+        // Handle resize
+        window.addEventListener("resize", () => {
+            if (this.renderer) this.renderer.resize();
+        });
+    }
+
+    bindUI() {
+        document.getElementById("btn-play").addEventListener("click", () => this.showScreen("settings"));
+        document.getElementById("btn-start-game").addEventListener("click", () => this.startGame());
+        document.getElementById("btn-back-menu").addEventListener("click", () => this.showScreen("menu"));
+        document.getElementById("btn-play-again").addEventListener("click", () => this.startGame());
+        document.getElementById("btn-results-menu").addEventListener("click", () => this.showScreen("menu"));
+        document.getElementById("btn-shop").addEventListener("click", () => this.showScreen("shop"));
+        document.getElementById("btn-shop-back").addEventListener("click", () => this.showScreen("menu"));
+
+        // AI count toggle
+        document.querySelectorAll("#ai-count-toggle .opt-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll("#ai-count-toggle .opt-btn").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                this.aiCount = parseInt(btn.dataset.val);
+            });
+        });
+    }
+
+    showScreen(name) {
+        this.state = name;
+        document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+        const el = document.getElementById("screen-" + name);
+        if (el) el.classList.add("active");
+    }
+
+    startGame() {
+        this.showScreen("game");
+        this.state = "playing";
+
+        // Init engine
+        this.engine.initGrid();
+        this.players = [];
+        this.aiControllers = [];
+
+        // Create human player (center-ish)
+        const hx = Math.floor(GRID_SIZE / 2);
+        const hy = Math.floor(GRID_SIZE / 2);
+        this.humanPlayer = new Player(0, "You", PLAYER_COLORS[0], hx, hy);
+        this.humanPlayer.spawnTerritory(this.engine);
+        this.players.push(this.humanPlayer);
+
+        // Create AI players
+        const spawnPositions = this.getSpawnPositions(this.aiCount);
+        for (let i = 0; i < this.aiCount; i++) {
+            const pos = spawnPositions[i];
+            const bot = new Player(i + 1, AI_NAMES[i], PLAYER_COLORS[i + 1], pos.x, pos.y);
+            bot.spawnTerritory(this.engine);
+            this.players.push(bot);
+
+            const type = AI_TYPES[i % AI_TYPES.length];
+            this.aiControllers.push(new AIController(bot, type));
+        }
+
+        this.engine.players = this.players;
+
+        // Init renderer
+        const canvas = document.getElementById("game-canvas");
+        this.renderer = new Renderer(canvas);
+        this.renderer.resize();
+
+        // Init joystick
+        this.joystick = new Joystick("joystick-zone");
+
+        // Set engine callbacks
+        this.engine.onTick = () => this.gameTick();
+        this.engine.onRender = (dt) => this.gameRender(dt);
+        this.engine.onGameEnd = () => this.gameEnd();
+
+        // Start
+        this.engine.start();
+    }
+
+    getSpawnPositions(count) {
+        const margin = 8;
+        const positions = [
+            { x: margin, y: margin },
+            { x: GRID_SIZE - margin, y: GRID_SIZE - margin },
+            { x: margin, y: GRID_SIZE - margin },
+            { x: GRID_SIZE - margin, y: margin },
+            { x: GRID_SIZE / 2, y: margin },
+        ];
+        return positions.slice(0, count);
+    }
+
+    gameTick() {
+        // Apply joystick input to human player
+        if (this.joystick && this.joystick.direction !== null) {
+            this.humanPlayer.setDirection(this.joystick.direction);
+        }
+
+        // Tick all players
+        for (const p of this.players) {
+            p.tick(this.engine, this.players);
+        }
+
+        // Tick AI
+        for (const ai of this.aiControllers) {
+            ai.tick(this.engine, this.players);
+        }
+
+        // Update HUD
+        this.updateHUD();
+    }
+
+    gameRender(dt) {
+        if (!this.renderer) return;
+
+        // Camera follows human player
+        this.renderer.setCameraTarget(this.humanPlayer.x, this.humanPlayer.y);
+        this.renderer.updateCamera(dt);
+
+        // Render
+        this.renderer.clear();
+        this.renderer.renderGrid(this.engine, this.players);
+    }
+
+    updateHUD() {
+        const remaining = Math.max(0, GAME_DURATION - this.engine.gameTime);
+        const min = Math.floor(remaining / 60);
+        const sec = Math.floor(remaining % 60).toString().padStart(2, "0");
+        document.getElementById("hud-timer").textContent = `${min}:${sec}`;
+        document.getElementById("hud-territory").textContent = this.engine.getTerritoryPercent(0) + "%";
+        document.getElementById("hud-kills").textContent = this.humanPlayer.kills + " kills";
+    }
+
+    gameEnd() {
+        this.engine.stop();
+        this.state = "results";
+
+        // Calculate scores
+        const scores = this.players.map(p => ({
+            name: p.name,
+            territory: parseFloat(this.engine.getTerritoryPercent(p.id)),
+            kills: p.kills,
+            isHuman: p.id === 0,
+        })).sort((a, b) => b.territory - a.territory);
+
+        const rank = scores.findIndex(s => s.isHuman) + 1;
+        const humanScore = scores.find(s => s.isHuman);
+        const won = rank === 1;
+
+        // Calculate coins
+        let coins = Math.floor(humanScore.territory * 2); // 2 coins per % territory
+        coins += humanScore.kills * 10; // 10 coins per kill
+        if (won) coins += 50; // win bonus
+        coins += Math.floor(GAME_DURATION / 10); // survival bonus (always get this)
+
+        // Show results
+        document.getElementById("result-title").textContent = won ? "Victory!" : `#${rank} Place`;
+        document.getElementById("result-stats").innerHTML = `
+            <div>Territory: <strong>${humanScore.territory}%</strong></div>
+            <div>Kills: <strong>${humanScore.kills}</strong></div>
+            <div>Rank: <strong>#${rank} of ${this.players.length}</strong></div>
+        `;
+        document.getElementById("result-coins").textContent = `+${coins} coins`;
+
+        this.showScreen("results");
+    }
+}
+
+// Boot
+document.addEventListener("DOMContentLoaded", () => {
+    const game = new Game();
+    game.init();
+
+    // Auth gate (simplified - in production uses site auth)
+    const gate = document.getElementById("auth-gate");
+    const app = document.getElementById("app");
+    // For now, auto-show app (auth will be handled when deployed to the site)
+    gate.classList.add("hidden");
+    app.classList.remove("hidden");
+});
