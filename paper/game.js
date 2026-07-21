@@ -26,8 +26,11 @@ class Game {
         this.equippedColor = "#00d2ff";
         this.equippedPattern = "solid";
         this.equippedShape = "cube";
+        this.equippedPowerup = "none";
         this.stats = { gamesPlayed: 0, wins: 0, kills: 0, totalTerritory: 0 };
         this.shop = null;
+        this.tokenManager = new TokenManager();
+        this.jackpot = new Jackpot();
     }
 
     loadUserData(user) {
@@ -43,6 +46,7 @@ class Game {
                 this.equippedColor = d.equippedColor || "#00d2ff";
                 this.equippedPattern = d.equippedPattern || "solid";
                 this.equippedShape = d.equippedShape || "cube";
+                this.equippedPowerup = d.equippedPowerup || "none";
                 this.stats = d.stats || this.stats;
             } catch (e) {}
         }
@@ -54,7 +58,7 @@ class Game {
         localStorage.setItem("paper_data_" + this.userId, JSON.stringify({
             coins: this.coins, unlockedSkins: this.unlockedSkins,
             equippedColor: this.equippedColor, equippedPattern: this.equippedPattern,
-            equippedShape: this.equippedShape, stats: this.stats,
+            equippedShape: this.equippedShape, equippedPowerup: this.equippedPowerup, stats: this.stats,
         }));
     }
 
@@ -121,6 +125,7 @@ class Game {
         this.engine.onUpdate = (dt) => this.update(dt);
         this.engine.onRender = (dt) => this.render(dt);
         this.engine.onGameEnd = () => this.gameEnd();
+        this.tokenManager.reset();
         this.engine.start();
     }
 
@@ -138,6 +143,13 @@ class Game {
         // Human input
         if (this.joystick && this.joystick.angle !== null) {
             this.humanPlayer.setTargetAngle(this.joystick.angle);
+        }
+
+        // Apply powerup: speed boost
+        if (this.equippedPowerup === "speed_boost") {
+            this.humanPlayer.speed = PLAYER_SPEED * 1.1;
+        } else {
+            this.humanPlayer.speed = PLAYER_SPEED;
         }
 
         // Update all players
@@ -161,8 +173,8 @@ class Game {
             ai.update(this.engine, this.players, dt);
         }
 
-        // Check kills (human killed an AI)
-        // Kills are handled inside Player.update
+        // Update tokens
+        this.tokenManager.update(dt, this.players);
 
         this.updateHUD();
     }
@@ -183,8 +195,11 @@ class Game {
         this.renderer.renderTerritories(this.engine, this.players);
         this.renderer.renderTrails(this.players);
         this.renderer.renderPlayers(this.players);
+        this.tokenManager.render(this.renderer.ctx, this.renderer);
         this.effects.render(this.renderer.ctx);
         this.minimap.render(this.renderer.ctx, this.engine, this.players, this.renderer.screenW);
+        this.jackpot.update();
+        this.jackpot.render(this.renderer.ctx, this.renderer.screenW, this.renderer.screenH);
     }
 
     updateHUD() {
@@ -213,8 +228,27 @@ class Game {
         const h = scores.find(s => s.isHuman);
         const won = rank === 1;
         let coins = Math.floor(h.territory * 2) + h.kills * 10 + (won ? 50 : 0) + 12;
+
+        // Jackpot if tokens collected
+        const collected = this.tokenManager.collected;
+        if (collected.length >= 3) {
+            this.jackpot.start(collected, (jackpotCoins) => {
+                coins += jackpotCoins;
+                this.showResults(h, rank, won, coins, collected.length);
+            });
+        } else {
+            this.showResults(h, rank, won, coins, collected.length);
+        }
+    }
+
+    showResults(h, rank, won, coins, tokensCollected) {
         document.getElementById("result-title").textContent = won ? "Victory!" : `#${rank} Place`;
-        document.getElementById("result-stats").innerHTML = `<div>Territory: <strong>${h.territory}%</strong></div><div>Kills: <strong>${h.kills}</strong></div><div>Rank: <strong>#${rank} of ${this.players.length}</strong></div>`;
+        document.getElementById("result-stats").innerHTML = `
+            <div>Territory: <strong>${h.territory}%</strong></div>
+            <div>Kills: <strong>${h.kills}</strong></div>
+            <div>Rank: <strong>#${rank} of ${this.players.length}</strong></div>
+            <div>Tokens: <strong>${tokensCollected}</strong></div>
+        `;
         document.getElementById("result-coins").textContent = `+${coins} coins`;
         this.addCoins(coins);
         this.stats.gamesPlayed++; if (won) this.stats.wins++;

@@ -38,6 +38,14 @@ const SKIN_CATALOG = {
         { id: "cat", name: "Cat", price: 500 },
         { id: "rocket", name: "Rocket", price: 750 },
         { id: "ghost", name: "Ghost", price: 1000 },
+    ],
+    powerups: [
+        { id: "none", name: "None", price: 0, desc: "No powerup equipped" },
+        { id: "speed_boost", name: "Speed+", price: 200, desc: "10% faster movement" },
+        { id: "magnet", name: "Magnet", price: 300, desc: "Tokens attracted from 2x range" },
+        { id: "shield", name: "Shield", price: 500, desc: "Survive one trail hit" },
+        { id: "thick_trail", name: "Wide Trail", price: 250, desc: "Trail is 50% wider (harder to dodge)" },
+        { id: "quick_fill", name: "Quick Fill", price: 400, desc: "Territory fills 30% more area" },
     ]
 };
 
@@ -84,6 +92,7 @@ class Shop {
             { id: "colors", label: "Colors" },
             { id: "patterns", label: "Patterns" },
             { id: "shapes", label: "Characters" },
+            { id: "powerups", label: "Powerups" },
         ];
         let html = '<div class="shop-tabs">';
         for (const tab of tabs) {
@@ -98,6 +107,8 @@ class Shop {
             return `<div style="width:36px;height:36px;border-radius:8px;background:${item.color};margin:0 auto;"></div>`;
         } else if (this.activeTab === "patterns") {
             return `<div class="pattern-preview pattern-${item.id}"></div>`;
+        } else if (this.activeTab === "powerups") {
+            return `<div class="shape-preview" style="font-size:1.2em;">${item.desc ? '⚡' : ''}</div>`;
         } else {
             return `<div class="shape-preview shape-${item.id}"></div>`;
         }
@@ -107,6 +118,7 @@ class Shop {
         if (this.activeTab === "colors") return this.game.equippedColor === item.color;
         if (this.activeTab === "patterns") return this.game.equippedPattern === item.id;
         if (this.activeTab === "shapes") return this.game.equippedShape === item.id;
+        if (this.activeTab === "powerups") return this.game.equippedPowerup === item.id;
         return false;
     }
 
@@ -155,6 +167,7 @@ class Shop {
         if (tab === "colors") this.game.equippedColor = item.color;
         else if (tab === "patterns") this.game.equippedPattern = item.id;
         else if (tab === "shapes") this.game.equippedShape = item.id;
+        else if (tab === "powerups") this.game.equippedPowerup = item.id;
         this.game.saveUserData();
     }
 }

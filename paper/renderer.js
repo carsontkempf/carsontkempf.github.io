@@ -118,7 +118,7 @@ class Renderer {
             // Trail shadow
             ctx.beginPath();
             ctx.strokeStyle = "rgba(0,0,0,0.3)";
-            ctx.lineWidth = 8 * this.scale * 50;
+            ctx.lineWidth = 4 * this.scale * 50;
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
             const f = this.worldToScreen(p.trail[0].x, p.trail[0].y);
@@ -134,7 +134,7 @@ class Renderer {
             // Main trail
             ctx.beginPath();
             ctx.strokeStyle = p.trailColor;
-            ctx.lineWidth = 6 * this.scale * 50;
+            ctx.lineWidth = 3 * this.scale * 50;
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
             const first = this.worldToScreen(p.trail[0].x, p.trail[0].y);
@@ -149,7 +149,7 @@ class Renderer {
             // Inner bright line
             ctx.beginPath();
             ctx.strokeStyle = p.color;
-            ctx.lineWidth = 2 * this.scale * 50;
+            ctx.lineWidth = 1.5 * this.scale * 50;
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
             ctx.moveTo(first.x, first.y);
