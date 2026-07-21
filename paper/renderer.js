@@ -116,8 +116,8 @@ class Renderer {
             if (!p.alive || p.trail.length < 2) continue;
 
             const points = [...p.trail, { x: p.x, y: p.y }];
-            const maxWidth = PLAYER_RADIUS * this.scale * 2.2; // matches player size
-            const minWidth = 2;
+            const maxWidth = PLAYER_RADIUS * this.scale * 1.2; // narrower than player icon
+            const minWidth = 1.5;
 
             // Draw tapered trail using individual segments with varying width
             for (let i = 0; i < points.length - 1; i++) {
