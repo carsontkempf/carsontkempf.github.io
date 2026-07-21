@@ -74,21 +74,18 @@ class Joystick {
     }
 
     bindMouse() {
-        let mouseDown = false, msx = 0, msy = 0;
-        document.addEventListener("mousedown", (e) => {
-            if (e.target.closest("#hud, .menu-container, .screen:not(#screen-game)")) return;
-            mouseDown = true; msx = e.clientX; msy = e.clientY;
-        });
+        // Mouse: player steers toward cursor position relative to screen center.
+        // No click needed - just move the mouse and the player follows.
         document.addEventListener("mousemove", (e) => {
-            if (!mouseDown) return;
-            const dx = e.clientX - msx;
-            const dy = e.clientY - msy;
-            if (Math.sqrt(dx * dx + dy * dy) > 8) {
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            const dx = e.clientX - cx;
+            const dy = e.clientY - cy;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 25) {
                 this.angle = Math.atan2(dy, dx);
-                msx = e.clientX; msy = e.clientY;
             }
         });
-        document.addEventListener("mouseup", () => { mouseDown = false; });
     }
 
     bindKeyboard() {

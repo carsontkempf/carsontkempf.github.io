@@ -10,8 +10,6 @@ class Renderer {
         this.baseScale = 1.2; // base zoom (zoomed in)
         this.scale = this.baseScale;
         this.targetScale = this.baseScale;
-        // Isometric projection angles
-        this.isoAngle = 0.46;
         this.cameraX = 0;
         this.cameraY = 0;
         this.targetCamX = 0;
@@ -28,15 +26,14 @@ class Renderer {
     }
 
     /**
-     * Convert world (x, y) to screen coords with isometric projection.
+     * Convert world (x, y) to screen coords.
+     * Uses a slight top-down perspective tilt (not full isometric) so speed looks uniform.
      */
     worldToScreen(wx, wy) {
         const s = this.scale;
-        const cos = Math.cos(this.isoAngle);
-        const sin = Math.sin(this.isoAngle);
-        // Rotate and scale
-        const sx = (wx - wy) * s * 0.7;
-        const sy = (wx + wy) * s * sin * 0.5;
+        // Slight Y compression for depth feel (0.85 instead of full iso 0.5)
+        const sx = (wx * s);
+        const sy = (wy * s * 0.85);
         return {
             x: sx - this.cameraX + this.screenW / 2,
             y: sy - this.cameraY + this.screenH / 2
@@ -45,9 +42,8 @@ class Renderer {
 
     setCameraTarget(wx, wy) {
         const s = this.scale;
-        const sin = Math.sin(this.isoAngle);
-        this.targetCamX = (wx - wy) * s * 0.7;
-        this.targetCamY = (wx + wy) * s * sin * 0.5;
+        this.targetCamX = wx * s;
+        this.targetCamY = wy * s * 0.85;
     }
 
     updateCamera(dt) {
@@ -103,8 +99,9 @@ class Renderer {
                     if (x < -20 || x > this.screenW + 20 || y < -20 || y > this.screenH + 20) continue;
 
                     // Draw as small rect (they overlap to form solid mass)
-                    const s = cellWorld * this.scale * 0.38;
-                    ctx.fillRect(x - s, y - s * 0.6, s * 2, s * 1.2);
+                    const sw = cellWorld * this.scale;
+                    const sh = cellWorld * this.scale * 0.85;
+                    ctx.fillRect(x - sw / 2, y - sh / 2, sw, sh);
                     hasPoints = true;
                 }
             }
@@ -176,7 +173,7 @@ class Renderer {
 
             // Direction indicator
             const tipX = x + Math.cos(p.angle) * r * 0.7;
-            const tipY = y - 2 + Math.sin(p.angle) * r * 0.4; // compressed for iso
+            const tipY = y - 2 + Math.sin(p.angle) * r * 0.7;
             ctx.beginPath();
             ctx.arc(tipX, tipY, r * 0.25, 0, Math.PI * 2);
             ctx.fillStyle = "#fff";
@@ -189,18 +186,18 @@ class Renderer {
      */
     renderBorder() {
         const ctx = this.ctx;
-        const corners = [
-            this.worldToScreen(0, 0),
-            this.worldToScreen(WORLD_SIZE, 0),
-            this.worldToScreen(WORLD_SIZE, WORLD_SIZE),
-            this.worldToScreen(0, WORLD_SIZE),
-        ];
+        const tl = this.worldToScreen(0, 0);
+        const tr = this.worldToScreen(WORLD_SIZE, 0);
+        const br = this.worldToScreen(WORLD_SIZE, WORLD_SIZE);
+        const bl = this.worldToScreen(0, WORLD_SIZE);
         ctx.beginPath();
-        ctx.moveTo(corners[0].x, corners[0].y);
-        for (let i = 1; i < 4; i++) ctx.lineTo(corners[i].x, corners[i].y);
+        ctx.moveTo(tl.x, tl.y);
+        ctx.lineTo(tr.x, tr.y);
+        ctx.lineTo(br.x, br.y);
+        ctx.lineTo(bl.x, bl.y);
         ctx.closePath();
-        ctx.strokeStyle = "rgba(255,71,87,0.5)";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "rgba(255,71,87,0.6)";
+        ctx.lineWidth = 3;
         ctx.stroke();
     }
 
