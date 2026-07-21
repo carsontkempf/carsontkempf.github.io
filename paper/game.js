@@ -21,6 +21,7 @@ class Game {
         // User data
         this.userId = null;
         this.userName = "";
+        this.isAdmin = false;
         this.coins = 0;
         this.unlockedSkins = ["default"];
         this.equippedColor = "#00d2ff";
@@ -37,6 +38,8 @@ class Game {
     loadUserData(user) {
         this.userId = user.id || user.email || "local";
         this.userName = user.name || user.email || "Player";
+        this.isAdmin = this.checkAdmin(user);
+
         const key = "paper_data_" + this.userId;
         const saved = localStorage.getItem(key);
         if (saved) {
@@ -51,7 +54,29 @@ class Game {
                 this.stats = d.stats || this.stats;
             } catch (e) {}
         }
+
+        // Admins get everything unlocked
+        if (this.isAdmin) {
+            const allItems = [
+                ...SKIN_CATALOG.colors.map(i => i.id),
+                ...SKIN_CATALOG.patterns.map(i => i.id),
+                ...SKIN_CATALOG.shapes.map(i => i.id),
+                ...SKIN_CATALOG.powerups.map(i => i.id),
+            ];
+            this.unlockedSkins = [...new Set([...this.unlockedSkins, ...allItems])];
+        }
+
         this.updateCoinDisplays();
+    }
+
+    checkAdmin(user) {
+        // Admin emails for carsontkempf.github.io
+        const adminEmails = [
+            "carsontkempf@gmail.com",
+            "carson@cloudprototype.org",
+        ];
+        const email = (user.email || "").toLowerCase();
+        return adminEmails.includes(email);
     }
 
     saveUserData() {
