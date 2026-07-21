@@ -110,18 +110,25 @@ class TokenManager {
     }
 
     /**
-     * Render tokens.
+     * Render tokens with rainbow glow cycling.
      */
     render(ctx, renderer) {
+        const time = performance.now() / 1000;
+
         for (const t of this.tokens) {
             if (!t.alive) continue;
 
-            // Token trail
+            // Rainbow hue cycling
+            const hue = (time * 40 + t.x * 0.01) % 360;
+            const glowColor = `hsl(${hue}, 100%, 60%)`;
+            const glowColor2 = `hsl(${(hue + 60) % 360}, 100%, 70%)`;
+
+            // Token trail (rainbow tinted)
             if (t.trail.length > 1) {
                 ctx.beginPath();
-                ctx.strokeStyle = t.color;
-                ctx.globalAlpha = 0.3;
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = glowColor;
+                ctx.globalAlpha = 0.25;
+                ctx.lineWidth = 3;
                 ctx.lineCap = "round";
                 const first = renderer.worldToScreen(t.trail[0].x, t.trail[0].y);
                 ctx.moveTo(first.x, first.y);
@@ -137,28 +144,44 @@ class TokenManager {
             const { x, y } = renderer.worldToScreen(t.x, t.y);
             const r = TOKEN_RADIUS * renderer.scale;
 
-            // Glow
+            // Outer glow (pulsing)
+            const pulse = 1 + Math.sin(time * 3) * 0.2;
             ctx.beginPath();
-            ctx.arc(x, y, r * 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = t.color;
-            ctx.globalAlpha = 0.15;
+            ctx.arc(x, y, r * 2 * pulse, 0, Math.PI * 2);
+            ctx.fillStyle = glowColor;
+            ctx.globalAlpha = 0.1;
             ctx.fill();
             ctx.globalAlpha = 1;
 
-            // Body
+            // Middle glow ring
+            ctx.beginPath();
+            ctx.arc(x, y, r * 1.4 * pulse, 0, Math.PI * 2);
+            ctx.fillStyle = glowColor2;
+            ctx.globalAlpha = 0.2;
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Main body
+            const grad = ctx.createRadialGradient(x - r * 0.2, y - r * 0.3, 0, x, y, r);
+            grad.addColorStop(0, "#fff");
+            grad.addColorStop(0.4, glowColor2);
+            grad.addColorStop(1, glowColor);
             ctx.beginPath();
             ctx.arc(x, y, r, 0, Math.PI * 2);
-            ctx.fillStyle = t.color;
+            ctx.fillStyle = grad;
             ctx.fill();
-            ctx.strokeStyle = "#fff";
-            ctx.lineWidth = 1.5;
+
+            // White border
+            ctx.strokeStyle = "rgba(255,255,255,0.7)";
+            ctx.lineWidth = 2;
             ctx.stroke();
 
             // Symbol
-            ctx.font = `${r * 1.2}px sans-serif`;
+            ctx.font = `bold ${r * 1.2}px sans-serif`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(t.symbol, x, y);
+            ctx.fillStyle = "#fff";
+            ctx.fillText(t.symbol, x, y + 1);
         }
     }
 }

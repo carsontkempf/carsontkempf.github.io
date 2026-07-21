@@ -107,7 +107,7 @@ class Renderer {
     }
 
     /**
-     * Render trails as smooth thick curves.
+     * Render trails as tapered paths (wide at player, thin at start).
      */
     renderTrails(players) {
         const ctx = this.ctx;
@@ -115,50 +115,45 @@ class Renderer {
         for (const p of players) {
             if (!p.alive || p.trail.length < 2) continue;
 
-            // Trail shadow
-            ctx.beginPath();
-            ctx.strokeStyle = "rgba(0,0,0,0.3)";
-            ctx.lineWidth = 4 * this.scale * 50;
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-            const f = this.worldToScreen(p.trail[0].x, p.trail[0].y);
-            ctx.moveTo(f.x + 1, f.y + 3);
-            for (let i = 1; i < p.trail.length; i++) {
-                const pt = this.worldToScreen(p.trail[i].x, p.trail[i].y);
-                ctx.lineTo(pt.x + 1, pt.y + 3);
-            }
-            const pos = this.worldToScreen(p.x, p.y);
-            ctx.lineTo(pos.x + 1, pos.y + 3);
-            ctx.stroke();
+            const points = [...p.trail, { x: p.x, y: p.y }];
+            const maxWidth = PLAYER_RADIUS * this.scale * 2.2; // matches player size
+            const minWidth = 2;
 
-            // Main trail
-            ctx.beginPath();
-            ctx.strokeStyle = p.trailColor;
-            ctx.lineWidth = 3 * this.scale * 50;
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-            const first = this.worldToScreen(p.trail[0].x, p.trail[0].y);
-            ctx.moveTo(first.x, first.y);
-            for (let i = 1; i < p.trail.length; i++) {
-                const pt = this.worldToScreen(p.trail[i].x, p.trail[i].y);
-                ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
+            // Draw tapered trail using individual segments with varying width
+            for (let i = 0; i < points.length - 1; i++) {
+                const t = i / (points.length - 1); // 0 at start, 1 at player
+                const width = minWidth + (maxWidth - minWidth) * t * t; // quadratic taper
 
-            // Inner bright line
-            ctx.beginPath();
-            ctx.strokeStyle = p.color;
-            ctx.lineWidth = 1.5 * this.scale * 50;
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-            ctx.moveTo(first.x, first.y);
-            for (let i = 1; i < p.trail.length; i++) {
-                const pt = this.worldToScreen(p.trail[i].x, p.trail[i].y);
-                ctx.lineTo(pt.x, pt.y);
+                const p0 = this.worldToScreen(points[i].x, points[i].y);
+                const p1 = this.worldToScreen(points[i + 1].x, points[i + 1].y);
+
+                // Shadow
+                ctx.beginPath();
+                ctx.moveTo(p0.x + 1, p0.y + 2);
+                ctx.lineTo(p1.x + 1, p1.y + 2);
+                ctx.strokeStyle = "rgba(0,0,0,0.2)";
+                ctx.lineWidth = width + 2;
+                ctx.lineCap = "round";
+                ctx.stroke();
+
+                // Main trail color
+                ctx.beginPath();
+                ctx.moveTo(p0.x, p0.y);
+                ctx.lineTo(p1.x, p1.y);
+                ctx.strokeStyle = p.trailColor;
+                ctx.lineWidth = width;
+                ctx.lineCap = "round";
+                ctx.stroke();
+
+                // Inner highlight
+                ctx.beginPath();
+                ctx.moveTo(p0.x, p0.y);
+                ctx.lineTo(p1.x, p1.y);
+                ctx.strokeStyle = p.color;
+                ctx.lineWidth = width * 0.4;
+                ctx.lineCap = "round";
+                ctx.stroke();
             }
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
         }
     }
 
@@ -169,32 +164,46 @@ class Renderer {
             const { x, y } = this.worldToScreen(p.x, p.y);
             const r = PLAYER_RADIUS * this.scale * 2.0;
 
-            // Shadow
+            // Shadow (ellipse below)
             ctx.beginPath();
-            ctx.ellipse(x + 1, y + 3, r * 1.1, r * 0.7, 0, 0, Math.PI * 2);
+            ctx.ellipse(x + 1, y + r * 0.4, r * 0.9, r * 0.35, 0, 0, Math.PI * 2);
             ctx.fillStyle = "rgba(0,0,0,0.3)";
             ctx.fill();
 
-            // Body
-            const grad = ctx.createRadialGradient(x - r * 0.3, y - r * 0.4, 0, x, y, r);
-            grad.addColorStop(0, "#fff");
-            grad.addColorStop(0.35, p.color);
-            grad.addColorStop(1, this.darken(p.color, 0.4));
+            // Water droplet body - teardrop shape pointing in movement direction
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(p.angle);
+
+            // Tail (tapers behind)
             ctx.beginPath();
-            ctx.arc(x, y - 1, r, 0, Math.PI * 2);
+            ctx.moveTo(r * 0.9, 0); // front tip
+            ctx.quadraticCurveTo(r * 0.3, -r * 0.7, -r * 0.6, -r * 0.3);
+            ctx.quadraticCurveTo(-r * 1.0, 0, -r * 0.6, r * 0.3);
+            ctx.quadraticCurveTo(r * 0.3, r * 0.7, r * 0.9, 0);
+            ctx.closePath();
+
+            // Gradient fill
+            const grad = ctx.createRadialGradient(-r * 0.1, -r * 0.2, 0, 0, 0, r);
+            grad.addColorStop(0, "#fff");
+            grad.addColorStop(0.25, this.lighten(p.color, 0.2));
+            grad.addColorStop(0.7, p.color);
+            grad.addColorStop(1, this.darken(p.color, 0.4));
             ctx.fillStyle = grad;
             ctx.fill();
-            ctx.strokeStyle = "rgba(255,255,255,0.5)";
-            ctx.lineWidth = 1;
+
+            // Outline
+            ctx.strokeStyle = "rgba(255,255,255,0.4)";
+            ctx.lineWidth = 1.2;
             ctx.stroke();
 
-            // Direction dot
-            const tipX = x + Math.cos(p.angle) * r * 0.6;
-            const tipY = y - 1 + Math.sin(p.angle) * r * 0.6;
+            // Specular highlight (front bubble)
             ctx.beginPath();
-            ctx.arc(tipX, tipY, r * 0.3, 0, Math.PI * 2);
-            ctx.fillStyle = "#fff";
+            ctx.ellipse(r * 0.3, -r * 0.15, r * 0.2, r * 0.15, -0.3, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(255,255,255,0.5)";
             ctx.fill();
+
+            ctx.restore();
         }
     }
 

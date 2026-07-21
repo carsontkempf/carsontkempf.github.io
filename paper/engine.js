@@ -123,6 +123,8 @@ class Engine {
     }
 
     _rasterLine(x0, y0, x1, y1, pid) {
+        // Thick line rasterization - marks cells so there are no diagonal gaps
+        // Uses both horizontal and vertical steps (no pure diagonal moves)
         const dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
         const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
         let err = dx - dy;
@@ -130,8 +132,17 @@ class Engine {
             if (x0 >= 0 && x0 < GRID_RES && y0 >= 0 && y0 < GRID_RES) this.grid[y0][x0] = pid;
             if (x0 === x1 && y0 === y1) break;
             const e2 = 2 * err;
-            if (e2 > -dy) { err -= dy; x0 += sx; }
-            if (e2 < dx) { err += dx; y0 += sy; }
+            // Move in BOTH directions when diagonal to ensure 4-connectivity
+            if (e2 > -dy && e2 < dx) {
+                // Would be diagonal - step horizontally first, mark, then vertically
+                err -= dy; x0 += sx;
+                if (x0 >= 0 && x0 < GRID_RES && y0 >= 0 && y0 < GRID_RES) this.grid[y0][x0] = pid;
+                err += dx; y0 += sy;
+            } else if (e2 > -dy) {
+                err -= dy; x0 += sx;
+            } else {
+                err += dx; y0 += sy;
+            }
         }
     }
 
