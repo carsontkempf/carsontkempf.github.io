@@ -265,3 +265,71 @@ html, body {
     font-size: 0.9em;
     line-height: 2;
 }
+
+/* ===========================
+   SHOP TABS & PREVIEWS
+   =========================== */
+.shop-tabs {
+    display: flex;
+    gap: 4px;
+    width: 100%;
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 12px;
+}
+.shop-tab {
+    flex: 1;
+    padding: 10px 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 0.85em;
+    font-weight: 700;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.shop-tab.active {
+    background: var(--primary);
+    color: #000;
+}
+
+.shop-item.locked { opacity: 0.5; }
+.shop-item-price.price-owned { color: var(--success); }
+
+.pattern-preview {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    margin: 0 auto;
+    background: var(--primary);
+}
+.pattern-stripes { background: repeating-linear-gradient(45deg, var(--primary), var(--primary) 4px, transparent 4px, transparent 8px); }
+.pattern-dots { background: radial-gradient(circle 3px, #fff 100%, transparent 100%) 0 0 / 8px 8px, var(--primary); }
+.pattern-gradient { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+.pattern-camo { background: conic-gradient(var(--primary) 25%, #2ed573 25% 50%, var(--primary) 50% 75%, #1e90ff 75%); border-radius: 8px; }
+.pattern-checker { background: repeating-conic-gradient(var(--primary) 0% 25%, #1a1a2e 0% 50%) 0 0 / 12px 12px; }
+.pattern-diamond { background: repeating-linear-gradient(45deg, var(--primary), var(--primary) 5px, var(--secondary) 5px, var(--secondary) 10px); }
+.pattern-neon { background: var(--primary); box-shadow: inset 0 0 8px #fff, 0 0 8px var(--primary); }
+.pattern-solid { background: var(--primary); }
+
+.shape-preview {
+    width: 36px;
+    height: 36px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4em;
+}
+.shape-cube::after { content: "■"; color: var(--primary); }
+.shape-sphere::after { content: "●"; color: var(--primary); }
+.shape-star::after { content: "★"; color: var(--gold); }
+.shape-diamond::after { content: "◆"; color: #a4f4ff; }
+.shape-arrow::after { content: "▲"; color: var(--primary); }
+.shape-crown::after { content: "♛"; color: var(--gold); }
+.shape-bear::after { content: "🐻"; }
+.shape-cat::after { content: "🐱"; }
+.shape-rocket::after { content: "🚀"; }
+.shape-ghost::after { content: "👻"; }

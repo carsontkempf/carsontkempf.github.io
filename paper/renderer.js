@@ -167,11 +167,7 @@ class Renderer {
             }
         }
 
-        // Draw players (sorted by y for z-order)
-        const sorted = [...players].filter(p => p.alive).sort((a, b) => (a.y + a.x) - (b.y + b.x));
-        for (const p of sorted) {
-            this.drawBlock(p.x, p.y, p.color, 14);
-        }
+        // Players are drawn separately by CharacterRenderer in game.js
     }
 
     /**

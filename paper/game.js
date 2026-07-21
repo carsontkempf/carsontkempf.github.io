@@ -22,8 +22,11 @@ class Game {
         this.coins = 0;
         this.unlockedSkins = ["default"];
         this.equippedColor = "#00d2ff";
+        this.equippedPattern = "solid";
         this.equippedShape = "cube";
         this.stats = { gamesPlayed: 0, wins: 0, kills: 0, totalTerritory: 0 };
+        this.shop = null;
+        this.charRenderer = null;
     }
 
     /**
@@ -41,6 +44,7 @@ class Game {
                 this.coins = data.coins || 0;
                 this.unlockedSkins = data.unlockedSkins || ["default"];
                 this.equippedColor = data.equippedColor || "#00d2ff";
+                this.equippedPattern = data.equippedPattern || "solid";
                 this.equippedShape = data.equippedShape || "cube";
                 this.stats = data.stats || this.stats;
             } catch (e) {
@@ -61,6 +65,7 @@ class Game {
             coins: this.coins,
             unlockedSkins: this.unlockedSkins,
             equippedColor: this.equippedColor,
+            equippedPattern: this.equippedPattern,
             equippedShape: this.equippedShape,
             stats: this.stats,
         };
@@ -82,10 +87,10 @@ class Game {
     }
 
     init() {
+        this.shop = new Shop(this);
         this.bindUI();
         this.showScreen("menu");
 
-        // Handle resize
         window.addEventListener("resize", () => {
             if (this.renderer) this.renderer.resize();
         });
@@ -97,7 +102,7 @@ class Game {
         document.getElementById("btn-back-menu").addEventListener("click", () => this.showScreen("menu"));
         document.getElementById("btn-play-again").addEventListener("click", () => this.startGame());
         document.getElementById("btn-results-menu").addEventListener("click", () => this.showScreen("menu"));
-        document.getElementById("btn-shop").addEventListener("click", () => this.showScreen("shop"));
+        document.getElementById("btn-shop").addEventListener("click", () => { this.showScreen("shop"); this.shop.render(); });
         document.getElementById("btn-shop-back").addEventListener("click", () => this.showScreen("menu"));
 
         // AI count toggle
@@ -151,6 +156,10 @@ class Game {
         const canvas = document.getElementById("game-canvas");
         this.renderer = new Renderer(canvas);
         this.renderer.resize();
+        this.charRenderer = new CharacterRenderer(this.renderer);
+
+        // Set human player's shape
+        this.humanPlayer.shape = this.equippedShape;
 
         // Init joystick
         this.joystick = new Joystick("joystick-zone");
@@ -199,13 +208,25 @@ class Game {
     gameRender(dt) {
         if (!this.renderer) return;
 
+        // Update character animations
+        if (this.charRenderer) this.charRenderer.update(dt);
+
         // Camera follows human player
         this.renderer.setCameraTarget(this.humanPlayer.x, this.humanPlayer.y);
         this.renderer.updateCamera(dt);
 
-        // Render
+        // Render grid
         this.renderer.clear();
         this.renderer.renderGrid(this.engine, this.players);
+
+        // Render characters on top (z-sorted)
+        const ctx = this.renderer.ctx;
+        const sorted = [...this.players].filter(p => p.alive).sort((a, b) => (a.y + a.x) - (b.y + b.x));
+        for (const p of sorted) {
+            const shape = p.shape || "cube";
+            const moving = true; // always moving in this game
+            this.charRenderer.draw(ctx, p.x, p.y, p.color, shape, moving, p.direction);
+        }
     }
 
     updateHUD() {
