@@ -23,7 +23,7 @@ class Player {
     }
 
     spawnTerritory(engine) {
-        engine.setTerritoryCircle(this.x, this.y, 120, this.id);
+        engine.setTerritoryCircle(this.x, this.y, 250, this.id);
     }
 
     /**
@@ -175,8 +175,8 @@ class Player {
     }
 
     respawn(engine) {
-        this.x = 300 + Math.random() * (WORLD_SIZE - 600);
-        this.y = 300 + Math.random() * (WORLD_SIZE - 600);
+        this.x = 1000 + Math.random() * (WORLD_SIZE - 2000);
+        this.y = 1000 + Math.random() * (WORLD_SIZE - 2000);
         this.alive = true;
         this.isInOwnTerritory = true;
         this.trail = [];

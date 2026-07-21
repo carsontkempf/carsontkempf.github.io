@@ -5,12 +5,12 @@
  * Trail rasterized with Bresenham lines for gap-free filling.
  */
 
-const WORLD_SIZE = 10000;
-const GRID_RES = 200;
+const WORLD_SIZE = 40000;
+const GRID_RES = 300;
 const CELL_SIZE = WORLD_SIZE / GRID_RES;
 const GAME_DURATION = 120;
-const PLAYER_SPEED = 300;
-const PLAYER_RADIUS = 18;
+const PLAYER_SPEED = 700;
+const PLAYER_RADIUS = 30;
 
 class Engine {
     constructor() {

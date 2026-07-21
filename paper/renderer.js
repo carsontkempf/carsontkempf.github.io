@@ -8,7 +8,7 @@ class Renderer {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
-        this.baseScale = 0.08;
+        this.baseScale = 0.04;
         this.scale = this.baseScale;
         this.targetScale = this.baseScale;
         this.cameraX = 0;
@@ -46,7 +46,7 @@ class Renderer {
     }
 
     setZoomForTerritory(pct) {
-        this.targetScale = Math.max(0.03, this.baseScale - pct * 0.001);
+        this.targetScale = Math.max(0.008, this.baseScale - pct * 0.0006);
     }
 
     clear() {
