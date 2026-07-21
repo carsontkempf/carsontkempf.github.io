@@ -15,6 +15,70 @@ class Game {
         this.aiControllers = [];
         this.aiCount = 3;
         this.state = "menu"; // menu, settings, playing, results
+        
+        // User data (persisted in localStorage)
+        this.userId = null;
+        this.userName = "";
+        this.coins = 0;
+        this.unlockedSkins = ["default"];
+        this.equippedColor = "#00d2ff";
+        this.equippedShape = "cube";
+        this.stats = { gamesPlayed: 0, wins: 0, kills: 0, totalTerritory: 0 };
+    }
+
+    /**
+     * Load user data from localStorage keyed by user ID.
+     */
+    loadUserData(user) {
+        this.userId = user.id || user.email || "local";
+        this.userName = user.name || user.email || "Player";
+        
+        const key = "paper_data_" + this.userId;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                this.coins = data.coins || 0;
+                this.unlockedSkins = data.unlockedSkins || ["default"];
+                this.equippedColor = data.equippedColor || "#00d2ff";
+                this.equippedShape = data.equippedShape || "cube";
+                this.stats = data.stats || this.stats;
+            } catch (e) {
+                console.warn("Failed to load saved data:", e);
+            }
+        }
+        
+        this.updateCoinDisplays();
+    }
+
+    /**
+     * Save user data to localStorage.
+     */
+    saveUserData() {
+        if (!this.userId) return;
+        const key = "paper_data_" + this.userId;
+        const data = {
+            coins: this.coins,
+            unlockedSkins: this.unlockedSkins,
+            equippedColor: this.equippedColor,
+            equippedShape: this.equippedShape,
+            stats: this.stats,
+        };
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    /**
+     * Add coins and save.
+     */
+    addCoins(amount) {
+        this.coins += amount;
+        this.saveUserData();
+        this.updateCoinDisplays();
+    }
+
+    updateCoinDisplays() {
+        const els = document.querySelectorAll("#menu-coins, #shop-coins");
+        els.forEach(el => { el.textContent = this.coins; });
     }
 
     init() {
@@ -65,7 +129,7 @@ class Game {
         // Create human player (center-ish)
         const hx = Math.floor(GRID_SIZE / 2);
         const hy = Math.floor(GRID_SIZE / 2);
-        this.humanPlayer = new Player(0, "You", PLAYER_COLORS[0], hx, hy);
+        this.humanPlayer = new Player(0, this.userName || "You", this.equippedColor, hx, hy);
         this.humanPlayer.spawnTerritory(this.engine);
         this.players.push(this.humanPlayer);
 
@@ -184,6 +248,14 @@ class Game {
         `;
         document.getElementById("result-coins").textContent = `+${coins} coins`;
 
+        // Save progress
+        this.addCoins(coins);
+        this.stats.gamesPlayed++;
+        if (won) this.stats.wins++;
+        this.stats.kills += humanScore.kills;
+        this.stats.totalTerritory += humanScore.territory;
+        this.saveUserData();
+
         this.showScreen("results");
     }
 }
@@ -193,10 +265,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const game = new Game();
     game.init();
 
-    // Auth gate (simplified - in production uses site auth)
+    // Auth gate - uses site's AuthSDK
     const gate = document.getElementById("auth-gate");
     const app = document.getElementById("app");
-    // For now, auto-show app (auth will be handled when deployed to the site)
-    gate.classList.add("hidden");
-    app.classList.remove("hidden");
+
+    async function checkAuth() {
+        if (window.authService && typeof window.authService.isAuthenticated === 'function') {
+            const authed = await window.authService.isAuthenticated();
+            if (authed) {
+                gate.classList.add("hidden");
+                app.classList.remove("hidden");
+                const user = await window.authService.getUser();
+                if (user) game.loadUserData(user);
+            }
+        }
+    }
+
+    // Listen for auth:ready event
+    window.addEventListener('auth:ready', async (event) => {
+        if (event.detail?.isAuthenticated) {
+            gate.classList.add("hidden");
+            app.classList.remove("hidden");
+            const user = await window.authService.getUser();
+            if (user) game.loadUserData(user);
+        }
+    });
+
+    // Fallback check after 2s (in case auth:ready already fired)
+    setTimeout(checkAuth, 2000);
 });
