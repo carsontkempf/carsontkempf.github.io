@@ -9,8 +9,9 @@ class MiniMap {
     }
 
     render(ctx, engine, players, screenW) {
+        const screenH = window.innerHeight;
         const x = screenW - this.size - this.padding;
-        const y = this.padding + 40;
+        const y = screenH - this.size - this.padding - 20; // bottom-right
         const cellSize = this.size / GRID_RES;
         const step = Math.max(2, Math.floor(GRID_RES / 40));
 

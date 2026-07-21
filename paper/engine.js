@@ -1,22 +1,20 @@
 /**
  * Engine - Continuous movement Paper.io clone.
- * 
  * World is WORLD_SIZE x WORLD_SIZE units.
- * Territory stored as a grid (GRID_RES x GRID_RES) for fast fill.
- * Players move continuously at any angle (360°).
- * Trail is a list of points forming a smooth path.
+ * Territory stored as grid (GRID_RES x GRID_RES).
+ * Trail rasterized with Bresenham lines for gap-free filling.
  */
 
-const WORLD_SIZE = 10000; // world units
-const GRID_RES = 200; // territory grid resolution
+const WORLD_SIZE = 10000;
+const GRID_RES = 200;
 const CELL_SIZE = WORLD_SIZE / GRID_RES;
 const GAME_DURATION = 120;
-const PLAYER_SPEED = 300; // units per second (faster for bigger map)
+const PLAYER_SPEED = 300;
 const PLAYER_RADIUS = 18;
 
 class Engine {
     constructor() {
-        this.grid = []; // territory ownership grid
+        this.grid = [];
         this.running = false;
         this.gameTime = 0;
         this.animFrameId = null;
@@ -29,44 +27,29 @@ class Engine {
     initGrid() {
         this.grid = [];
         for (let y = 0; y < GRID_RES; y++) {
-            const row = new Int8Array(GRID_RES); // -1 = neutral, 0-5 = player id
+            const row = new Int8Array(GRID_RES);
             row.fill(-1);
             this.grid.push(row);
         }
     }
 
-    /**
-     * Convert world coords to grid coords.
-     */
     worldToGrid(wx, wy) {
-        return {
-            gx: Math.floor(wx / CELL_SIZE),
-            gy: Math.floor(wy / CELL_SIZE)
-        };
+        return { gx: Math.floor(wx / CELL_SIZE), gy: Math.floor(wy / CELL_SIZE) };
     }
 
-    /**
-     * Set territory ownership for a circle of cells around a point.
-     */
     setTerritoryCircle(wx, wy, radius, playerId) {
         const { gx: cx, gy: cy } = this.worldToGrid(wx, wy);
         const gr = Math.ceil(radius / CELL_SIZE);
         for (let dy = -gr; dy <= gr; dy++) {
             for (let dx = -gr; dx <= gr; dx++) {
-                const x = cx + dx;
-                const y = cy + dy;
-                if (x >= 0 && x < GRID_RES && y >= 0 && y < GRID_RES) {
-                    if (dx * dx + dy * dy <= gr * gr) {
-                        this.grid[y][x] = playerId;
-                    }
+                const x = cx + dx, y = cy + dy;
+                if (x >= 0 && x < GRID_RES && y >= 0 && y < GRID_RES && dx * dx + dy * dy <= gr * gr) {
+                    this.grid[y][x] = playerId;
                 }
             }
         }
     }
 
-    /**
-     * Check if a world position is in a player's territory.
-     */
     isInTerritory(wx, wy, playerId) {
         const { gx, gy } = this.worldToGrid(wx, wy);
         if (gx < 0 || gx >= GRID_RES || gy < 0 || gy >= GRID_RES) return false;
@@ -74,109 +57,96 @@ class Engine {
     }
 
     /**
-     * Fill territory enclosed by a trail polygon using flood-fill.
-     * The trail forms the border; everything inside that can't reach the edges = owned.
+     * Fill territory. Rasterizes trail as connected Bresenham lines then flood-fills.
      */
     fillTerritory(playerId, trail) {
         if (trail.length < 3) return 0;
 
-        // Mark trail cells as owned
+        // Rasterize trail as connected line segments (gap-free)
+        for (let i = 0; i < trail.length - 1; i++) {
+            const g0 = this.worldToGrid(trail[i].x, trail[i].y);
+            const g1 = this.worldToGrid(trail[i + 1].x, trail[i + 1].y);
+            this._rasterLine(g0.gx, g0.gy, g1.gx, g1.gy, playerId);
+        }
+
+        // Bounding box
+        let minX = GRID_RES, maxX = 0, minY = GRID_RES, maxY = 0;
         for (const pt of trail) {
-            const { gx, gy } = this.worldToGrid(pt.x, pt.y);
-            if (gx >= 0 && gx < GRID_RES && gy >= 0 && gy < GRID_RES) {
-                this.grid[gy][gx] = playerId;
-            }
-        }
-
-        // Rasterize trail as a filled polygon on the grid
-        // Find bounding box
-        let minGx = GRID_RES, maxGx = 0, minGy = GRID_RES, maxGy = 0;
-        const gridTrail = trail.map(pt => {
             const g = this.worldToGrid(pt.x, pt.y);
-            minGx = Math.min(minGx, g.gx); maxGx = Math.max(maxGx, g.gx);
-            minGy = Math.min(minGy, g.gy); maxGy = Math.max(maxGy, g.gy);
-            return g;
-        });
-
-        minGx = Math.max(0, minGx - 1); maxGx = Math.min(GRID_RES - 1, maxGx + 1);
-        minGy = Math.max(0, minGy - 1); maxGy = Math.min(GRID_RES - 1, maxGy + 1);
-
-        // Flood fill from edges of bounding box - anything unreachable = enclosed
-        const w = maxGx - minGx + 1;
-        const h = maxGy - minGy + 1;
-        const visited = new Uint8Array(w * h);
-        const queue = [];
-
-        // Seed edges
-        for (let x = minGx; x <= maxGx; x++) {
-            if (this.grid[minGy][x] !== playerId) { queue.push(x - minGx + (0) * w); visited[(0) * w + x - minGx] = 1; }
-            if (this.grid[maxGy][x] !== playerId) { queue.push(x - minGx + (h - 1) * w); visited[(h - 1) * w + x - minGx] = 1; }
+            if (g.gx < minX) minX = g.gx; if (g.gx > maxX) maxX = g.gx;
+            if (g.gy < minY) minY = g.gy; if (g.gy > maxY) maxY = g.gy;
         }
-        for (let y = minGy; y <= maxGy; y++) {
-            if (this.grid[y][minGx] !== playerId) { queue.push(0 + (y - minGy) * w); visited[(y - minGy) * w] = 1; }
-            if (this.grid[y][maxGx] !== playerId) { queue.push(w - 1 + (y - minGy) * w); visited[(y - minGy) * w + w - 1] = 1; }
+        minX = Math.max(0, minX - 2); maxX = Math.min(GRID_RES - 1, maxX + 2);
+        minY = Math.max(0, minY - 2); maxY = Math.min(GRID_RES - 1, maxY + 2);
+
+        // Flood fill from edges - unvisited = enclosed
+        const w = maxX - minX + 1, h = maxY - minY + 1;
+        const vis = new Uint8Array(w * h);
+        const q = [];
+
+        for (let x = minX; x <= maxX; x++) {
+            const ti = x - minX, bi = (h - 1) * w + x - minX;
+            if (this.grid[minY][x] !== playerId && !vis[ti]) { vis[ti] = 1; q.push(ti); }
+            if (this.grid[maxY][x] !== playerId && !vis[bi]) { vis[bi] = 1; q.push(bi); }
+        }
+        for (let y = minY; y <= maxY; y++) {
+            const li = (y - minY) * w, ri = (y - minY) * w + w - 1;
+            if (this.grid[y][minX] !== playerId && !vis[li]) { vis[li] = 1; q.push(li); }
+            if (this.grid[y][maxX] !== playerId && !vis[ri]) { vis[ri] = 1; q.push(ri); }
         }
 
-        // BFS
         let qi = 0;
-        while (qi < queue.length) {
-            const idx = queue[qi++];
-            const lx = idx % w;
-            const ly = Math.floor(idx / w);
-            const dirs = [[0, -1], [0, 1], [-1, 0], [1, 0]];
-            for (const [ddx, ddy] of dirs) {
-                const nx = lx + ddx;
-                const ny = ly + ddy;
+        while (qi < q.length) {
+            const idx = q[qi++];
+            const lx = idx % w, ly = (idx - lx) / w;
+            for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
+                const nx = lx + dx, ny = ly + dy;
                 if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
                 const ni = ny * w + nx;
-                if (visited[ni]) continue;
-                const gx = nx + minGx;
-                const gy = ny + minGy;
-                if (this.grid[gy][gx] === playerId) continue;
-                visited[ni] = 1;
-                queue.push(ni);
+                if (vis[ni]) continue;
+                if (this.grid[ny + minY][nx + minX] === playerId) continue;
+                vis[ni] = 1;
+                q.push(ni);
             }
         }
 
-        // Anything not visited = enclosed = claim it
         let filled = 0;
         for (let ly = 0; ly < h; ly++) {
             for (let lx = 0; lx < w; lx++) {
-                if (!visited[ly * w + lx]) {
-                    const gx = lx + minGx;
-                    const gy = ly + minGy;
-                    if (this.grid[gy][gx] !== playerId) {
-                        this.grid[gy][gx] = playerId;
-                        filled++;
-                    }
+                if (!vis[ly * w + lx]) {
+                    const gx = lx + minX, gy = ly + minY;
+                    if (this.grid[gy][gx] !== playerId) { this.grid[gy][gx] = playerId; filled++; }
                 }
             }
         }
         return filled;
     }
 
-    /**
-     * Clear ALL territory for a player (on death).
-     */
-    clearTerritory(playerId) {
-        for (let y = 0; y < GRID_RES; y++) {
-            for (let x = 0; x < GRID_RES; x++) {
-                if (this.grid[y][x] === playerId) this.grid[y][x] = -1;
-            }
+    _rasterLine(x0, y0, x1, y1, pid) {
+        const dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+        const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+        let err = dx - dy;
+        while (true) {
+            if (x0 >= 0 && x0 < GRID_RES && y0 >= 0 && y0 < GRID_RES) this.grid[y0][x0] = pid;
+            if (x0 === x1 && y0 === y1) break;
+            const e2 = 2 * err;
+            if (e2 > -dy) { err -= dy; x0 += sx; }
+            if (e2 < dx) { err += dx; y0 += sy; }
         }
     }
 
-    /**
-     * Count territory cells for a player.
-     */
+    clearTerritory(playerId) {
+        for (let y = 0; y < GRID_RES; y++)
+            for (let x = 0; x < GRID_RES; x++)
+                if (this.grid[y][x] === playerId) this.grid[y][x] = -1;
+    }
+
     countTerritory(playerId) {
-        let count = 0;
-        for (let y = 0; y < GRID_RES; y++) {
-            for (let x = 0; x < GRID_RES; x++) {
-                if (this.grid[y][x] === playerId) count++;
-            }
-        }
-        return count;
+        let c = 0;
+        for (let y = 0; y < GRID_RES; y++)
+            for (let x = 0; x < GRID_RES; x++)
+                if (this.grid[y][x] === playerId) c++;
+        return c;
     }
 
     getTerritoryPercent(playerId) {
@@ -198,19 +168,12 @@ class Engine {
     _loop() {
         if (!this.running) return;
         const now = performance.now();
-        const dt = Math.min((now - this._lastTime) / 1000, 0.05); // cap at 50ms
+        const dt = Math.min((now - this._lastTime) / 1000, 0.05);
         this._lastTime = now;
         this.gameTime += dt;
-
-        if (this.gameTime >= GAME_DURATION) {
-            this.running = false;
-            if (this.onGameEnd) this.onGameEnd();
-            return;
-        }
-
+        if (this.gameTime >= GAME_DURATION) { this.running = false; if (this.onGameEnd) this.onGameEnd(); return; }
         if (this.onUpdate) this.onUpdate(dt);
         if (this.onRender) this.onRender(dt);
-
         this.animFrameId = requestAnimationFrame(() => this._loop());
     }
 }
