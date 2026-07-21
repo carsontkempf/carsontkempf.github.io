@@ -22,10 +22,10 @@ class AIController {
 
     getTargetLength() {
         switch (this.type) {
-            case "cautious": return 4 + Math.floor(Math.random() * 4); // 4-7
-            case "expansive": return 8 + Math.floor(Math.random() * 8); // 8-15
-            case "aggressive": return 5 + Math.floor(Math.random() * 5); // 5-9
-            default: return 6;
+            case "cautious": return 8 + Math.floor(Math.random() * 8); // 8-15
+            case "expansive": return 16 + Math.floor(Math.random() * 16); // 16-31
+            case "aggressive": return 10 + Math.floor(Math.random() * 10); // 10-19
+            default: return 12;
         }
     }
 

@@ -54,10 +54,71 @@ class Joystick {
     }
 
     bindEvents() {
+        // Touch
         this.zone.addEventListener("touchstart", (e) => this.onStart(e), { passive: false });
         this.zone.addEventListener("touchmove", (e) => this.onMove(e), { passive: false });
         this.zone.addEventListener("touchend", (e) => this.onEnd(e), { passive: false });
         this.zone.addEventListener("touchcancel", (e) => this.onEnd(e), { passive: false });
+
+        // Mouse (for PC) - uses the full game screen
+        document.addEventListener("mousedown", (e) => this.onMouseDown(e));
+        document.addEventListener("mousemove", (e) => this.onMouseMove(e));
+        document.addEventListener("mouseup", (e) => this.onMouseUp(e));
+
+        // Keyboard (WASD + Arrow keys)
+        document.addEventListener("keydown", (e) => this.onKeyDown(e));
+        document.addEventListener("keyup", (e) => this.onKeyUp(e));
+        this.keysHeld = new Set();
+    }
+
+    onMouseDown(e) {
+        if (e.target.closest("#hud") || e.target.closest(".menu-container")) return;
+        this.mouseActive = true;
+        this.mouseStartX = e.clientX;
+        this.mouseStartY = e.clientY;
+    }
+
+    onMouseMove(e) {
+        if (!this.mouseActive) return;
+        const dx = e.clientX - this.mouseStartX;
+        const dy = e.clientY - this.mouseStartY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 10) {
+            const angle = Math.atan2(dy, dx);
+            if (angle > -Math.PI / 4 && angle <= Math.PI / 4) this.direction = 1;
+            else if (angle > Math.PI / 4 && angle <= 3 * Math.PI / 4) this.direction = 2;
+            else if (angle > -3 * Math.PI / 4 && angle <= -Math.PI / 4) this.direction = 0;
+            else this.direction = 3;
+            this.mouseStartX = e.clientX;
+            this.mouseStartY = e.clientY;
+        }
+    }
+
+    onMouseUp(e) {
+        this.mouseActive = false;
+    }
+
+    onKeyDown(e) {
+        this.keysHeld.add(e.key);
+        const dir = this.keyToDir(e.key);
+        if (dir !== null) {
+            this.direction = dir;
+            e.preventDefault();
+        }
+    }
+
+    onKeyUp(e) {
+        this.keysHeld.delete(e.key);
+    }
+
+    keyToDir(key) {
+        switch (key) {
+            case "ArrowUp": case "w": case "W": return 0;
+            case "ArrowRight": case "d": case "D": return 1;
+            case "ArrowDown": case "s": case "S": return 2;
+            case "ArrowLeft": case "a": case "A": return 3;
+            default: return null;
+        }
     }
 
     onStart(e) {

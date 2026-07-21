@@ -9,8 +9,8 @@ class Renderer {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
-        this.tileWidth = 32;
-        this.tileHeight = 16; // half of width for isometric
+        this.tileWidth = 12;
+        this.tileHeight = 6; // half of width for isometric
         this.cameraX = 0;
         this.cameraY = 0;
         this.targetCamX = 0;
@@ -138,36 +138,42 @@ class Renderer {
     }
 
     /**
-     * Render the full grid given engine state.
+     * Render the visible portion of the grid (viewport culling).
      */
     renderGrid(engine, players) {
-        // Draw tiles back-to-front (isometric z-order)
-        for (let y = 0; y < GRID_SIZE; y++) {
-            for (let x = 0; x < GRID_SIZE; x++) {
+        // Calculate visible grid bounds from camera position
+        const viewCols = Math.ceil(this.screenW / (this.tileWidth / 2)) + 4;
+        const viewRows = Math.ceil(this.screenH / (this.tileHeight / 2)) + 4;
+        
+        // Center of view in grid coords (approximate inverse of isometric transform)
+        const centerGx = Math.floor((this.cameraX / (this.tileWidth / 2) + this.cameraY / (this.tileHeight / 2)) / 2);
+        const centerGy = Math.floor((this.cameraY / (this.tileHeight / 2) - this.cameraX / (this.tileWidth / 2)) / 2);
+        
+        const halfView = Math.ceil(Math.max(viewCols, viewRows) / 2) + 2;
+        const minX = Math.max(0, centerGx - halfView);
+        const maxX = Math.min(GRID_SIZE - 1, centerGx + halfView);
+        const minY = Math.max(0, centerGy - halfView);
+        const maxY = Math.min(GRID_SIZE - 1, centerGy + halfView);
+
+        // Draw tiles back-to-front (isometric z-order) - only visible region
+        for (let y = minY; y <= maxY; y++) {
+            for (let x = minX; x <= maxX; x++) {
                 const cell = engine.grid[y][x];
-                let color = "#1a1f2e"; // neutral
-                let border = "#252a3a";
+                let color = "#1a1f2e";
+                let border = "#222838";
 
                 if (cell.owner !== null) {
                     const owner = players.find(p => p.id === cell.owner);
-                    if (owner) {
-                        color = owner.territoryColor;
-                        border = null;
-                    }
+                    if (owner) { color = owner.territoryColor; border = null; }
                 }
                 if (cell.trail !== null) {
                     const trailer = players.find(p => p.id === cell.trail);
-                    if (trailer) {
-                        color = trailer.trailColor;
-                        border = null;
-                    }
+                    if (trailer) { color = trailer.trailColor; border = null; }
                 }
 
                 this.drawTile(x, y, color, border);
             }
         }
-
-        // Players are drawn separately by CharacterRenderer in game.js
     }
 
     /**

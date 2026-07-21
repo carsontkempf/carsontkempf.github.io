@@ -7,7 +7,7 @@
  * The engine runs at 60fps and ticks game logic at a fixed rate.
  */
 
-const GRID_SIZE = 50;
+const GRID_SIZE = 200;
 const TICK_RATE = 10; // game logic ticks per second (player moves 10 cells/sec)
 const GAME_DURATION = 120; // seconds
 

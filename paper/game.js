@@ -176,13 +176,14 @@ class Game {
     }
 
     getSpawnPositions(count) {
-        const margin = 8;
+        const margin = 30;
+        const mid = GRID_SIZE / 2;
         const positions = [
             { x: margin, y: margin },
             { x: GRID_SIZE - margin, y: GRID_SIZE - margin },
             { x: margin, y: GRID_SIZE - margin },
             { x: GRID_SIZE - margin, y: margin },
-            { x: GRID_SIZE / 2, y: margin },
+            { x: mid, y: margin },
         ];
         return positions.slice(0, count);
     }

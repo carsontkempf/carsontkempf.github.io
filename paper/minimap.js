@@ -21,9 +21,10 @@ class MiniMap {
         ctx.lineWidth = 1;
         ctx.strokeRect(x - 2, y - 2, this.size + 4, this.size + 4);
 
-        // Draw territories (sample every 2 cells for performance)
-        for (let gy = 0; gy < GRID_SIZE; gy += 2) {
-            for (let gx = 0; gx < GRID_SIZE; gx += 2) {
+        // Draw territories (sample every 4 cells for performance on large grids)
+        const step = Math.max(2, Math.floor(GRID_SIZE / 50));
+        for (let gy = 0; gy < GRID_SIZE; gy += step) {
+            for (let gx = 0; gx < GRID_SIZE; gx += step) {
                 const cell = engine.grid[gy][gx];
                 if (cell.owner !== null) {
                     const owner = players.find(p => p.id === cell.owner);
@@ -32,8 +33,8 @@ class MiniMap {
                         ctx.fillRect(
                             x + gx * cellSize,
                             y + gy * cellSize,
-                            cellSize * 2,
-                            cellSize * 2
+                            cellSize * step,
+                            cellSize * step
                         );
                     }
                 }
@@ -45,8 +46,8 @@ class MiniMap {
                         ctx.fillRect(
                             x + gx * cellSize,
                             y + gy * cellSize,
-                            cellSize * 2,
-                            cellSize * 2
+                            cellSize * step,
+                            cellSize * step
                         );
                         ctx.globalAlpha = 1;
                     }
