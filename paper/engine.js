@@ -9,7 +9,7 @@ const WORLD_SIZE = 40000;
 const GRID_RES = 300;
 const CELL_SIZE = WORLD_SIZE / GRID_RES;
 const GAME_DURATION = 120;
-const PLAYER_SPEED = 700;
+const PLAYER_SPEED = 2000;
 const PLAYER_RADIUS = 30;
 
 class Engine {
