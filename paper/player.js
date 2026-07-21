@@ -65,12 +65,10 @@ class Player {
         const nx = this.x + DIR_DX[this.direction];
         const ny = this.y + DIR_DY[this.direction];
 
-        // Boundary check - bounce off walls
+        // Boundary check - die at walls (like Paper.io)
         if (nx < 0 || nx >= GRID_SIZE || ny < 0 || ny >= GRID_SIZE) {
-            // Reverse direction
-            this.direction = (this.direction + 2) % 4;
-            this.nextDirection = this.direction;
-            return null;
+            this.die(engine);
+            return "died";
         }
 
         // Move
@@ -80,20 +78,21 @@ class Player {
         const cell = engine.getCell(nx, ny);
         if (!cell) return null;
 
-        // Check if we hit someone's trail (kill them)
+        // Check if we hit our own trail (suicide) - check BEFORE kill check
+        if (cell.trail === this.id) {
+            this.die(engine);
+            return "died";
+        }
+
+        // Check if we hit someone else's trail (kill them)
         if (cell.trail !== null && cell.trail !== this.id) {
             const victim = allPlayers.find(p => p.id === cell.trail);
             if (victim && victim.alive) {
                 victim.die(engine);
                 this.kills++;
-                return "kill";
             }
-        }
-
-        // Check if we hit our own trail (suicide)
-        if (cell.trail === this.id) {
-            this.die(engine);
-            return "died";
+            // After kill, the cell is now clear - continue our movement normally
+            // Don't return early, process territory logic below
         }
 
         // Are we in our own territory?

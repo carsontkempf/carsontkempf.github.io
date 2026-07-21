@@ -1,10 +1,11 @@
 /**
- * AI - Bot behavior for Paper Conquest.
+ * AI - Smarter bot behavior.
  * 
- * AI types:
- * - cautious: makes small rectangles close to home
- * - expansive: makes bigger loops, more risk
- * - aggressive: targets player trails to kill them
+ * Key behaviors:
+ * 1. ALWAYS avoid own trail and walls (survival priority)
+ * 2. When outside territory, actively hunt nearby enemy trails
+ * 3. Return home before trail gets too long
+ * 4. When in territory, head toward nearest enemy trail to intercept
  */
 
 const AI_TYPES = ["cautious", "expansive", "aggressive"];
@@ -13,97 +14,174 @@ class AIController {
     constructor(player, type) {
         this.player = player;
         this.type = type || AI_TYPES[Math.floor(Math.random() * AI_TYPES.length)];
-        this.targetTrailLength = this.getTargetLength();
-        this.turnCooldown = 0;
-        this.stuckCounter = 0;
-        this.lastX = -1;
-        this.lastY = -1;
+        this.maxTrailLength = this.getMaxTrail();
+        this.decisionCooldown = 0;
     }
 
-    getTargetLength() {
+    getMaxTrail() {
         switch (this.type) {
-            case "cautious": return 8 + Math.floor(Math.random() * 8); // 8-15
-            case "expansive": return 16 + Math.floor(Math.random() * 16); // 16-31
-            case "aggressive": return 10 + Math.floor(Math.random() * 10); // 10-19
-            default: return 12;
+            case "cautious": return 10 + Math.floor(Math.random() * 8);
+            case "expansive": return 20 + Math.floor(Math.random() * 15);
+            case "aggressive": return 12 + Math.floor(Math.random() * 8);
+            default: return 15;
+        }
+    }
+
+    tick(engine, allPlayers) {
+        if (!this.player.alive) return;
+        this.decisionCooldown--;
+
+        const p = this.player;
+        const curDir = p.direction;
+
+        // Priority 1: NEVER walk into death (own trail, wall, immediate danger)
+        if (this.isDeadAhead(engine, curDir)) {
+            const safeDir = this.findSafeDirection(engine);
+            if (safeDir !== null) p.setDirection(safeDir);
+            return;
+        }
+
+        // Priority 2: If trail is long, go home
+        if (!p.isInOwnTerritory && p.trail.length >= this.maxTrailLength) {
+            const homeDir = this.directionToward(engine, p, true);
+            if (homeDir !== null && !this.isDeadAhead(engine, homeDir)) {
+                p.setDirection(homeDir);
+                return;
+            }
+        }
+
+        // Priority 3: Aggressive AI hunts enemy trails
+        if (this.type === "aggressive" || (this.type === "expansive" && Math.random() < 0.4)) {
+            const huntDir = this.findNearbyEnemyTrail(engine, allPlayers);
+            if (huntDir !== null && !this.isDeadAhead(engine, huntDir)) {
+                p.setDirection(huntDir);
+                return;
+            }
+        }
+
+        // Priority 4: If in own territory, head outward
+        if (p.isInOwnTerritory && this.decisionCooldown <= 0) {
+            const outDir = this.findDirectionOutOfTerritory(engine);
+            if (outDir !== null && !this.isDeadAhead(engine, outDir)) {
+                p.setDirection(outDir);
+                this.decisionCooldown = 3 + Math.floor(Math.random() * 4);
+                return;
+            }
+        }
+
+        // Priority 5: Random turn to avoid straight lines
+        if (this.decisionCooldown <= 0 && Math.random() < 0.15) {
+            const turn = this.randomSafeTurn(engine);
+            if (turn !== null) p.setDirection(turn);
+            this.decisionCooldown = 2 + Math.floor(Math.random() * 3);
         }
     }
 
     /**
-     * Called each game tick. Decides direction for the AI player.
+     * Check if moving in direction `dir` would kill us.
      */
-    tick(engine, allPlayers) {
-        if (!this.player.alive) return;
-
-        this.turnCooldown--;
-
-        // Detect if stuck (same position as last tick = bounced off wall)
-        if (this.player.x === this.lastX && this.player.y === this.lastY) {
-            this.stuckCounter++;
-            if (this.stuckCounter > 2) {
-                this.randomTurn();
-                this.stuckCounter = 0;
-            }
-        } else {
-            this.stuckCounter = 0;
-        }
-        this.lastX = this.player.x;
-        this.lastY = this.player.y;
-
-        // Core behavior
-        if (this.player.isInOwnTerritory) {
-            this.behaviorInTerritory(engine, allPlayers);
-        } else {
-            this.behaviorOutside(engine, allPlayers);
-        }
+    isDeadAhead(engine, dir) {
+        const nx = this.player.x + DIR_DX[dir];
+        const ny = this.player.y + DIR_DY[dir];
+        // Wall
+        if (nx < 1 || nx >= GRID_SIZE - 1 || ny < 1 || ny >= GRID_SIZE - 1) return true;
+        const cell = engine.getCell(nx, ny);
+        if (!cell) return true;
+        // Own trail
+        if (cell.trail === this.player.id) return true;
+        return false;
     }
 
-    behaviorInTerritory(engine, allPlayers) {
-        // If in own territory and no trail, head outward
-        if (this.turnCooldown > 0) return;
-
-        // Pick a direction toward the nearest edge of own territory
-        const dir = this.findDirectionToEdge(engine);
-        if (dir !== null) {
-            this.player.setDirection(dir);
-            this.turnCooldown = 2 + Math.floor(Math.random() * 3);
-        }
+    /**
+     * Check if a direction is safe for 2 cells ahead.
+     */
+    isSafe(engine, dir) {
+        if (this.isDeadAhead(engine, dir)) return false;
+        // Check 2 cells ahead
+        const nx = this.player.x + DIR_DX[dir] * 2;
+        const ny = this.player.y + DIR_DY[dir] * 2;
+        if (nx < 1 || nx >= GRID_SIZE - 1 || ny < 1 || ny >= GRID_SIZE - 1) return false;
+        const cell = engine.getCell(nx, ny);
+        if (cell && cell.trail === this.player.id) return false;
+        return true;
     }
 
-    behaviorOutside(engine, allPlayers) {
-        // If trail is long enough, try to return home
-        if (this.player.trail.length >= this.targetTrailLength) {
-            const homeDir = this.findDirectionHome(engine);
-            if (homeDir !== null) {
-                this.player.setDirection(homeDir);
-                return;
-            }
+    /**
+     * Find any safe direction (prefer forward, then sides).
+     */
+    findSafeDirection(engine) {
+        const cur = this.player.direction;
+        // Try sides first, then forward variants
+        const options = [
+            (cur + 1) % 4,
+            (cur + 3) % 4,
+            cur,
+            (cur + 2) % 4, // reverse as last resort
+        ];
+        for (const d of options) {
+            if (Math.abs(d - cur) === 2 && options.indexOf(d) < 3) continue; // skip reverse unless last
+            if (!this.isDeadAhead(engine, d)) return d;
         }
-
-        // Aggressive: try to intercept player trails
-        if (this.type === "aggressive" && Math.random() < 0.3) {
-            const killDir = this.findKillOpportunity(engine, allPlayers);
-            if (killDir !== null) {
-                this.player.setDirection(killDir);
-                return;
-            }
-        }
-
-        // Avoid danger (walls, own trail, other trails that could kill us)
-        if (this.isNextCellDangerous(engine)) {
-            this.avoidDanger(engine);
-            return;
-        }
-
-        // Random turns to make path interesting
-        if (this.turnCooldown <= 0 && Math.random() < 0.2) {
-            this.randomTurn();
-            this.turnCooldown = 3;
-        }
+        // Truly stuck - reverse
+        return (cur + 2) % 4;
     }
 
-    findDirectionToEdge(engine) {
-        // Find direction that leads out of own territory
+    /**
+     * Find direction toward own territory (BFS limited).
+     */
+    directionToward(engine, player, toHome) {
+        const dirs = [0, 1, 2, 3];
+        let bestDir = null;
+        let bestDist = Infinity;
+
+        for (const d of dirs) {
+            if (Math.abs(d - player.direction) === 2) continue;
+            // Check cells in this direction
+            for (let dist = 1; dist <= 8; dist++) {
+                const nx = player.x + DIR_DX[d] * dist;
+                const ny = player.y + DIR_DY[d] * dist;
+                const cell = engine.getCell(nx, ny);
+                if (!cell) break;
+                if (cell.trail === player.id) break; // Can't cross own trail
+                if (toHome && cell.owner === player.id) {
+                    if (dist < bestDist) { bestDist = dist; bestDir = d; }
+                    break;
+                }
+            }
+        }
+        return bestDir;
+    }
+
+    /**
+     * Scan nearby cells for enemy trails to intercept.
+     */
+    findNearbyEnemyTrail(engine, allPlayers) {
+        const scanRange = this.type === "aggressive" ? 8 : 5;
+        let bestDir = null;
+        let bestDist = Infinity;
+
+        for (const d of [0, 1, 2, 3]) {
+            if (Math.abs(d - this.player.direction) === 2) continue;
+            for (let dist = 1; dist <= scanRange; dist++) {
+                const nx = this.player.x + DIR_DX[d] * dist;
+                const ny = this.player.y + DIR_DY[d] * dist;
+                const cell = engine.getCell(nx, ny);
+                if (!cell) break;
+                if (cell.trail === this.player.id) break; // blocked by own trail
+                if (cell.trail !== null && cell.trail !== this.player.id) {
+                    // Found enemy trail!
+                    if (dist < bestDist) { bestDist = dist; bestDir = d; }
+                    break;
+                }
+            }
+        }
+        return bestDir;
+    }
+
+    /**
+     * Find direction that leads out of own territory.
+     */
+    findDirectionOutOfTerritory(engine) {
         const dirs = [0, 1, 2, 3];
         // Shuffle
         for (let i = dirs.length - 1; i > 0; i--) {
@@ -111,99 +189,26 @@ class AIController {
             [dirs[i], dirs[j]] = [dirs[j], dirs[i]];
         }
         for (const d of dirs) {
+            if (Math.abs(d - this.player.direction) === 2) continue;
             const nx = this.player.x + DIR_DX[d] * 3;
             const ny = this.player.y + DIR_DY[d] * 3;
             const cell = engine.getCell(nx, ny);
-            if (cell && cell.owner !== this.player.id) {
-                // Don't reverse
-                if (Math.abs(d - this.player.direction) !== 2) return d;
-            }
+            if (cell && cell.owner !== this.player.id) return d;
         }
         return null;
     }
 
-    findDirectionHome(engine) {
-        // Find direction that moves toward owned territory
-        const dirs = [0, 1, 2, 3];
-        let bestDir = null;
-        let bestDist = Infinity;
-
-        for (const d of dirs) {
-            if (Math.abs(d - this.player.direction) === 2) continue; // no reverse
-            const nx = this.player.x + DIR_DX[d];
-            const ny = this.player.y + DIR_DY[d];
-            const cell = engine.getCell(nx, ny);
-            if (!cell) continue;
-            if (cell.trail === this.player.id) continue; // don't walk own trail
-
-            // Check if this cell is owned by us
-            if (cell.owner === this.player.id) return d;
-
-            // Otherwise measure distance to nearest own cell
-            const dist = this.distToOwnTerritory(engine, nx, ny);
-            if (dist < bestDist) { bestDist = dist; bestDir = d; }
-        }
-        return bestDir;
-    }
-
-    distToOwnTerritory(engine, fromX, fromY) {
-        // Simple heuristic: check in a small radius
-        for (let r = 1; r <= 10; r++) {
-            for (let dy = -r; dy <= r; dy++) {
-                for (let dx = -r; dx <= r; dx++) {
-                    if (Math.abs(dx) + Math.abs(dy) !== r) continue;
-                    const cell = engine.getCell(fromX + dx, fromY + dy);
-                    if (cell && cell.owner === this.player.id) return r;
-                }
-            }
-        }
-        return 99;
-    }
-
-    findKillOpportunity(engine, allPlayers) {
-        // Look for nearby player trails to intercept
-        const dirs = [0, 1, 2, 3];
-        for (const d of dirs) {
-            if (Math.abs(d - this.player.direction) === 2) continue;
-            for (let dist = 1; dist <= 3; dist++) {
-                const nx = this.player.x + DIR_DX[d] * dist;
-                const ny = this.player.y + DIR_DY[d] * dist;
-                const cell = engine.getCell(nx, ny);
-                if (cell && cell.trail !== null && cell.trail !== this.player.id) {
-                    return d;
-                }
-            }
+    /**
+     * Pick a random safe turn (left or right).
+     */
+    randomSafeTurn(engine) {
+        const cur = this.player.direction;
+        const options = [(cur + 1) % 4, (cur + 3) % 4];
+        // Shuffle
+        if (Math.random() < 0.5) options.reverse();
+        for (const d of options) {
+            if (this.isSafe(engine, d)) return d;
         }
         return null;
-    }
-
-    isNextCellDangerous(engine) {
-        const nx = this.player.x + DIR_DX[this.player.direction];
-        const ny = this.player.y + DIR_DY[this.player.direction];
-        const cell = engine.getCell(nx, ny);
-        if (!cell) return true; // wall
-        if (cell.trail === this.player.id) return true; // own trail
-        return false;
-    }
-
-    avoidDanger(engine) {
-        // Try turning left or right
-        const dirs = [(this.player.direction + 1) % 4, (this.player.direction + 3) % 4];
-        for (const d of dirs) {
-            const nx = this.player.x + DIR_DX[d];
-            const ny = this.player.y + DIR_DY[d];
-            const cell = engine.getCell(nx, ny);
-            if (cell && cell.trail !== this.player.id) {
-                this.player.setDirection(d);
-                return;
-            }
-        }
-        // Last resort: reverse (shouldn't happen often)
-        this.player.setDirection((this.player.direction + 2) % 4);
-    }
-
-    randomTurn() {
-        const options = [(this.player.direction + 1) % 4, (this.player.direction + 3) % 4];
-        this.player.setDirection(options[Math.floor(Math.random() * options.length)]);
     }
 }

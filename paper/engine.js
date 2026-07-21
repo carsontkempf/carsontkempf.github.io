@@ -8,7 +8,7 @@
  */
 
 const GRID_SIZE = 200;
-const TICK_RATE = 10; // game logic ticks per second (player moves 10 cells/sec)
+const TICK_RATE = 15; // game logic ticks per second (player moves 15 cells/sec)
 const GAME_DURATION = 120; // seconds
 
 class Engine {

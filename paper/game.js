@@ -158,7 +158,6 @@ class Game {
         const canvas = document.getElementById("game-canvas");
         this.renderer = new Renderer(canvas);
         this.renderer.resize();
-        this.charRenderer = new CharacterRenderer(this.renderer);
 
         // Set human player's shape
         this.humanPlayer.shape = this.equippedShape;
@@ -233,7 +232,6 @@ class Game {
 
         // Update effects
         this.effects.update(dt);
-        if (this.charRenderer) this.charRenderer.update(dt);
 
         // Camera follows human player + screen shake offset
         this.renderer.setCameraTarget(this.humanPlayer.x, this.humanPlayer.y);
@@ -241,20 +239,17 @@ class Game {
         this.renderer.cameraX += this.effects.shakeOffsetX;
         this.renderer.cameraY += this.effects.shakeOffsetY;
 
-        // Render grid
+        // Render
         this.renderer.clear();
         this.renderer.renderGrid(this.engine, this.players);
 
-        // Render characters on top (z-sorted)
+        // Draw players
         const ctx = this.renderer.ctx;
-        const sorted = [...this.players].filter(p => p.alive).sort((a, b) => (a.y + a.x) - (b.y + b.x));
-        for (const p of sorted) {
-            const shape = p.shape || "cube";
-            const moving = true;
-            this.charRenderer.draw(ctx, p.x, p.y, p.color, shape, moving, p.direction);
+        for (const p of this.players) {
+            this.renderer.drawPlayer(p);
         }
 
-        // Render effects (particles, waves, glows)
+        // Render effects
         this.effects.render(ctx);
 
         // Render minimap
