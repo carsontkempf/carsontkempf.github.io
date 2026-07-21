@@ -187,12 +187,7 @@ class Game {
         this.tokenManager.update(dt, this.players);
         if (this.tokenManager.collected.length > prevCollected) {
             const total = this.tokenManager.collected.length;
-            const spins = Math.floor(total / 3);
-            if (total % 3 === 0 && spins > 0) {
-                this.toasts.show(`🎰 Jackpot spin earned! (${spins} total)`, "#ffd700");
-            } else {
-                this.toasts.show(`✨ Token collected! (${total % 3}/3 for spin)`, "#ffd700");
-            }
+            this.toasts.show(`🎰 Token collected! +1 Jackpot spin (${total} total)`, "#ffd700");
         }
 
         this.updateHUD();
@@ -256,7 +251,7 @@ class Game {
 
         // Jackpot if tokens collected
         const collected = this.tokenManager.collected;
-        if (collected.length >= 3) {
+        if (collected.length >= 1) {
             this.jackpot.start(collected, (jackpotCoins) => {
                 coins += jackpotCoins;
                 this.showResults(h, rank, won, coins, collected.length);

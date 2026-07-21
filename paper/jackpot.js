@@ -23,8 +23,7 @@ class Jackpot {
     }
 
     /**
-     * Start jackpot sequence with collected tokens.
-     * Each 3 tokens = 1 spin attempt.
+     * Start jackpot sequence. 1 token = 1 spin.
      */
     start(collectedTokens, onComplete) {
         this.visible = true;
@@ -33,16 +32,13 @@ class Jackpot {
         this.onComplete = onComplete;
         this.spins = [];
 
-        // Every 3 tokens = 1 spin
-        const spinCount = Math.floor(collectedTokens.length / 3);
+        const spinCount = collectedTokens.length;
         for (let i = 0; i < spinCount; i++) {
-            // Random reels
             const reels = [
                 Math.floor(Math.random() * 3),
                 Math.floor(Math.random() * 3),
                 Math.floor(Math.random() * 3)
             ];
-            // Bias slightly toward wins (20% chance of three-of-a-kind)
             if (Math.random() < 0.2) {
                 const val = Math.floor(Math.random() * 3);
                 reels[0] = val; reels[1] = val; reels[2] = val;

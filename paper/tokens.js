@@ -66,7 +66,7 @@ class Token {
 class TokenManager {
     constructor() {
         this.tokens = [];
-        this.maxTokens = 8;
+        this.maxTokens = 3;
         this.spawnTimer = 0;
         this.collected = []; // types collected this game (for jackpot)
     }
@@ -89,10 +89,8 @@ class TokenManager {
     }
 
     update(dt, players) {
-        // Update existing tokens
         for (const t of this.tokens) t.update(dt);
 
-        // Check collection by human player (id=0)
         const human = players.find(p => p.id === 0);
         if (human && human.alive) {
             for (const t of this.tokens) {
@@ -103,12 +101,11 @@ class TokenManager {
             }
         }
 
-        // Remove dead tokens and respawn
         this.tokens = this.tokens.filter(t => t.alive);
         this.spawnTimer -= dt;
         if (this.tokens.length < this.maxTokens && this.spawnTimer <= 0) {
             this.spawnToken();
-            this.spawnTimer = 3 + Math.random() * 5;
+            this.spawnTimer = 15 + Math.random() * 20; // rare spawns
         }
     }
 
