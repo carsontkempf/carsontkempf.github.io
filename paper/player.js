@@ -19,7 +19,8 @@ class Player {
         this.trail = []; // [{x, y}, ...] smooth path points
         this.kills = 0;
         this.deathTimer = 0;
-        this.trailCooldown = 0; // minimum distance between trail points
+        this.trailCooldown = 0;
+        this.hearts = 0; // respawn lives (0-3)
     }
 
     spawnTerritory(engine) {
@@ -167,11 +168,34 @@ class Player {
     }
 
     die(engine) {
+        // If player has hearts, use one instead of dying
+        if (this.hearts > 0) {
+            this.hearts--;
+            this.trail = [];
+            // Don't clear territory - just reset trail and keep going
+            this.isInOwnTerritory = true;
+            // Teleport back to own territory
+            this._returnToTerritory(engine);
+            return;
+        }
         this.alive = false;
         this.deathTimer = 1.5;
         this.trail = [];
-        // Clear ALL territory on death
         engine.clearTerritory(this.id);
+    }
+
+    _returnToTerritory(engine) {
+        // Find a cell we own and teleport there
+        for (let gy = 0; gy < GRID_RES; gy++) {
+            for (let gx = 0; gx < GRID_RES; gx++) {
+                if (engine.grid[gy][gx] === this.id) {
+                    this.x = (gx + 0.5) * CELL_SIZE;
+                    this.y = (gy + 0.5) * CELL_SIZE;
+                    return;
+                }
+            }
+        }
+        // No territory found - just stay in place
     }
 
     respawn(engine) {

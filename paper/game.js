@@ -105,6 +105,9 @@ class Game {
         // Human player (center)
         this.humanPlayer = new Player(0, this.userName || "You", this.equippedColor, WORLD_SIZE / 2, WORLD_SIZE / 2);
         this.humanPlayer.spawnTerritory(this.engine);
+        // Apply hearts from powerup
+        if (this.equippedPowerup === "heart_1") this.humanPlayer.hearts = 1;
+        else if (this.equippedPowerup === "heart_3") this.humanPlayer.hearts = 3;
         this.players.push(this.humanPlayer);
 
         // AI players
@@ -207,6 +210,10 @@ class Game {
         document.getElementById("hud-timer").textContent = `${Math.floor(rem / 60)}:${Math.floor(rem % 60).toString().padStart(2, "0")}`;
         document.getElementById("hud-territory").textContent = this.engine.getTerritoryPercent(0) + "%";
         document.getElementById("hud-kills").textContent = this.humanPlayer.kills + " kills";
+
+        // Hearts display
+        const heartsEl = document.getElementById("hud-hearts");
+        if (heartsEl) heartsEl.textContent = "❤️".repeat(this.humanPlayer.hearts);
 
         // Leaderboard update every ~0.5s
         if (Math.floor(this.engine.gameTime * 2) % 1 === 0) {

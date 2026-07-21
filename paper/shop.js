@@ -46,6 +46,8 @@ const SKIN_CATALOG = {
         { id: "shield", name: "Shield", price: 500, desc: "Survive one trail hit" },
         { id: "thick_trail", name: "Wide Trail", price: 250, desc: "Trail is 50% wider (harder to dodge)" },
         { id: "quick_fill", name: "Quick Fill", price: 400, desc: "Territory fills 30% more area" },
+        { id: "heart_1", name: "1 Heart", price: 100, desc: "1 extra life per game" },
+        { id: "heart_3", name: "3 Hearts", price: 250, desc: "3 extra lives per game" },
     ]
 };
 
