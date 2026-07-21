@@ -171,6 +171,9 @@ class Game {
         if (!this.renderer) return;
         this.effects.update(dt);
         this.renderer.setCameraTarget(this.humanPlayer.x, this.humanPlayer.y);
+        // Dynamic zoom based on territory
+        const pct = parseFloat(this.engine.getTerritoryPercent(0));
+        this.renderer.setZoomForTerritory(pct);
         this.renderer.updateCamera(dt);
         this.renderer.cameraX += this.effects.shakeOffsetX;
         this.renderer.cameraY += this.effects.shakeOffsetY;

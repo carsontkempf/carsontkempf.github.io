@@ -48,13 +48,11 @@ class AIController {
             }
         }
 
-        // Priority 3: Hunt enemy trails (aggressive bots)
-        if (this.type === "aggressive" || (this.type === "expansive" && Math.random() < 0.02)) {
-            const huntAngle = this.findEnemyTrail(allPlayers, p);
-            if (huntAngle !== null) {
-                p.setTargetAngle(huntAngle);
-                return;
-            }
+        // Priority 3: Hunt enemy trails (all bots try to kill player)
+        const huntAngle = this.findEnemyTrail(allPlayers, p);
+        if (huntAngle !== null) {
+            p.setTargetAngle(huntAngle);
+            return;
         }
 
         // Priority 4: Wander with smooth curves
@@ -102,12 +100,14 @@ class AIController {
     findEnemyTrail(allPlayers, p) {
         let bestAngle = null;
         let bestDist = Infinity;
-        const range = 300;
+        const range = this.type === "aggressive" ? 600 : 400;
 
-        for (const other of allPlayers) {
-            if (other.id === p.id || !other.alive || other.trail.length < 3) continue;
-            // Find nearest trail point
-            for (let i = 0; i < other.trail.length; i += 3) {
+        // Prioritize human player (id=0)
+        const sorted = [...allPlayers].sort((a, b) => (a.id === 0 ? -1 : 1));
+
+        for (const other of sorted) {
+            if (other.id === p.id || !other.alive || other.trail.length < 2) continue;
+            for (let i = 0; i < other.trail.length; i += 2) {
                 const dx = other.trail[i].x - p.x;
                 const dy = other.trail[i].y - p.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
@@ -116,6 +116,7 @@ class AIController {
                     bestAngle = Math.atan2(dy, dx);
                 }
             }
+            if (bestAngle !== null) break; // Found closest trail, go for it
         }
         return bestAngle;
     }

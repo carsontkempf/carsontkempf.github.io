@@ -7,9 +7,11 @@ class Renderer {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
-        this.scale = 0.6; // zoom level
+        this.baseScale = 1.2; // base zoom (zoomed in)
+        this.scale = this.baseScale;
+        this.targetScale = this.baseScale;
         // Isometric projection angles
-        this.isoAngle = 0.46; // tilt (radians, ~26°)
+        this.isoAngle = 0.46;
         this.cameraX = 0;
         this.cameraY = 0;
         this.targetCamX = 0;
@@ -52,6 +54,16 @@ class Renderer {
         const lerp = 1 - Math.pow(0.01, dt);
         this.cameraX += (this.targetCamX - this.cameraX) * lerp;
         this.cameraY += (this.targetCamY - this.cameraY) * lerp;
+        // Smooth zoom
+        this.scale += (this.targetScale - this.scale) * lerp * 0.5;
+    }
+
+    /**
+     * Set zoom based on territory percentage. More territory = zoom out.
+     */
+    setZoomForTerritory(pct) {
+        // 0% = zoomed in (1.2), 50% = zoomed out (0.4)
+        this.targetScale = Math.max(0.4, this.baseScale - pct * 0.016);
     }
 
     clear() {
@@ -60,39 +72,41 @@ class Renderer {
     }
 
     /**
-     * Render territories as colored regions.
+     * Render territories as solid colored fills (no tiles/grid).
+     * Uses fillRect per grid cell but drawn as a continuous colored mass.
      */
     renderTerritories(engine, players) {
         const ctx = this.ctx;
         const cellWorld = CELL_SIZE;
 
-        // Only draw cells visible on screen (approximate)
-        for (let gy = 0; gy < GRID_RES; gy++) {
-            for (let gx = 0; gx < GRID_RES; gx++) {
-                const owner = engine.grid[gy][gx];
-                if (owner === -1) continue;
+        // Pre-compute screen bounds for culling
+        // Approximate inverse transform to find visible world bounds
+        const invScale = 1 / (this.scale * 0.7);
+        const worldViewW = this.screenW * invScale;
+        const worldViewH = this.screenH * invScale / (Math.sin(this.isoAngle) * 0.5);
 
-                const wx = gx * cellWorld + cellWorld / 2;
-                const wy = gy * cellWorld + cellWorld / 2;
-                const { x, y } = this.worldToScreen(wx, wy);
+        // Draw each player's territory as a solid mass
+        for (const p of players) {
+            ctx.fillStyle = p.territoryColor;
+            ctx.beginPath();
+            let hasPoints = false;
 
-                // Cull off-screen
-                if (x < -30 || x > this.screenW + 30 || y < -30 || y > this.screenH + 30) continue;
+            for (let gy = 0; gy < GRID_RES; gy++) {
+                for (let gx = 0; gx < GRID_RES; gx++) {
+                    if (engine.grid[gy][gx] !== p.id) continue;
 
-                const player = players.find(p => p.id === owner);
-                if (!player) continue;
+                    const wx = gx * cellWorld;
+                    const wy = gy * cellWorld;
+                    const { x, y } = this.worldToScreen(wx + cellWorld / 2, wy + cellWorld / 2);
 
-                // Draw as small filled diamond
-                const s = cellWorld * this.scale * 0.35;
-                const sy = s * Math.sin(this.isoAngle) * 0.7;
-                ctx.fillStyle = player.territoryColor;
-                ctx.beginPath();
-                ctx.moveTo(x, y - sy);
-                ctx.lineTo(x + s, y);
-                ctx.lineTo(x, y + sy);
-                ctx.lineTo(x - s, y);
-                ctx.closePath();
-                ctx.fill();
+                    // Cull
+                    if (x < -20 || x > this.screenW + 20 || y < -20 || y > this.screenH + 20) continue;
+
+                    // Draw as small rect (they overlap to form solid mass)
+                    const s = cellWorld * this.scale * 0.38;
+                    ctx.fillRect(x - s, y - s * 0.6, s * 2, s * 1.2);
+                    hasPoints = true;
+                }
             }
         }
     }

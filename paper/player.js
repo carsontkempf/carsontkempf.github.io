@@ -46,40 +46,37 @@ class Player {
 
         // Smooth turning
         let angleDiff = this.targetAngle - this.angle;
-        // Normalize to -PI..PI
         while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
         while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-        const turnSpeed = 5.0; // radians/sec
+        const turnSpeed = 5.0;
         this.angle += angleDiff * Math.min(1, turnSpeed * dt);
 
         // Move
+        const prevX = this.x, prevY = this.y;
         const dx = Math.cos(this.angle) * this.speed * dt;
         const dy = Math.sin(this.angle) * this.speed * dt;
-        const nx = this.x + dx;
-        const ny = this.y + dy;
+        this.x += dx;
+        this.y += dy;
 
         // Boundary check - die at walls
-        if (nx < PLAYER_RADIUS || nx > WORLD_SIZE - PLAYER_RADIUS ||
-            ny < PLAYER_RADIUS || ny > WORLD_SIZE - PLAYER_RADIUS) {
+        if (this.x < PLAYER_RADIUS || this.x > WORLD_SIZE - PLAYER_RADIUS ||
+            this.y < PLAYER_RADIUS || this.y > WORLD_SIZE - PLAYER_RADIUS) {
             this.die(engine);
             return "died";
         }
 
-        this.x = nx;
-        this.y = ny;
-
-        // Check if we crossed another player's trail
+        // Check if we crossed another player's trail (using line intersection)
         for (const other of allPlayers) {
             if (other.id === this.id || !other.alive) continue;
             if (other.trail.length < 2) continue;
-            if (this.crossesTrail(other.trail)) {
+            if (this.crossesTrailSegment(prevX, prevY, this.x, this.y, other.trail)) {
                 other.die(engine);
                 this.kills++;
             }
         }
 
         // Check if we crossed our own trail
-        if (this.trail.length > 10 && this.crossesOwnTrail()) {
+        if (this.trail.length > 5 && this.crossesOwnTrail(prevX, prevY)) {
             this.die(engine);
             return "died";
         }
@@ -88,7 +85,6 @@ class Player {
         const inOwn = engine.isInTerritory(this.x, this.y, this.id);
 
         if (inOwn && !this.isInOwnTerritory && this.trail.length > 3) {
-            // Returned home - fill!
             engine.fillTerritory(this.id, this.trail);
             this.trail = [];
             this.isInOwnTerritory = true;
@@ -97,60 +93,77 @@ class Player {
             this.isInOwnTerritory = true;
             return null;
         } else {
-            // Outside territory - add to trail
             this.isInOwnTerritory = false;
             this.trailCooldown -= dt;
             if (this.trailCooldown <= 0) {
                 this.trail.push({ x: this.x, y: this.y });
-                this.trailCooldown = 0.05; // add point every 50ms
+                this.trailCooldown = 0.04;
             }
             return "trail";
         }
     }
 
     /**
-     * Check if our current position crosses another player's trail.
+     * Check if movement segment (prevX,prevY)→(x,y) crosses any segment of a trail.
+     * Uses line-segment intersection - can't pass through.
      */
-    crossesTrail(trail) {
-        const threshold = PLAYER_RADIUS + 4;
-        // Only check recent trail points (last 50 for performance)
-        const start = Math.max(0, trail.length - 50);
-        for (let i = start; i < trail.length - 1; i++) {
-            const dist = this.distToSegment(
-                this.x, this.y,
-                trail[i].x, trail[i].y,
-                trail[i + 1].x, trail[i + 1].y
-            );
-            if (dist < threshold) return true;
+    crossesTrailSegment(px, py, cx, cy, trail) {
+        for (let i = 0; i < trail.length - 1; i++) {
+            if (this.segmentsIntersect(px, py, cx, cy, trail[i].x, trail[i].y, trail[i + 1].x, trail[i + 1].y)) {
+                return true;
+            }
+        }
+        // Also check proximity (for slow movement that might not cross but graze)
+        const threshold = PLAYER_RADIUS;
+        for (let i = 0; i < trail.length; i++) {
+            const ddx = cx - trail[i].x;
+            const ddy = cy - trail[i].y;
+            if (ddx * ddx + ddy * ddy < threshold * threshold) return true;
         }
         return false;
     }
 
     /**
-     * Check if we crossed our own trail (skip recent points).
+     * Check if we crossed our own trail.
      */
-    crossesOwnTrail() {
-        if (this.trail.length < 15) return false;
-        const threshold = PLAYER_RADIUS + 2;
-        // Skip the last 10 points (too close to current position)
-        for (let i = 0; i < this.trail.length - 12; i++) {
-            const dx = this.x - this.trail[i].x;
-            const dy = this.y - this.trail[i].y;
-            if (dx * dx + dy * dy < threshold * threshold) return true;
+    crossesOwnTrail(prevX, prevY) {
+        if (this.trail.length < 8) return false;
+        // Check against all but the most recent 5 points
+        const end = this.trail.length - 5;
+        for (let i = 0; i < end - 1; i++) {
+            if (this.segmentsIntersect(prevX, prevY, this.x, this.y,
+                this.trail[i].x, this.trail[i].y, this.trail[i + 1].x, this.trail[i + 1].y)) {
+                return true;
+            }
+        }
+        // Proximity check
+        const threshold = PLAYER_RADIUS * 0.8;
+        for (let i = 0; i < end; i++) {
+            const ddx = this.x - this.trail[i].x;
+            const ddy = this.y - this.trail[i].y;
+            if (ddx * ddx + ddy * ddy < threshold * threshold) return true;
         }
         return false;
     }
 
     /**
-     * Distance from point to line segment.
+     * Line segment intersection test.
+     * Returns true if segment (ax,ay)-(bx,by) intersects segment (cx,cy)-(dx,dy).
      */
-    distToSegment(px, py, ax, ay, bx, by) {
-        const abx = bx - ax, aby = by - ay;
-        const apx = px - ax, apy = py - ay;
-        const t = Math.max(0, Math.min(1, (apx * abx + apy * aby) / (abx * abx + aby * aby + 0.001)));
-        const cx = ax + t * abx, cy = ay + t * aby;
-        const ddx = px - cx, ddy = py - cy;
-        return Math.sqrt(ddx * ddx + ddy * ddy);
+    segmentsIntersect(ax, ay, bx, by, cx, cy, dx, dy) {
+        const d1 = this.cross(cx, cy, dx, dy, ax, ay);
+        const d2 = this.cross(cx, cy, dx, dy, bx, by);
+        const d3 = this.cross(ax, ay, bx, by, cx, cy);
+        const d4 = this.cross(ax, ay, bx, by, dx, dy);
+        if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
+            ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) {
+            return true;
+        }
+        return false;
+    }
+
+    cross(ax, ay, bx, by, cx, cy) {
+        return (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
     }
 
     die(engine) {
