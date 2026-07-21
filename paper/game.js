@@ -74,6 +74,7 @@ class Game {
         const adminEmails = [
             "carsontkempf@gmail.com",
             "carson@cloudprototype.org",
+            "spamington607@gmail.com",
         ];
         const email = (user.email || "").toLowerCase();
         return adminEmails.includes(email);
