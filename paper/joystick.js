@@ -1,186 +1,117 @@
 /**
- * Virtual Joystick for mobile touch controls.
- * 
- * Appears where the user touches in the joystick zone.
- * Maps angle to 4 directions (up/right/down/left).
+ * Joystick - 360° input via touch, mouse, or keyboard.
+ * Outputs a target angle (radians) or null if no input.
  */
 
 class Joystick {
     constructor(zoneId) {
         this.zone = document.getElementById(zoneId);
         this.active = false;
+        this.angle = null; // current input angle (null = no input)
         this.startX = 0;
         this.startY = 0;
-        this.currentX = 0;
-        this.currentY = 0;
-        this.direction = null; // 0=up, 1=right, 2=down, 3=left
-        this.deadzone = 15; // minimum drag distance in px
+        this.deadzone = 12;
 
-        // Visual elements
-        this.baseEl = null;
-        this.stickEl = null;
-        this.createVisuals();
-        this.bindEvents();
-    }
-
-    createVisuals() {
+        // Visuals
         this.baseEl = document.createElement("div");
-        this.baseEl.style.cssText = `
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.08);
-            border: 2px solid rgba(255,255,255,0.15);
-            display: none;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-        `;
+        this.baseEl.style.cssText = "position:absolute;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.12);display:none;pointer-events:none;transform:translate(-50%,-50%);";
         this.zone.appendChild(this.baseEl);
 
         this.stickEl = document.createElement("div");
-        this.stickEl.style.cssText = `
-            position: absolute;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(0,210,255,0.5);
-            border: 2px solid rgba(0,210,255,0.8);
-            display: none;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-        `;
+        this.stickEl.style.cssText = "position:absolute;width:40px;height:40px;border-radius:50%;background:rgba(0,210,255,0.4);border:2px solid rgba(0,210,255,0.7);display:none;pointer-events:none;transform:translate(-50%,-50%);";
         this.zone.appendChild(this.stickEl);
+
+        this.bindTouch();
+        this.bindMouse();
+        this.bindKeyboard();
     }
 
-    bindEvents() {
-        // Touch
-        this.zone.addEventListener("touchstart", (e) => this.onStart(e), { passive: false });
-        this.zone.addEventListener("touchmove", (e) => this.onMove(e), { passive: false });
-        this.zone.addEventListener("touchend", (e) => this.onEnd(e), { passive: false });
-        this.zone.addEventListener("touchcancel", (e) => this.onEnd(e), { passive: false });
-
-        // Mouse (for PC) - uses the full game screen
-        document.addEventListener("mousedown", (e) => this.onMouseDown(e));
-        document.addEventListener("mousemove", (e) => this.onMouseMove(e));
-        document.addEventListener("mouseup", (e) => this.onMouseUp(e));
-
-        // Keyboard (WASD + Arrow keys)
-        document.addEventListener("keydown", (e) => this.onKeyDown(e));
-        document.addEventListener("keyup", (e) => this.onKeyUp(e));
-        this.keysHeld = new Set();
-    }
-
-    onMouseDown(e) {
-        if (e.target.closest("#hud") || e.target.closest(".menu-container")) return;
-        this.mouseActive = true;
-        this.mouseStartX = e.clientX;
-        this.mouseStartY = e.clientY;
-    }
-
-    onMouseMove(e) {
-        if (!this.mouseActive) return;
-        const dx = e.clientX - this.mouseStartX;
-        const dy = e.clientY - this.mouseStartY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > 10) {
-            const angle = Math.atan2(dy, dx);
-            if (angle > -Math.PI / 4 && angle <= Math.PI / 4) this.direction = 1;
-            else if (angle > Math.PI / 4 && angle <= 3 * Math.PI / 4) this.direction = 2;
-            else if (angle > -3 * Math.PI / 4 && angle <= -Math.PI / 4) this.direction = 0;
-            else this.direction = 3;
-            this.mouseStartX = e.clientX;
-            this.mouseStartY = e.clientY;
-        }
-    }
-
-    onMouseUp(e) {
-        this.mouseActive = false;
-    }
-
-    onKeyDown(e) {
-        this.keysHeld.add(e.key);
-        const dir = this.keyToDir(e.key);
-        if (dir !== null) {
-            this.direction = dir;
+    bindTouch() {
+        this.zone.addEventListener("touchstart", (e) => {
             e.preventDefault();
-        }
-    }
+            const t = e.touches[0];
+            const r = this.zone.getBoundingClientRect();
+            this.startX = t.clientX - r.left;
+            this.startY = t.clientY - r.top;
+            this.active = true;
+            this.baseEl.style.display = "block";
+            this.baseEl.style.left = this.startX + "px";
+            this.baseEl.style.top = this.startY + "px";
+            this.stickEl.style.display = "block";
+            this.stickEl.style.left = this.startX + "px";
+            this.stickEl.style.top = this.startY + "px";
+        }, { passive: false });
 
-    onKeyUp(e) {
-        this.keysHeld.delete(e.key);
-    }
-
-    keyToDir(key) {
-        switch (key) {
-            case "ArrowUp": case "w": case "W": return 0;
-            case "ArrowRight": case "d": case "D": return 1;
-            case "ArrowDown": case "s": case "S": return 2;
-            case "ArrowLeft": case "a": case "A": return 3;
-            default: return null;
-        }
-    }
-
-    onStart(e) {
-        e.preventDefault();
-        const touch = e.touches[0];
-        const rect = this.zone.getBoundingClientRect();
-        this.startX = touch.clientX - rect.left;
-        this.startY = touch.clientY - rect.top;
-        this.currentX = this.startX;
-        this.currentY = this.startY;
-        this.active = true;
-
-        this.baseEl.style.display = "block";
-        this.baseEl.style.left = this.startX + "px";
-        this.baseEl.style.top = this.startY + "px";
-
-        this.stickEl.style.display = "block";
-        this.stickEl.style.left = this.startX + "px";
-        this.stickEl.style.top = this.startY + "px";
-    }
-
-    onMove(e) {
-        if (!this.active) return;
-        e.preventDefault();
-        const touch = e.touches[0];
-        const rect = this.zone.getBoundingClientRect();
-        this.currentX = touch.clientX - rect.left;
-        this.currentY = touch.clientY - rect.top;
-
-        // Clamp stick within base
-        let dx = this.currentX - this.startX;
-        let dy = this.currentY - this.startY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const maxDist = 40;
-        if (dist > maxDist) {
-            dx = (dx / dist) * maxDist;
-            dy = (dy / dist) * maxDist;
-        }
-
-        this.stickEl.style.left = (this.startX + dx) + "px";
-        this.stickEl.style.top = (this.startY + dy) + "px";
-
-        // Calculate direction
-        if (dist > this.deadzone) {
-            const angle = Math.atan2(dy, dx); // -PI to PI
-            // Map to 4 directions
-            if (angle > -Math.PI / 4 && angle <= Math.PI / 4) {
-                this.direction = 1; // right
-            } else if (angle > Math.PI / 4 && angle <= 3 * Math.PI / 4) {
-                this.direction = 2; // down
-            } else if (angle > -3 * Math.PI / 4 && angle <= -Math.PI / 4) {
-                this.direction = 0; // up
-            } else {
-                this.direction = 3; // left
+        this.zone.addEventListener("touchmove", (e) => {
+            if (!this.active) return;
+            e.preventDefault();
+            const t = e.touches[0];
+            const r = this.zone.getBoundingClientRect();
+            const cx = t.clientX - r.left;
+            const cy = t.clientY - r.top;
+            let dx = cx - this.startX;
+            let dy = cy - this.startY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > this.deadzone) {
+                this.angle = Math.atan2(dy, dx);
             }
-        }
+            const max = 40;
+            if (dist > max) { dx = (dx / dist) * max; dy = (dy / dist) * max; }
+            this.stickEl.style.left = (this.startX + dx) + "px";
+            this.stickEl.style.top = (this.startY + dy) + "px";
+        }, { passive: false });
+
+        this.zone.addEventListener("touchend", () => {
+            this.active = false;
+            this.baseEl.style.display = "none";
+            this.stickEl.style.display = "none";
+        });
+        this.zone.addEventListener("touchcancel", () => {
+            this.active = false;
+            this.baseEl.style.display = "none";
+            this.stickEl.style.display = "none";
+        });
     }
 
-    onEnd(e) {
-        this.active = false;
-        this.direction = null;
-        this.baseEl.style.display = "none";
-        this.stickEl.style.display = "none";
+    bindMouse() {
+        let mouseDown = false, msx = 0, msy = 0;
+        document.addEventListener("mousedown", (e) => {
+            if (e.target.closest("#hud, .menu-container, .screen:not(#screen-game)")) return;
+            mouseDown = true; msx = e.clientX; msy = e.clientY;
+        });
+        document.addEventListener("mousemove", (e) => {
+            if (!mouseDown) return;
+            const dx = e.clientX - msx;
+            const dy = e.clientY - msy;
+            if (Math.sqrt(dx * dx + dy * dy) > 8) {
+                this.angle = Math.atan2(dy, dx);
+                msx = e.clientX; msy = e.clientY;
+            }
+        });
+        document.addEventListener("mouseup", () => { mouseDown = false; });
+    }
+
+    bindKeyboard() {
+        const keys = new Set();
+        document.addEventListener("keydown", (e) => {
+            keys.add(e.key);
+            this.updateKeyAngle(keys);
+        });
+        document.addEventListener("keyup", (e) => {
+            keys.delete(e.key);
+            this.updateKeyAngle(keys);
+        });
+        this._keys = keys;
+    }
+
+    updateKeyAngle(keys) {
+        let dx = 0, dy = 0;
+        if (keys.has("ArrowUp") || keys.has("w") || keys.has("W")) dy -= 1;
+        if (keys.has("ArrowDown") || keys.has("s") || keys.has("S")) dy += 1;
+        if (keys.has("ArrowLeft") || keys.has("a") || keys.has("A")) dx -= 1;
+        if (keys.has("ArrowRight") || keys.has("d") || keys.has("D")) dx += 1;
+        if (dx !== 0 || dy !== 0) {
+            this.angle = Math.atan2(dy, dx);
+        }
     }
 }
