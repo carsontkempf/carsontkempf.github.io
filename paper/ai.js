@@ -65,14 +65,15 @@ class AIController {
     }
 
     avoidWalls(p) {
-        const margin = 500;
-        let steerX = 0, steerY = 0;
-        if (p.x < margin) steerX += 1;
-        if (p.x > WORLD_SIZE - margin) steerX -= 1;
-        if (p.y < margin) steerY += 1;
-        if (p.y > WORLD_SIZE - margin) steerY -= 1;
-        if (steerX !== 0 || steerY !== 0) {
-            return Math.atan2(steerY, steerX);
+        // Circular arena boundary avoidance
+        const cx = WORLD_SIZE / 2, cy = WORLD_SIZE / 2;
+        const dx = p.x - cx, dy = p.y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const radius = p.arenaRadius || WORLD_SIZE / 2;
+        const margin = 600;
+        if (dist > radius - margin) {
+            // Steer toward center
+            return Math.atan2(cy - p.y, cx - p.x);
         }
         return null;
     }

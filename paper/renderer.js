@@ -157,63 +157,58 @@ class Renderer {
         }
     }
 
-    renderPlayers(players) {
+    renderPlayers(players, skins3d) {
         const ctx = this.ctx;
         for (const p of players) {
             if (!p.alive) continue;
             const { x, y } = this.worldToScreen(p.x, p.y);
-            const r = PLAYER_RADIUS * this.scale * 2.0;
+            const r = PLAYER_RADIUS * this.scale * 5.0; // 5x bigger than trail
 
-            // Shadow (ellipse below)
+            // Shadow
             ctx.beginPath();
-            ctx.ellipse(x + 1, y + r * 0.4, r * 0.9, r * 0.35, 0, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            ctx.ellipse(x + 1, y + r * 0.3, r * 0.7, r * 0.25, 0, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(0,0,0,0.25)";
             ctx.fill();
 
-            // Water droplet body - teardrop shape pointing in movement direction
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(p.angle);
-
-            // Tail (tapers behind)
-            ctx.beginPath();
-            ctx.moveTo(r * 0.9, 0); // front tip
-            ctx.quadraticCurveTo(r * 0.3, -r * 0.7, -r * 0.6, -r * 0.3);
-            ctx.quadraticCurveTo(-r * 1.0, 0, -r * 0.6, r * 0.3);
-            ctx.quadraticCurveTo(r * 0.3, r * 0.7, r * 0.9, 0);
-            ctx.closePath();
-
-            // Gradient fill
-            const grad = ctx.createRadialGradient(-r * 0.1, -r * 0.2, 0, 0, 0, r);
-            grad.addColorStop(0, "#fff");
-            grad.addColorStop(0.25, this.lighten(p.color, 0.2));
-            grad.addColorStop(0.7, p.color);
-            grad.addColorStop(1, this.darken(p.color, 0.4));
-            ctx.fillStyle = grad;
-            ctx.fill();
-
-            // Outline
-            ctx.strokeStyle = "rgba(255,255,255,0.4)";
-            ctx.lineWidth = 1.2;
-            ctx.stroke();
-
-            // Specular highlight (front bubble)
-            ctx.beginPath();
-            ctx.ellipse(r * 0.3, -r * 0.15, r * 0.2, r * 0.15, -0.3, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(255,255,255,0.5)";
-            ctx.fill();
-
-            ctx.restore();
+            // Draw 3D skin
+            const skinId = p.shape || "droplet";
+            if (skins3d) {
+                skins3d.draw(ctx, x, y, r, p.angle, skinId, p.color);
+            } else {
+                // Fallback droplet
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(p.angle);
+                ctx.beginPath();
+                ctx.moveTo(r * 0.9, 0);
+                ctx.quadraticCurveTo(r * 0.3, -r * 0.7, -r * 0.6, -r * 0.3);
+                ctx.quadraticCurveTo(-r * 1.0, 0, -r * 0.6, r * 0.3);
+                ctx.quadraticCurveTo(r * 0.3, r * 0.7, r * 0.9, 0);
+                ctx.closePath();
+                const grad = ctx.createRadialGradient(-r * 0.1, -r * 0.2, 0, 0, 0, r);
+                grad.addColorStop(0, "#fff");
+                grad.addColorStop(0.25, p.color);
+                grad.addColorStop(1, this.darken(p.color, 0.4));
+                ctx.fillStyle = grad;
+                ctx.fill();
+                ctx.restore();
+            }
         }
     }
 
-    renderBorder() {
+    renderBorder(arenaRadius) {
         const ctx = this.ctx;
-        const tl = this.worldToScreen(0, 0);
-        const br = this.worldToScreen(WORLD_SIZE, WORLD_SIZE);
-        ctx.strokeStyle = "rgba(255,71,87,0.5)";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
+        const center = this.worldToScreen(WORLD_SIZE / 2, WORLD_SIZE / 2);
+        const r = (arenaRadius || WORLD_SIZE / 2) * this.scale;
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, r, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255,71,87,0.4)";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        // Glow
+        ctx.strokeStyle = "rgba(255,71,87,0.1)";
+        ctx.lineWidth = 8;
+        ctx.stroke();
     }
 
     lighten(color, amount) {

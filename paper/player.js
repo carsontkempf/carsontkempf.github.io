@@ -20,12 +20,16 @@ class Player {
         this.kills = 0;
         this.deathTimer = 0;
         this.trailCooldown = 0;
-        this.hearts = 0; // respawn lives (0-3)
-        this.departurePoint = null; // where we left our territory
+        this.hearts = 0;
+        this.departurePoint = null;
+        this.shape = "droplet";
+        this.spawnRadius = 500;
+        this.arenaRadius = WORLD_SIZE / 2;
     }
 
     spawnTerritory(engine) {
-        engine.setTerritoryCircle(this.x, this.y, 500, this.id);
+        const radius = this.spawnRadius || 500;
+        engine.setTerritoryCircle(this.x, this.y, radius, this.id);
     }
 
     /**
@@ -60,9 +64,10 @@ class Player {
         this.x += dx;
         this.y += dy;
 
-        // Boundary check - die at walls
-        if (this.x < PLAYER_RADIUS || this.x > WORLD_SIZE - PLAYER_RADIUS ||
-            this.y < PLAYER_RADIUS || this.y > WORLD_SIZE - PLAYER_RADIUS) {
+        // Boundary check - die at circular arena edge
+        const cx = WORLD_SIZE / 2, cy = WORLD_SIZE / 2;
+        const distFromCenter = Math.sqrt((this.x - cx) ** 2 + (this.y - cy) ** 2);
+        if (distFromCenter > (this.arenaRadius || WORLD_SIZE / 2) - PLAYER_RADIUS) {
             this.die(engine);
             return "died";
         }

@@ -33,6 +33,8 @@ class Game {
         this.tokenManager = new TokenManager();
         this.jackpot = new Jackpot();
         this.toasts = new Toasts();
+        this.skins3d = new Skins3DRenderer();
+        this.currentLevel = 1;
     }
 
     loadUserData(user) {
@@ -159,21 +161,35 @@ class Game {
         this.players = [];
         this.aiControllers = [];
 
+        // Level config
+        const level = getLevel(this.currentLevel);
+        const arenaRadius = level.radius;
+        const center = WORLD_SIZE / 2;
+
         // Human player (center)
-        this.humanPlayer = new Player(0, this.userName || "You", this.equippedColor, WORLD_SIZE / 2, WORLD_SIZE / 2);
-        this.humanPlayer.spawnTerritory(this.engine);
-        // Apply hearts from powerup
+        this.humanPlayer = new Player(0, this.userName || "You", this.equippedColor, center, center);
+        this.humanPlayer.shape = this.equippedShape || "droplet";
+        this.humanPlayer.arenaRadius = arenaRadius;
+        // Apply powerups
         if (this.equippedPowerup === "heart_1") this.humanPlayer.hearts = 1;
         else if (this.equippedPowerup === "heart_3") this.humanPlayer.hearts = 3;
+        else if (this.equippedPowerup === "big_start") {
+            this.humanPlayer.spawnRadius = 800; // 60% bigger
+        }
+        this.humanPlayer.spawnTerritory(this.engine);
         this.players.push(this.humanPlayer);
 
-        // AI players
-        const spawns = this.getSpawns(this.aiCount);
-        for (let i = 0; i < this.aiCount; i++) {
-            const bot = new Player(i + 1, AI_NAMES[i], PLAYER_COLORS[i + 1], spawns[i].x, spawns[i].y);
+        // AI players (from level config)
+        const aiCount = level.aiCount;
+        const aiTypes = level.aiTypes;
+        const spawns = this.getSpawnsCircular(aiCount, center, arenaRadius * 0.6);
+        for (let i = 0; i < aiCount; i++) {
+            const bot = new Player(i + 1, AI_NAMES[i % AI_NAMES.length], PLAYER_COLORS[(i + 1) % PLAYER_COLORS.length], spawns[i].x, spawns[i].y);
+            bot.shape = ["droplet", "bunny", "penguin", "fox", "panda", "chick"][i % 6];
+            bot.arenaRadius = arenaRadius;
             bot.spawnTerritory(this.engine);
             this.players.push(bot);
-            this.aiControllers.push(new AIController(bot, ["cautious", "aggressive", "expansive"][i % 3]));
+            this.aiControllers.push(new AIController(bot, aiTypes[i] || "expansive"));
         }
 
         // Renderer + joystick
@@ -199,18 +215,26 @@ class Game {
         ].slice(0, count);
     }
 
+    getSpawnsCircular(count, center, radius) {
+        const spawns = [];
+        for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i) / count + Math.PI / 4;
+            spawns.push({
+                x: center + Math.cos(angle) * radius,
+                y: center + Math.sin(angle) * radius,
+            });
+        }
+        return spawns;
+    }
+
     update(dt) {
         // Human input
         if (this.joystick && this.joystick.angle !== null) {
             this.humanPlayer.setTargetAngle(this.joystick.angle);
         }
 
-        // Apply powerup: speed boost
-        if (this.equippedPowerup === "speed_boost") {
-            this.humanPlayer.speed = PLAYER_SPEED * 1.1;
-        } else {
-            this.humanPlayer.speed = PLAYER_SPEED;
-        }
+        // Apply powerup effects (no speed boost - too OP)
+        this.humanPlayer.speed = PLAYER_SPEED;
 
         // Update all players
         for (const p of this.players) {
@@ -261,10 +285,11 @@ class Game {
         this.renderer.cameraY += this.effects.shakeOffsetY;
 
         this.renderer.clear();
-        this.renderer.renderBorder();
+        const level = getLevel(this.currentLevel);
+        this.renderer.renderBorder(level.radius);
         this.renderer.renderTerritories(this.engine, this.players);
         this.renderer.renderTrails(this.players);
-        this.renderer.renderPlayers(this.players);
+        this.renderer.renderPlayers(this.players, this.skins3d);
         this.tokenManager.render(this.renderer.ctx, this.renderer);
         this.effects.render(this.renderer.ctx);
         this.minimap.render(this.renderer.ctx, this.engine, this.players, this.renderer.screenW);
@@ -318,8 +343,10 @@ class Game {
     }
 
     showResults(h, rank, won, coins, tokensCollected) {
+        const level = getLevel(this.currentLevel);
         document.getElementById("result-title").textContent = won ? "Victory!" : `#${rank} Place`;
         document.getElementById("result-stats").innerHTML = `
+            <div>Level: <strong>${level.name} (${this.currentLevel})</strong></div>
             <div>Territory: <strong>${h.territory}%</strong></div>
             <div>Kills: <strong>${h.kills}</strong></div>
             <div>Rank: <strong>#${rank} of ${this.players.length}</strong></div>
@@ -329,6 +356,13 @@ class Game {
         this.addCoins(coins);
         this.stats.gamesPlayed++; if (won) this.stats.wins++;
         this.stats.kills += h.kills; this.stats.totalTerritory += h.territory;
+        // Level up on win
+        if (won && this.currentLevel < LEVELS.length) {
+            this.currentLevel++;
+            if (!this.stats.maxLevel || this.currentLevel > this.stats.maxLevel) {
+                this.stats.maxLevel = this.currentLevel;
+            }
+        }
         this.saveUserData();
         this.showScreen("results");
     }
