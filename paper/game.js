@@ -115,8 +115,13 @@ class Game {
     }
 
     bindUI() {
-        const $ = (id) => document.getElementById(id);
-        const on = (id, fn) => { const el = $(id); if (el) el.addEventListener("click", fn); };
+        const on = (id, fn) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener("click", fn);
+                el.addEventListener("touchend", (e) => { e.preventDefault(); fn(); });
+            }
+        };
 
         on("btn-play", () => { this.renderLevelSelect(); this.showScreen("settings"); });
         on("btn-start-game", () => this.startGame());
@@ -232,7 +237,6 @@ class Game {
 
         // Renderer + joystick
         this.renderer = new Renderer(document.getElementById("game-canvas"));
-        this.renderer.resize();
         this.joystick = new Joystick("joystick-zone");
 
         // Engine callbacks
@@ -240,7 +244,12 @@ class Game {
         this.engine.onRender = (dt) => this.render(dt);
         this.engine.onGameEnd = () => this.gameEnd();
         this.tokenManager.reset();
-        this.engine.start();
+
+        // Start after layout settles
+        requestAnimationFrame(() => {
+            this.renderer.resize();
+            this.engine.start();
+        });
     }
 
     getSpawns(count) {

@@ -62,52 +62,31 @@ class Renderer {
         const ctx = this.ctx;
         const cellWorld = CELL_SIZE;
         const cs = cellWorld * this.scale;
+        if (cs < 0.3) return;
 
         for (const p of players) {
-            // Collect visible cells
-            const cells = [];
+            // Batch all rects into one path for performance
+            ctx.fillStyle = p.territoryColor || p.color;
+            ctx.globalAlpha = 0.4;
+            ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
-                    const wx = (gx + 0.5) * cellWorld;
-                    const wy = (gy + 0.5) * cellWorld;
-                    const { x, y } = this.worldToScreen(wx, wy);
-                    if (x < -cs * 2 || x > this.screenW + cs * 2 || y < -cs * 2 || y > this.screenH + cs * 2) continue;
-                    cells.push({ x, y });
+                    const wx = gx * cellWorld;
+                    const wy = gy * cellWorld;
+                    const sx = wx * this.scale - this.cameraX + this.screenW / 2;
+                    const sy = wy * this.scale - this.cameraY + this.screenH / 2;
+                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
+                    ctx.rect(sx, sy, cs + 0.5, cs + 0.5);
                 }
             }
-            if (cells.length === 0) continue;
-
-            const r = cs * 0.7; // circle radius per cell (overlap for smooth look)
-
-            // 3D Shadow layer (offset down and slightly transparent)
-            ctx.fillStyle = "rgba(0,0,0,0.35)";
-            for (const c of cells) {
-                ctx.beginPath();
-                ctx.arc(c.x + 2, c.y + 4, r, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            // Main territory fill (circles that overlap = smooth blob)
-            ctx.fillStyle = p.territoryColor;
-            for (const c of cells) {
-                ctx.beginPath();
-                ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            // Highlight on top edge (lighter circles, smaller, offset up)
-            ctx.fillStyle = this.lighten(p.territoryColor, 0.15);
-            for (const c of cells) {
-                ctx.beginPath();
-                ctx.arc(c.x, c.y - 1, r * 0.75, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            ctx.fill();
+            ctx.globalAlpha = 1;
         }
     }
 
     /**
-     * Render trails as tapered paths (wide at player, thin at start).
+     * Render trails - single wide stroke per player (fast).
      */
     renderTrails(players) {
         const ctx = this.ctx;
@@ -116,44 +95,21 @@ class Renderer {
             if (!p.alive || p.trail.length < 2) continue;
 
             const points = [...p.trail, { x: p.x, y: p.y }];
-            const maxWidth = PLAYER_RADIUS * this.scale * 1.2; // narrower than player icon
-            const minWidth = 1.5;
+            const maxWidth = PLAYER_RADIUS * this.scale * 1.2;
 
-            // Draw tapered trail using individual segments with varying width
-            for (let i = 0; i < points.length - 1; i++) {
-                const t = i / (points.length - 1); // 0 at start, 1 at player
-                const width = minWidth + (maxWidth - minWidth) * t * t; // quadratic taper
-
-                const p0 = this.worldToScreen(points[i].x, points[i].y);
-                const p1 = this.worldToScreen(points[i + 1].x, points[i + 1].y);
-
-                // Shadow
-                ctx.beginPath();
-                ctx.moveTo(p0.x + 1, p0.y + 2);
-                ctx.lineTo(p1.x + 1, p1.y + 2);
-                ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                ctx.lineWidth = width + 2;
-                ctx.lineCap = "round";
-                ctx.stroke();
-
-                // Main trail color
-                ctx.beginPath();
-                ctx.moveTo(p0.x, p0.y);
-                ctx.lineTo(p1.x, p1.y);
-                ctx.strokeStyle = p.trailColor;
-                ctx.lineWidth = width;
-                ctx.lineCap = "round";
-                ctx.stroke();
-
-                // Inner highlight
-                ctx.beginPath();
-                ctx.moveTo(p0.x, p0.y);
-                ctx.lineTo(p1.x, p1.y);
-                ctx.strokeStyle = p.color;
-                ctx.lineWidth = width * 0.4;
-                ctx.lineCap = "round";
-                ctx.stroke();
+            // Single trail stroke
+            ctx.beginPath();
+            ctx.strokeStyle = p.trailColor || p.color;
+            ctx.lineWidth = maxWidth;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            const first = this.worldToScreen(points[0].x, points[0].y);
+            ctx.moveTo(first.x, first.y);
+            for (let i = 1; i < points.length; i++) {
+                const pt = this.worldToScreen(points[i].x, points[i].y);
+                ctx.lineTo(pt.x, pt.y);
             }
+            ctx.stroke();
         }
     }
 
