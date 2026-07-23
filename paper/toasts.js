@@ -33,10 +33,19 @@ class Toasts {
 
             // Background pill
             ctx.globalAlpha = alpha * 0.8;
-            const textW = ctx.measureText(t.text).width || 100;
+            const textW = ctx.measureText ? (ctx.measureText(t.text).width || 100) : 100;
             ctx.fillStyle = "rgba(0,0,0,0.7)";
             ctx.beginPath();
-            ctx.roundRect(screenW / 2 - textW / 2 - 16, y - 12, textW + 32, 28, 14);
+            const rx = screenW / 2 - textW / 2 - 16;
+            const ry = y - 12;
+            const rw = textW + 32;
+            const rh = 28;
+            const rr = 14;
+            if (ctx.roundRect) {
+                ctx.roundRect(rx, ry, rw, rh, rr);
+            } else {
+                ctx.rect(rx, ry, rw, rh);
+            }
             ctx.fill();
 
             // Text

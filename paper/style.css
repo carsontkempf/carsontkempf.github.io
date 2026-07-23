@@ -388,3 +388,49 @@ html, body {
 .pause-panel .btn { margin-bottom: 8px; }
 .btn-danger { background: #ff4757; color: #fff; }
 .btn-danger:hover { background: #ff6b81; }
+
+/* Loading Screen */
+.loading-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+}
+.loading-screen h1 { font-size: 2em; margin-bottom: 20px; }
+.loading-spinner {
+    width: 36px; height: 36px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: #00d2ff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loading-status { color: #888; font-size: 0.9em; }
+
+/* Level Grid */
+.level-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 12px 0;
+}
+.level-btn {
+    background: var(--surface);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+    color: var(--text);
+    cursor: pointer;
+    transition: 0.2s;
+}
+.level-btn.selected { border-color: #00d2ff; background: rgba(0,210,255,0.1); }
+.level-btn.locked { opacity: 0.4; pointer-events: none; }
+.level-btn .level-num { font-size: 1.2em; font-weight: bold; }
+.level-btn .level-name { font-size: 0.7em; color: #888; margin-top: 2px; }
+.shop-item-desc { font-size: 0.65em; color: #888; margin-top: 2px; }

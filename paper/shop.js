@@ -202,16 +202,19 @@ class Shop {
 
         html += '<div class="shop-grid">';
         for (const item of items) {
+            // Show item if owned OR if it's free (price === 0)
             const owned = this.game.unlockedSkins.includes(item.id) || item.price === 0;
-            if (!owned) continue; // Only show owned items in loadout
+            if (!owned) continue;
 
             const equipped = this.isLoadoutEquipped(item);
             const stateClass = equipped ? "equipped" : "owned";
             const stateText = equipped ? "Equipped" : "Tap to equip";
+            const desc = item.desc ? `<div class="shop-item-desc">${item.desc}</div>` : "";
 
             html += `<div class="shop-item ${stateClass}" data-id="${item.id}" data-tab="${this.loadoutTab}">
                 <div class="shop-item-preview">${this.renderPreview(item)}</div>
                 <div class="shop-item-name">${item.name}</div>
+                ${desc}
                 <div class="shop-item-price price-owned">${stateText}</div>
             </div>`;
         }

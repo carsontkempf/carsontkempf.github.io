@@ -17,9 +17,12 @@ permalink: /paper/
 <body>
     <!-- Auth Gate -->
     <div id="auth-gate">
-        <h1>Paper Conquest</h1>
-        <p>You need to be logged in to play</p>
-        <button class="gate-btn" onclick="window.location.href='/login/?redirect=/paper/'">Log In</button>
+        <div class="loading-screen">
+            <h1>Paper Conquest</h1>
+            <div class="loading-spinner"></div>
+            <p id="loading-status">Loading...</p>
+            <button id="btn-skip-auth" class="btn btn-ghost" style="display:none;margin-top:16px;">Play as Guest</button>
+        </div>
     </div>
 
     <!-- App (hidden until authed) -->
@@ -44,17 +47,8 @@ permalink: /paper/
         <!-- Settings Screen (pre-game) -->
         <div id="screen-settings" class="screen">
             <div class="menu-container">
-                <h2>Game Settings</h2>
-                <div class="setting-row">
-                    <span class="setting-label">AI Opponents</span>
-                    <div class="setting-toggle" id="ai-count-toggle">
-                        <button class="opt-btn" data-val="1">1</button>
-                        <button class="opt-btn" data-val="2">2</button>
-                        <button class="opt-btn active" data-val="3">3</button>
-                        <button class="opt-btn" data-val="4">4</button>
-                        <button class="opt-btn" data-val="5">5</button>
-                    </div>
-                </div>
+                <h2>Select Level</h2>
+                <div id="level-select" class="level-grid"></div>
                 <button id="btn-start-game" class="btn btn-primary btn-full btn-tall">Start Game</button>
                 <button id="btn-back-menu" class="btn btn-ghost btn-full">Back</button>
             </div>

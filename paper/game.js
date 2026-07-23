@@ -26,7 +26,7 @@ class Game {
         this.unlockedSkins = ["default"];
         this.equippedColor = "#00d2ff";
         this.equippedPattern = "solid";
-        this.equippedShape = "cube";
+        this.equippedShape = "droplet";
         this.equippedPowerup = "none";
         this.stats = { gamesPlayed: 0, wins: 0, kills: 0, totalTerritory: 0 };
         this.shop = null;
@@ -51,9 +51,10 @@ class Game {
                 this.unlockedSkins = d.unlockedSkins || ["default"];
                 this.equippedColor = d.equippedColor || "#00d2ff";
                 this.equippedPattern = d.equippedPattern || "solid";
-                this.equippedShape = d.equippedShape || "cube";
+                this.equippedShape = d.equippedShape || "droplet";
                 this.equippedPowerup = d.equippedPowerup || "none";
                 this.stats = d.stats || this.stats;
+                this.currentLevel = d.currentLevel || 1;
             } catch (e) {}
         }
 
@@ -87,7 +88,8 @@ class Game {
         localStorage.setItem("paper_data_" + this.userId, JSON.stringify({
             coins: this.coins, unlockedSkins: this.unlockedSkins,
             equippedColor: this.equippedColor, equippedPattern: this.equippedPattern,
-            equippedShape: this.equippedShape, equippedPowerup: this.equippedPowerup, stats: this.stats,
+            equippedShape: this.equippedShape, equippedPowerup: this.equippedPowerup,
+            stats: this.stats, currentLevel: this.currentLevel,
         }));
     }
 
@@ -102,7 +104,7 @@ class Game {
     }
 
     bindUI() {
-        document.getElementById("btn-play").addEventListener("click", () => this.showScreen("settings"));
+        document.getElementById("btn-play").addEventListener("click", () => { this.renderLevelSelect(); this.showScreen("settings"); });
         document.getElementById("btn-start-game").addEventListener("click", () => this.startGame());
         document.getElementById("btn-back-menu").addEventListener("click", () => this.showScreen("menu"));
         document.getElementById("btn-play-again").addEventListener("click", () => this.startGame());
@@ -119,20 +121,34 @@ class Game {
         document.getElementById("btn-loadout-pause").addEventListener("click", () => {
             this.showScreen("loadout"); this.shop.renderLoadout();
         });
-
-        document.querySelectorAll("#ai-count-toggle .opt-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                document.querySelectorAll("#ai-count-toggle .opt-btn").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                this.aiCount = parseInt(btn.dataset.val);
-            });
-        });
     }
 
     showScreen(name) {
         this.state = name;
         document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
         document.getElementById("screen-" + name)?.classList.add("active");
+    }
+
+    renderLevelSelect() {
+        const container = document.getElementById("level-select");
+        if (!container) return;
+        const maxLevel = this.stats.maxLevel || 1;
+        let html = "";
+        for (const level of LEVELS) {
+            const locked = level.id > maxLevel;
+            const selected = level.id === this.currentLevel;
+            html += `<div class="level-btn ${locked ? 'locked' : ''} ${selected ? 'selected' : ''}" data-level="${level.id}">
+                <div class="level-num">${level.id}</div>
+                <div class="level-name">${level.name}</div>
+            </div>`;
+        }
+        container.innerHTML = html;
+        container.querySelectorAll(".level-btn:not(.locked)").forEach(btn => {
+            btn.addEventListener("click", () => {
+                this.currentLevel = parseInt(btn.dataset.level);
+                this.renderLevelSelect();
+            });
+        });
     }
 
     pauseGame() {
@@ -373,18 +389,84 @@ class Game {
 // Boot
 let game;
 document.addEventListener("DOMContentLoaded", () => {
-    game = new Game();
-    game.init();
+    try {
+        game = new Game();
+        game.init();
+    } catch (e) {
+        console.error("Game init failed:", e);
+        document.getElementById("loading-status").textContent = "Error: " + e.message;
+        return;
+    }
+
     const gate = document.getElementById("auth-gate");
     const app = document.getElementById("app");
-    async function checkAuth() {
-        if (window.authService) {
-            const authed = await window.authService.isAuthenticated();
-            if (authed) { gate.classList.add("hidden"); app.classList.remove("hidden"); const u = await window.authService.getUser(); if (u) game.loadUserData(u); }
-        }
+    const status = document.getElementById("loading-status");
+    const skipBtn = document.getElementById("btn-skip-auth");
+
+    function showApp(user) {
+        gate.style.display = "none";
+        app.classList.remove("hidden");
+        if (user) game.loadUserData(user);
     }
-    window.addEventListener('auth:ready', async (ev) => {
-        if (ev.detail?.isAuthenticated) { gate.classList.add("hidden"); app.classList.remove("hidden"); const u = await window.authService.getUser(); if (u) game.loadUserData(u); }
+
+    // Skip auth / play as guest
+    skipBtn.addEventListener("click", () => {
+        showApp({ name: "Guest", email: "guest@local" });
     });
-    setTimeout(checkAuth, 2000);
+
+    // Try auth
+    let authResolved = false;
+
+    async function checkAuth() {
+        if (authResolved) return;
+        try {
+            if (window.authService) {
+                status.textContent = "Checking login...";
+                const authed = await window.authService.isAuthenticated();
+                if (authed) {
+                    authResolved = true;
+                    const u = await window.authService.getUser();
+                    showApp(u || { name: "Player", email: "unknown" });
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn("Auth check failed:", e);
+        }
+        // Auth not available or not logged in - show skip button
+        status.textContent = "Not logged in";
+        skipBtn.style.display = "inline-block";
+    }
+
+    window.addEventListener("auth:ready", async (ev) => {
+        if (authResolved) return;
+        if (ev.detail?.isAuthenticated) {
+            authResolved = true;
+            try {
+                const u = await window.authService.getUser();
+                showApp(u || { name: "Player", email: "unknown" });
+            } catch (e) {
+                showApp({ name: "Player", email: "unknown" });
+            }
+        } else {
+            status.textContent = "Not logged in";
+            skipBtn.style.display = "inline-block";
+        }
+    });
+
+    // Timeout - show skip button after 3s regardless
+    setTimeout(() => {
+        if (!authResolved) {
+            checkAuth();
+        }
+    }, 1500);
+
+    // Fallback - always show play button after 4s
+    setTimeout(() => {
+        if (!authResolved) {
+            status.textContent = "Ready";
+            skipBtn.style.display = "inline-block";
+            skipBtn.textContent = "Play";
+        }
+    }, 4000);
 });

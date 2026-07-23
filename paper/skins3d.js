@@ -8,6 +8,23 @@
  * - Small accessories (ears, vehicles, etc)
  */
 
+// Polyfill roundRect for older browsers
+if (typeof CanvasRenderingContext2D !== "undefined" && !CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
+        const r = typeof radii === "number" ? radii : (radii?.[0] || 0);
+        this.moveTo(x + r, y);
+        this.lineTo(x + w - r, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r);
+        this.lineTo(x + w, y + h - r);
+        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        this.lineTo(x + r, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r);
+        this.lineTo(x, y + r);
+        this.quadraticCurveTo(x, y, x + r, y);
+        this.closePath();
+    };
+}
+
 const SKINS_3D = {
     // Default
     droplet: { name: "Droplet", price: 0 },
@@ -402,7 +419,21 @@ class Skins3DRenderer {
 
     roundRect(ctx, x, y, w, h, rad) {
         ctx.beginPath();
-        ctx.roundRect(x, y, w, h, rad);
+        if (ctx.roundRect) {
+            ctx.roundRect(x, y, w, h, rad);
+        } else {
+            // Fallback
+            ctx.moveTo(x + rad, y);
+            ctx.lineTo(x + w - rad, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + rad);
+            ctx.lineTo(x + w, y + h - rad);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - rad, y + h);
+            ctx.lineTo(x + rad, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - rad);
+            ctx.lineTo(x, y + rad);
+            ctx.quadraticCurveTo(x, y, x + rad, y);
+            ctx.closePath();
+        }
         ctx.fill();
     }
 
