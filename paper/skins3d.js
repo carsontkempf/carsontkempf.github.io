@@ -537,31 +537,107 @@ SPRITES.ninja = {
 
 
 class Skins3DRenderer {
-    constructor() {}
+    constructor() {
+        // Generate missing directions for all sprites
+        for (var key in SPRITES) {
+            var s = SPRITES[key];
+            if (!s.back) {
+                // Back: replace face-detail colors with body color
+                s.back = this._makeBack(s.front, s.colors);
+            }
+            if (!s.left) {
+                s.left = this._makeLeft(s.front);
+            }
+            if (!s.right) {
+                s.right = this._makeRight(s.front);
+            }
+        }
+    }
+
+    _makeBack(front, colors) {
+        // Copy front but replace eye/nose/mouth chars with the most common body char
+        var bodyChar = this._findBodyChar(front);
+        var faceChars = ["k", "p", "e", "n", "w"]; // eyes, pupils, nose typically
+        var back = [];
+        for (var i = 0; i < front.length; i++) {
+            var row = "";
+            for (var j = 0; j < front[i].length; j++) {
+                var ch = front[i][j];
+                if (faceChars.indexOf(ch) >= 0 && i < 10) {
+                    // Only replace in upper half (head area)
+                    row += bodyChar;
+                } else {
+                    row += ch;
+                }
+            }
+            back.push(row);
+        }
+        return back;
+    }
+
+    _makeLeft(front) {
+        // Shift all non-zero pixels 2 columns to the left
+        var left = [];
+        for (var i = 0; i < front.length; i++) {
+            var row = "";
+            for (var j = 0; j < 16; j++) {
+                var srcJ = j + 2;
+                if (srcJ < 16) row += front[i][srcJ];
+                else row += "0";
+            }
+            left.push(row);
+        }
+        return left;
+    }
+
+    _makeRight(front) {
+        // Shift all non-zero pixels 2 columns to the right
+        var right = [];
+        for (var i = 0; i < front.length; i++) {
+            var row = "";
+            for (var j = 0; j < 16; j++) {
+                var srcJ = j - 2;
+                if (srcJ >= 0) row += front[i][srcJ];
+                else row += "0";
+            }
+            right.push(row);
+        }
+        return right;
+    }
+
+    _findBodyChar(grid) {
+        // Find most common non-zero, non-face character
+        var counts = {};
+        for (var i = 0; i < grid.length; i++) {
+            for (var j = 0; j < grid[i].length; j++) {
+                var ch = grid[i][j];
+                if (ch !== "0") {
+                    counts[ch] = (counts[ch] || 0) + 1;
+                }
+            }
+        }
+        var best = "0", bestCount = 0;
+        for (var c in counts) {
+            if (counts[c] > bestCount && c !== "k" && c !== "p" && c !== "e") {
+                best = c;
+                bestCount = counts[c];
+            }
+        }
+        return best;
+    }
 
     draw(ctx, x, y, r, angle, skinId, playerColor) {
         var sprite = SPRITES[skinId] || SPRITES.droplet;
-        var hasDirections = !!sprite.back;
 
-        var grid, rotAngle;
-        if (hasDirections) {
-            // Use directional sprites based on angle
-            var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-            var dir;
-            // right=0, down=PI/2, left=PI, up=3PI/2
-            if (a > Math.PI * 7/4 || a <= Math.PI * 1/4) dir = "right";
-            else if (a > Math.PI * 1/4 && a <= Math.PI * 3/4) dir = "back";
-            else if (a > Math.PI * 3/4 && a <= Math.PI * 5/4) dir = "left";
-            else dir = "front";
-            grid = sprite[dir] || sprite.front;
-            rotAngle = 0; // no extra rotation needed
-        } else {
-            // Single sprite - rotate the whole thing to face movement direction
-            grid = sprite.front;
-            // Rotate so the sprite faces the movement direction
-            // Subtract PI/2 because the sprite "faces down" by default (front view)
-            rotAngle = angle - Math.PI / 2;
-        }
+        // Select direction based on movement angle
+        var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+        var dir;
+        if (a > Math.PI * 7/4 || a <= Math.PI * 1/4) dir = "right";
+        else if (a > Math.PI * 1/4 && a <= Math.PI * 3/4) dir = "back";
+        else if (a > Math.PI * 3/4 && a <= Math.PI * 5/4) dir = "left";
+        else dir = "front";
+
+        var grid = sprite[dir] || sprite.front;
 
         var size = r * 2;
         var pixelSize = size / 16;
@@ -574,12 +650,8 @@ class Skins3DRenderer {
         ctx.fillStyle = "rgba(0,0,0,0.3)";
         ctx.fill();
 
-        ctx.save();
-        ctx.translate(x, y);
-        if (rotAngle !== 0) ctx.rotate(rotAngle);
-
-        var startX = -size / 2;
-        var startY = -size * topSquish / 2 - blockDepth;
+        var startX = x - size / 2;
+        var startY = y - size * topSquish / 2 - blockDepth;
 
         // Draw rows bottom-to-top for correct overlap
         for (var row = 15; row >= 0; row--) {
@@ -614,8 +686,6 @@ class Skins3DRenderer {
                 ctx.fillRect(px + pixelSize * 0.85, py, pixelSize * 0.15 + 0.3, pixelSize * topSquish + blockDepth);
             }
         }
-
-        ctx.restore();
     }
 
     lighten(color, amount) {

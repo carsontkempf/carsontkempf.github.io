@@ -101,20 +101,19 @@ class Renderer {
             ctx.fill();
             ctx.globalAlpha = 1;
 
-            // Pass 3: Hex grid texture on top (lines only, no fill)
-            if (cs >= 3) {
-                ctx.strokeStyle = this.darken(baseColor, 0.55);
-                ctx.lineWidth = 0.5;
-                ctx.globalAlpha = 0.3;
+            // Pass 3: Hex grid texture on top (visible hexagonal pattern)
+            if (cs >= 2) {
+                ctx.strokeStyle = this.darken(baseColor, 0.4);
+                ctx.lineWidth = Math.max(0.8, cs * 0.08);
+                ctx.globalAlpha = 0.5;
                 for (let gy = 0; gy < GRID_RES; gy++) {
                     for (let gx = 0; gx < GRID_RES; gx++) {
                         if (engine.grid[gy][gx] !== p.id) continue;
                         const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
                         const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
                         if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                        // Draw hex outline centered in cell
                         ctx.beginPath();
-                        this._hexTop(ctx, sx + cs / 2, sy + cs / 2, cs * 0.42);
+                        this._hexTop(ctx, sx + cs / 2, sy + cs / 2, cs * 0.48);
                         ctx.stroke();
                     }
                 }
