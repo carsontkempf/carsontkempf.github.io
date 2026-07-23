@@ -1,21 +1,9 @@
 /**
- * Skins3D - 4-directional pixel-art characters with rotation.
- * Each character has front/back/left/right 16x16 sprites.
- * Character facing direction updates based on movement angle.
- * Each pixel rendered as a tiny 3D block (top highlight, bottom shadow).
+ * Skins3D - Crossy Road style 3D characters.
+ * Each character is built from stacked 3D cuboids (boxes).
+ * Each box has: top face, front face, right face (isometric 3/4 view).
+ * Characters rotate by selecting different face visibility per angle.
  */
-
-// Polyfill roundRect
-if (typeof CanvasRenderingContext2D !== "undefined" && !CanvasRenderingContext2D.prototype.roundRect) {
-    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
-        var r = typeof radii === "number" ? radii : (radii && radii[0] || 0);
-        this.moveTo(x + r, y); this.lineTo(x + w - r, y);
-        this.quadraticCurveTo(x + w, y, x + w, y + r); this.lineTo(x + w, y + h - r);
-        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h); this.lineTo(x + r, y + h);
-        this.quadraticCurveTo(x, y + h, x, y + h - r); this.lineTo(x, y + r);
-        this.quadraticCurveTo(x, y, x + r, y); this.closePath();
-    };
-}
 
 const SKINS_3D = {
     droplet: { name: "Droplet", price: 0 },
@@ -33,726 +21,277 @@ const SKINS_3D = {
     ninja: { name: "Ninja", price: 500 },
 };
 
-// Color palettes shared across sprites
-// c/C = player color (mapped at render time)
-// Common: w=white, k=black, h=skin, p=pink, o=orange, g=green, b=blue, r=red, y=yellow
+// Character models: arrays of 3D boxes
+// Each box: [x, y, z, width, height, depth, color]
+// x,y,z are relative to center (0,0,0), normalized to -1..1 range
+// Colors: use string keys that map to actual colors per character
 
-// Each sprite has: colors{}, front[], back[], left[], right[] (16x16 grids)
-// "0" = transparent
+const MODELS = {};
 
-const SPRITES = {
-bunny: {
-    colors: { w:"#ffffff", W:"#e0e0e0", p:"#ffaacc", P:"#ff77aa", k:"#111111", n:"#ff8899" },
-    front: [
-        "0000ww0000ww0000",
-        "0000ww0000ww0000",
-        "0000wp0000pw0000",
-        "0000ww0000ww0000",
-        "000wwwwwwwwww000",
-        "00wwwwwwwwwwww00",
-        "00wwkwwwwwkwww00",
-        "00wwwwwnwwwwww00",
-        "00wwwwwwwwwwww00",
-        "000WWWWWWWWWW000",
-        "00WWWWWWWWWWWW00",
-        "00WWWWWWWWWWWW00",
-        "00WW00WWWW00WW00",
-        "00WW00WWWW00WW00",
-        "00pp00pppp00pp00",
-        "0000000000000000",
-    ],
-    back: [
-        "0000ww0000ww0000",
-        "0000ww0000ww0000",
-        "0000ww0000ww0000",
-        "0000ww0000ww0000",
-        "000wwwwwwwwww000",
-        "00wwwwwwwwwwww00",
-        "00wwwwwwwwwwww00",
-        "00wwwwwwwwwwww00",
-        "00wwwwwwwwwwww00",
-        "000WWWWWWWWWW000",
-        "00WWWWWWWWWWWW00",
-        "00WWWWWWWWWWWW00",
-        "00WW00WWWW00WW00",
-        "00WW00WWWW00WW00",
-        "00pp00pppp00pp00",
-        "0000000000000000",
-    ],
-    left: [
-        "00ww000000000000",
-        "00ww000000000000",
-        "00pw000000000000",
-        "00ww000000000000",
-        "00wwwwwwww000000",
-        "0wwwwwwwwww00000",
-        "0wkwwwwwwwww0000",
-        "0wwwnwwwwwww0000",
-        "0wwwwwwwwwww0000",
-        "00WWWWWWWWW00000",
-        "0WWWWWWWWWWW0000",
-        "0WWWWWWWWWWW0000",
-        "0WW00WWWW0000000",
-        "0WW00WWWW0000000",
-        "0pp00pppp0000000",
-        "0000000000000000",
-    ],
-    right: [
-        "00000000000ww000",
-        "00000000000ww000",
-        "00000000000wp000",
-        "00000000000ww000",
-        "000000wwwwwwww00",
-        "00000wwwwwwwww00",
-        "0000wwwwwwwwkw00",
-        "0000wwwwwwwnww00",
-        "0000wwwwwwwwww00",
-        "00000WWWWWWWW000",
-        "0000WWWWWWWWWW00",
-        "0000WWWWWWWWWW00",
-        "0000000WWWW00WW0",
-        "0000000WWWW00WW0",
-        "0000000pppp00pp0",
-        "0000000000000000",
-    ],
-},
-penguin: {
-    colors: { k:"#1a1a2e", K:"#333344", w:"#f5f5f5", o:"#ff8c00", e:"#ffffff", p:"#111111" },
-    front: [
-        "0000kkkkkk000000",
-        "000kkkkkkkkkk000",
-        "00kkekkkkkekk000",
-        "00kkpkkkkkpkk000",
-        "00kkkkkokkkkkk00",
-        "00kkkkkkkkkkkk00",
-        "0Kkkkwwwwwwkkk00",
-        "0Kkkkwwwwwwkkk00",
-        "0KKkkwwwwwwkKK00",
-        "00KKkwwwwwwKK000",
-        "000kkwwwwwwkk000",
-        "0000kkwwwwkk0000",
-        "0000kkkkkkkk0000",
-        "000oo00000oo0000",
-        "00oooo000oooo000",
-        "0000000000000000",
-    ],
-    back: [
-        "0000kkkkkk000000",
-        "000kkkkkkkkkk000",
-        "00kkkkkkkkkkkk00",
-        "00kkkkkkkkkkkk00",
-        "00kkkkkkkkkkkk00",
-        "00kkkkkkkkkkkk00",
-        "0KkkkkkkkkkkkK00",
-        "0KkkkkkkkkkkkK00",
-        "0KKkkkkkkkkKKK00",
-        "00KKkkkkkkKKK000",
-        "000kkkkkkkkkk000",
-        "0000kkkkkkkk0000",
-        "0000kkkkkkkk0000",
-        "000oo00000oo0000",
-        "00oooo000oooo000",
-        "0000000000000000",
-    ],
-    left: [
-        "000kkkkk00000000",
-        "00kkkkkkkk000000",
-        "0kkekkkkkk000000",
-        "0kkpkkokkkk00000",
-        "0kkkkkkkkkk00000",
-        "0kkkwwwwkkk00000",
-        "Kkkkwwwwkkk00000",
-        "KKkkwwwwkKK00000",
-        "0KKkwwwwKKK00000",
-        "00kkwwwwkkk00000",
-        "000kkwwkk0000000",
-        "000kkkkkk0000000",
-        "00oo00oo00000000",
-        "0oooo0oooo000000",
-        "0000000000000000",
-        "0000000000000000",
-    ],
-    right: [
-        "00000000kkkkk000",
-        "000000kkkkkkkk00",
-        "000000kkkkkekk00",
-        "00000kkkkokpkk00",
-        "00000kkkkkkkkkk0",
-        "00000kkkwwwwkkk0",
-        "00000kkkwwwwkkKK",
-        "00000KKkwwwwkkKK",
-        "00000KKKwwwwkKK0",
-        "00000kkkwwwwkk00",
-        "0000000kkwwkk000",
-        "0000000kkkkkk000",
-        "00000000oo00oo00",
-        "000000oooo0oooo0",
-        "0000000000000000",
-        "0000000000000000",
-    ],
-},
-fox: {
-    colors: { o:"#f07020", O:"#cc5500", w:"#ffffff", k:"#111111", t:"#ff9040", b:"#884400" },
-    front: [
-        "0o0000000000o000",
-        "0oo00000000oo000",
-        "00oooooooooo0000",
-        "00ookooookoo0000",
-        "00oooowwoooo0000",
-        "00oowwwwwooo0000",
-        "000ooknkooo00000",
-        "0000ooooooo00000",
-        "000OOOoOOOOO0000",
-        "00OOwwwwwwOO0000",
-        "00OOwwwwwwOO0000",
-        "000OOOOOOOO00000",
-        "000OO000OOO00000",
-        "000bb000bbb00000",
-        "0000000000ttttt0",
-        "00000000000twwt0",
-    ],
-    back: [
-        "0o0000000000o000",
-        "0oo00000000oo000",
-        "00oooooooooo0000",
-        "00oooooooooo0000",
-        "00oooooooooo0000",
-        "00oooooooooo0000",
-        "000ooooooooo0000",
-        "0000ooooooo00000",
-        "000OOOOOOOOOO000",
-        "00OOOOOOOOOOOO00",
-        "00OOOOOOOOOOOO00",
-        "000OOOOOOOOOO000",
-        "000OO0000OOO0000",
-        "000bb0000bbb0000",
-        "00000000ttttt000",
-        "000000000twwt000",
-    ],
-    left: [
-        "0o00000000000000",
-        "0ooo0000000000t0",
-        "00ooooooo00000t0",
-        "00okoooooo000tt0",
-        "00oowwooo000tww0",
-        "00ooknoo00000000",
-        "000ooooo00000000",
-        "00OOOoOO00000000",
-        "0OOwwwOOO0000000",
-        "0OOwwwOOO0000000",
-        "00OOOOOOO0000000",
-        "00OO00OO00000000",
-        "00bb00bb00000000",
-        "0000000000000000",
-        "0000000000000000",
-        "0000000000000000",
-    ],
-    right: [
-        "000000000000o000",
-        "t000000000ooo000",
-        "t00000ooooooo000",
-        "tt000ooooookoo00",
-        "wwt000ooowwoo000",
-        "00000000onkoo000",
-        "0000000oooooo000",
-        "00000000OOoOO000",
-        "0000000OOOwwwO00",
-        "0000000OOOwwwO00",
-        "0000000OOOOOOO00",
-        "000000000OO00OO0",
-        "000000000bb00bb0",
-        "0000000000000000",
-        "0000000000000000",
-        "0000000000000000",
-    ],
-},
-panda: {
-    colors: { w:"#ffffff", W:"#e8e8e8", k:"#222222", K:"#444444", p:"#111111", e:"#ffffff" },
-    front: [
-        "00kk00000000kk00",
-        "00kkk000000kkk00",
-        "00wwwwwwwwwwww00",
-        "0wwwkkwwwwkkwww0",
-        "0wwkpkwwwwkpkww0",
-        "0wwwkkwwwwkkwww0",
-        "0wwwwwwkkwwwwww0",
-        "00wwwwwwwwwwww00",
-        "0kWWWWWWWWWWWWk0",
-        "0kWWWWWWWWWWWWk0",
-        "00kWWWwwwwWWWk00",
-        "00kWWWwwwwWWWk00",
-        "000kWWWWWWWWk000",
-        "000kk0000kkk0000",
-        "000kk0000kkk0000",
-        "0000000000000000",
-    ],
-    back: [
-        "00kk00000000kk00",
-        "00kkk000000kkk00",
-        "00wwwwwwwwwwww00",
-        "0wwwwwwwwwwwwww0",
-        "0wwwwwwwwwwwwww0",
-        "0wwwwwwwwwwwwww0",
-        "0wwwwwwwwwwwwww0",
-        "00wwwwwwwwwwww00",
-        "0kWWWWWWWWWWWWk0",
-        "0kWWWWWWWWWWWWk0",
-        "00kWWWWWWWWWWk00",
-        "00kWWWWWWWWWWk00",
-        "000kWWWWWWWWk000",
-        "000kk0000kkk0000",
-        "000kk0000kkk0000",
-        "0000000000000000",
-    ],
-    left: [
-        "0kk0000000000000",
-        "0kkk0000000000k0",
-        "0wwwwwwwwww0000k",
-        "wwkkwwwwwwww000k",
-        "wkpkwwwwwwwW00k0",
-        "wwkkwwwwwWWW00k0",
-        "wwwwwkkwWWWW0k00",
-        "0wwwwwwWWWWWWk00",
-        "00wwwWWWWWWWk000",
-        "000WWWWWWWWW0000",
-        "0000WWwwWWW00000",
-        "0000kk00kk000000",
-        "0000kk00kk000000",
-        "0000000000000000",
-        "0000000000000000",
-        "0000000000000000",
-    ],
-    right: [
-        "00000000000kk000",
-        "k0000000000kkk00",
-        "k0000wwwwwwwwww0",
-        "k000wwwwwwwwkkww",
-        "0k00Wwwwwwwwkpkw",
-        "0k00WWWWwwwwkkww",
-        "00k0WWWWwkkwwwww",
-        "00kWWWWWWwwwwww0",
-        "000kWWWWWWWwww00",
-        "0000WWWWWWWWW000",
-        "00000WWwwWWW0000",
-        "000000kk00kk0000",
-        "000000kk00kk0000",
-        "0000000000000000",
-        "0000000000000000",
-        "0000000000000000",
-    ],
-},
-};
+MODELS.bunny = [
+    // Body
+    { x:0, y:0, z:0, w:0.5, h:0.5, d:0.4, c:"body" },
+    // Head
+    { x:0, y:-0.45, z:0.05, w:0.4, h:0.4, d:0.35, c:"head" },
+    // Left ear
+    { x:-0.12, y:-0.85, z:0, w:0.08, h:0.35, d:0.06, c:"head" },
+    // Right ear
+    { x:0.12, y:-0.85, z:0, w:0.08, h:0.35, d:0.06, c:"head" },
+    // Inner ears (pink)
+    { x:-0.12, y:-0.82, z:0.03, w:0.04, h:0.25, d:0.02, c:"accent" },
+    { x:0.12, y:-0.82, z:0.03, w:0.04, h:0.25, d:0.02, c:"accent" },
+    // Left leg
+    { x:-0.15, y:0.35, z:0, w:0.12, h:0.2, d:0.12, c:"body" },
+    // Right leg
+    { x:0.15, y:0.35, z:0, w:0.12, h:0.2, d:0.12, c:"body" },
+    // Feet
+    { x:-0.15, y:0.5, z:0.03, w:0.14, h:0.06, d:0.14, c:"accent" },
+    { x:0.15, y:0.5, z:0.03, w:0.14, h:0.06, d:0.14, c:"accent" },
+    // Tail (back)
+    { x:0, y:0.1, z:-0.25, w:0.1, h:0.1, d:0.1, c:"head" },
+    // Eyes
+    { x:-0.1, y:-0.42, z:0.18, w:0.06, h:0.06, d:0.02, c:"eye" },
+    { x:0.1, y:-0.42, z:0.18, w:0.06, h:0.06, d:0.02, c:"eye" },
+    // Nose
+    { x:0, y:-0.35, z:0.2, w:0.05, h:0.04, d:0.02, c:"nose" },
+];
 
-// Simpler sprites share front for all directions
-SPRITES.droplet = {
-    colors: { c:"#00d2ff", C:"#0099bb", w:"#ffffff", k:"#111111" },
-    front: [
-        "0000000cc0000000",
-        "000000cccc000000",
-        "00000cccccc00000",
-        "0000ccwccccc0000",
-        "000cccwccccccc00",
-        "00cccccccccccc00",
-        "0cccccccccccccc0",
-        "0ccccckcckccccc0",
-        "0cccccccccccccc0",
-        "00cccccccccccc00",
-        "00cccccccccccc00",
-        "000CcccccccCC000",
-        "0000CCccccCC0000",
-        "00000CCCCCC00000",
-        "0000000CC0000000",
-        "0000000000000000",
-    ],
-};
+MODELS.penguin = [
+    { x:0, y:0, z:0, w:0.45, h:0.55, d:0.4, c:"body" },
+    { x:0, y:0.05, z:0.1, w:0.3, h:0.4, d:0.1, c:"belly" },
+    { x:0, y:-0.4, z:0, w:0.35, h:0.35, d:0.3, c:"body" },
+    { x:-0.25, y:0, z:0, w:0.08, h:0.3, d:0.15, c:"body" },
+    { x:0.25, y:0, z:0, w:0.08, h:0.3, d:0.15, c:"body" },
+    { x:-0.12, y:0.4, z:0.05, w:0.14, h:0.06, d:0.14, c:"feet" },
+    { x:0.12, y:0.4, z:0.05, w:0.14, h:0.06, d:0.14, c:"feet" },
+    { x:-0.08, y:-0.4, z:0.15, w:0.06, h:0.06, d:0.02, c:"eye" },
+    { x:0.08, y:-0.4, z:0.15, w:0.06, h:0.06, d:0.02, c:"eye" },
+    { x:0, y:-0.3, z:0.18, w:0.08, h:0.05, d:0.04, c:"feet" },
+];
 
-SPRITES.owl = {
-    colors: { b:"#8B5E3C", B:"#6B3E1C", t:"#d4a574", o:"#ff8c00", w:"#f0dcc0", k:"#111111", y:"#ff9800" },
-    front: [
-        "00Bb000000bB0000",
-        "000bbbbbbbbbb000",
-        "00bbbbbbbbbbb000",
-        "0bbbwwbbbwwbbb00",
-        "0bbwowbbwowbbb00",
-        "0bbbwwbbbwwbbb00",
-        "0bbbbbbybbbbb000",
-        "00bbbbbbbbbb0000",
-        "00BBbbttttbbBB00",
-        "000Bbbttttbbb000",
-        "000Bbbttttbbb000",
-        "0000Bbbbbbbbb000",
-        "0000BBbbbbBB0000",
-        "00000yy00yy00000",
-        "00000yy00yy00000",
-        "0000000000000000",
-    ],
-};
-SPRITES.frog = {
-    colors: { g:"#2ecc71", G:"#27ae60", l:"#a8e6cf", w:"#ffffff", k:"#111111", d:"#1a7a40" },
-    front: [
-        "00ww00000ww00000",
-        "0wkww000wkww0000",
-        "00ww00000ww00000",
-        "00ggggggggg00000",
-        "0ggggggggggg0000",
-        "0ggggggggggggg00",
-        "0gggggddddggg000",
-        "00ggggggggggg000",
-        "000GGGGGGGGGG000",
-        "00GGGllllGGGG000",
-        "00GGGllllGGGGG00",
-        "00GGGllllGGGGG00",
-        "000GGGGGGGGGG000",
-        "000GG0000GG00000",
-        "00ggg000ggg00000",
-        "0000000000000000",
-    ],
-};
-SPRITES.chick = {
-    colors: { y:"#ffd700", Y:"#f0c000", o:"#ff6600", k:"#111111", w:"#ffffff" },
-    front: [
-        "000000YY00000000",
-        "00000YYY00000000",
-        "0000yyyyyy000000",
-        "000yyyyyyyy00000",
-        "000yykyyyyky0000",
-        "000yyyyyyyyy0000",
-        "0000yyooyyyy0000",
-        "0000yyyyyyyy0000",
-        "000YYyyyyyYY0000",
-        "00YYYYyyyyYYY000",
-        "00YYYYyyyyYYY000",
-        "000YYYyyyyYYY000",
-        "0000YYyyyyYY0000",
-        "00000oo00oo00000",
-        "0000ooo0ooo00000",
-        "0000000000000000",
-    ],
-};
-SPRITES.skateboard = {
-    colors: { h:"#fdd9b5", c:"#333333", s:"#00d2ff", S:"#0099bb", b:"#8B4513", k:"#444444", j:"#3366cc" },
-    front: [
-        "0000ccccc0000000",
-        "000hhcccchh00000",
-        "000hhhhhhhh00000",
-        "000hhkhhkhh00000",
-        "000hhhhhhhh00000",
-        "000ssssssss00000",
-        "00ssssssssss0000",
-        "00Ssssssssss0000",
-        "000sssssssss0000",
-        "000jjjjjjjjj0000",
-        "000jjjjjjjjj0000",
-        "000jj000jjjj0000",
-        "000kk000kkk00000",
-        "00bbbbbbbbbbb000",
-        "00k00k000k00k000",
-        "0000000000000000",
-    ],
-};
-SPRITES.skis = {
-    colors: { r:"#e74c3c", h:"#fdd9b5", o:"#ffa500", w:"#ffffff", k:"#222222", B:"#1e90ff", g:"#888888" },
-    front: [
-        "000000ww00000000",
-        "0000rrrrrr000000",
-        "000rrooorr000000",
-        "000hhhhhhhh00000",
-        "000rrrrrrrr00000",
-        "00rrrrrrrrrr0000",
-        "0grrrrrrrrrrg000",
-        "0g0rrrrrrrr0g000",
-        "000kkkkkkkk00000",
-        "000kk000kkk00000",
-        "000kk000kkk00000",
-        "00BBB00BBBB00000",
-        "00BBB00BBBB00000",
-        "00BBB00BBBB00000",
-        "00BBB00BBBB00000",
-        "0000000000000000",
-    ],
-};
-SPRITES.hoverboard = {
-    colors: { d:"#2c3e50", D:"#1a252f", c:"#00d2ff", C:"#0099bb", p:"#7b2ff7", g:"#00ff88", k:"#111111" },
-    front: [
-        "0000DDDDDDdd0000",
-        "000DDcccccDDd000",
-        "000DDDDDDDDDd000",
-        "000DDDDDDDDDD000",
-        "000DDkDDkDDDD000",
-        "0000DDDDDDDD0000",
-        "000ddddddddddd00",
-        "00dddddcdddddd00",
-        "000ddddddddddd00",
-        "000dd00000dd0000",
-        "000kk00000kk0000",
-        "0000kk000kk00000",
-        "0pppccccccccpp00",
-        "0pCCccccccccCp00",
-        "00gggg00gggggg00",
-        "0000000000000000",
-    ],
-};
-SPRITES.astronaut = {
-    colors: { w:"#eeeeee", W:"#cccccc", g:"#888888", G:"#666666", b:"#2a4a8a", B:"#1a1a4e", v:"#4a90d9", s:"#aaaaaa" },
-    front: [
-        "0000wwwwww000000",
-        "000wwwwwwwww0000",
-        "000wBBBBBBwww000",
-        "000wBvvvvBwww000",
-        "000wBvvvvBwww000",
-        "000wwBBBBwwww000",
-        "0000wwwwwwww0000",
-        "00gwwwwwwwwwwg00",
-        "00gwwwwwwwwwwg00",
-        "00sswwwwwwwwss00",
-        "000WWWWWWWWWW000",
-        "000WWWWWWWWWW000",
-        "000WW000WWWWW000",
-        "000gg000ggggg000",
-        "000ggg00ggggg000",
-        "0000000000000000",
-    ],
-};
-SPRITES.ninja = {
-    colors: { d:"#2f3542", D:"#1a1a2e", r:"#ff4757", w:"#ffffff", s:"#999999", k:"#111111", g:"#c0a000" },
-    front: [
-        "00000000s0000000",
-        "000000s0s0000000",
-        "0000ddddddd00000",
-        "000ddrrrrrdd0000",
-        "000ddwddwddd0000",
-        "000dddddddddrrr0",
-        "0000ddddddddd000",
-        "000DDDDsDDDDD000",
-        "00DDDDDDDDDDD000",
-        "00DDgggggggDD000",
-        "000DDDDDDDDD0000",
-        "000DDDDDDDDD0000",
-        "000DD000DD000000",
-        "000DD000DD000000",
-        "000kk000kk000000",
-        "0000000000000000",
-    ],
-};
+MODELS.fox = [
+    { x:0, y:0, z:0, w:0.45, h:0.5, d:0.35, c:"body" },
+    { x:0, y:0.1, z:0.08, w:0.25, h:0.25, d:0.1, c:"belly" },
+    { x:0, y:-0.4, z:0.02, w:0.35, h:0.35, d:0.3, c:"body" },
+    { x:-0.18, y:-0.62, z:0, w:0.1, h:0.15, d:0.06, c:"body" },
+    { x:0.18, y:-0.62, z:0, w:0.1, h:0.15, d:0.06, c:"body" },
+    { x:0, y:-0.32, z:0.16, w:0.12, h:0.08, d:0.06, c:"belly" },
+    { x:-0.12, y:0.35, z:0, w:0.1, h:0.2, d:0.1, c:"dark" },
+    { x:0.12, y:0.35, z:0, w:0.1, h:0.2, d:0.1, c:"dark" },
+    { x:0.3, y:0.15, z:-0.15, w:0.12, h:0.12, d:0.3, c:"body" },
+    { x:0.38, y:0.25, z:-0.15, w:0.08, h:0.08, d:0.08, c:"belly" },
+    { x:-0.08, y:-0.4, z:0.16, w:0.05, h:0.05, d:0.02, c:"eye" },
+    { x:0.08, y:-0.4, z:0.16, w:0.05, h:0.05, d:0.02, c:"eye" },
+    { x:0, y:-0.3, z:0.18, w:0.04, h:0.04, d:0.02, c:"dark" },
+];
 
+MODELS.panda = [
+    { x:0, y:0, z:0, w:0.5, h:0.55, d:0.4, c:"body" },
+    { x:0, y:0, z:0, w:0.48, h:0.53, d:0.38, c:"belly" },
+    { x:-0.22, y:-0.05, z:0, w:0.12, h:0.28, d:0.12, c:"dark" },
+    { x:0.22, y:-0.05, z:0, w:0.12, h:0.28, d:0.12, c:"dark" },
+    { x:-0.12, y:0.35, z:0, w:0.12, h:0.18, d:0.12, c:"dark" },
+    { x:0.12, y:0.35, z:0, w:0.12, h:0.18, d:0.12, c:"dark" },
+    { x:0, y:-0.4, z:0, w:0.4, h:0.38, d:0.35, c:"belly" },
+    { x:-0.18, y:-0.55, z:0, w:0.1, h:0.1, d:0.1, c:"dark" },
+    { x:0.18, y:-0.55, z:0, w:0.1, h:0.1, d:0.1, c:"dark" },
+    { x:-0.1, y:-0.42, z:0.14, w:0.1, h:0.1, d:0.04, c:"dark" },
+    { x:0.1, y:-0.42, z:0.14, w:0.1, h:0.1, d:0.04, c:"dark" },
+    { x:-0.1, y:-0.42, z:0.16, w:0.04, h:0.04, d:0.02, c:"eye" },
+    { x:0.1, y:-0.42, z:0.16, w:0.04, h:0.04, d:0.02, c:"eye" },
+    { x:0, y:-0.32, z:0.18, w:0.05, h:0.04, d:0.02, c:"dark" },
+];
+
+MODELS.owl = [
+    { x:0, y:0, z:0, w:0.4, h:0.5, d:0.35, c:"body" },
+    { x:0, y:0.15, z:0.05, w:0.25, h:0.25, d:0.1, c:"belly" },
+    { x:-0.22, y:0, z:0, w:0.1, h:0.35, d:0.12, c:"dark" },
+    { x:0.22, y:0, z:0, w:0.1, h:0.35, d:0.12, c:"dark" },
+    { x:0, y:-0.4, z:0, w:0.38, h:0.35, d:0.32, c:"body" },
+    { x:-0.15, y:-0.6, z:0, w:0.08, h:0.12, d:0.06, c:"dark" },
+    { x:0.15, y:-0.6, z:0, w:0.08, h:0.12, d:0.06, c:"dark" },
+    { x:-0.1, y:-0.4, z:0.14, w:0.1, h:0.1, d:0.06, c:"accent" },
+    { x:0.1, y:-0.4, z:0.14, w:0.1, h:0.1, d:0.06, c:"accent" },
+    { x:-0.1, y:-0.4, z:0.17, w:0.05, h:0.05, d:0.02, c:"eye" },
+    { x:0.1, y:-0.4, z:0.17, w:0.05, h:0.05, d:0.02, c:"eye" },
+    { x:0, y:-0.3, z:0.18, w:0.06, h:0.06, d:0.04, c:"feet" },
+    { x:-0.1, y:0.4, z:0.05, w:0.08, h:0.06, d:0.1, c:"feet" },
+    { x:0.1, y:0.4, z:0.05, w:0.08, h:0.06, d:0.1, c:"feet" },
+];
+
+MODELS.frog = [
+    { x:0, y:0, z:0, w:0.5, h:0.35, d:0.4, c:"body" },
+    { x:0, y:0.05, z:0.08, w:0.35, h:0.2, d:0.1, c:"belly" },
+    { x:0, y:-0.3, z:0, w:0.45, h:0.3, d:0.35, c:"body" },
+    { x:-0.2, y:-0.38, z:0.1, w:0.1, h:0.1, d:0.1, c:"eye_w" },
+    { x:0.2, y:-0.38, z:0.1, w:0.1, h:0.1, d:0.1, c:"eye_w" },
+    { x:-0.2, y:-0.38, z:0.15, w:0.05, h:0.05, d:0.02, c:"eye" },
+    { x:0.2, y:-0.38, z:0.15, w:0.05, h:0.05, d:0.02, c:"eye" },
+    { x:-0.25, y:0.2, z:0, w:0.14, h:0.18, d:0.14, c:"body" },
+    { x:0.25, y:0.2, z:0, w:0.14, h:0.18, d:0.14, c:"body" },
+    { x:-0.15, y:0.35, z:0.04, w:0.12, h:0.05, d:0.14, c:"body" },
+    { x:0.15, y:0.35, z:0.04, w:0.12, h:0.05, d:0.14, c:"body" },
+];
+
+MODELS.chick = [
+    { x:0, y:0, z:0, w:0.4, h:0.4, d:0.35, c:"body" },
+    { x:0, y:-0.35, z:0, w:0.35, h:0.32, d:0.3, c:"body" },
+    { x:-0.2, y:0, z:0, w:0.08, h:0.18, d:0.1, c:"body" },
+    { x:0.2, y:0, z:0, w:0.08, h:0.18, d:0.1, c:"body" },
+    { x:0, y:-0.55, z:0, w:0.04, h:0.12, d:0.03, c:"accent" },
+    { x:-0.06, y:-0.52, z:0, w:0.03, h:0.08, d:0.03, c:"accent" },
+    { x:0.06, y:-0.52, z:0, w:0.03, h:0.08, d:0.03, c:"accent" },
+    { x:-0.08, y:-0.35, z:0.15, w:0.05, h:0.05, d:0.02, c:"eye" },
+    { x:0.08, y:-0.35, z:0.15, w:0.05, h:0.05, d:0.02, c:"eye" },
+    { x:0, y:-0.25, z:0.18, w:0.06, h:0.05, d:0.04, c:"feet" },
+    { x:-0.08, y:0.3, z:0.03, w:0.08, h:0.05, d:0.1, c:"feet" },
+    { x:0.08, y:0.3, z:0.03, w:0.08, h:0.05, d:0.1, c:"feet" },
+];
+
+MODELS.droplet = [
+    { x:0, y:0, z:0, w:0.45, h:0.5, d:0.4, c:"body" },
+    { x:0, y:-0.35, z:0, w:0.3, h:0.3, d:0.25, c:"body" },
+    { x:0, y:-0.55, z:0, w:0.15, h:0.15, d:0.12, c:"body" },
+    { x:-0.08, y:-0.1, z:0.2, w:0.05, h:0.06, d:0.02, c:"eye" },
+    { x:0.08, y:-0.1, z:0.2, w:0.05, h:0.06, d:0.02, c:"eye" },
+];
+
+MODELS.astronaut = MODELS.droplet;
+MODELS.ninja = MODELS.fox;
+MODELS.skateboard = MODELS.bunny;
+MODELS.skis = MODELS.penguin;
+MODELS.hoverboard = MODELS.chick;
+
+// Color palettes per skin
+const PALETTES = {
+    bunny:   { body:"#ffffff", head:"#ffffff", belly:"#ffffff", accent:"#ffaacc", dark:"#dddddd", eye:"#111111", nose:"#ff8899", eye_w:"#ffffff", feet:"#ff9800" },
+    penguin: { body:"#1a1a2e", head:"#1a1a2e", belly:"#f5f5f5", accent:"#ffaacc", dark:"#333344", eye:"#ffffff", nose:"#111111", eye_w:"#ffffff", feet:"#ff8c00" },
+    fox:     { body:"#f07020", head:"#f07020", belly:"#ffffff", accent:"#ffaacc", dark:"#222222", eye:"#111111", nose:"#222222", eye_w:"#ffffff", feet:"#ff8c00" },
+    panda:   { body:"#ffffff", head:"#ffffff", belly:"#ffffff", accent:"#ffaacc", dark:"#222222", eye:"#ffffff", nose:"#333333", eye_w:"#ffffff", feet:"#ff8c00" },
+    owl:     { body:"#8B5E3C", head:"#8B5E3C", belly:"#d4a574", accent:"#f0dcc0", dark:"#6B3E1C", eye:"#111111", nose:"#111111", eye_w:"#ffffff", feet:"#ff9800" },
+    frog:    { body:"#2ecc71", head:"#2ecc71", belly:"#a8e6cf", accent:"#ffaacc", dark:"#1a7a40", eye:"#111111", nose:"#111111", eye_w:"#ffffff", feet:"#ff9800" },
+    chick:   { body:"#ffd700", head:"#ffd700", belly:"#ffd700", accent:"#f0a000", dark:"#cc9900", eye:"#111111", nose:"#111111", eye_w:"#ffffff", feet:"#ff6600" },
+    droplet: { body:"#00d2ff", head:"#00d2ff", belly:"#00d2ff", accent:"#0099bb", dark:"#007799", eye:"#111111", nose:"#111111", eye_w:"#ffffff", feet:"#ff9800" },
+    astronaut:{ body:"#eeeeee", head:"#eeeeee", belly:"#eeeeee", accent:"#2a4a8a", dark:"#888888", eye:"#111111", nose:"#111111", eye_w:"#ffffff", feet:"#666666" },
+    ninja:   { body:"#2f3542", head:"#2f3542", belly:"#2f3542", accent:"#ff4757", dark:"#111111", eye:"#ffffff", nose:"#111111", eye_w:"#ffffff", feet:"#222222" },
+    skateboard:{ body:"#00d2ff", head:"#fdd9b5", belly:"#00d2ff", accent:"#8B4513", dark:"#333333", eye:"#111111", nose:"#111111", eye_w:"#ffffff", feet:"#444444" },
+    skis:    { body:"#e74c3c", head:"#fdd9b5", belly:"#e74c3c", accent:"#1e90ff", dark:"#222222", eye:"#111111", nose:"#111111", eye_w:"#ffffff", feet:"#444444" },
+    hoverboard:{ body:"#2c3e50", head:"#2c3e50", belly:"#2c3e50", accent:"#00d2ff", dark:"#1a252f", eye:"#00d2ff", nose:"#111111", eye_w:"#ffffff", feet:"#7b2ff7" },
+};
 
 class Skins3DRenderer {
-    constructor() {
-        // Generate missing directions for all sprites
-        for (var key in SPRITES) {
-            var s = SPRITES[key];
-            if (!s.back) s.back = this._makeBack(s.front, s.colors);
-            if (!s.left) s.left = this._makeLeft(s.front);
-            if (!s.right) s.right = this._makeRight(s.front);
-        }
-
-        // Pre-generate all 32 frames for each sprite
-        this._frames = {};
-        for (var key in SPRITES) {
-            this._frames[key] = this._generate32Frames(SPRITES[key]);
-        }
-    }
-
-    /**
-     * Generate 32 rotational frames by interpolating between 4 base sprites.
-     * Frames 0-7: right to back (moving clockwise from right toward down)
-     * Frames 8-15: back to left
-     * Frames 16-23: left to front
-     * Frames 24-31: front to right
-     */
-    _generate32Frames(sprite) {
-        var dirs = ["right", "back", "left", "front"];
-        var frames = [];
-        for (var q = 0; q < 4; q++) {
-            var fromDir = dirs[q];
-            var toDir = dirs[(q + 1) % 4];
-            var fromGrid = sprite[fromDir];
-            var toGrid = sprite[toDir];
-            for (var step = 0; step < 8; step++) {
-                var t = step / 8; // 0 to 0.875
-                frames.push(this._blendGrids(fromGrid, toGrid, t));
-            }
-        }
-        return frames;
-    }
-
-    /**
-     * Blend two 16x16 grids by shifting pixels.
-     * At t=0, shows fromGrid. At t=1, shows toGrid.
-     * Intermediate: shift columns from fromGrid and overlay toGrid pixels.
-     */
-    _blendGrids(fromGrid, toGrid, t) {
-        var shift = Math.round(t * 3); // 0-2 pixel shift
-        var result = [];
-        for (var row = 0; row < 16; row++) {
-            var line = "";
-            for (var col = 0; col < 16; col++) {
-                // Blend: use toGrid for pixels that "appear" as we turn
-                var fromCol = col + shift;
-                var toCol = col - (3 - shift);
-                var ch = "0";
-                if (t < 0.5) {
-                    // Mostly from
-                    if (fromCol >= 0 && fromCol < 16) ch = fromGrid[row][fromCol];
-                    if (ch === "0" && toCol >= 0 && toCol < 16) ch = toGrid[row][toCol];
-                } else {
-                    // Mostly to
-                    if (toCol >= 0 && toCol < 16) ch = toGrid[row][toCol];
-                    if (ch === "0" && fromCol >= 0 && fromCol < 16) ch = fromGrid[row][fromCol];
-                }
-                if (!ch) ch = "0";
-                line += ch;
-            }
-            result.push(line);
-        }
-        return result;
-    }
-
-    _makeBack(front, colors) {
-        var bodyChar = this._findBodyChar(front);
-        var faceChars = ["k", "p", "e", "n"];
-        var back = [];
-        for (var i = 0; i < front.length; i++) {
-            var row = "";
-            for (var j = 0; j < front[i].length; j++) {
-                var ch = front[i][j];
-                if (faceChars.indexOf(ch) >= 0 && i < 10) row += bodyChar;
-                else row += ch;
-            }
-            back.push(row);
-        }
-        return back;
-    }
-
-    _makeLeft(front) {
-        var left = [];
-        for (var i = 0; i < front.length; i++) {
-            var row = "";
-            for (var j = 0; j < 16; j++) {
-                var srcJ = j + 2;
-                row += (srcJ < 16) ? front[i][srcJ] : "0";
-            }
-            left.push(row);
-        }
-        return left;
-    }
-
-    _makeRight(front) {
-        var right = [];
-        for (var i = 0; i < front.length; i++) {
-            var row = "";
-            for (var j = 0; j < 16; j++) {
-                var srcJ = j - 2;
-                row += (srcJ >= 0) ? front[i][srcJ] : "0";
-            }
-            right.push(row);
-        }
-        return right;
-    }
-
-    _findBodyChar(grid) {
-        var counts = {};
-        for (var i = 0; i < grid.length; i++) {
-            for (var j = 0; j < grid[i].length; j++) {
-                var ch = grid[i][j];
-                if (ch !== "0") counts[ch] = (counts[ch] || 0) + 1;
-            }
-        }
-        var best = "0", bestCount = 0;
-        for (var c in counts) {
-            if (counts[c] > bestCount && c !== "k" && c !== "p" && c !== "e") {
-                best = c; bestCount = counts[c];
-            }
-        }
-        return best;
-    }
+    constructor() {}
 
     draw(ctx, x, y, r, angle, skinId, playerColor) {
-        var frames = this._frames[skinId] || this._frames.droplet;
-        var sprite = SPRITES[skinId] || SPRITES.droplet;
+        var model = MODELS[skinId] || MODELS.droplet;
+        var palette = PALETTES[skinId] || PALETTES.droplet;
 
-        // Map angle to frame index (0-31)
-        // angle=0 is right. Our frames: 0=right, 8=back(down), 16=left, 24=front(up)
+        // Determine which faces are visible based on angle
         var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-        var frameIdx = Math.floor(a / (Math.PI * 2) * 32) % 32;
-        var grid = frames[frameIdx];
-
-        var size = r * 2;
-        var pixelSize = size / 16;
-        var blockDepth = pixelSize * 1.5; // THICK 3D depth per voxel
-        var topSquish = 0.5; // more squished top = more visible sides
+        var cosA = Math.cos(a);
+        var sinA = Math.sin(a);
 
         // Ground shadow
         ctx.beginPath();
-        ctx.ellipse(x, y + r * 0.7, r * 0.55, r * 0.18, 0, 0, Math.PI * 2);
+        ctx.ellipse(x, y + r * 0.8, r * 0.5, r * 0.15, 0, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(0,0,0,0.3)";
         ctx.fill();
 
-        var startX = x - size / 2;
-        var startY = y - size * topSquish / 2 - blockDepth;
+        // Sort boxes by depth (back to front based on angle)
+        var sorted = model.slice().sort(function(a2, b2) {
+            var da = -a2.x * sinA + a2.z * cosA;
+            var db = -b2.x * sinA + b2.z * cosA;
+            return da - db;
+        });
 
-        for (var row = 15; row >= 0; row--) {
-            var line = grid[row];
-            if (!line) continue;
-            for (var col = 0; col < 16; col++) {
-                var ch = line[col];
-                if (ch === "0" || !ch) continue;
+        for (var i = 0; i < sorted.length; i++) {
+            var box = sorted[i];
+            var color = palette[box.c] || playerColor;
+            if (box.c === "body" && skinId === "droplet") color = playerColor;
 
-                var color = sprite.colors[ch];
-                if (!color) continue;
-                if (ch === "c") color = playerColor;
-                if (ch === "C") color = this.darken(playerColor, 0.7);
+            // Rotate box position based on angle
+            var rx = box.x * cosA + box.z * sinA;
+            var rz = -box.x * sinA + box.z * cosA;
 
-                var px = startX + col * pixelSize;
-                var py = startY + row * pixelSize * topSquish;
+            // Project to screen (isometric-ish)
+            var screenX = x + rx * r;
+            var screenY = y + box.y * r - rz * r * 0.2;
 
-                // TOP FACE
-                ctx.fillStyle = color;
-                ctx.fillRect(px, py, pixelSize + 0.3, pixelSize * topSquish + 0.3);
+            var bw = box.w * r;
+            var bh = box.h * r;
+            var bd = box.d * r * 0.4; // depth shown as vertical offset
 
-                // TOP HIGHLIGHT
-                ctx.fillStyle = this.lighten(color, 0.2);
-                ctx.fillRect(px, py, pixelSize + 0.3, pixelSize * topSquish * 0.2);
-
-                // FRONT FACE (thick depth below each pixel)
-                ctx.fillStyle = this.darken(color, 0.5);
-                ctx.fillRect(px, py + pixelSize * topSquish, pixelSize + 0.3, blockDepth);
-
-                // RIGHT FACE (thick side on each pixel)
-                ctx.fillStyle = this.darken(color, 0.65);
-                ctx.fillRect(px + pixelSize * 0.7, py, pixelSize * 0.3 + 0.3, pixelSize * topSquish + blockDepth);
-            }
+            this._drawBox(ctx, screenX, screenY, bw, bh, bd, color, cosA, sinA);
         }
     }
 
-    lighten(color, amount) {
+    _drawBox(ctx, x, y, w, h, d, color, cosA, sinA) {
+        var topColor = color;
+        var frontColor = this._darken(color, 0.6);
+        var sideColor = this._darken(color, 0.75);
+        var highlightColor = this._lighten(color, 0.15);
+
+        // TOP FACE (parallelogram - always visible from above)
+        ctx.beginPath();
+        ctx.moveTo(x - w, y - h);
+        ctx.lineTo(x + w, y - h);
+        ctx.lineTo(x + w + d * 0.3, y - h - d * 0.5);
+        ctx.lineTo(x - w + d * 0.3, y - h - d * 0.5);
+        ctx.closePath();
+        ctx.fillStyle = highlightColor;
+        ctx.fill();
+
+        // FRONT FACE (rectangle)
+        ctx.beginPath();
+        ctx.moveTo(x - w, y - h);
+        ctx.lineTo(x + w, y - h);
+        ctx.lineTo(x + w, y + h);
+        ctx.lineTo(x - w, y + h);
+        ctx.closePath();
+        ctx.fillStyle = topColor;
+        ctx.fill();
+
+        // RIGHT SIDE FACE (parallelogram)
+        ctx.beginPath();
+        ctx.moveTo(x + w, y - h);
+        ctx.lineTo(x + w + d * 0.3, y - h - d * 0.5);
+        ctx.lineTo(x + w + d * 0.3, y + h - d * 0.5);
+        ctx.lineTo(x + w, y + h);
+        ctx.closePath();
+        ctx.fillStyle = sideColor;
+        ctx.fill();
+
+        // BOTTOM FACE (front-facing depth)
+        ctx.beginPath();
+        ctx.moveTo(x - w, y + h);
+        ctx.lineTo(x + w, y + h);
+        ctx.lineTo(x + w + d * 0.3, y + h - d * 0.5);
+        ctx.lineTo(x - w + d * 0.3, y + h - d * 0.5);
+        ctx.closePath();
+        ctx.fillStyle = frontColor;
+        ctx.fill();
+    }
+
+    _lighten(color, amount) {
         var r, g, b;
         if (color[0] === "#") {
             r = parseInt(color.slice(1, 3), 16);
             g = parseInt(color.slice(3, 5), 16);
             b = parseInt(color.slice(5, 7), 16);
-        } else {
-            var m = color.match(/\d+/g);
-            if (!m) return color;
-            r = parseInt(m[0]); g = parseInt(m[1]); b = parseInt(m[2]);
-        }
+        } else { return color; }
         r = Math.min(255, r + Math.floor(255 * amount));
         g = Math.min(255, g + Math.floor(255 * amount));
         b = Math.min(255, b + Math.floor(255 * amount));
         return "rgb(" + r + "," + g + "," + b + ")";
     }
 
-    darken(color, factor) {
+    _darken(color, factor) {
         var r, g, b;
         if (color[0] === "#") {
             r = parseInt(color.slice(1, 3), 16);
             g = parseInt(color.slice(3, 5), 16);
             b = parseInt(color.slice(5, 7), 16);
-        } else {
-            var m = color.match(/\d+/g);
-            if (!m) return color;
-            r = parseInt(m[0]); g = parseInt(m[1]); b = parseInt(m[2]);
-        }
+        } else { return color; }
         return "rgb(" + Math.floor(r * factor) + "," + Math.floor(g * factor) + "," + Math.floor(b * factor) + ")";
     }
 }
