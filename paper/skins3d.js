@@ -545,9 +545,7 @@ class Skins3DRenderer {
      * Get facing direction from angle: front/back/left/right
      */
     getDirection(angle) {
-        // Normalize to 0-2PI
         var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-        // right=0, down=PI/2, left=PI, up=3PI/2
         if (a > Math.PI * 7 / 4 || a <= Math.PI / 4) return "right";
         if (a > Math.PI / 4 && a <= Math.PI * 3 / 4) return "front";
         if (a > Math.PI * 3 / 4 && a <= Math.PI * 5 / 4) return "left";
@@ -560,18 +558,19 @@ class Skins3DRenderer {
         var grid = sprite[dir] || sprite.front;
         var size = r * 2;
         var pixelSize = size / 16;
-        var depth = pixelSize * 0.4; // 3D block height
+        var blockDepth = pixelSize * 0.5; // how tall each voxel block is
+        var topSquish = 0.6; // Y compression for top face (isometric)
 
         // Ground shadow
         ctx.beginPath();
-        ctx.ellipse(x, y + r * 0.9, r * 0.5, r * 0.12, 0, 0, Math.PI * 2);
+        ctx.ellipse(x, y + r * 0.7, r * 0.55, r * 0.18, 0, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(0,0,0,0.3)";
         ctx.fill();
 
         var startX = x - size / 2;
-        var startY = y - size / 2 - depth;
+        var startY = y - size * topSquish / 2 - blockDepth;
 
-        // Draw back to front (bottom rows first for proper overlap)
+        // Draw from bottom-to-top row so upper rows overlap lower (correct depth)
         for (var row = 15; row >= 0; row--) {
             var line = grid[row];
             if (!line) continue;
@@ -581,29 +580,51 @@ class Skins3DRenderer {
 
                 var color = sprite.colors[ch];
                 if (!color) continue;
-
-                // Map c/C to player color
                 if (ch === "c") color = playerColor;
                 if (ch === "C") color = this.darken(playerColor, 0.7);
 
                 var px = startX + col * pixelSize;
-                var py = startY + row * pixelSize;
+                var py = startY + row * pixelSize * topSquish;
 
-                // 3D block: front face (side visible from below)
-                ctx.fillStyle = this.darken(color, 0.6);
-                ctx.fillRect(px, py + pixelSize, pixelSize + 0.3, depth);
-
-                // Top face (main visible pixel)
+                // TOP FACE (always visible - isometric rhombus)
                 ctx.fillStyle = color;
-                ctx.fillRect(px, py, pixelSize + 0.3, pixelSize + 0.3);
+                ctx.beginPath();
+                ctx.moveTo(px, py);
+                ctx.lineTo(px + pixelSize, py);
+                ctx.lineTo(px + pixelSize, py + pixelSize * topSquish);
+                ctx.lineTo(px, py + pixelSize * topSquish);
+                ctx.closePath();
+                ctx.fill();
 
-                // Top highlight strip
-                ctx.fillStyle = this.lighten(color, 0.25);
-                ctx.fillRect(px, py, pixelSize + 0.3, pixelSize * 0.25);
+                // TOP HIGHLIGHT
+                ctx.fillStyle = this.lighten(color, 0.2);
+                ctx.beginPath();
+                ctx.moveTo(px, py);
+                ctx.lineTo(px + pixelSize, py);
+                ctx.lineTo(px + pixelSize, py + pixelSize * topSquish * 0.3);
+                ctx.lineTo(px, py + pixelSize * topSquish * 0.3);
+                ctx.closePath();
+                ctx.fill();
 
-                // Left highlight strip (light source from top-left)
-                ctx.fillStyle = this.lighten(color, 0.12);
-                ctx.fillRect(px, py, pixelSize * 0.2, pixelSize + 0.3);
+                // FRONT FACE (bottom side - always visible from 3/4 view)
+                ctx.fillStyle = this.darken(color, 0.6);
+                ctx.beginPath();
+                ctx.moveTo(px, py + pixelSize * topSquish);
+                ctx.lineTo(px + pixelSize, py + pixelSize * topSquish);
+                ctx.lineTo(px + pixelSize, py + pixelSize * topSquish + blockDepth);
+                ctx.lineTo(px, py + pixelSize * topSquish + blockDepth);
+                ctx.closePath();
+                ctx.fill();
+
+                // RIGHT FACE (visible when looking from slight right angle)
+                ctx.fillStyle = this.darken(color, 0.75);
+                ctx.beginPath();
+                ctx.moveTo(px + pixelSize, py);
+                ctx.lineTo(px + pixelSize, py + pixelSize * topSquish + blockDepth);
+                ctx.lineTo(px + pixelSize - pixelSize * 0.15, py + pixelSize * topSquish + blockDepth);
+                ctx.lineTo(px + pixelSize - pixelSize * 0.15, py);
+                ctx.closePath();
+                ctx.fill();
             }
         }
     }
