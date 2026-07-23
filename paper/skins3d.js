@@ -1,9 +1,8 @@
 /**
- * Skins3D - Pixel-art characters drawn as scaled sprite grids.
- * Each character is a 16x16 pixel art grid rendered with 3D depth:
- * - Each pixel is drawn as a small raised block (isometric style)
- * - Colors include shading to simulate depth
- * - Characters look like tiny 3D voxel figures
+ * Skins3D - 4-directional pixel-art characters with rotation.
+ * Each character has front/back/left/right 16x16 sprites.
+ * Character facing direction updates based on movement angle.
+ * Each pixel rendered as a tiny 3D block (top highlight, bottom shadow).
  */
 
 // Polyfill roundRect
@@ -34,83 +33,242 @@ const SKINS_3D = {
     ninja: { name: "Ninja", price: 500 },
 };
 
-// Pixel art sprites: 16x16 grids
-// Each cell is a color key: 0=transparent, letters=colors defined per sprite
-const SPRITES = {};
+// Color palettes shared across sprites
+// c/C = player color (mapped at render time)
+// Common: w=white, k=black, h=skin, p=pink, o=orange, g=green, b=blue, r=red, y=yellow
 
-// --- BUNNY ---
-SPRITES.bunny = {
-    colors: { w:"#ffffff", W:"#e8e8e8", p:"#ffb8cc", P:"#ff88aa", k:"#111111", n:"#ffa0b0", b:"#fdd9b5" },
-    grid: [
+// Each sprite has: colors{}, front[], back[], left[], right[] (16x16 grids)
+// "0" = transparent
+
+const SPRITES = {
+bunny: {
+    colors: { w:"#ffffff", W:"#e0e0e0", p:"#ffaacc", P:"#ff77aa", k:"#111111", n:"#ff8899" },
+    front: [
         "0000ww0000ww0000",
         "0000ww0000ww0000",
         "0000wp0000pw0000",
         "0000ww0000ww0000",
         "000wwwwwwwwww000",
         "00wwwwwwwwwwww00",
-        "00wwkwwwwwwkww00",
-        "00wwwwwwnwwwww00",
-        "00Wwwwwwwwwwww00",
-        "000wwwwwwwwww000",
-        "0000WWWWWWWW0000",
+        "00wwkwwwwwkwww00",
+        "00wwwwwnwwwwww00",
+        "00wwwwwwwwwwww00",
         "000WWWWWWWWWW000",
+        "00WWWWWWWWWWWW00",
         "00WWWWWWWWWWWW00",
         "00WW00WWWW00WW00",
         "00WW00WWWW00WW00",
-        "00pp000000pppp00",
-    ]
-};
-
-// --- PENGUIN ---
-SPRITES.penguin = {
-    colors: { k:"#1a1a2e", K:"#333344", w:"#f5f5f5", W:"#dddddd", o:"#ff8c00", O:"#cc7000", e:"#ffffff", p:"#111111" },
-    grid: [
+        "00pp00pppp00pp00",
+        "0000000000000000",
+    ],
+    back: [
+        "0000ww0000ww0000",
+        "0000ww0000ww0000",
+        "0000ww0000ww0000",
+        "0000ww0000ww0000",
+        "000wwwwwwwwww000",
+        "00wwwwwwwwwwww00",
+        "00wwwwwwwwwwww00",
+        "00wwwwwwwwwwww00",
+        "00wwwwwwwwwwww00",
+        "000WWWWWWWWWW000",
+        "00WWWWWWWWWWWW00",
+        "00WWWWWWWWWWWW00",
+        "00WW00WWWW00WW00",
+        "00WW00WWWW00WW00",
+        "00pp00pppp00pp00",
+        "0000000000000000",
+    ],
+    left: [
+        "00ww000000000000",
+        "00ww000000000000",
+        "00pw000000000000",
+        "00ww000000000000",
+        "00wwwwwwww000000",
+        "0wwwwwwwwww00000",
+        "0wkwwwwwwwww0000",
+        "0wwwnwwwwwww0000",
+        "0wwwwwwwwwww0000",
+        "00WWWWWWWWW00000",
+        "0WWWWWWWWWWW0000",
+        "0WWWWWWWWWWW0000",
+        "0WW00WWWW0000000",
+        "0WW00WWWW0000000",
+        "0pp00pppp0000000",
+        "0000000000000000",
+    ],
+    right: [
+        "00000000000ww000",
+        "00000000000ww000",
+        "00000000000wp000",
+        "00000000000ww000",
+        "000000wwwwwwww00",
+        "00000wwwwwwwww00",
+        "0000wwwwwwwwkw00",
+        "0000wwwwwwwnww00",
+        "0000wwwwwwwwww00",
+        "00000WWWWWWWW000",
+        "0000WWWWWWWWWW00",
+        "0000WWWWWWWWWW00",
+        "0000000WWWW00WW0",
+        "0000000WWWW00WW0",
+        "0000000pppp00pp0",
+        "0000000000000000",
+    ],
+},
+penguin: {
+    colors: { k:"#1a1a2e", K:"#333344", w:"#f5f5f5", o:"#ff8c00", e:"#ffffff", p:"#111111" },
+    front: [
         "0000kkkkkk000000",
-        "000kkkkkkkkk0000",
-        "00kkkekkkekkkk00",
-        "00kkpekkkepkkk00",
-        "00kkkkkokkkkkkk0",
-        "00kkkkkkkkkkkkk0",
-        "0Kkkkwwwwwwkkkk0",
-        "0Kkkkwwwwwwkkkk0",
-        "0KKkkwwwwwwkkKK0",
-        "00KKkwwwwwwkKK00",
-        "000kkwwwwwwkk000",
+        "000kkkkkkkkkk000",
+        "00kkekkkkkekk000",
+        "00kkpkkkkkpkk000",
+        "00kkkkkokkkkkk00",
+        "00kkkkkkkkkkkk00",
+        "0Kkkkwwwwwwkkk00",
+        "0Kkkkwwwwwwkkk00",
+        "0KKkkwwwwwwkKK00",
+        "00KKkwwwwwwKK000",
         "000kkwwwwwwkk000",
         "0000kkwwwwkk0000",
         "0000kkkkkkkk0000",
         "000oo00000oo0000",
-        "000ooo000ooo0000",
-    ]
-};
-
-// --- FOX ---
-SPRITES.fox = {
-    colors: { o:"#f07020", O:"#cc5500", w:"#ffffff", W:"#e0e0e0", k:"#111111", n:"#222222", b:"#884400", t:"#ff9040" },
-    grid: [
-        "0o00000000000o00",
-        "0oo0000000000oo0",
-        "00ooooooooooooo0",
-        "00oookooookoooo0",
-        "00ooooowooooooo0",
-        "00ooowwwwwooooo0",
-        "000oooooooooooo0",
-        "0000oooooooooo00",
-        "000OOOOOoOOOO000",
-        "00OOOOOOOOOOOO00",
-        "00OOwwwwwwwwOO00",
-        "00OOwwwwwwwwOO00",
+        "00oooo000oooo000",
+        "0000000000000000",
+    ],
+    back: [
+        "0000kkkkkk000000",
+        "000kkkkkkkkkk000",
+        "00kkkkkkkkkkkk00",
+        "00kkkkkkkkkkkk00",
+        "00kkkkkkkkkkkk00",
+        "00kkkkkkkkkkkk00",
+        "0KkkkkkkkkkkkK00",
+        "0KkkkkkkkkkkkK00",
+        "0KKkkkkkkkkKKK00",
+        "00KKkkkkkkKKK000",
+        "000kkkkkkkkkk000",
+        "0000kkkkkkkk0000",
+        "0000kkkkkkkk0000",
+        "000oo00000oo0000",
+        "00oooo000oooo000",
+        "0000000000000000",
+    ],
+    left: [
+        "000kkkkk00000000",
+        "00kkkkkkkk000000",
+        "0kkekkkkkk000000",
+        "0kkpkkokkkk00000",
+        "0kkkkkkkkkk00000",
+        "0kkkwwwwkkk00000",
+        "Kkkkwwwwkkk00000",
+        "KKkkwwwwkKK00000",
+        "0KKkwwwwKKK00000",
+        "00kkwwwwkkk00000",
+        "000kkwwkk0000000",
+        "000kkkkkk0000000",
+        "00oo00oo00000000",
+        "0oooo0oooo000000",
+        "0000000000000000",
+        "0000000000000000",
+    ],
+    right: [
+        "00000000kkkkk000",
+        "000000kkkkkkkk00",
+        "000000kkkkkekk00",
+        "00000kkkkokpkk00",
+        "00000kkkkkkkkkk0",
+        "00000kkkwwwwkkk0",
+        "00000kkkwwwwkkKK",
+        "00000KKkwwwwkkKK",
+        "00000KKKwwwwkKK0",
+        "00000kkkwwwwkk00",
+        "0000000kkwwkk000",
+        "0000000kkkkkk000",
+        "00000000oo00oo00",
+        "000000oooo0oooo0",
+        "0000000000000000",
+        "0000000000000000",
+    ],
+},
+fox: {
+    colors: { o:"#f07020", O:"#cc5500", w:"#ffffff", k:"#111111", t:"#ff9040", b:"#884400" },
+    front: [
+        "0o0000000000o000",
+        "0oo00000000oo000",
+        "00oooooooooo0000",
+        "00ookooookoo0000",
+        "00oooowwoooo0000",
+        "00oowwwwwooo0000",
+        "000ooknkooo00000",
+        "0000ooooooo00000",
+        "000OOOoOOOOO0000",
+        "00OOwwwwwwOO0000",
+        "00OOwwwwwwOO0000",
+        "000OOOOOOOO00000",
+        "000OO000OOO00000",
+        "000bb000bbb00000",
+        "0000000000ttttt0",
+        "00000000000twwt0",
+    ],
+    back: [
+        "0o0000000000o000",
+        "0oo00000000oo000",
+        "00oooooooooo0000",
+        "00oooooooooo0000",
+        "00oooooooooo0000",
+        "00oooooooooo0000",
+        "000ooooooooo0000",
+        "0000ooooooo00000",
         "000OOOOOOOOOO000",
-        "000OO0000000OO00",
-        "000nn00000000nn0",
-        "00000000000ttttt",
-    ]
-};
-
-// --- PANDA ---
-SPRITES.panda = {
-    colors: { w:"#ffffff", W:"#e8e8e8", k:"#222222", K:"#444444", p:"#111111", n:"#333333", e:"#ffffff" },
-    grid: [
+        "00OOOOOOOOOOOO00",
+        "00OOOOOOOOOOOO00",
+        "000OOOOOOOOOO000",
+        "000OO0000OOO0000",
+        "000bb0000bbb0000",
+        "00000000ttttt000",
+        "000000000twwt000",
+    ],
+    left: [
+        "0o00000000000000",
+        "0ooo0000000000t0",
+        "00ooooooo00000t0",
+        "00okoooooo000tt0",
+        "00oowwooo000tww0",
+        "00ooknoo00000000",
+        "000ooooo00000000",
+        "00OOOoOO00000000",
+        "0OOwwwOOO0000000",
+        "0OOwwwOOO0000000",
+        "00OOOOOOO0000000",
+        "00OO00OO00000000",
+        "00bb00bb00000000",
+        "0000000000000000",
+        "0000000000000000",
+        "0000000000000000",
+    ],
+    right: [
+        "000000000000o000",
+        "t000000000ooo000",
+        "t00000ooooooo000",
+        "tt000ooooookoo00",
+        "wwt000ooowwoo000",
+        "00000000onkoo000",
+        "0000000oooooo000",
+        "00000000OOoOO000",
+        "0000000OOOwwwO00",
+        "0000000OOOwwwO00",
+        "0000000OOOOOOO00",
+        "000000000OO00OO0",
+        "000000000bb00bb0",
+        "0000000000000000",
+        "0000000000000000",
+        "0000000000000000",
+    ],
+},
+panda: {
+    colors: { w:"#ffffff", W:"#e8e8e8", k:"#222222", K:"#444444", p:"#111111", e:"#ffffff" },
+    front: [
         "00kk00000000kk00",
         "00kkk000000kkk00",
         "00wwwwwwwwwwww00",
@@ -121,71 +279,143 @@ SPRITES.panda = {
         "00wwwwwwwwwwww00",
         "0kWWWWWWWWWWWWk0",
         "0kWWWWWWWWWWWWk0",
-        "0kkWWWwwwwWWWkk0",
-        "0kkWWWwwwwWWWkk0",
+        "00kWWWwwwwWWWk00",
+        "00kWWWwwwwWWWk00",
+        "000kWWWWWWWWk000",
+        "000kk0000kkk0000",
+        "000kk0000kkk0000",
+        "0000000000000000",
+    ],
+    back: [
+        "00kk00000000kk00",
+        "00kkk000000kkk00",
+        "00wwwwwwwwwwww00",
+        "0wwwwwwwwwwwwww0",
+        "0wwwwwwwwwwwwww0",
+        "0wwwwwwwwwwwwww0",
+        "0wwwwwwwwwwwwww0",
+        "00wwwwwwwwwwww00",
+        "0kWWWWWWWWWWWWk0",
+        "0kWWWWWWWWWWWWk0",
         "00kWWWWWWWWWWk00",
-        "00kkWWWWWWWWkk00",
-        "000kk0000000kk00",
-        "000kk0000000kk00",
-    ]
+        "00kWWWWWWWWWWk00",
+        "000kWWWWWWWWk000",
+        "000kk0000kkk0000",
+        "000kk0000kkk0000",
+        "0000000000000000",
+    ],
+    left: [
+        "0kk0000000000000",
+        "0kkk0000000000k0",
+        "0wwwwwwwwww0000k",
+        "wwkkwwwwwwww000k",
+        "wkpkwwwwwwwW00k0",
+        "wwkkwwwwwWWW00k0",
+        "wwwwwkkwWWWW0k00",
+        "0wwwwwwWWWWWWk00",
+        "00wwwWWWWWWWk000",
+        "000WWWWWWWWW0000",
+        "0000WWwwWWW00000",
+        "0000kk00kk000000",
+        "0000kk00kk000000",
+        "0000000000000000",
+        "0000000000000000",
+        "0000000000000000",
+    ],
+    right: [
+        "00000000000kk000",
+        "k0000000000kkk00",
+        "k0000wwwwwwwwww0",
+        "k000wwwwwwwwkkww",
+        "0k00Wwwwwwwwkpkw",
+        "0k00WWWWwwwwkkww",
+        "00k0WWWWwkkwwwww",
+        "00kWWWWWWwwwwww0",
+        "000kWWWWWWWwww00",
+        "0000WWWWWWWWW000",
+        "00000WWwwWWW0000",
+        "000000kk00kk0000",
+        "000000kk00kk0000",
+        "0000000000000000",
+        "0000000000000000",
+        "0000000000000000",
+    ],
+},
 };
 
-// --- OWL ---
+// Simpler sprites share front for all directions
+SPRITES.droplet = {
+    colors: { c:"#00d2ff", C:"#0099bb", w:"#ffffff", k:"#111111" },
+    front: [
+        "0000000cc0000000",
+        "000000cccc000000",
+        "00000cccccc00000",
+        "0000ccwccccc0000",
+        "000cccwccccccc00",
+        "00cccccccccccc00",
+        "0cccccccccccccc0",
+        "0ccccckcckccccc0",
+        "0cccccccccccccc0",
+        "00cccccccccccc00",
+        "00cccccccccccc00",
+        "000CcccccccCC000",
+        "0000CCccccCC0000",
+        "00000CCCCCC00000",
+        "0000000CC0000000",
+        "0000000000000000",
+    ],
+};
+
 SPRITES.owl = {
-    colors: { b:"#8B5E3C", B:"#6B3E1C", t:"#d4a574", o:"#ff8c00", O:"#cc7000", w:"#f0dcc0", k:"#111111", y:"#ff9800" },
-    grid: [
-        "00Bb000000000bB0",
-        "00bbb00000bbbbb0",
-        "00bbbbbbbbbbbbb0",
-        "0bbbwwbbbwwbbbb0",
-        "0bbwowbbwowbbbb0",
-        "0bbbwwbbbwwbbbb0",
-        "0bbbbbbybbbbbb00",
-        "00bbbbbbbbbbbb00",
+    colors: { b:"#8B5E3C", B:"#6B3E1C", t:"#d4a574", o:"#ff8c00", w:"#f0dcc0", k:"#111111", y:"#ff9800" },
+    front: [
+        "00Bb000000bB0000",
+        "000bbbbbbbbbb000",
+        "00bbbbbbbbbbb000",
+        "0bbbwwbbbwwbbb00",
+        "0bbwowbbwowbbb00",
+        "0bbbwwbbbwwbbb00",
+        "0bbbbbbybbbbb000",
+        "00bbbbbbbbbb0000",
         "00BBbbttttbbBB00",
-        "00BBbbttttbbBB00",
-        "000Bbbttttbb000B",
-        "000Bbbbbbbbb000B",
-        "0000Bbbbbbbb0000",
+        "000Bbbttttbbb000",
+        "000Bbbttttbbb000",
+        "0000Bbbbbbbbb000",
         "0000BBbbbbBB0000",
         "00000yy00yy00000",
         "00000yy00yy00000",
-    ]
+        "0000000000000000",
+    ],
 };
-
-// --- FROG ---
 SPRITES.frog = {
     colors: { g:"#2ecc71", G:"#27ae60", l:"#a8e6cf", w:"#ffffff", k:"#111111", d:"#1a7a40" },
-    grid: [
-        "00ww00000000ww00",
-        "0wkww00000wkww00",
-        "00ww00000000ww00",
+    front: [
+        "00ww00000ww00000",
+        "0wkww000wkww0000",
+        "00ww00000ww00000",
+        "00ggggggggg00000",
+        "0ggggggggggg0000",
+        "0ggggggggggggg00",
+        "0gggggddddggg000",
         "00ggggggggggg000",
-        "0gggggggggggggg0",
-        "0ggggggggggggggg",
-        "0gggggddddgggg00",
-        "00ggggggggggg000",
-        "G00GGGGGGGGGG000",
-        "GG0GGGllllGGGG00",
-        "GG0GGGllllGGGGG0",
-        "GG0GGGllllGGGGG0",
-        "000GGGGGGGGGGGG0",
-        "000GGGGGGGGGGG00",
-        "000GG000000GG000",
-        "00ggg00000ggg000",
-    ]
+        "000GGGGGGGGGG000",
+        "00GGGllllGGGG000",
+        "00GGGllllGGGGG00",
+        "00GGGllllGGGGG00",
+        "000GGGGGGGGGG000",
+        "000GG0000GG00000",
+        "00ggg000ggg00000",
+        "0000000000000000",
+    ],
 };
-
-// --- CHICK ---
 SPRITES.chick = {
-    colors: { y:"#ffd700", Y:"#f0c000", o:"#ff6600", O:"#cc5500", k:"#111111", w:"#ffffff", b:"#ff8888" },
-    grid: [
+    colors: { y:"#ffd700", Y:"#f0c000", o:"#ff6600", k:"#111111", w:"#ffffff" },
+    front: [
         "000000YY00000000",
         "00000YYY00000000",
         "0000yyyyyy000000",
         "000yyyyyyyy00000",
         "000yykyyyyky0000",
-        "000yyyyyyyyyy000",
         "000yyyyyyyyy0000",
         "0000yyooyyyy0000",
         "0000yyyyyyyy0000",
@@ -196,13 +426,75 @@ SPRITES.chick = {
         "0000YYyyyyYY0000",
         "00000oo00oo00000",
         "0000ooo0ooo00000",
-    ]
+        "0000000000000000",
+    ],
 };
-
-// --- ASTRONAUT ---
+SPRITES.skateboard = {
+    colors: { h:"#fdd9b5", c:"#333333", s:"#00d2ff", S:"#0099bb", b:"#8B4513", k:"#444444", j:"#3366cc" },
+    front: [
+        "0000ccccc0000000",
+        "000hhcccchh00000",
+        "000hhhhhhhh00000",
+        "000hhkhhkhh00000",
+        "000hhhhhhhh00000",
+        "000ssssssss00000",
+        "00ssssssssss0000",
+        "00Ssssssssss0000",
+        "000sssssssss0000",
+        "000jjjjjjjjj0000",
+        "000jjjjjjjjj0000",
+        "000jj000jjjj0000",
+        "000kk000kkk00000",
+        "00bbbbbbbbbbb000",
+        "00k00k000k00k000",
+        "0000000000000000",
+    ],
+};
+SPRITES.skis = {
+    colors: { r:"#e74c3c", h:"#fdd9b5", o:"#ffa500", w:"#ffffff", k:"#222222", B:"#1e90ff", g:"#888888" },
+    front: [
+        "000000ww00000000",
+        "0000rrrrrr000000",
+        "000rrooorr000000",
+        "000hhhhhhhh00000",
+        "000rrrrrrrr00000",
+        "00rrrrrrrrrr0000",
+        "0grrrrrrrrrrg000",
+        "0g0rrrrrrrr0g000",
+        "000kkkkkkkk00000",
+        "000kk000kkk00000",
+        "000kk000kkk00000",
+        "00BBB00BBBB00000",
+        "00BBB00BBBB00000",
+        "00BBB00BBBB00000",
+        "00BBB00BBBB00000",
+        "0000000000000000",
+    ],
+};
+SPRITES.hoverboard = {
+    colors: { d:"#2c3e50", D:"#1a252f", c:"#00d2ff", C:"#0099bb", p:"#7b2ff7", g:"#00ff88", k:"#111111" },
+    front: [
+        "0000DDDDDDdd0000",
+        "000DDcccccDDd000",
+        "000DDDDDDDDDd000",
+        "000DDDDDDDDDD000",
+        "000DDkDDkDDDD000",
+        "0000DDDDDDDD0000",
+        "000ddddddddddd00",
+        "00dddddcdddddd00",
+        "000ddddddddddd00",
+        "000dd00000dd0000",
+        "000kk00000kk0000",
+        "0000kk000kk00000",
+        "0pppccccccccpp00",
+        "0pCCccccccccCp00",
+        "00gggg00gggggg00",
+        "0000000000000000",
+    ],
+};
 SPRITES.astronaut = {
     colors: { w:"#eeeeee", W:"#cccccc", g:"#888888", G:"#666666", b:"#2a4a8a", B:"#1a1a4e", v:"#4a90d9", s:"#aaaaaa" },
-    grid: [
+    front: [
         "0000wwwwww000000",
         "000wwwwwwwww0000",
         "000wBBBBBBwww000",
@@ -213,177 +505,105 @@ SPRITES.astronaut = {
         "00gwwwwwwwwwwg00",
         "00gwwwwwwwwwwg00",
         "00sswwwwwwwwss00",
-        "00ssWWWWWWWWss00",
         "000WWWWWWWWWW000",
         "000WWWWWWWWWW000",
-        "000WW0000WW0WW00",
-        "000gg000gg00gg00",
-        "000ggg00ggg0000",
-    ]
+        "000WW000WWWWW000",
+        "000gg000ggggg000",
+        "000ggg00ggggg000",
+        "0000000000000000",
+    ],
 };
-
-// --- NINJA ---
 SPRITES.ninja = {
-    colors: { d:"#2f3542", D:"#1a1a2e", r:"#ff4757", R:"#cc3344", w:"#ffffff", g:"#c0a000", s:"#999999", k:"#111111" },
-    grid: [
+    colors: { d:"#2f3542", D:"#1a1a2e", r:"#ff4757", w:"#ffffff", s:"#999999", k:"#111111", g:"#c0a000" },
+    front: [
         "00000000s0000000",
         "000000s0s0000000",
         "0000ddddddd00000",
         "000ddrrrrrdd0000",
-        "000ddwddwdddd000",
-        "000dddddddddrrr",
+        "000ddwddwddd0000",
+        "000dddddddddrrr0",
         "0000ddddddddd000",
         "000DDDDsDDDDD000",
-        "00DDDDDsDDDDDD00",
         "00DDDDDDDDDDD000",
         "00DDgggggggDD000",
         "000DDDDDDDDD0000",
         "000DDDDDDDDD0000",
-        "000DD00000DD0000",
-        "000DD00000DD0000",
-        "000kk00000kk0000",
-    ]
+        "000DD000DD000000",
+        "000DD000DD000000",
+        "000kk000kk000000",
+        "0000000000000000",
+    ],
 };
 
-// --- SKATER ---
-SPRITES.skateboard = {
-    colors: { h:"#fdd9b5", H:"#eec9a5", c:"#333333", C:"#222222", s:"#00d2ff", S:"#0099bb", b:"#8B4513", k:"#444444", j:"#3366cc", J:"#2244aa" },
-    grid: [
-        "0000ccccc0000000",
-        "0000cccccc000000",
-        "000hhcccchh00000",
-        "000hhhhhhhh00000",
-        "000hhkhhkhhh0000",
-        "000hhhhhhhhh0000",
-        "0000ssssssss0000",
-        "000ssssssssss000",
-        "00Sssssssssss000",
-        "00Sssssssssss000",
-        "000jjjjjjjjj0000",
-        "000jjjjjjjjjj000",
-        "000jj0000jjjj000",
-        "000kk0000kkk0000",
-        "00bbbbbbbbbbb000",
-        "00k00k000k00k000",
-    ]
-};
-
-// --- SKIER ---
-SPRITES.skis = {
-    colors: { r:"#e74c3c", R:"#cc3333", h:"#fdd9b5", o:"#ffa500", O:"#cc8400", w:"#ffffff", k:"#222222", b:"#1e90ff", g:"#888888", K:"#333333" },
-    grid: [
-        "000000ww00000000",
-        "0000rrrrrr000000",
-        "000rrooorrrr0000",
-        "000rrKKKKrrr0000",
-        "000hhhhhhhh00000",
-        "000rrrrrrrrrr000",
-        "00rrrrrrrrrrrr00",
-        "0grrrrrrrrrrrg00",
-        "0g0rrrrrrrrr0g00",
-        "000KKKKKKKKKK000",
-        "000KK0000KKKK000",
-        "000KK0000KKKK000",
-        "000kk0000kkkk000",
-        "00bbb000bbbb0000",
-        "00bbb000bbbb0000",
-        "00bbb000bbbb0000",
-    ]
-};
-
-// --- HOVERBOARD ---
-SPRITES.hoverboard = {
-    colors: { d:"#2c3e50", D:"#1a252f", c:"#00d2ff", C:"#0099bb", p:"#7b2ff7", P:"#5a1fb7", g:"#00ff88", h:"#1a252f", k:"#111111" },
-    grid: [
-        "0000DDDDDDdd0000",
-        "000DDcccccDDd000",
-        "000DDDDDDDDDd000",
-        "000DDDDDDDDDD000",
-        "000DDkDDkDDDD000",
-        "0000DDDDDDDD0000",
-        "000ddddddddddd00",
-        "00dddddcdddddd00",
-        "00dddddddddddd00",
-        "000ddddddddddd00",
-        "000dd00000dd0000",
-        "000kk00000kk0000",
-        "0000kk000kk00000",
-        "0pppccccccccpp00",
-        "0PCCccccccccCP00",
-        "00gggg00gggggg00",
-    ]
-};
-
-// --- DROPLET (simple) ---
-SPRITES.droplet = {
-    colors: { c:"#00d2ff", C:"#0099bb", w:"#ffffff", W:"#aaeeff", k:"#111111" },
-    grid: [
-        "0000000cc0000000",
-        "000000cccc000000",
-        "00000cccccc00000",
-        "0000cccccccc0000",
-        "000ccWccccccc000",
-        "00cccWccccccc000",
-        "00cccccccccccc00",
-        "0ccccccccccccc00",
-        "0ccccckcckccccc0",
-        "0ccccccccccccc00",
-        "00cccccccccccc00",
-        "00ccccccccccc000",
-        "000cccccccccc000",
-        "0000Cccccccc0000",
-        "00000CCCCCC00000",
-        "0000000CC0000000",
-    ]
-};
 
 class Skins3DRenderer {
     constructor() {
         this._cache = {};
     }
 
+    /**
+     * Get facing direction from angle: front/back/left/right
+     */
+    getDirection(angle) {
+        // Normalize to 0-2PI
+        var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+        // right=0, down=PI/2, left=PI, up=3PI/2
+        if (a > Math.PI * 7 / 4 || a <= Math.PI / 4) return "right";
+        if (a > Math.PI / 4 && a <= Math.PI * 3 / 4) return "front";
+        if (a > Math.PI * 3 / 4 && a <= Math.PI * 5 / 4) return "left";
+        return "back";
+    }
+
     draw(ctx, x, y, r, angle, skinId, playerColor) {
         var sprite = SPRITES[skinId] || SPRITES.droplet;
+        var dir = this.getDirection(angle);
+        var grid = sprite[dir] || sprite.front;
         var size = r * 2;
         var pixelSize = size / 16;
+        var depth = pixelSize * 0.4; // 3D block height
 
         // Ground shadow
         ctx.beginPath();
-        ctx.ellipse(x, y + r * 0.85, r * 0.5, r * 0.15, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0,0,0,0.25)";
+        ctx.ellipse(x, y + r * 0.9, r * 0.5, r * 0.12, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
         ctx.fill();
 
-        // Draw each pixel as a 3D-ish block
         var startX = x - size / 2;
-        var startY = y - size / 2;
+        var startY = y - size / 2 - depth;
 
-        for (var row = 0; row < 16; row++) {
-            var line = sprite.grid[row];
+        // Draw back to front (bottom rows first for proper overlap)
+        for (var row = 15; row >= 0; row--) {
+            var line = grid[row];
+            if (!line) continue;
             for (var col = 0; col < 16; col++) {
                 var ch = line[col];
-                if (ch === "0") continue;
+                if (ch === "0" || !ch) continue;
 
                 var color = sprite.colors[ch];
                 if (!color) continue;
 
-                // If color is the player-mapped color, use player color
+                // Map c/C to player color
                 if (ch === "c") color = playerColor;
                 if (ch === "C") color = this.darken(playerColor, 0.7);
 
                 var px = startX + col * pixelSize;
                 var py = startY + row * pixelSize;
 
-                // Main pixel face
+                // 3D block: front face (side visible from below)
+                ctx.fillStyle = this.darken(color, 0.6);
+                ctx.fillRect(px, py + pixelSize, pixelSize + 0.3, depth);
+
+                // Top face (main visible pixel)
                 ctx.fillStyle = color;
-                ctx.fillRect(px, py, pixelSize + 0.5, pixelSize + 0.5);
+                ctx.fillRect(px, py, pixelSize + 0.3, pixelSize + 0.3);
 
-                // Top edge highlight (lighter)
-                ctx.fillStyle = this.lighten(color, 0.2);
-                ctx.fillRect(px, py, pixelSize + 0.5, pixelSize * 0.2);
+                // Top highlight strip
+                ctx.fillStyle = this.lighten(color, 0.25);
+                ctx.fillRect(px, py, pixelSize + 0.3, pixelSize * 0.25);
 
-                // Bottom/right shadow (darker)
-                ctx.fillStyle = this.darken(color, 0.7);
-                ctx.fillRect(px, py + pixelSize * 0.8, pixelSize + 0.5, pixelSize * 0.2);
+                // Left highlight strip (light source from top-left)
+                ctx.fillStyle = this.lighten(color, 0.12);
+                ctx.fillRect(px, py, pixelSize * 0.2, pixelSize + 0.3);
             }
         }
     }

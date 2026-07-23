@@ -64,25 +64,99 @@ class Renderer {
         const cs = cellWorld * this.scale;
         if (cs < 0.3) return;
 
+        // If cells are too small for hex detail, use fast batch rects
+        if (cs < 4) {
+            for (const p of players) {
+                ctx.fillStyle = p.territoryColor || p.color;
+                ctx.globalAlpha = 0.45;
+                ctx.beginPath();
+                for (let gy = 0; gy < GRID_RES; gy++) {
+                    for (let gx = 0; gx < GRID_RES; gx++) {
+                        if (engine.grid[gy][gx] !== p.id) continue;
+                        const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
+                        const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
+                        if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
+                        ctx.rect(sx, sy, cs + 0.5, cs + 0.5);
+                    }
+                }
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+            return;
+        }
+
+        // Detailed 3D hexagonal tiles when zoomed in
+        const hexR = cs * 0.55;
+        const hexH = hexR * 0.3;
+
         for (const p of players) {
-            // Batch all rects into one path for performance
-            ctx.fillStyle = p.territoryColor || p.color;
-            ctx.globalAlpha = 0.4;
-            ctx.beginPath();
+            const baseColor = p.territoryColor || p.color;
+            const topColor = baseColor;
+            const sideColor = this.darken(baseColor, 0.55);
+            const edgeColor = this.darken(baseColor, 0.4);
+
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
-                    const wx = gx * cellWorld;
-                    const wy = gy * cellWorld;
-                    const sx = wx * this.scale - this.cameraX + this.screenW / 2;
-                    const sy = wy * this.scale - this.cameraY + this.screenH / 2;
-                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                    ctx.rect(sx, sy, cs + 0.5, cs + 0.5);
+                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
+                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
+                    if (sx > this.screenW + cs || sx < -cs * 2 || sy > this.screenH + cs || sy < -cs * 2) continue;
+
+                    // Side face (depth)
+                    ctx.beginPath();
+                    this._hexSide(ctx, sx, sy, hexR, hexH);
+                    ctx.fillStyle = sideColor;
+                    ctx.globalAlpha = 0.7;
+                    ctx.fill();
+
+                    // Top face (hex)
+                    ctx.beginPath();
+                    this._hexTop(ctx, sx, sy - hexH, hexR);
+                    ctx.fillStyle = topColor;
+                    ctx.globalAlpha = 0.55;
+                    ctx.fill();
+                    ctx.strokeStyle = edgeColor;
+                    ctx.lineWidth = 0.4;
+                    ctx.globalAlpha = 0.3;
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
                 }
             }
-            ctx.fill();
-            ctx.globalAlpha = 1;
         }
+    }
+
+    _hexTop(ctx, cx, cy, r) {
+        for (var i = 0; i < 6; i++) {
+            var angle = Math.PI / 6 + (Math.PI / 3) * i;
+            var hx = cx + r * Math.cos(angle);
+            var hy = cy + r * Math.sin(angle) * 0.5; // flatten for isometric
+            if (i === 0) ctx.moveTo(hx, hy);
+            else ctx.lineTo(hx, hy);
+        }
+        ctx.closePath();
+    }
+
+    _hexSide(ctx, cx, cy, r, h) {
+        // Draw the front 3 sides of the hex (bottom half visible)
+        var pts = [];
+        for (var i = 0; i < 6; i++) {
+            var angle = Math.PI / 6 + (Math.PI / 3) * i;
+            pts.push({
+                x: cx + r * Math.cos(angle),
+                y: cy + r * Math.sin(angle) * 0.5
+            });
+        }
+        // Front-facing sides (indices 2,3,4 for pointy-top)
+        ctx.moveTo(pts[2].x, pts[2].y - h);
+        ctx.lineTo(pts[2].x, pts[2].y);
+        ctx.lineTo(pts[3].x, pts[3].y);
+        ctx.lineTo(pts[3].x, pts[3].y - h);
+        ctx.closePath();
+        ctx.moveTo(pts[3].x, pts[3].y - h);
+        ctx.lineTo(pts[3].x, pts[3].y);
+        ctx.lineTo(pts[4].x, pts[4].y);
+        ctx.lineTo(pts[4].x, pts[4].y - h);
+        ctx.closePath();
     }
 
     /**
