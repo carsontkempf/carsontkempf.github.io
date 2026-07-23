@@ -328,16 +328,11 @@ class Game {
 
     render(dt) {
         if (!this.renderer) return;
-        // Debug overlay
         if (!this._fc) this._fc = 0;
         this._fc++;
-        if (this._fc % 30 === 0) {
-            const dEl = document.getElementById("debug-overlay");
-            if (dEl) dEl.textContent = "F:" + this._fc + " T:" + this.engine.gameTime.toFixed(1) + " P:" + this.players.length + " R:" + this.engine.running;
-        }
+
         this.effects.update(dt);
         this.renderer.setCameraTarget(this.humanPlayer.x, this.humanPlayer.y);
-        // Dynamic zoom based on territory
         const pct = parseFloat(this.engine.getTerritoryPercent(0));
         this.renderer.setZoomForTerritory(pct);
         this.renderer.updateCamera(dt);
@@ -357,6 +352,20 @@ class Game {
         this.jackpot.render(this.renderer.ctx, this.renderer.screenW, this.renderer.screenH);
         this.toasts.update(dt);
         this.toasts.render(this.renderer.ctx, this.renderer.screenW, this.renderer.screenH);
+
+        // DEBUG: Draw directly to canvas to confirm it works
+        const ctx = this.renderer.ctx;
+        ctx.fillStyle = "#0f0";
+        ctx.font = "12px monospace";
+        ctx.fillText("F:" + this._fc + " Scale:" + this.renderer.scale.toFixed(4) + " Cam:" + Math.round(this.renderer.cameraX) + "," + Math.round(this.renderer.cameraY), 10, 60);
+        ctx.fillText("W:" + this.renderer.screenW + " H:" + this.renderer.screenH + " Canvas:" + this.renderer.canvas.width + "x" + this.renderer.canvas.height, 10, 75);
+        ctx.fillText("Player:" + Math.round(this.humanPlayer.x) + "," + Math.round(this.humanPlayer.y) + " Shape:" + this.humanPlayer.shape, 10, 90);
+        ctx.fillText("Territory cells:" + this.engine.countTerritory(0) + " Alive:" + this.players.filter(p=>p.alive).length, 10, 105);
+        // Draw a visible marker at player screen position
+        const pp = this.renderer.worldToScreen(this.humanPlayer.x, this.humanPlayer.y);
+        ctx.fillStyle = "#ff0";
+        ctx.fillRect(pp.x - 5, pp.y - 5, 10, 10);
+        ctx.fillText("ME", pp.x - 8, pp.y - 10);
     }
 
     updateHUD() {
