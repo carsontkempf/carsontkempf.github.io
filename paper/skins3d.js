@@ -540,28 +540,29 @@ class Skins3DRenderer {
     constructor() {}
 
     /**
-     * Get one of 4 base sprite directions + a rotation offset for smooth 32-dir
+     * Get sprite direction based on movement angle.
+     * angle=0: right, PI/2: down, PI: left, 3PI/2: up
+     * In top-down view:
+     *   moving down -> back (away from viewer)
+     *   moving up -> front (facing viewer)
+     *   moving right -> right side
+     *   moving left -> left side
+     * 32 intermediate positions via small rotation offset.
      */
     getDirectionInfo(angle) {
-        // Normalize to 0-2PI
         var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-        // 32 steps = 11.25 degrees each
-        var step = Math.floor(a / (Math.PI * 2 / 32));
-        // Map 32 steps to 4 base sprites + rotation offset
-        // Steps 0-7: right (with -4 to +3 offset), 8-15: front, 16-23: left, 24-31: back
-        var dir, rotOffset;
-        if (step >= 28 || step < 4) {
-            dir = "right";
-            rotOffset = (step >= 28 ? step - 32 : step) * 0.04;
-        } else if (step >= 4 && step < 12) {
-            dir = "front";
-            rotOffset = (step - 8) * 0.04;
-        } else if (step >= 12 && step < 20) {
-            dir = "left";
-            rotOffset = (step - 16) * 0.04;
-        } else {
-            dir = "back";
-            rotOffset = (step - 24) * 0.04;
+        // Divide into 8 sectors of 45 degrees
+        var sector = Math.floor(a / (Math.PI / 4));
+        var sectorAngle = a - sector * (Math.PI / 4);
+        var rotOffset = (sectorAngle - Math.PI / 8) * 0.3; // smooth sub-rotation
+
+        var dir;
+        switch (sector) {
+            case 0: case 7: dir = "right"; break;  // 0 or 315-360
+            case 1: case 2:  dir = "back"; break;  // 45-135 (moving down)
+            case 3: case 4:  dir = "left"; break;  // 135-225
+            case 5: case 6:  dir = "front"; break; // 225-315 (moving up)
+            default: dir = "front";
         }
         return { dir: dir, rot: rotOffset };
     }

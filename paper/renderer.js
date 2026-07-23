@@ -64,8 +64,8 @@ class Renderer {
         const cs = cellWorld * this.scale;
         if (cs < 0.3) return;
 
-        const hexR = cs * 0.52;
-        const depth = Math.max(1.5, cs * 0.3);
+        const hexR = cs * 0.35;
+        const depth = Math.max(1.5, cs * 0.25);
 
         for (const p of players) {
             const baseColor = p.territoryColor || p.color;
@@ -95,7 +95,7 @@ class Renderer {
 
             // Pass 2: Hex top faces
             ctx.fillStyle = baseColor;
-            ctx.globalAlpha = 0.5;
+            ctx.globalAlpha = 0.75;
             ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
@@ -125,7 +125,6 @@ class Renderer {
                 }
                 ctx.stroke();
             }
-            ctx.globalAlpha = 1;
             ctx.globalAlpha = 1;
         }
     }
