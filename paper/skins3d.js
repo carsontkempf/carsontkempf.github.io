@@ -541,34 +541,83 @@ class Skins3DRenderer {
         // Generate missing directions for all sprites
         for (var key in SPRITES) {
             var s = SPRITES[key];
-            if (!s.back) {
-                // Back: replace face-detail colors with body color
-                s.back = this._makeBack(s.front, s.colors);
-            }
-            if (!s.left) {
-                s.left = this._makeLeft(s.front);
-            }
-            if (!s.right) {
-                s.right = this._makeRight(s.front);
-            }
+            if (!s.back) s.back = this._makeBack(s.front, s.colors);
+            if (!s.left) s.left = this._makeLeft(s.front);
+            if (!s.right) s.right = this._makeRight(s.front);
+        }
+
+        // Pre-generate all 32 frames for each sprite
+        this._frames = {};
+        for (var key in SPRITES) {
+            this._frames[key] = this._generate32Frames(SPRITES[key]);
         }
     }
 
+    /**
+     * Generate 32 rotational frames by interpolating between 4 base sprites.
+     * Frames 0-7: right to back (moving clockwise from right toward down)
+     * Frames 8-15: back to left
+     * Frames 16-23: left to front
+     * Frames 24-31: front to right
+     */
+    _generate32Frames(sprite) {
+        var dirs = ["right", "back", "left", "front"];
+        var frames = [];
+        for (var q = 0; q < 4; q++) {
+            var fromDir = dirs[q];
+            var toDir = dirs[(q + 1) % 4];
+            var fromGrid = sprite[fromDir];
+            var toGrid = sprite[toDir];
+            for (var step = 0; step < 8; step++) {
+                var t = step / 8; // 0 to 0.875
+                frames.push(this._blendGrids(fromGrid, toGrid, t));
+            }
+        }
+        return frames;
+    }
+
+    /**
+     * Blend two 16x16 grids by shifting pixels.
+     * At t=0, shows fromGrid. At t=1, shows toGrid.
+     * Intermediate: shift columns from fromGrid and overlay toGrid pixels.
+     */
+    _blendGrids(fromGrid, toGrid, t) {
+        var shift = Math.round(t * 3); // 0-2 pixel shift
+        var result = [];
+        for (var row = 0; row < 16; row++) {
+            var line = "";
+            for (var col = 0; col < 16; col++) {
+                // Blend: use toGrid for pixels that "appear" as we turn
+                var fromCol = col + shift;
+                var toCol = col - (3 - shift);
+                var ch = "0";
+                if (t < 0.5) {
+                    // Mostly from
+                    if (fromCol >= 0 && fromCol < 16) ch = fromGrid[row][fromCol];
+                    if (ch === "0" && toCol >= 0 && toCol < 16) ch = toGrid[row][toCol];
+                } else {
+                    // Mostly to
+                    if (toCol >= 0 && toCol < 16) ch = toGrid[row][toCol];
+                    if (ch === "0" && fromCol >= 0 && fromCol < 16) ch = fromGrid[row][fromCol];
+                }
+                if (!ch) ch = "0";
+                line += ch;
+            }
+            result.push(line);
+        }
+        return result;
+    }
+
     _makeBack(front, colors) {
-        // Copy front but replace eye/nose/mouth chars with the most common body char
         var bodyChar = this._findBodyChar(front);
-        var faceChars = ["k", "p", "e", "n", "w"]; // eyes, pupils, nose typically
+        var faceChars = ["k", "p", "e", "n"];
         var back = [];
         for (var i = 0; i < front.length; i++) {
             var row = "";
             for (var j = 0; j < front[i].length; j++) {
                 var ch = front[i][j];
-                if (faceChars.indexOf(ch) >= 0 && i < 10) {
-                    // Only replace in upper half (head area)
-                    row += bodyChar;
-                } else {
-                    row += ch;
-                }
+                if (faceChars.indexOf(ch) >= 0 && i < 10) row += bodyChar;
+                else row += ch;
             }
             back.push(row);
         }
@@ -576,14 +625,12 @@ class Skins3DRenderer {
     }
 
     _makeLeft(front) {
-        // Shift all non-zero pixels 2 columns to the left
         var left = [];
         for (var i = 0; i < front.length; i++) {
             var row = "";
             for (var j = 0; j < 16; j++) {
                 var srcJ = j + 2;
-                if (srcJ < 16) row += front[i][srcJ];
-                else row += "0";
+                row += (srcJ < 16) ? front[i][srcJ] : "0";
             }
             left.push(row);
         }
@@ -591,14 +638,12 @@ class Skins3DRenderer {
     }
 
     _makeRight(front) {
-        // Shift all non-zero pixels 2 columns to the right
         var right = [];
         for (var i = 0; i < front.length; i++) {
             var row = "";
             for (var j = 0; j < 16; j++) {
                 var srcJ = j - 2;
-                if (srcJ >= 0) row += front[i][srcJ];
-                else row += "0";
+                row += (srcJ >= 0) ? front[i][srcJ] : "0";
             }
             right.push(row);
         }
@@ -606,38 +651,31 @@ class Skins3DRenderer {
     }
 
     _findBodyChar(grid) {
-        // Find most common non-zero, non-face character
         var counts = {};
         for (var i = 0; i < grid.length; i++) {
             for (var j = 0; j < grid[i].length; j++) {
                 var ch = grid[i][j];
-                if (ch !== "0") {
-                    counts[ch] = (counts[ch] || 0) + 1;
-                }
+                if (ch !== "0") counts[ch] = (counts[ch] || 0) + 1;
             }
         }
         var best = "0", bestCount = 0;
         for (var c in counts) {
             if (counts[c] > bestCount && c !== "k" && c !== "p" && c !== "e") {
-                best = c;
-                bestCount = counts[c];
+                best = c; bestCount = counts[c];
             }
         }
         return best;
     }
 
     draw(ctx, x, y, r, angle, skinId, playerColor) {
+        var frames = this._frames[skinId] || this._frames.droplet;
         var sprite = SPRITES[skinId] || SPRITES.droplet;
 
-        // Select direction based on movement angle
+        // Map angle to frame index (0-31)
+        // angle=0 is right. Our frames: 0=right, 8=back(down), 16=left, 24=front(up)
         var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-        var dir;
-        if (a > Math.PI * 7/4 || a <= Math.PI * 1/4) dir = "right";
-        else if (a > Math.PI * 1/4 && a <= Math.PI * 3/4) dir = "back";
-        else if (a > Math.PI * 3/4 && a <= Math.PI * 5/4) dir = "left";
-        else dir = "front";
-
-        var grid = sprite[dir] || sprite.front;
+        var frameIdx = Math.floor(a / (Math.PI * 2) * 32) % 32;
+        var grid = frames[frameIdx];
 
         var size = r * 2;
         var pixelSize = size / 16;
@@ -653,7 +691,6 @@ class Skins3DRenderer {
         var startX = x - size / 2;
         var startY = y - size * topSquish / 2 - blockDepth;
 
-        // Draw rows bottom-to-top for correct overlap
         for (var row = 15; row >= 0; row--) {
             var line = grid[row];
             if (!line) continue;
@@ -677,11 +714,11 @@ class Skins3DRenderer {
                 ctx.fillStyle = this.lighten(color, 0.2);
                 ctx.fillRect(px, py, pixelSize + 0.3, pixelSize * topSquish * 0.25);
 
-                // FRONT FACE (depth below)
+                // FRONT FACE (depth)
                 ctx.fillStyle = this.darken(color, 0.5);
                 ctx.fillRect(px, py + pixelSize * topSquish, pixelSize + 0.3, blockDepth);
 
-                // RIGHT FACE (side depth)
+                // RIGHT FACE (side)
                 ctx.fillStyle = this.darken(color, 0.65);
                 ctx.fillRect(px + pixelSize * 0.85, py, pixelSize * 0.15 + 0.3, pixelSize * topSquish + blockDepth);
             }
