@@ -115,29 +115,29 @@ class Game {
     }
 
     bindUI() {
-        document.getElementById("btn-play").addEventListener("click", () => { this.renderLevelSelect(); this.showScreen("settings"); });
-        document.getElementById("btn-start-game").addEventListener("click", () => this.startGame());
-        document.getElementById("btn-back-menu").addEventListener("click", () => this.showScreen("menu"));
-        document.getElementById("btn-play-again").addEventListener("click", () => this.startGame());
-        document.getElementById("btn-results-menu").addEventListener("click", () => this.showScreen("menu"));
-        document.getElementById("btn-shop").addEventListener("click", () => { this.showScreen("shop"); this.shop.render(); });
-        document.getElementById("btn-shop-back").addEventListener("click", () => this.showScreen("menu"));
-        document.getElementById("btn-loadout").addEventListener("click", () => { this.showScreen("loadout"); this.shop.renderLoadout(); });
-        document.getElementById("btn-loadout-back").addEventListener("click", () => this.showScreen("menu"));
+        const $ = (id) => document.getElementById(id);
+        const on = (id, fn) => { const el = $(id); if (el) el.addEventListener("click", fn); };
 
-        // Pause/Quit
-        document.getElementById("btn-pause").addEventListener("click", () => this.pauseGame());
-        document.getElementById("btn-resume").addEventListener("click", () => this.resumeGame());
-        document.getElementById("btn-quit-game").addEventListener("click", () => this.quitGame());
-        document.getElementById("btn-loadout-pause").addEventListener("click", () => {
-            this.showScreen("loadout"); this.shop.renderLoadout();
-        });
+        on("btn-play", () => { this.renderLevelSelect(); this.showScreen("settings"); });
+        on("btn-start-game", () => this.startGame());
+        on("btn-back-menu", () => this.showScreen("menu"));
+        on("btn-play-again", () => this.startGame());
+        on("btn-results-menu", () => this.showScreen("menu"));
+        on("btn-shop", () => { this.showScreen("shop"); this.shop.render(); });
+        on("btn-shop-back", () => this.showScreen("menu"));
+        on("btn-loadout", () => { this.showScreen("loadout"); this.shop.renderLoadout(); });
+        on("btn-loadout-back", () => this.showScreen("menu"));
+        on("btn-pause", () => this.pauseGame());
+        on("btn-resume", () => this.resumeGame());
+        on("btn-quit-game", () => this.quitGame());
+        on("btn-loadout-pause", () => { this.showScreen("loadout"); this.shop.renderLoadout(); });
     }
 
     showScreen(name) {
         this.state = name;
         document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-        document.getElementById("screen-" + name)?.classList.add("active");
+        const el = document.getElementById("screen-" + name);
+        if (el) el.classList.add("active");
     }
 
     renderLevelSelect() {
@@ -329,14 +329,18 @@ class Game {
     }
 
     updateHUD() {
-        const rem = Math.max(0, GAME_DURATION - this.engine.gameTime);
-        document.getElementById("hud-timer").textContent = `${Math.floor(rem / 60)}:${Math.floor(rem % 60).toString().padStart(2, "0")}`;
+        // Stopwatch (counts up)
+        const elapsed = Math.floor(this.engine.gameTime);
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+        document.getElementById("hud-timer").textContent = `${mins}:${secs.toString().padStart(2, "0")}`;
         document.getElementById("hud-territory").textContent = this.engine.getTerritoryPercent(0) + "%";
-        document.getElementById("hud-kills").textContent = this.humanPlayer.kills + " kills";
+        document.getElementById("hud-kills").textContent = this.humanPlayer.kills + "K";
 
         // Hearts display
         const heartsEl = document.getElementById("hud-hearts");
-        if (heartsEl) heartsEl.textContent = "❤️".repeat(this.humanPlayer.hearts);
+        if (heartsEl && this.humanPlayer.hearts > 0) heartsEl.textContent = this.humanPlayer.hearts + "HP";
+        else if (heartsEl) heartsEl.textContent = "";
 
         // Leaderboard update every ~0.5s
         if (Math.floor(this.engine.gameTime * 2) % 1 === 0) {
@@ -399,33 +403,46 @@ class Game {
 
 // Boot
 let game;
-document.addEventListener("DOMContentLoaded", () => {
-    try {
-        game = new Game();
-        game.init();
-    } catch (e) {
-        console.error("Game init failed:", e);
-        document.getElementById("loading-status").textContent = "Error: " + e.message;
-        return;
-    }
 
+// Global error handler - shows errors on screen
+window.onerror = function(msg, src, line) {
+    const el = document.getElementById("loading-status");
+    if (el) el.textContent = "Error: " + msg + " (line " + line + ")";
+    console.error("GLOBAL ERROR:", msg, src, line);
+};
+
+document.addEventListener("DOMContentLoaded", () => {
     const gate = document.getElementById("auth-gate");
     const app = document.getElementById("app");
     const status = document.getElementById("loading-status");
     const skipBtn = document.getElementById("btn-skip-auth");
 
-    function showApp(user) {
-        gate.style.display = "none";
-        app.classList.remove("hidden");
-        if (user) game.loadUserData(user);
+    try {
+        game = new Game();
+        game.init();
+    } catch (e) {
+        console.error("Game init failed:", e);
+        if (status) status.textContent = "Init Error: " + e.message;
+        if (skipBtn) skipBtn.style.display = "inline-block";
+        return;
     }
 
-    // Skip auth / play as guest
+    function showApp(user) {
+        try {
+            gate.style.display = "none";
+            app.classList.remove("hidden");
+            if (user) game.loadUserData(user);
+        } catch (e) {
+            console.error("showApp error:", e);
+            gate.style.display = "none";
+            app.classList.remove("hidden");
+        }
+    }
+
     skipBtn.addEventListener("click", () => {
         showApp({ name: "Guest", email: "guest@local" });
     });
 
-    // Try auth
     let authResolved = false;
 
     async function checkAuth() {
@@ -444,14 +461,13 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e) {
             console.warn("Auth check failed:", e);
         }
-        // Auth not available or not logged in - show skip button
         status.textContent = "Not logged in";
         skipBtn.style.display = "inline-block";
     }
 
     window.addEventListener("auth:ready", async (ev) => {
         if (authResolved) return;
-        if (ev.detail?.isAuthenticated) {
+        if (ev.detail && ev.detail.isAuthenticated) {
             authResolved = true;
             try {
                 const u = await window.authService.getUser();
@@ -465,19 +481,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Timeout - show skip button after 3s regardless
+    // Always show play button quickly
+    setTimeout(() => { if (!authResolved) checkAuth(); }, 1000);
     setTimeout(() => {
         if (!authResolved) {
-            checkAuth();
-        }
-    }, 1500);
-
-    // Fallback - always show play button after 4s
-    setTimeout(() => {
-        if (!authResolved) {
-            status.textContent = "Ready";
             skipBtn.style.display = "inline-block";
             skipBtn.textContent = "Play";
+            status.textContent = "";
         }
-    }, 4000);
+    }, 3000);
 });
