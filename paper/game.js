@@ -172,9 +172,91 @@ class Game {
     }
 
     pauseGame() {
-        if (!this.engine.running) return;
         this.engine.running = false;
-        document.getElementById("pause-overlay").classList.remove("hidden");
+        // Build diagnostic dump
+        var lines = [];
+        lines.push("=== PAPER CONQUEST DEBUG ===");
+        lines.push("Time: " + new Date().toISOString());
+        lines.push("State: " + this.state);
+        lines.push("Engine running: " + this.engine.running);
+        lines.push("GameTime: " + (this.engine.gameTime || 0).toFixed(2));
+        lines.push("Frame count: " + (this._fc || 0));
+        lines.push("");
+        lines.push("--- RENDERER ---");
+        if (this.renderer) {
+            lines.push("screenW: " + this.renderer.screenW);
+            lines.push("screenH: " + this.renderer.screenH);
+            lines.push("canvas.width: " + this.renderer.canvas.width);
+            lines.push("canvas.height: " + this.renderer.canvas.height);
+            lines.push("scale: " + this.renderer.scale);
+            lines.push("baseScale: " + this.renderer.baseScale);
+            lines.push("cameraX: " + this.renderer.cameraX);
+            lines.push("cameraY: " + this.renderer.cameraY);
+            lines.push("canvas display: " + this.renderer.canvas.style.display);
+            lines.push("canvas parent: " + (this.renderer.canvas.parentElement ? this.renderer.canvas.parentElement.id : "none"));
+            lines.push("canvas offsetW: " + this.renderer.canvas.offsetWidth);
+            lines.push("canvas offsetH: " + this.renderer.canvas.offsetHeight);
+        } else {
+            lines.push("renderer is NULL");
+        }
+        lines.push("");
+        lines.push("--- PLAYER ---");
+        if (this.humanPlayer) {
+            lines.push("x: " + this.humanPlayer.x);
+            lines.push("y: " + this.humanPlayer.y);
+            lines.push("alive: " + this.humanPlayer.alive);
+            lines.push("shape: " + this.humanPlayer.shape);
+            lines.push("color: " + this.humanPlayer.color);
+            lines.push("trail length: " + (this.humanPlayer.trail ? this.humanPlayer.trail.length : 0));
+            if (this.renderer) {
+                var sp = this.renderer.worldToScreen(this.humanPlayer.x, this.humanPlayer.y);
+                lines.push("screenPos: " + sp.x.toFixed(1) + ", " + sp.y.toFixed(1));
+            }
+        } else {
+            lines.push("humanPlayer is NULL");
+        }
+        lines.push("");
+        lines.push("--- PLAYERS ---");
+        lines.push("count: " + this.players.length);
+        for (var i = 0; i < this.players.length; i++) {
+            var p = this.players[i];
+            lines.push("  [" + i + "] " + p.name + " alive:" + p.alive + " shape:" + p.shape + " pos:" + Math.round(p.x) + "," + Math.round(p.y));
+        }
+        lines.push("");
+        lines.push("--- ENGINE ---");
+        lines.push("WORLD_SIZE: " + WORLD_SIZE);
+        lines.push("GRID_RES: " + GRID_RES);
+        lines.push("CELL_SIZE: " + CELL_SIZE);
+        lines.push("Territory(0): " + this.engine.countTerritory(0));
+        lines.push("Level: " + this.currentLevel);
+        lines.push("");
+        lines.push("--- EQUIPPED ---");
+        lines.push("shape: " + this.equippedShape);
+        lines.push("color: " + this.equippedColor);
+        lines.push("powerup: " + this.equippedPowerup);
+        lines.push("");
+        lines.push("--- SKINS3D ---");
+        lines.push("skins3d exists: " + !!this.skins3d);
+        if (this.skins3d) lines.push("type: " + typeof this.skins3d.draw);
+        lines.push("window.innerWidth: " + window.innerWidth);
+        lines.push("window.innerHeight: " + window.innerHeight);
+        lines.push("devicePixelRatio: " + devicePixelRatio);
+
+        var dump = lines.join("\n");
+        console.log(dump);
+
+        // Show in pause overlay as selectable text
+        var overlay = document.getElementById("pause-overlay");
+        if (overlay) {
+            overlay.classList.remove("hidden");
+            overlay.innerHTML = '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.95);overflow:auto;padding:16px;z-index:999;">'
+                + '<textarea id="debug-dump" style="width:100%;height:70%;background:#111;color:#0f0;font:11px monospace;border:1px solid #333;padding:8px;resize:none;" readonly>' + dump + '</textarea>'
+                + '<div style="margin-top:12px;text-align:center;">'
+                + '<button onclick="document.getElementById(\'debug-dump\').select();document.execCommand(\'copy\')" style="padding:8px 16px;background:#00d2ff;color:#000;border:none;border-radius:6px;margin:4px;cursor:pointer;">Copy Logs</button>'
+                + '<button onclick="document.getElementById(\'pause-overlay\').classList.add(\'hidden\');game.resumeGame();" style="padding:8px 16px;background:#2ed573;color:#000;border:none;border-radius:6px;margin:4px;cursor:pointer;">Resume</button>'
+                + '<button onclick="document.getElementById(\'pause-overlay\').classList.add(\'hidden\');game.quitGame();" style="padding:8px 16px;background:#ff4757;color:#000;border:none;border-radius:6px;margin:4px;cursor:pointer;">Quit</button>'
+                + '</div></div>';
+        }
     }
 
     resumeGame() {
