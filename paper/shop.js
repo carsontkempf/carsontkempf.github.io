@@ -88,7 +88,7 @@ class Shop {
             else { stateClass = "locked"; stateText = `● ${item.price}`; }
 
             html += `<div class="shop-item ${stateClass}" data-id="${item.id}" data-tab="${this.activeTab}">
-                <div class="shop-item-preview">${this.renderPreview(item)}</div>
+                <div class="shop-item-preview">${this.renderPreview(item, this.activeTab)}</div>
                 <div class="shop-item-name">${item.name}</div>
                 <div class="shop-item-price ${owned ? 'price-owned' : ''}">${stateText}</div>
             </div>`;
@@ -114,13 +114,17 @@ class Shop {
         return html;
     }
 
-    renderPreview(item) {
-        if (this.activeTab === "colors") {
-            return `<div style="width:36px;height:36px;border-radius:8px;background:${item.color};margin:0 auto;"></div>`;
-        } else if (this.activeTab === "patterns") {
+    renderPreview(item, tab) {
+        const t = tab || this.activeTab;
+        if (t === "colors") {
+            return `<div style="width:36px;height:36px;border-radius:8px;background:${item.color || '#888'};margin:0 auto;"></div>`;
+        } else if (t === "patterns") {
             return `<div class="pattern-preview pattern-${item.id}"></div>`;
-        } else if (this.activeTab === "powerups") {
-            return `<div class="shape-preview" style="font-size:1.2em;">${item.desc ? '⚡' : ''}</div>`;
+        } else if (t === "powerups") {
+            return `<div class="shape-preview" style="font-size:1.4em;">⚡</div>`;
+        } else if (t === "shapes") {
+            const icons = { droplet:"💧", bunny:"🐰", penguin:"🐧", fox:"🦊", panda:"🐼", owl:"🦉", frog:"🐸", chick:"🐣", skateboard:"🛹", skis:"⛷", hoverboard:"🛸", ninja:"🥷", astronaut:"🧑‍🚀" };
+            return `<div class="shape-preview" style="font-size:1.8em;">${icons[item.id] || "🔵"}</div>`;
         } else {
             return `<div class="shape-preview shape-${item.id}"></div>`;
         }
@@ -212,7 +216,7 @@ class Shop {
             const desc = item.desc ? `<div class="shop-item-desc">${item.desc}</div>` : "";
 
             html += `<div class="shop-item ${stateClass}" data-id="${item.id}" data-tab="${this.loadoutTab}">
-                <div class="shop-item-preview">${this.renderPreview(item)}</div>
+                <div class="shop-item-preview">${this.renderPreview(item, this.loadoutTab)}</div>
                 <div class="shop-item-name">${item.name}</div>
                 ${desc}
                 <div class="shop-item-price price-owned">${stateText}</div>

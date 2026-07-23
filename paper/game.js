@@ -52,6 +52,10 @@ class Game {
                 this.equippedColor = d.equippedColor || "#00d2ff";
                 this.equippedPattern = d.equippedPattern || "solid";
                 this.equippedShape = d.equippedShape || "droplet";
+                // Validate shape exists in catalog
+                if (!SKIN_CATALOG.shapes.find(s => s.id === this.equippedShape)) {
+                    this.equippedShape = "droplet";
+                }
                 this.equippedPowerup = d.equippedPowerup || "none";
                 this.stats = d.stats || this.stats;
                 this.currentLevel = d.currentLevel || 1;
@@ -60,13 +64,15 @@ class Game {
 
         // Admins get everything unlocked
         if (this.isAdmin) {
-            const allItems = [
-                ...SKIN_CATALOG.colors.map(i => i.id),
-                ...SKIN_CATALOG.patterns.map(i => i.id),
-                ...SKIN_CATALOG.shapes.map(i => i.id),
-                ...SKIN_CATALOG.powerups.map(i => i.id),
-            ];
-            this.unlockedSkins = [...new Set([...this.unlockedSkins, ...allItems])];
+            try {
+                const allItems = [
+                    ...SKIN_CATALOG.colors.map(i => i.id),
+                    ...SKIN_CATALOG.patterns.map(i => i.id),
+                    ...SKIN_CATALOG.shapes.map(i => i.id),
+                    ...SKIN_CATALOG.powerups.map(i => i.id),
+                ];
+                this.unlockedSkins = [...new Set([...this.unlockedSkins, ...allItems])];
+            } catch (e) { console.warn("Admin unlock failed:", e); }
         }
 
         this.updateCoinDisplays();
@@ -97,7 +103,12 @@ class Game {
     updateCoinDisplays() { document.querySelectorAll("#menu-coins, #shop-coins").forEach(e => e.textContent = this.coins); }
 
     init() {
-        this.shop = new Shop(this);
+        try {
+            this.shop = new Shop(this);
+        } catch (e) {
+            console.error("Shop init error:", e);
+            this.shop = { render: ()=>{}, renderLoadout: ()=>{} };
+        }
         this.bindUI();
         this.showScreen("menu");
         window.addEventListener("resize", () => { if (this.renderer) this.renderer.resize(); });
