@@ -182,6 +182,15 @@ class Game {
     }
 
     startGame() {
+        try {
+            this._startGameInner();
+        } catch (e) {
+            console.error("startGame FAILED:", e);
+            alert("Game start error: " + e.message);
+        }
+    }
+
+    _startGameInner() {
         this.showScreen("game");
         this.state = "playing";
         this.engine.initGrid();

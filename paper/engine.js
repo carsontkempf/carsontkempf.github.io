@@ -239,8 +239,14 @@ class Engine {
         this._lastTime = now;
         this.gameTime += dt;
         if (this.gameTime >= GAME_DURATION) { this.running = false; if (this.onGameEnd) this.onGameEnd(); return; }
-        if (this.onUpdate) this.onUpdate(dt);
-        if (this.onRender) this.onRender(dt);
+        try {
+            if (this.onUpdate) this.onUpdate(dt);
+            if (this.onRender) this.onRender(dt);
+        } catch (e) {
+            console.error("Game loop error:", e);
+            this.running = false;
+            return;
+        }
         this.animFrameId = requestAnimationFrame(() => this._loop());
     }
 }
