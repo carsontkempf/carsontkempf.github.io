@@ -123,19 +123,24 @@ class TokenManager {
             const glowColor = `hsl(${hue}, 100%, 60%)`;
             const glowColor2 = `hsl(${(hue + 60) % 360}, 100%, 70%)`;
 
-            // Token trail (rainbow tinted)
+            // Token trail (rainbow tinted, as wide as token)
             if (t.trail.length > 1) {
+                const { x: tx, y: ty } = renderer.worldToScreen(t.x, t.y);
+                const tr = TOKEN_RADIUS * renderer.scale;
                 ctx.beginPath();
                 ctx.strokeStyle = glowColor;
-                ctx.globalAlpha = 0.25;
-                ctx.lineWidth = 3;
+                ctx.globalAlpha = 0.4;
+                ctx.lineWidth = tr * 2; // full token diameter
                 ctx.lineCap = "round";
+                ctx.lineJoin = "round";
                 const first = renderer.worldToScreen(t.trail[0].x, t.trail[0].y);
                 ctx.moveTo(first.x, first.y);
                 for (let i = 1; i < t.trail.length; i++) {
                     const pt = renderer.worldToScreen(t.trail[i].x, t.trail[i].y);
                     ctx.lineTo(pt.x, pt.y);
                 }
+                const tpos = renderer.worldToScreen(t.x, t.y);
+                ctx.lineTo(tpos.x, tpos.y);
                 ctx.stroke();
                 ctx.globalAlpha = 1;
             }

@@ -54,7 +54,8 @@ const SKIN_CATALOG = {
 class Shop {
     constructor(game) {
         this.game = game;
-        this.activeTab = "colors"; // colors, patterns, shapes
+        this.activeTab = "colors";
+        this.loadoutTab = "colors";
     }
 
     render() {
@@ -171,5 +172,77 @@ class Shop {
         else if (tab === "shapes") this.game.equippedShape = item.id;
         else if (tab === "powerups") this.game.equippedPowerup = item.id;
         this.game.saveUserData();
+    }
+
+    /**
+     * Render the loadout screen (only owned items, equip only).
+     */
+    renderLoadout() {
+        const container = document.getElementById("loadout-items");
+        if (!container) return;
+
+        let html = this.renderLoadoutTabs();
+        const items = SKIN_CATALOG[this.loadoutTab] || [];
+
+        html += '<div class="shop-grid">';
+        for (const item of items) {
+            const owned = this.game.unlockedSkins.includes(item.id) || item.price === 0;
+            if (!owned) continue; // Only show owned items in loadout
+
+            const equipped = this.isLoadoutEquipped(item);
+            const stateClass = equipped ? "equipped" : "owned";
+            const stateText = equipped ? "Equipped" : "Tap to equip";
+
+            html += `<div class="shop-item ${stateClass}" data-id="${item.id}" data-tab="${this.loadoutTab}">
+                <div class="shop-item-preview">${this.renderPreview(item)}</div>
+                <div class="shop-item-name">${item.name}</div>
+                <div class="shop-item-price price-owned">${stateText}</div>
+            </div>`;
+        }
+        html += '</div>';
+        container.innerHTML = html;
+        this.bindLoadoutEvents(container);
+    }
+
+    renderLoadoutTabs() {
+        const tabs = [
+            { id: "colors", label: "Colors" },
+            { id: "shapes", label: "3D Skins" },
+            { id: "powerups", label: "Powerups" },
+            { id: "patterns", label: "Trails" },
+        ];
+        let html = '<div class="shop-tabs">';
+        for (const tab of tabs) {
+            html += `<button class="shop-tab ${this.loadoutTab === tab.id ? 'active' : ''}" data-tab="${tab.id}">${tab.label}</button>`;
+        }
+        html += '</div>';
+        return html;
+    }
+
+    isLoadoutEquipped(item) {
+        if (this.loadoutTab === "colors") return this.game.equippedColor === item.color;
+        if (this.loadoutTab === "patterns") return this.game.equippedPattern === item.id;
+        if (this.loadoutTab === "shapes") return this.game.equippedShape === item.id;
+        if (this.loadoutTab === "powerups") return this.game.equippedPowerup === item.id;
+        return false;
+    }
+
+    bindLoadoutEvents(container) {
+        container.querySelectorAll(".shop-tab").forEach(tab => {
+            tab.addEventListener("click", () => {
+                this.loadoutTab = tab.dataset.tab;
+                this.renderLoadout();
+            });
+        });
+        container.querySelectorAll(".shop-item").forEach(el => {
+            el.addEventListener("click", () => {
+                const id = el.dataset.id;
+                const tab = el.dataset.tab;
+                const catalog = SKIN_CATALOG[tab];
+                const item = catalog.find(i => i.id === id);
+                if (item) this.equip(item, tab);
+                this.renderLoadout();
+            });
+        });
     }
 }

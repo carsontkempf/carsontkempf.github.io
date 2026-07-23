@@ -31,6 +31,7 @@ permalink: /paper/
                 <p class="subtitle">Claim territory. Eliminate opponents.</p>
                 <div class="menu-buttons">
                     <button id="btn-play" class="btn btn-primary btn-full btn-tall">Play</button>
+                    <button id="btn-loadout" class="btn btn-secondary btn-full">Customize</button>
                     <button id="btn-shop" class="btn btn-secondary btn-full">Shop</button>
                 </div>
                 <div class="coin-display">
@@ -69,11 +70,21 @@ permalink: /paper/
                     <span id="hud-hearts"></span>
                     <span id="hud-territory">0%</span>
                     <span id="hud-kills">0 kills</span>
+                    <button id="btn-pause" class="hud-btn">&#9646;&#9646;</button>
                 </div>
                 <div class="hud-leaderboard" id="hud-leaderboard"></div>
             </div>
             <!-- Virtual Joystick -->
             <div id="joystick-zone"></div>
+            <!-- Pause Overlay -->
+            <div id="pause-overlay" class="hidden">
+                <div class="pause-panel">
+                    <h2>Paused</h2>
+                    <button id="btn-resume" class="btn btn-primary btn-full">Resume</button>
+                    <button id="btn-loadout-pause" class="btn btn-secondary btn-full">Customize</button>
+                    <button id="btn-quit-game" class="btn btn-danger btn-full">Quit Game</button>
+                </div>
+            </div>
         </div>
 
         <!-- Results Screen -->
@@ -96,6 +107,16 @@ permalink: /paper/
                 </div>
                 <div id="shop-items" class="shop-grid"></div>
                 <button id="btn-shop-back" class="btn btn-ghost btn-full">Back</button>
+            </div>
+        </div>
+
+        <!-- Loadout / Customize Screen -->
+        <div id="screen-loadout" class="screen">
+            <div class="menu-container">
+                <h2>Customize</h2>
+                <p class="subtitle">Equip your owned items</p>
+                <div id="loadout-items"></div>
+                <button id="btn-loadout-back" class="btn btn-ghost btn-full">Back</button>
             </div>
         </div>
     </div>

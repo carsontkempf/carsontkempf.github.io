@@ -107,6 +107,17 @@ class Game {
         document.getElementById("btn-results-menu").addEventListener("click", () => this.showScreen("menu"));
         document.getElementById("btn-shop").addEventListener("click", () => { this.showScreen("shop"); this.shop.render(); });
         document.getElementById("btn-shop-back").addEventListener("click", () => this.showScreen("menu"));
+        document.getElementById("btn-loadout").addEventListener("click", () => { this.showScreen("loadout"); this.shop.renderLoadout(); });
+        document.getElementById("btn-loadout-back").addEventListener("click", () => this.showScreen("menu"));
+
+        // Pause/Quit
+        document.getElementById("btn-pause").addEventListener("click", () => this.pauseGame());
+        document.getElementById("btn-resume").addEventListener("click", () => this.resumeGame());
+        document.getElementById("btn-quit-game").addEventListener("click", () => this.quitGame());
+        document.getElementById("btn-loadout-pause").addEventListener("click", () => {
+            this.showScreen("loadout"); this.shop.renderLoadout();
+        });
+
         document.querySelectorAll("#ai-count-toggle .opt-btn").forEach(btn => {
             btn.addEventListener("click", () => {
                 document.querySelectorAll("#ai-count-toggle .opt-btn").forEach(b => b.classList.remove("active"));
@@ -120,6 +131,25 @@ class Game {
         this.state = name;
         document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
         document.getElementById("screen-" + name)?.classList.add("active");
+    }
+
+    pauseGame() {
+        if (!this.engine.running) return;
+        this.engine.running = false;
+        document.getElementById("pause-overlay").classList.remove("hidden");
+    }
+
+    resumeGame() {
+        document.getElementById("pause-overlay").classList.add("hidden");
+        this.engine.running = true;
+        this.engine._lastTime = performance.now();
+        this.engine._loop();
+    }
+
+    quitGame() {
+        document.getElementById("pause-overlay").classList.add("hidden");
+        this.engine.stop();
+        this.showScreen("menu");
     }
 
     startGame() {
