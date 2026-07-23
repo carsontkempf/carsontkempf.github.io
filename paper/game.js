@@ -327,6 +327,12 @@ class Game {
         this.renderer = new Renderer(document.getElementById("game-canvas"));
         this.joystick = new Joystick("joystick-zone");
 
+        // Set camera immediately to player (no lerp delay)
+        this.renderer.cameraX = center * this.renderer.scale;
+        this.renderer.cameraY = center * this.renderer.scale;
+        this.renderer.targetCamX = this.renderer.cameraX;
+        this.renderer.targetCamY = this.renderer.cameraY;
+
         // Engine callbacks
         this.engine.onUpdate = (dt) => this.update(dt);
         this.engine.onRender = (dt) => this.render(dt);
@@ -336,6 +342,10 @@ class Game {
         // Start after layout settles
         requestAnimationFrame(() => {
             this.renderer.resize();
+            this.renderer.cameraX = center * this.renderer.scale;
+            this.renderer.cameraY = center * this.renderer.scale;
+            this.renderer.targetCamX = this.renderer.cameraX;
+            this.renderer.targetCamY = this.renderer.cameraY;
             this.engine.start();
         });
     }

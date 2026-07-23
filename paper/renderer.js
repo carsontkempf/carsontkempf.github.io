@@ -39,10 +39,10 @@ class Renderer {
     }
 
     updateCamera(dt) {
-        const lerp = 1 - Math.pow(0.005, dt);
+        const lerp = 1 - Math.pow(0.0001, dt);
         this.cameraX += (this.targetCamX - this.cameraX) * lerp;
         this.cameraY += (this.targetCamY - this.cameraY) * lerp;
-        this.scale += (this.targetScale - this.scale) * lerp * 0.3;
+        this.scale += (this.targetScale - this.scale) * lerp * 0.5;
     }
 
     setZoomForTerritory(pct) {
