@@ -679,8 +679,8 @@ class Skins3DRenderer {
 
         var size = r * 2;
         var pixelSize = size / 16;
-        var blockDepth = pixelSize * 0.5;
-        var topSquish = 0.6;
+        var blockDepth = pixelSize * 1.5; // THICK 3D depth per voxel
+        var topSquish = 0.5; // more squished top = more visible sides
 
         // Ground shadow
         ctx.beginPath();
@@ -712,15 +712,15 @@ class Skins3DRenderer {
 
                 // TOP HIGHLIGHT
                 ctx.fillStyle = this.lighten(color, 0.2);
-                ctx.fillRect(px, py, pixelSize + 0.3, pixelSize * topSquish * 0.25);
+                ctx.fillRect(px, py, pixelSize + 0.3, pixelSize * topSquish * 0.2);
 
-                // FRONT FACE (depth)
+                // FRONT FACE (thick depth below each pixel)
                 ctx.fillStyle = this.darken(color, 0.5);
                 ctx.fillRect(px, py + pixelSize * topSquish, pixelSize + 0.3, blockDepth);
 
-                // RIGHT FACE (side)
+                // RIGHT FACE (thick side on each pixel)
                 ctx.fillStyle = this.darken(color, 0.65);
-                ctx.fillRect(px + pixelSize * 0.85, py, pixelSize * 0.15 + 0.3, pixelSize * topSquish + blockDepth);
+                ctx.fillRect(px + pixelSize * 0.7, py, pixelSize * 0.3 + 0.3, pixelSize * topSquish + blockDepth);
             }
         }
     }

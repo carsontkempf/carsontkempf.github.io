@@ -55,7 +55,8 @@ class Renderer {
     }
 
     /**
-     * Render territories: solid filled top surface with hex texture + 3D depth on edges.
+     * Render territories as proper 3D tessellating hexagons.
+     * Uses offset-row hex grid so hexagons tile without gaps.
      */
     renderTerritories(engine, players) {
         const ctx = this.ctx;
@@ -63,61 +64,67 @@ class Renderer {
         const cs = cellWorld * this.scale;
         if (cs < 0.3) return;
 
-        const depth = Math.max(2, cs * 0.4);
+        // Hex geometry for proper tiling
+        const hexW = cs; // width of hex cell matches grid cell
+        const hexH = cs * 0.9; // slight vertical compression for isometric
+        const hexDepth = Math.max(3, cs * 0.5); // thick 3D depth
 
         for (const p of players) {
             const baseColor = p.territoryColor || p.color;
-            const sideColor = this.darken(baseColor, 0.45);
+            const sideColor = this.darken(baseColor, 0.4);
+            const topLight = this.lighten(baseColor, 0.1);
 
-            // Pass 1: Depth strip on bottom-edge cells (cells with no neighbor below)
-            ctx.fillStyle = sideColor;
-            ctx.beginPath();
+            // Draw back-to-front (top rows first) for proper 3D overlap
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
+
+                    // Hex position with offset for odd rows
+                    const offset = (gy % 2) * hexW * 0.5;
+                    const sx = gx * hexW + offset - this.cameraX + this.screenW / 2;
+                    const sy = gy * hexH * 0.75 - this.cameraY + this.screenH / 2;
+
+                    if (sx > this.screenW + hexW || sx < -hexW || sy > this.screenH + hexH + hexDepth || sy < -hexH) continue;
+
                     const hasBelow = (gy + 1 < GRID_RES && engine.grid[gy + 1][gx] === p.id);
-                    if (hasBelow) continue;
-                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
-                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
-                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs * 2 || sy < -cs) continue;
-                    ctx.rect(sx, sy + cs, cs + 0.5, depth);
-                }
-            }
-            ctx.fill();
 
-            // Pass 2: Solid top surface (no gaps - full cell coverage)
-            ctx.fillStyle = baseColor;
-            ctx.globalAlpha = 0.7;
-            ctx.beginPath();
-            for (let gy = 0; gy < GRID_RES; gy++) {
-                for (let gx = 0; gx < GRID_RES; gx++) {
-                    if (engine.grid[gy][gx] !== p.id) continue;
-                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
-                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
-                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                    ctx.rect(sx, sy, cs + 0.5, cs + 0.5);
-                }
-            }
-            ctx.fill();
-            ctx.globalAlpha = 1;
-
-            // Pass 3: Hex grid texture on top (visible hexagonal pattern)
-            if (cs >= 2) {
-                ctx.strokeStyle = this.darken(baseColor, 0.4);
-                ctx.lineWidth = Math.max(0.8, cs * 0.08);
-                ctx.globalAlpha = 0.5;
-                for (let gy = 0; gy < GRID_RES; gy++) {
-                    for (let gx = 0; gx < GRID_RES; gx++) {
-                        if (engine.grid[gy][gx] !== p.id) continue;
-                        const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
-                        const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
-                        if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
+                    // SIDE FACE (only if no neighbor below)
+                    if (!hasBelow) {
                         ctx.beginPath();
-                        this._hexTop(ctx, sx + cs / 2, sy + cs / 2, cs * 0.48);
-                        ctx.stroke();
+                        // Bottom edge of hex to bottom edge + depth
+                        const hr = hexW * 0.5;
+                        ctx.moveTo(sx - hr * 0.87, sy + hexH * 0.25);
+                        ctx.lineTo(sx, sy + hexH * 0.5);
+                        ctx.lineTo(sx + hr * 0.87, sy + hexH * 0.25);
+                        ctx.lineTo(sx + hr * 0.87, sy + hexH * 0.25 + hexDepth);
+                        ctx.lineTo(sx, sy + hexH * 0.5 + hexDepth);
+                        ctx.lineTo(sx - hr * 0.87, sy + hexH * 0.25 + hexDepth);
+                        ctx.closePath();
+                        ctx.fillStyle = sideColor;
+                        ctx.fill();
                     }
+
+                    // TOP FACE (hexagon)
+                    ctx.beginPath();
+                    for (var i = 0; i < 6; i++) {
+                        var a = Math.PI / 6 + (Math.PI / 3) * i;
+                        var hx = sx + hexW * 0.48 * Math.cos(a);
+                        var hy = sy + hexH * 0.48 * Math.sin(a);
+                        if (i === 0) ctx.moveTo(hx, hy);
+                        else ctx.lineTo(hx, hy);
+                    }
+                    ctx.closePath();
+                    ctx.fillStyle = baseColor;
+                    ctx.globalAlpha = 0.7;
+                    ctx.fill();
+
+                    // Top edge highlight
+                    ctx.strokeStyle = topLight;
+                    ctx.lineWidth = 0.5;
+                    ctx.globalAlpha = 0.3;
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
                 }
-                ctx.globalAlpha = 1;
             }
         }
     }
