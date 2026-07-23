@@ -537,29 +537,43 @@ SPRITES.ninja = {
 
 
 class Skins3DRenderer {
-    constructor() {
-        this._cache = {};
-    }
+    constructor() {}
 
     /**
-     * Get facing direction from angle: front/back/left/right
+     * Get one of 4 base sprite directions + a rotation offset for smooth 32-dir
      */
-    getDirection(angle) {
+    getDirectionInfo(angle) {
+        // Normalize to 0-2PI
         var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-        if (a > Math.PI * 7 / 4 || a <= Math.PI / 4) return "right";
-        if (a > Math.PI / 4 && a <= Math.PI * 3 / 4) return "front";
-        if (a > Math.PI * 3 / 4 && a <= Math.PI * 5 / 4) return "left";
-        return "back";
+        // 32 steps = 11.25 degrees each
+        var step = Math.floor(a / (Math.PI * 2 / 32));
+        // Map 32 steps to 4 base sprites + rotation offset
+        // Steps 0-7: right (with -4 to +3 offset), 8-15: front, 16-23: left, 24-31: back
+        var dir, rotOffset;
+        if (step >= 28 || step < 4) {
+            dir = "right";
+            rotOffset = (step >= 28 ? step - 32 : step) * 0.04;
+        } else if (step >= 4 && step < 12) {
+            dir = "front";
+            rotOffset = (step - 8) * 0.04;
+        } else if (step >= 12 && step < 20) {
+            dir = "left";
+            rotOffset = (step - 16) * 0.04;
+        } else {
+            dir = "back";
+            rotOffset = (step - 24) * 0.04;
+        }
+        return { dir: dir, rot: rotOffset };
     }
 
     draw(ctx, x, y, r, angle, skinId, playerColor) {
         var sprite = SPRITES[skinId] || SPRITES.droplet;
-        var dir = this.getDirection(angle);
-        var grid = sprite[dir] || sprite.front;
+        var info = this.getDirectionInfo(angle);
+        var grid = sprite[info.dir] || sprite.front;
         var size = r * 2;
         var pixelSize = size / 16;
-        var blockDepth = pixelSize * 0.5; // how tall each voxel block is
-        var topSquish = 0.6; // Y compression for top face (isometric)
+        var blockDepth = pixelSize * 0.5;
+        var topSquish = 0.6;
 
         // Ground shadow
         ctx.beginPath();
@@ -567,10 +581,16 @@ class Skins3DRenderer {
         ctx.fillStyle = "rgba(0,0,0,0.3)";
         ctx.fill();
 
+        // Apply slight rotation for smooth 32-direction turning
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(info.rot);
+        ctx.translate(-x, -y);
+
         var startX = x - size / 2;
         var startY = y - size * topSquish / 2 - blockDepth;
 
-        // Draw from bottom-to-top row so upper rows overlap lower (correct depth)
+        // Draw rows bottom-to-top for proper overlap
         for (var row = 15; row >= 0; row--) {
             var line = grid[row];
             if (!line) continue;
@@ -586,47 +606,25 @@ class Skins3DRenderer {
                 var px = startX + col * pixelSize;
                 var py = startY + row * pixelSize * topSquish;
 
-                // TOP FACE (always visible - isometric rhombus)
+                // TOP FACE (always visible)
                 ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.moveTo(px, py);
-                ctx.lineTo(px + pixelSize, py);
-                ctx.lineTo(px + pixelSize, py + pixelSize * topSquish);
-                ctx.lineTo(px, py + pixelSize * topSquish);
-                ctx.closePath();
-                ctx.fill();
+                ctx.fillRect(px, py, pixelSize + 0.3, pixelSize * topSquish + 0.3);
 
-                // TOP HIGHLIGHT
-                ctx.fillStyle = this.lighten(color, 0.2);
-                ctx.beginPath();
-                ctx.moveTo(px, py);
-                ctx.lineTo(px + pixelSize, py);
-                ctx.lineTo(px + pixelSize, py + pixelSize * topSquish * 0.3);
-                ctx.lineTo(px, py + pixelSize * topSquish * 0.3);
-                ctx.closePath();
-                ctx.fill();
+                // TOP HIGHLIGHT (light from above-left)
+                ctx.fillStyle = this.lighten(color, 0.22);
+                ctx.fillRect(px, py, pixelSize + 0.3, pixelSize * topSquish * 0.25);
 
-                // FRONT FACE (bottom side - always visible from 3/4 view)
-                ctx.fillStyle = this.darken(color, 0.6);
-                ctx.beginPath();
-                ctx.moveTo(px, py + pixelSize * topSquish);
-                ctx.lineTo(px + pixelSize, py + pixelSize * topSquish);
-                ctx.lineTo(px + pixelSize, py + pixelSize * topSquish + blockDepth);
-                ctx.lineTo(px, py + pixelSize * topSquish + blockDepth);
-                ctx.closePath();
-                ctx.fill();
+                // FRONT FACE (bottom side - depth)
+                ctx.fillStyle = this.darken(color, 0.55);
+                ctx.fillRect(px, py + pixelSize * topSquish, pixelSize + 0.3, blockDepth);
 
-                // RIGHT FACE (visible when looking from slight right angle)
-                ctx.fillStyle = this.darken(color, 0.75);
-                ctx.beginPath();
-                ctx.moveTo(px + pixelSize, py);
-                ctx.lineTo(px + pixelSize, py + pixelSize * topSquish + blockDepth);
-                ctx.lineTo(px + pixelSize - pixelSize * 0.15, py + pixelSize * topSquish + blockDepth);
-                ctx.lineTo(px + pixelSize - pixelSize * 0.15, py);
-                ctx.closePath();
-                ctx.fill();
+                // RIGHT FACE (side depth)
+                ctx.fillStyle = this.darken(color, 0.7);
+                ctx.fillRect(px + pixelSize * 0.85, py, pixelSize * 0.15 + 0.3, pixelSize * topSquish + blockDepth);
             }
         }
+
+        ctx.restore();
     }
 
     lighten(color, amount) {

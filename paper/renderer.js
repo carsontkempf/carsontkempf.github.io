@@ -64,63 +64,68 @@ class Renderer {
         const cs = cellWorld * this.scale;
         if (cs < 0.3) return;
 
+        const hexR = cs * 0.52;
+        const depth = Math.max(1.5, cs * 0.3);
+
         for (const p of players) {
             const baseColor = p.territoryColor || p.color;
-            const topColor = baseColor;
             const sideColor = this.darken(baseColor, 0.5);
-            const depth = Math.max(2, cs * 0.35); // visible thickness on edges
 
-            // Pass 1: Draw side faces only on cells that have NO neighbor below them
+            // Pass 1: Side depth on bottom-edge cells only
             ctx.fillStyle = sideColor;
             ctx.globalAlpha = 0.7;
-            ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
-                    // Only draw depth if the cell below is NOT owned by same player
                     const hasBelow = (gy + 1 < GRID_RES && engine.grid[gy + 1][gx] === p.id);
                     if (hasBelow) continue;
-                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
-                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
+                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2 + cs / 2;
+                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2 + cs / 2;
                     if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs * 2 || sy < -cs) continue;
-                    ctx.rect(sx, sy + cs, cs + 0.5, depth);
+                    // Draw a flat side strip below the hex
+                    ctx.beginPath();
+                    ctx.moveTo(sx - hexR * 0.87, sy + hexR * 0.3);
+                    ctx.lineTo(sx + hexR * 0.87, sy + hexR * 0.3);
+                    ctx.lineTo(sx + hexR * 0.87, sy + hexR * 0.3 + depth);
+                    ctx.lineTo(sx - hexR * 0.87, sy + hexR * 0.3 + depth);
+                    ctx.closePath();
+                    ctx.fill();
                 }
             }
-            ctx.fill();
 
-            // Pass 2: Draw top faces for all owned cells
-            ctx.fillStyle = topColor;
+            // Pass 2: Hex top faces
+            ctx.fillStyle = baseColor;
             ctx.globalAlpha = 0.5;
             ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
-                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
-                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
+                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2 + cs / 2;
+                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2 + cs / 2;
                     if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                    ctx.rect(sx, sy, cs + 0.5, cs + 0.5);
+                    this._hexTop(ctx, sx, sy, hexR);
                 }
             }
             ctx.fill();
 
-            // Pass 3: Hex grid lines on top (subtle)
-            if (cs >= 4) {
-                ctx.strokeStyle = this.darken(baseColor, 0.65);
-                ctx.lineWidth = 0.3;
-                ctx.globalAlpha = 0.2;
+            // Pass 3: Hex outlines
+            if (cs >= 3) {
+                ctx.strokeStyle = this.darken(baseColor, 0.6);
+                ctx.lineWidth = 0.4;
+                ctx.globalAlpha = 0.25;
                 ctx.beginPath();
                 for (let gy = 0; gy < GRID_RES; gy++) {
                     for (let gx = 0; gx < GRID_RES; gx++) {
                         if (engine.grid[gy][gx] !== p.id) continue;
-                        const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
-                        const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
+                        const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2 + cs / 2;
+                        const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2 + cs / 2;
                         if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                        // Tiny hex outline
-                        this._hexTop(ctx, sx + cs / 2, sy + cs / 2, cs * 0.48);
+                        this._hexTop(ctx, sx, sy, hexR);
                     }
                 }
                 ctx.stroke();
             }
+            ctx.globalAlpha = 1;
             ctx.globalAlpha = 1;
         }
     }
@@ -169,7 +174,7 @@ class Renderer {
         for (const p of players) {
             if (!p.alive) continue;
             const { x, y } = this.worldToScreen(p.x, p.y);
-            const r = PLAYER_RADIUS * this.scale * 5.0;
+            const r = PLAYER_RADIUS * this.scale * 10.0;
 
             // Shadow
             ctx.beginPath();
@@ -177,10 +182,10 @@ class Renderer {
             ctx.fillStyle = "rgba(0,0,0,0.25)";
             ctx.fill();
 
-            // Draw skin (with fallback to simple circle)
+            // Draw skin
             const skinId = p.shape || "droplet";
             try {
-                if (skins3d && skinId !== "droplet") {
+                if (skins3d) {
                     skins3d.draw(ctx, x, y, r, p.angle, skinId, p.color);
                 } else {
                     this._drawSimplePlayer(ctx, x, y, r, p);
