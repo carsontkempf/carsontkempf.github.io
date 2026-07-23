@@ -539,38 +539,30 @@ SPRITES.ninja = {
 class Skins3DRenderer {
     constructor() {}
 
-    /**
-     * Get sprite direction based on movement angle.
-     * angle=0: right, PI/2: down, PI: left, 3PI/2: up
-     * In top-down view:
-     *   moving down -> back (away from viewer)
-     *   moving up -> front (facing viewer)
-     *   moving right -> right side
-     *   moving left -> left side
-     * 32 intermediate positions via small rotation offset.
-     */
-    getDirectionInfo(angle) {
-        var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-        // Divide into 8 sectors of 45 degrees
-        var sector = Math.floor(a / (Math.PI / 4));
-        var sectorAngle = a - sector * (Math.PI / 4);
-        var rotOffset = (sectorAngle - Math.PI / 8) * 0.3; // smooth sub-rotation
-
-        var dir;
-        switch (sector) {
-            case 0: case 7: dir = "right"; break;  // 0 or 315-360
-            case 1: case 2:  dir = "back"; break;  // 45-135 (moving down)
-            case 3: case 4:  dir = "left"; break;  // 135-225
-            case 5: case 6:  dir = "front"; break; // 225-315 (moving up)
-            default: dir = "front";
-        }
-        return { dir: dir, rot: rotOffset };
-    }
-
     draw(ctx, x, y, r, angle, skinId, playerColor) {
         var sprite = SPRITES[skinId] || SPRITES.droplet;
-        var info = this.getDirectionInfo(angle);
-        var grid = sprite[info.dir] || sprite.front;
+        var hasDirections = !!sprite.back;
+
+        var grid, rotAngle;
+        if (hasDirections) {
+            // Use directional sprites based on angle
+            var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+            var dir;
+            // right=0, down=PI/2, left=PI, up=3PI/2
+            if (a > Math.PI * 7/4 || a <= Math.PI * 1/4) dir = "right";
+            else if (a > Math.PI * 1/4 && a <= Math.PI * 3/4) dir = "back";
+            else if (a > Math.PI * 3/4 && a <= Math.PI * 5/4) dir = "left";
+            else dir = "front";
+            grid = sprite[dir] || sprite.front;
+            rotAngle = 0; // no extra rotation needed
+        } else {
+            // Single sprite - rotate the whole thing to face movement direction
+            grid = sprite.front;
+            // Rotate so the sprite faces the movement direction
+            // Subtract PI/2 because the sprite "faces down" by default (front view)
+            rotAngle = angle - Math.PI / 2;
+        }
+
         var size = r * 2;
         var pixelSize = size / 16;
         var blockDepth = pixelSize * 0.5;
@@ -582,16 +574,14 @@ class Skins3DRenderer {
         ctx.fillStyle = "rgba(0,0,0,0.3)";
         ctx.fill();
 
-        // Apply slight rotation for smooth 32-direction turning
         ctx.save();
         ctx.translate(x, y);
-        ctx.rotate(info.rot);
-        ctx.translate(-x, -y);
+        if (rotAngle !== 0) ctx.rotate(rotAngle);
 
-        var startX = x - size / 2;
-        var startY = y - size * topSquish / 2 - blockDepth;
+        var startX = -size / 2;
+        var startY = -size * topSquish / 2 - blockDepth;
 
-        // Draw rows bottom-to-top for proper overlap
+        // Draw rows bottom-to-top for correct overlap
         for (var row = 15; row >= 0; row--) {
             var line = grid[row];
             if (!line) continue;
@@ -607,20 +597,20 @@ class Skins3DRenderer {
                 var px = startX + col * pixelSize;
                 var py = startY + row * pixelSize * topSquish;
 
-                // TOP FACE (always visible)
+                // TOP FACE
                 ctx.fillStyle = color;
                 ctx.fillRect(px, py, pixelSize + 0.3, pixelSize * topSquish + 0.3);
 
-                // TOP HIGHLIGHT (light from above-left)
-                ctx.fillStyle = this.lighten(color, 0.22);
+                // TOP HIGHLIGHT
+                ctx.fillStyle = this.lighten(color, 0.2);
                 ctx.fillRect(px, py, pixelSize + 0.3, pixelSize * topSquish * 0.25);
 
-                // FRONT FACE (bottom side - depth)
-                ctx.fillStyle = this.darken(color, 0.55);
+                // FRONT FACE (depth below)
+                ctx.fillStyle = this.darken(color, 0.5);
                 ctx.fillRect(px, py + pixelSize * topSquish, pixelSize + 0.3, blockDepth);
 
                 // RIGHT FACE (side depth)
-                ctx.fillStyle = this.darken(color, 0.7);
+                ctx.fillStyle = this.darken(color, 0.65);
                 ctx.fillRect(px + pixelSize * 0.85, py, pixelSize * 0.15 + 0.3, pixelSize * topSquish + blockDepth);
             }
         }

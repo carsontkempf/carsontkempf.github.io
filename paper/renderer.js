@@ -55,8 +55,7 @@ class Renderer {
     }
 
     /**
-     * Render territories as smooth blobs with 3D shadow effect.
-     * Uses rounded circles per cell to create organic shapes.
+     * Render territories: solid filled top surface with hex texture + 3D depth on edges.
      */
     renderTerritories(engine, players) {
         const ctx = this.ctx;
@@ -64,68 +63,63 @@ class Renderer {
         const cs = cellWorld * this.scale;
         if (cs < 0.3) return;
 
-        const hexR = cs * 0.35;
-        const depth = Math.max(1.5, cs * 0.25);
+        const depth = Math.max(2, cs * 0.4);
 
         for (const p of players) {
             const baseColor = p.territoryColor || p.color;
-            const sideColor = this.darken(baseColor, 0.5);
+            const sideColor = this.darken(baseColor, 0.45);
 
-            // Pass 1: Side depth on bottom-edge cells only
+            // Pass 1: Depth strip on bottom-edge cells (cells with no neighbor below)
             ctx.fillStyle = sideColor;
-            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
                     const hasBelow = (gy + 1 < GRID_RES && engine.grid[gy + 1][gx] === p.id);
                     if (hasBelow) continue;
-                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2 + cs / 2;
-                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2 + cs / 2;
+                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
+                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
                     if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs * 2 || sy < -cs) continue;
-                    // Draw a flat side strip below the hex
-                    ctx.beginPath();
-                    ctx.moveTo(sx - hexR * 0.87, sy + hexR * 0.3);
-                    ctx.lineTo(sx + hexR * 0.87, sy + hexR * 0.3);
-                    ctx.lineTo(sx + hexR * 0.87, sy + hexR * 0.3 + depth);
-                    ctx.lineTo(sx - hexR * 0.87, sy + hexR * 0.3 + depth);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-            }
-
-            // Pass 2: Hex top faces
-            ctx.fillStyle = baseColor;
-            ctx.globalAlpha = 0.75;
-            ctx.beginPath();
-            for (let gy = 0; gy < GRID_RES; gy++) {
-                for (let gx = 0; gx < GRID_RES; gx++) {
-                    if (engine.grid[gy][gx] !== p.id) continue;
-                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2 + cs / 2;
-                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2 + cs / 2;
-                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                    this._hexTop(ctx, sx, sy, hexR);
+                    ctx.rect(sx, sy + cs, cs + 0.5, depth);
                 }
             }
             ctx.fill();
 
-            // Pass 3: Hex outlines
+            // Pass 2: Solid top surface (no gaps - full cell coverage)
+            ctx.fillStyle = baseColor;
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            for (let gy = 0; gy < GRID_RES; gy++) {
+                for (let gx = 0; gx < GRID_RES; gx++) {
+                    if (engine.grid[gy][gx] !== p.id) continue;
+                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
+                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
+                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
+                    ctx.rect(sx, sy, cs + 0.5, cs + 0.5);
+                }
+            }
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Pass 3: Hex grid texture on top (lines only, no fill)
             if (cs >= 3) {
-                ctx.strokeStyle = this.darken(baseColor, 0.6);
-                ctx.lineWidth = 0.4;
-                ctx.globalAlpha = 0.25;
-                ctx.beginPath();
+                ctx.strokeStyle = this.darken(baseColor, 0.55);
+                ctx.lineWidth = 0.5;
+                ctx.globalAlpha = 0.3;
                 for (let gy = 0; gy < GRID_RES; gy++) {
                     for (let gx = 0; gx < GRID_RES; gx++) {
                         if (engine.grid[gy][gx] !== p.id) continue;
-                        const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2 + cs / 2;
-                        const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2 + cs / 2;
+                        const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
+                        const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
                         if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                        this._hexTop(ctx, sx, sy, hexR);
+                        // Draw hex outline centered in cell
+                        ctx.beginPath();
+                        this._hexTop(ctx, sx + cs / 2, sy + cs / 2, cs * 0.42);
+                        ctx.stroke();
                     }
                 }
-                ctx.stroke();
+                ctx.globalAlpha = 1;
             }
-            ctx.globalAlpha = 1;
         }
     }
 
