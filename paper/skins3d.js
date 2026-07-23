@@ -1,23 +1,20 @@
 /**
- * Skins3D - Pixel-art style 3D characters for mobile paper.io game.
- * Each character is a fully drawn figure with body, head, limbs, accessories.
- * Rendered at 5x player radius for visibility on mobile.
+ * Skins3D - Pixel-art characters drawn as scaled sprite grids.
+ * Each character is a 16x16 pixel art grid rendered with 3D depth:
+ * - Each pixel is drawn as a small raised block (isometric style)
+ * - Colors include shading to simulate depth
+ * - Characters look like tiny 3D voxel figures
  */
 
 // Polyfill roundRect
 if (typeof CanvasRenderingContext2D !== "undefined" && !CanvasRenderingContext2D.prototype.roundRect) {
     CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
         var r = typeof radii === "number" ? radii : (radii && radii[0] || 0);
-        this.moveTo(x + r, y);
-        this.lineTo(x + w - r, y);
-        this.quadraticCurveTo(x + w, y, x + w, y + r);
-        this.lineTo(x + w, y + h - r);
-        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        this.lineTo(x + r, y + h);
-        this.quadraticCurveTo(x, y + h, x, y + h - r);
-        this.lineTo(x, y + r);
-        this.quadraticCurveTo(x, y, x + r, y);
-        this.closePath();
+        this.moveTo(x + r, y); this.lineTo(x + w - r, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r); this.lineTo(x + w, y + h - r);
+        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h); this.lineTo(x + r, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r); this.lineTo(x, y + r);
+        this.quadraticCurveTo(x, y, x + r, y); this.closePath();
     };
 }
 
@@ -37,609 +34,370 @@ const SKINS_3D = {
     ninja: { name: "Ninja", price: 500 },
 };
 
-class Skins3DRenderer {
-    constructor() {}
+// Pixel art sprites: 16x16 grids
+// Each cell is a color key: 0=transparent, letters=colors defined per sprite
+const SPRITES = {};
 
-    draw(ctx, x, y, r, angle, skinId, color) {
-        ctx.save();
-        ctx.translate(x, y);
+// --- BUNNY ---
+SPRITES.bunny = {
+    colors: { w:"#ffffff", W:"#e8e8e8", p:"#ffb8cc", P:"#ff88aa", k:"#111111", n:"#ffa0b0", b:"#fdd9b5" },
+    grid: [
+        "0000ww0000ww0000",
+        "0000ww0000ww0000",
+        "0000wp0000pw0000",
+        "0000ww0000ww0000",
+        "000wwwwwwwwww000",
+        "00wwwwwwwwwwww00",
+        "00wwkwwwwwwkww00",
+        "00wwwwwwnwwwww00",
+        "00Wwwwwwwwwwww00",
+        "000wwwwwwwwww000",
+        "0000WWWWWWWW0000",
+        "000WWWWWWWWWW000",
+        "00WWWWWWWWWWWW00",
+        "00WW00WWWW00WW00",
+        "00WW00WWWW00WW00",
+        "00pp000000pppp00",
+    ]
+};
+
+// --- PENGUIN ---
+SPRITES.penguin = {
+    colors: { k:"#1a1a2e", K:"#333344", w:"#f5f5f5", W:"#dddddd", o:"#ff8c00", O:"#cc7000", e:"#ffffff", p:"#111111" },
+    grid: [
+        "0000kkkkkk000000",
+        "000kkkkkkkkk0000",
+        "00kkkekkkekkkk00",
+        "00kkpekkkepkkk00",
+        "00kkkkkokkkkkkk0",
+        "00kkkkkkkkkkkkk0",
+        "0Kkkkwwwwwwkkkk0",
+        "0Kkkkwwwwwwkkkk0",
+        "0KKkkwwwwwwkkKK0",
+        "00KKkwwwwwwkKK00",
+        "000kkwwwwwwkk000",
+        "000kkwwwwwwkk000",
+        "0000kkwwwwkk0000",
+        "0000kkkkkkkk0000",
+        "000oo00000oo0000",
+        "000ooo000ooo0000",
+    ]
+};
+
+// --- FOX ---
+SPRITES.fox = {
+    colors: { o:"#f07020", O:"#cc5500", w:"#ffffff", W:"#e0e0e0", k:"#111111", n:"#222222", b:"#884400", t:"#ff9040" },
+    grid: [
+        "0o00000000000o00",
+        "0oo0000000000oo0",
+        "00ooooooooooooo0",
+        "00oookooookoooo0",
+        "00ooooowooooooo0",
+        "00ooowwwwwooooo0",
+        "000oooooooooooo0",
+        "0000oooooooooo00",
+        "000OOOOOoOOOO000",
+        "00OOOOOOOOOOOO00",
+        "00OOwwwwwwwwOO00",
+        "00OOwwwwwwwwOO00",
+        "000OOOOOOOOOO000",
+        "000OO0000000OO00",
+        "000nn00000000nn0",
+        "00000000000ttttt",
+    ]
+};
+
+// --- PANDA ---
+SPRITES.panda = {
+    colors: { w:"#ffffff", W:"#e8e8e8", k:"#222222", K:"#444444", p:"#111111", n:"#333333", e:"#ffffff" },
+    grid: [
+        "00kk00000000kk00",
+        "00kkk000000kkk00",
+        "00wwwwwwwwwwww00",
+        "0wwwkkwwwwkkwww0",
+        "0wwkpkwwwwkpkww0",
+        "0wwwkkwwwwkkwww0",
+        "0wwwwwwkkwwwwww0",
+        "00wwwwwwwwwwww00",
+        "0kWWWWWWWWWWWWk0",
+        "0kWWWWWWWWWWWWk0",
+        "0kkWWWwwwwWWWkk0",
+        "0kkWWWwwwwWWWkk0",
+        "00kWWWWWWWWWWk00",
+        "00kkWWWWWWWWkk00",
+        "000kk0000000kk00",
+        "000kk0000000kk00",
+    ]
+};
+
+// --- OWL ---
+SPRITES.owl = {
+    colors: { b:"#8B5E3C", B:"#6B3E1C", t:"#d4a574", o:"#ff8c00", O:"#cc7000", w:"#f0dcc0", k:"#111111", y:"#ff9800" },
+    grid: [
+        "00Bb000000000bB0",
+        "00bbb00000bbbbb0",
+        "00bbbbbbbbbbbbb0",
+        "0bbbwwbbbwwbbbb0",
+        "0bbwowbbwowbbbb0",
+        "0bbbwwbbbwwbbbb0",
+        "0bbbbbbybbbbbb00",
+        "00bbbbbbbbbbbb00",
+        "00BBbbttttbbBB00",
+        "00BBbbttttbbBB00",
+        "000Bbbttttbb000B",
+        "000Bbbbbbbbb000B",
+        "0000Bbbbbbbb0000",
+        "0000BBbbbbBB0000",
+        "00000yy00yy00000",
+        "00000yy00yy00000",
+    ]
+};
+
+// --- FROG ---
+SPRITES.frog = {
+    colors: { g:"#2ecc71", G:"#27ae60", l:"#a8e6cf", w:"#ffffff", k:"#111111", d:"#1a7a40" },
+    grid: [
+        "00ww00000000ww00",
+        "0wkww00000wkww00",
+        "00ww00000000ww00",
+        "00ggggggggggg000",
+        "0gggggggggggggg0",
+        "0ggggggggggggggg",
+        "0gggggddddgggg00",
+        "00ggggggggggg000",
+        "G00GGGGGGGGGG000",
+        "GG0GGGllllGGGG00",
+        "GG0GGGllllGGGGG0",
+        "GG0GGGllllGGGGG0",
+        "000GGGGGGGGGGGG0",
+        "000GGGGGGGGGGG00",
+        "000GG000000GG000",
+        "00ggg00000ggg000",
+    ]
+};
+
+// --- CHICK ---
+SPRITES.chick = {
+    colors: { y:"#ffd700", Y:"#f0c000", o:"#ff6600", O:"#cc5500", k:"#111111", w:"#ffffff", b:"#ff8888" },
+    grid: [
+        "000000YY00000000",
+        "00000YYY00000000",
+        "0000yyyyyy000000",
+        "000yyyyyyyy00000",
+        "000yykyyyyky0000",
+        "000yyyyyyyyyy000",
+        "000yyyyyyyyy0000",
+        "0000yyooyyyy0000",
+        "0000yyyyyyyy0000",
+        "000YYyyyyyYY0000",
+        "00YYYYyyyyYYY000",
+        "00YYYYyyyyYYY000",
+        "000YYYyyyyYYY000",
+        "0000YYyyyyYY0000",
+        "00000oo00oo00000",
+        "0000ooo0ooo00000",
+    ]
+};
+
+// --- ASTRONAUT ---
+SPRITES.astronaut = {
+    colors: { w:"#eeeeee", W:"#cccccc", g:"#888888", G:"#666666", b:"#2a4a8a", B:"#1a1a4e", v:"#4a90d9", s:"#aaaaaa" },
+    grid: [
+        "0000wwwwww000000",
+        "000wwwwwwwww0000",
+        "000wBBBBBBwww000",
+        "000wBvvvvBwww000",
+        "000wBvvvvBwww000",
+        "000wwBBBBwwww000",
+        "0000wwwwwwww0000",
+        "00gwwwwwwwwwwg00",
+        "00gwwwwwwwwwwg00",
+        "00sswwwwwwwwss00",
+        "00ssWWWWWWWWss00",
+        "000WWWWWWWWWW000",
+        "000WWWWWWWWWW000",
+        "000WW0000WW0WW00",
+        "000gg000gg00gg00",
+        "000ggg00ggg0000",
+    ]
+};
+
+// --- NINJA ---
+SPRITES.ninja = {
+    colors: { d:"#2f3542", D:"#1a1a2e", r:"#ff4757", R:"#cc3344", w:"#ffffff", g:"#c0a000", s:"#999999", k:"#111111" },
+    grid: [
+        "00000000s0000000",
+        "000000s0s0000000",
+        "0000ddddddd00000",
+        "000ddrrrrrdd0000",
+        "000ddwddwdddd000",
+        "000dddddddddrrr",
+        "0000ddddddddd000",
+        "000DDDDsDDDDD000",
+        "00DDDDDsDDDDDD00",
+        "00DDDDDDDDDDD000",
+        "00DDgggggggDD000",
+        "000DDDDDDDDD0000",
+        "000DDDDDDDDD0000",
+        "000DD00000DD0000",
+        "000DD00000DD0000",
+        "000kk00000kk0000",
+    ]
+};
+
+// --- SKATER ---
+SPRITES.skateboard = {
+    colors: { h:"#fdd9b5", H:"#eec9a5", c:"#333333", C:"#222222", s:"#00d2ff", S:"#0099bb", b:"#8B4513", k:"#444444", j:"#3366cc", J:"#2244aa" },
+    grid: [
+        "0000ccccc0000000",
+        "0000cccccc000000",
+        "000hhcccchh00000",
+        "000hhhhhhhh00000",
+        "000hhkhhkhhh0000",
+        "000hhhhhhhhh0000",
+        "0000ssssssss0000",
+        "000ssssssssss000",
+        "00Sssssssssss000",
+        "00Sssssssssss000",
+        "000jjjjjjjjj0000",
+        "000jjjjjjjjjj000",
+        "000jj0000jjjj000",
+        "000kk0000kkk0000",
+        "00bbbbbbbbbbb000",
+        "00k00k000k00k000",
+    ]
+};
+
+// --- SKIER ---
+SPRITES.skis = {
+    colors: { r:"#e74c3c", R:"#cc3333", h:"#fdd9b5", o:"#ffa500", O:"#cc8400", w:"#ffffff", k:"#222222", b:"#1e90ff", g:"#888888", K:"#333333" },
+    grid: [
+        "000000ww00000000",
+        "0000rrrrrr000000",
+        "000rrooorrrr0000",
+        "000rrKKKKrrr0000",
+        "000hhhhhhhh00000",
+        "000rrrrrrrrrr000",
+        "00rrrrrrrrrrrr00",
+        "0grrrrrrrrrrrg00",
+        "0g0rrrrrrrrr0g00",
+        "000KKKKKKKKKK000",
+        "000KK0000KKKK000",
+        "000KK0000KKKK000",
+        "000kk0000kkkk000",
+        "00bbb000bbbb0000",
+        "00bbb000bbbb0000",
+        "00bbb000bbbb0000",
+    ]
+};
+
+// --- HOVERBOARD ---
+SPRITES.hoverboard = {
+    colors: { d:"#2c3e50", D:"#1a252f", c:"#00d2ff", C:"#0099bb", p:"#7b2ff7", P:"#5a1fb7", g:"#00ff88", h:"#1a252f", k:"#111111" },
+    grid: [
+        "0000DDDDDDdd0000",
+        "000DDcccccDDd000",
+        "000DDDDDDDDDd000",
+        "000DDDDDDDDDD000",
+        "000DDkDDkDDDD000",
+        "0000DDDDDDDD0000",
+        "000ddddddddddd00",
+        "00dddddcdddddd00",
+        "00dddddddddddd00",
+        "000ddddddddddd00",
+        "000dd00000dd0000",
+        "000kk00000kk0000",
+        "0000kk000kk00000",
+        "0pppccccccccpp00",
+        "0PCCccccccccCP00",
+        "00gggg00gggggg00",
+    ]
+};
+
+// --- DROPLET (simple) ---
+SPRITES.droplet = {
+    colors: { c:"#00d2ff", C:"#0099bb", w:"#ffffff", W:"#aaeeff", k:"#111111" },
+    grid: [
+        "0000000cc0000000",
+        "000000cccc000000",
+        "00000cccccc00000",
+        "0000cccccccc0000",
+        "000ccWccccccc000",
+        "00cccWccccccc000",
+        "00cccccccccccc00",
+        "0ccccccccccccc00",
+        "0ccccckcckccccc0",
+        "0ccccccccccccc00",
+        "00cccccccccccc00",
+        "00ccccccccccc000",
+        "000cccccccccc000",
+        "0000Cccccccc0000",
+        "00000CCCCCC00000",
+        "0000000CC0000000",
+    ]
+};
+
+class Skins3DRenderer {
+    constructor() {
+        this._cache = {};
+    }
+
+    draw(ctx, x, y, r, angle, skinId, playerColor) {
+        var sprite = SPRITES[skinId] || SPRITES.droplet;
+        var size = r * 2;
+        var pixelSize = size / 16;
+
         // Ground shadow
         ctx.beginPath();
-        ctx.ellipse(0, r * 0.8, r * 0.5, r * 0.15, 0, 0, Math.PI * 2);
+        ctx.ellipse(x, y + r * 0.85, r * 0.5, r * 0.15, 0, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(0,0,0,0.25)";
         ctx.fill();
 
-        switch (skinId) {
-            case "bunny": this.drawBunny(ctx, r, color); break;
-            case "penguin": this.drawPenguin(ctx, r, color); break;
-            case "fox": this.drawFox(ctx, r, color); break;
-            case "panda": this.drawPanda(ctx, r, color); break;
-            case "owl": this.drawOwl(ctx, r, color); break;
-            case "frog": this.drawFrog(ctx, r, color); break;
-            case "chick": this.drawChick(ctx, r, color); break;
-            case "skateboard": this.drawSkater(ctx, r, color); break;
-            case "skis": this.drawSkier(ctx, r, color); break;
-            case "hoverboard": this.drawHoverboard(ctx, r, color); break;
-            case "astronaut": this.drawAstronaut(ctx, r, color); break;
-            case "ninja": this.drawNinja(ctx, r, color); break;
-            default: this.drawDroplet(ctx, r, color); break;
+        // Draw each pixel as a 3D-ish block
+        var startX = x - size / 2;
+        var startY = y - size / 2;
+
+        for (var row = 0; row < 16; row++) {
+            var line = sprite.grid[row];
+            for (var col = 0; col < 16; col++) {
+                var ch = line[col];
+                if (ch === "0") continue;
+
+                var color = sprite.colors[ch];
+                if (!color) continue;
+
+                // If color is the player-mapped color, use player color
+                if (ch === "c") color = playerColor;
+                if (ch === "C") color = this.darken(playerColor, 0.7);
+
+                var px = startX + col * pixelSize;
+                var py = startY + row * pixelSize;
+
+                // Main pixel face
+                ctx.fillStyle = color;
+                ctx.fillRect(px, py, pixelSize + 0.5, pixelSize + 0.5);
+
+                // Top edge highlight (lighter)
+                ctx.fillStyle = this.lighten(color, 0.2);
+                ctx.fillRect(px, py, pixelSize + 0.5, pixelSize * 0.2);
+
+                // Bottom/right shadow (darker)
+                ctx.fillStyle = this.darken(color, 0.7);
+                ctx.fillRect(px, py + pixelSize * 0.8, pixelSize + 0.5, pixelSize * 0.2);
+            }
         }
-        ctx.restore();
     }
 
-    // --- DROPLET (default) ---
-    drawDroplet(ctx, r, color) {
-        // Teardrop body
-        ctx.beginPath();
-        ctx.moveTo(0, -r * 0.7);
-        ctx.bezierCurveTo(r * 0.5, -r * 0.3, r * 0.5, r * 0.3, 0, r * 0.6);
-        ctx.bezierCurveTo(-r * 0.5, r * 0.3, -r * 0.5, -r * 0.3, 0, -r * 0.7);
-        ctx.closePath();
-        this.fill3D(ctx, 0, 0, r * 0.6, color);
-        // Eyes
-        this.drawEyes(ctx, r * 0.35, -r * 0.15, -r * 0.1);
-        // Highlight
-        this.specular(ctx, -r * 0.12, -r * 0.35, r * 0.1);
-    }
-
-    // --- BUNNY ---
-    drawBunny(ctx, r, color) {
-        // Feet
-        this.pill(ctx, -r * 0.2, r * 0.55, r * 0.15, r * 0.1, "#f8c8dc");
-        this.pill(ctx, r * 0.2, r * 0.55, r * 0.15, r * 0.1, "#f8c8dc");
-        // Body (oval torso)
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.2, r * 0.35, r * 0.4, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, r * 0.2, r * 0.4, "#f0f0f0");
-        // Arms
-        this.pill(ctx, -r * 0.4, r * 0.1, r * 0.1, r * 0.2, "#e8e8e8");
-        this.pill(ctx, r * 0.4, r * 0.1, r * 0.1, r * 0.2, "#e8e8e8");
-        // Head
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.25, r * 0.3, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.25, r * 0.3, "#fff");
-        // Ears (tall ovals)
-        this.pill(ctx, -r * 0.12, -r * 0.7, r * 0.08, r * 0.3, "#fff");
-        this.pill(ctx, r * 0.12, -r * 0.7, r * 0.08, r * 0.3, "#fff");
-        // Inner ears (pink)
-        this.pill(ctx, -r * 0.12, -r * 0.68, r * 0.04, r * 0.2, "#f8a0b8");
-        this.pill(ctx, r * 0.12, -r * 0.68, r * 0.04, r * 0.2, "#f8a0b8");
-        // Face
-        this.drawEyes(ctx, r * 0.32, -r * 0.15, -r * 0.28);
-        // Nose (pink triangle)
-        ctx.beginPath();
-        ctx.moveTo(0, -r * 0.2);
-        ctx.lineTo(-r * 0.04, -r * 0.15);
-        ctx.lineTo(r * 0.04, -r * 0.15);
-        ctx.closePath();
-        ctx.fillStyle = "#f08090";
-        ctx.fill();
-        // Cheeks
-        ctx.globalAlpha = 0.3;
-        ctx.beginPath(); ctx.arc(-r * 0.18, -r * 0.15, r * 0.06, 0, Math.PI * 2);
-        ctx.fillStyle = "#ff8888"; ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.18, -r * 0.15, r * 0.06, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        this.specular(ctx, -r * 0.1, -r * 0.4, r * 0.08);
-    }
-
-    // --- PENGUIN ---
-    drawPenguin(ctx, r, color) {
-        // Feet (orange)
-        this.pill(ctx, -r * 0.15, r * 0.6, r * 0.12, r * 0.06, "#ff9800");
-        this.pill(ctx, r * 0.15, r * 0.6, r * 0.12, r * 0.06, "#ff9800");
-        // Body (black oval)
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.15, r * 0.35, r * 0.5, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, r * 0.15, r * 0.45, "#222");
-        // White belly
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.25, r * 0.22, r * 0.35, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#f5f5f5";
-        ctx.fill();
-        // Wings/flippers
-        ctx.save();
-        ctx.translate(-r * 0.35, r * 0.1);
-        ctx.rotate(-0.2);
-        this.pill(ctx, 0, 0, r * 0.08, r * 0.25, "#333");
-        ctx.restore();
-        ctx.save();
-        ctx.translate(r * 0.35, r * 0.1);
-        ctx.rotate(0.2);
-        this.pill(ctx, 0, 0, r * 0.08, r * 0.25, "#333");
-        ctx.restore();
-        // Head (black circle)
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.3, r * 0.25, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.3, r * 0.25, "#1a1a1a");
-        // Eyes (white circles with black pupils)
-        ctx.fillStyle = "#fff";
-        ctx.beginPath(); ctx.arc(-r * 0.1, -r * 0.32, r * 0.07, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.1, -r * 0.32, r * 0.07, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#111";
-        ctx.beginPath(); ctx.arc(-r * 0.09, -r * 0.31, r * 0.04, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.11, -r * 0.31, r * 0.04, 0, Math.PI * 2); ctx.fill();
-        // Beak (orange)
-        ctx.beginPath();
-        ctx.moveTo(0, -r * 0.22);
-        ctx.lineTo(-r * 0.06, -r * 0.15);
-        ctx.lineTo(r * 0.06, -r * 0.15);
-        ctx.closePath();
-        ctx.fillStyle = "#ff9800";
-        ctx.fill();
-        this.specular(ctx, -r * 0.08, -r * 0.45, r * 0.06);
-    }
-
-    // --- FOX ---
-    drawFox(ctx, r, color) {
-        // Tail (big bushy behind body)
-        ctx.beginPath();
-        ctx.ellipse(r * 0.3, r * 0.3, r * 0.2, r * 0.35, 0.5, 0, Math.PI * 2);
-        this.fill3D(ctx, r * 0.3, r * 0.3, r * 0.25, "#e85d04");
-        // White tail tip
-        ctx.beginPath();
-        ctx.arc(r * 0.4, r * 0.55, r * 0.08, 0, Math.PI * 2);
-        ctx.fillStyle = "#fff"; ctx.fill();
-        // Feet
-        this.pill(ctx, -r * 0.15, r * 0.55, r * 0.08, r * 0.08, "#333");
-        this.pill(ctx, r * 0.15, r * 0.55, r * 0.08, r * 0.08, "#333");
-        // Body (orange)
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.15, r * 0.3, r * 0.4, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, r * 0.15, r * 0.35, "#f07020");
-        // White chest
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.25, r * 0.15, r * 0.2, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#fff"; ctx.fill();
-        // Head (orange, slightly pointed)
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.25, r * 0.28, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.25, r * 0.28, "#f07020");
-        // Ears (triangles)
-        ctx.fillStyle = "#e85d04";
-        ctx.beginPath(); ctx.moveTo(-r * 0.2, -r * 0.5); ctx.lineTo(-r * 0.3, -r * 0.75); ctx.lineTo(-r * 0.08, -r * 0.5); ctx.closePath(); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(r * 0.2, -r * 0.5); ctx.lineTo(r * 0.3, -r * 0.75); ctx.lineTo(r * 0.08, -r * 0.5); ctx.closePath(); ctx.fill();
-        // Inner ears
-        ctx.fillStyle = "#f8c8dc";
-        ctx.beginPath(); ctx.moveTo(-r * 0.17, -r * 0.52); ctx.lineTo(-r * 0.25, -r * 0.68); ctx.lineTo(-r * 0.11, -r * 0.52); ctx.closePath(); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(r * 0.17, -r * 0.52); ctx.lineTo(r * 0.25, -r * 0.68); ctx.lineTo(r * 0.11, -r * 0.52); ctx.closePath(); ctx.fill();
-        // White muzzle
-        ctx.beginPath();
-        ctx.ellipse(0, -r * 0.15, r * 0.13, r * 0.1, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#fff"; ctx.fill();
-        // Nose
-        ctx.beginPath(); ctx.arc(0, -r * 0.18, r * 0.04, 0, Math.PI * 2);
-        ctx.fillStyle = "#222"; ctx.fill();
-        // Eyes
-        this.drawEyes(ctx, r * 0.3, -r * 0.12, -r * 0.3);
-        this.specular(ctx, -r * 0.08, -r * 0.42, r * 0.07);
-    }
-
-    // --- PANDA ---
-    drawPanda(ctx, r, color) {
-        // Body (round white)
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.15, r * 0.35, r * 0.45, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, r * 0.15, r * 0.4, "#f8f8f8");
-        // Black arms
-        this.pill(ctx, -r * 0.4, r * 0.05, r * 0.12, r * 0.22, "#222");
-        this.pill(ctx, r * 0.4, r * 0.05, r * 0.12, r * 0.22, "#222");
-        // Black legs
-        this.pill(ctx, -r * 0.18, r * 0.55, r * 0.12, r * 0.12, "#222");
-        this.pill(ctx, r * 0.18, r * 0.55, r * 0.12, r * 0.12, "#222");
-        // Head (white)
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.28, r * 0.3, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.28, r * 0.3, "#fff");
-        // Ears (black)
-        ctx.fillStyle = "#222";
-        ctx.beginPath(); ctx.arc(-r * 0.22, -r * 0.52, r * 0.1, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.22, -r * 0.52, r * 0.1, 0, Math.PI * 2); ctx.fill();
-        // Eye patches (black ovals)
-        ctx.fillStyle = "#222";
-        ctx.beginPath(); ctx.ellipse(-r * 0.12, -r * 0.28, r * 0.1, r * 0.12, -0.2, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(r * 0.12, -r * 0.28, r * 0.1, r * 0.12, 0.2, 0, Math.PI * 2); ctx.fill();
-        // Eyes (white dots in patches)
-        ctx.fillStyle = "#fff";
-        ctx.beginPath(); ctx.arc(-r * 0.11, -r * 0.28, r * 0.04, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.11, -r * 0.28, r * 0.04, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#111";
-        ctx.beginPath(); ctx.arc(-r * 0.11, -r * 0.27, r * 0.025, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.11, -r * 0.27, r * 0.025, 0, Math.PI * 2); ctx.fill();
-        // Nose
-        ctx.beginPath(); ctx.ellipse(0, -r * 0.18, r * 0.04, r * 0.03, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#333"; ctx.fill();
-        this.specular(ctx, -r * 0.1, -r * 0.45, r * 0.07);
-    }
-
-    // --- OWL ---
-    drawOwl(ctx, r, color) {
-        // Body (brown, egg shape)
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.2, r * 0.3, r * 0.45, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, r * 0.2, r * 0.4, "#8B5E3C");
-        // Wing feathers (darker patches)
-        ctx.beginPath(); ctx.ellipse(-r * 0.3, r * 0.15, r * 0.1, r * 0.3, -0.2, 0, Math.PI * 2);
-        ctx.fillStyle = "#6B3E1C"; ctx.fill();
-        ctx.beginPath(); ctx.ellipse(r * 0.3, r * 0.15, r * 0.1, r * 0.3, 0.2, 0, Math.PI * 2);
-        ctx.fillStyle = "#6B3E1C"; ctx.fill();
-        // Belly (lighter)
-        ctx.beginPath(); ctx.ellipse(0, r * 0.3, r * 0.18, r * 0.25, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#d4a574"; ctx.fill();
-        // Head
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.25, r * 0.28, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.25, r * 0.28, "#8B5E3C");
-        // Ear tufts
-        ctx.fillStyle = "#6B3E1C";
-        ctx.beginPath(); ctx.moveTo(-r * 0.18, -r * 0.48); ctx.lineTo(-r * 0.25, -r * 0.72); ctx.lineTo(-r * 0.08, -r * 0.5); ctx.closePath(); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(r * 0.18, -r * 0.48); ctx.lineTo(r * 0.25, -r * 0.72); ctx.lineTo(r * 0.08, -r * 0.5); ctx.closePath(); ctx.fill();
-        // Eye discs (light circles)
-        ctx.fillStyle = "#f0dcc0";
-        ctx.beginPath(); ctx.arc(-r * 0.12, -r * 0.25, r * 0.12, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.12, -r * 0.25, r * 0.12, 0, Math.PI * 2); ctx.fill();
-        // Big eyes (orange with black)
-        ctx.fillStyle = "#ff8c00";
-        ctx.beginPath(); ctx.arc(-r * 0.12, -r * 0.25, r * 0.08, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.12, -r * 0.25, r * 0.08, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#111";
-        ctx.beginPath(); ctx.arc(-r * 0.12, -r * 0.24, r * 0.04, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.12, -r * 0.24, r * 0.04, 0, Math.PI * 2); ctx.fill();
-        // Beak
-        ctx.beginPath(); ctx.moveTo(0, -r * 0.18); ctx.lineTo(-r * 0.04, -r * 0.1); ctx.lineTo(r * 0.04, -r * 0.1); ctx.closePath();
-        ctx.fillStyle = "#ff9800"; ctx.fill();
-        // Feet
-        this.pill(ctx, -r * 0.12, r * 0.6, r * 0.08, r * 0.05, "#ff9800");
-        this.pill(ctx, r * 0.12, r * 0.6, r * 0.08, r * 0.05, "#ff9800");
-        this.specular(ctx, -r * 0.08, -r * 0.42, r * 0.06);
-    }
-
-    // --- FROG ---
-    drawFrog(ctx, r, color) {
-        // Body (green, squat)
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.2, r * 0.38, r * 0.35, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, r * 0.2, r * 0.35, "#2ecc71");
-        // Light belly
-        ctx.beginPath(); ctx.ellipse(0, r * 0.3, r * 0.22, r * 0.2, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#a8e6cf"; ctx.fill();
-        // Back legs (bent)
-        this.pill(ctx, -r * 0.35, r * 0.45, r * 0.12, r * 0.15, "#27ae60");
-        this.pill(ctx, r * 0.35, r * 0.45, r * 0.12, r * 0.15, "#27ae60");
-        // Front legs
-        this.pill(ctx, -r * 0.3, r * 0.15, r * 0.07, r * 0.15, "#27ae60");
-        this.pill(ctx, r * 0.3, r * 0.15, r * 0.07, r * 0.15, "#27ae60");
-        // Head (wide)
-        ctx.beginPath();
-        ctx.ellipse(0, -r * 0.15, r * 0.32, r * 0.25, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.15, r * 0.28, "#2ecc71");
-        // Bulging eyes (on top)
-        ctx.fillStyle = "#fff";
-        ctx.beginPath(); ctx.arc(-r * 0.15, -r * 0.38, r * 0.1, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.15, -r * 0.38, r * 0.1, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#111";
-        ctx.beginPath(); ctx.arc(-r * 0.14, -r * 0.37, r * 0.05, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.16, -r * 0.37, r * 0.05, 0, Math.PI * 2); ctx.fill();
-        // Wide smile
-        ctx.beginPath(); ctx.arc(0, -r * 0.08, r * 0.15, 0.1, Math.PI - 0.1);
-        ctx.strokeStyle = "#1a7a40"; ctx.lineWidth = 1.5; ctx.stroke();
-        // Spots on back
-        ctx.fillStyle = "rgba(30,80,40,0.3)";
-        ctx.beginPath(); ctx.arc(-r * 0.1, r * 0.1, r * 0.05, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.08, r * 0.2, r * 0.04, 0, Math.PI * 2); ctx.fill();
-        this.specular(ctx, -r * 0.1, -r * 0.35, r * 0.06);
-    }
-
-    // --- CHICK ---
-    drawChick(ctx, r, color) {
-        // Feet (orange)
-        this.pill(ctx, -r * 0.1, r * 0.6, r * 0.08, r * 0.06, "#ff8c00");
-        this.pill(ctx, r * 0.1, r * 0.6, r * 0.08, r * 0.06, "#ff8c00");
-        // Body (round yellow)
-        ctx.beginPath();
-        ctx.arc(0, r * 0.15, r * 0.35, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, r * 0.15, r * 0.35, "#ffd700");
-        // Wings (small)
-        ctx.beginPath(); ctx.ellipse(-r * 0.35, r * 0.15, r * 0.08, r * 0.15, -0.3, 0, Math.PI * 2);
-        ctx.fillStyle = "#f0c000"; ctx.fill();
-        ctx.beginPath(); ctx.ellipse(r * 0.35, r * 0.15, r * 0.08, r * 0.15, 0.3, 0, Math.PI * 2);
-        ctx.fillStyle = "#f0c000"; ctx.fill();
-        // Head (yellow)
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.22, r * 0.26, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.22, r * 0.26, "#ffe044");
-        // Crest (3 small feathers on top)
-        ctx.strokeStyle = "#f0a000"; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, -r * 0.48); ctx.lineTo(0, -r * 0.6); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(-r * 0.05, -r * 0.46); ctx.lineTo(-r * 0.08, -r * 0.56); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(r * 0.05, -r * 0.46); ctx.lineTo(r * 0.08, -r * 0.56); ctx.stroke();
-        // Eyes
-        this.drawEyes(ctx, r * 0.28, -r * 0.1, -r * 0.24);
-        // Beak (orange)
-        ctx.beginPath();
-        ctx.moveTo(0, -r * 0.15);
-        ctx.lineTo(-r * 0.06, -r * 0.08);
-        ctx.lineTo(r * 0.06, -r * 0.08);
-        ctx.closePath();
-        ctx.fillStyle = "#ff6600"; ctx.fill();
-        // Blush
-        ctx.globalAlpha = 0.25;
-        ctx.fillStyle = "#ff6666";
-        ctx.beginPath(); ctx.arc(-r * 0.15, -r * 0.14, r * 0.05, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.15, -r * 0.14, r * 0.05, 0, Math.PI * 2); ctx.fill();
-        ctx.globalAlpha = 1;
-        this.specular(ctx, -r * 0.08, -r * 0.38, r * 0.06);
-    }
-
-    // --- SKATER (person on skateboard) ---
-    drawSkater(ctx, r, color) {
-        // Skateboard
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.6, r * 0.45, r * 0.06, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, r * 0.6, r * 0.3, "#8B4513");
-        // Wheels
-        ctx.fillStyle = "#333";
-        ctx.beginPath(); ctx.arc(-r * 0.25, r * 0.68, r * 0.04, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.25, r * 0.68, r * 0.04, 0, Math.PI * 2); ctx.fill();
-        // Legs (standing on board)
-        this.pill(ctx, -r * 0.1, r * 0.35, r * 0.07, r * 0.2, "#3366cc");
-        this.pill(ctx, r * 0.1, r * 0.35, r * 0.07, r * 0.2, "#3366cc");
-        // Shoes
-        this.pill(ctx, -r * 0.1, r * 0.52, r * 0.09, r * 0.05, "#444");
-        this.pill(ctx, r * 0.1, r * 0.52, r * 0.09, r * 0.05, "#444");
-        // Body (t-shirt)
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.0, r * 0.22, r * 0.28, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, 0, r * 0.25, color);
-        // Arms
-        this.pill(ctx, -r * 0.3, -r * 0.05, r * 0.06, r * 0.18, color);
-        this.pill(ctx, r * 0.3, -r * 0.05, r * 0.06, r * 0.18, color);
-        // Head
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.35, r * 0.18, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.35, r * 0.18, "#fdd9b5");
-        // Hair/cap
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.42, r * 0.16, Math.PI, 0);
-        ctx.fillStyle = "#333"; ctx.fill();
-        // Cap brim
-        ctx.beginPath();
-        ctx.ellipse(0, -r * 0.38, r * 0.2, r * 0.04, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#222"; ctx.fill();
-        // Face
-        this.drawEyes(ctx, r * 0.2, -r * 0.08, -r * 0.37);
-        // Smile
-        ctx.beginPath(); ctx.arc(0, -r * 0.3, r * 0.06, 0.2, Math.PI - 0.2);
-        ctx.strokeStyle = "#333"; ctx.lineWidth = 1; ctx.stroke();
-        this.specular(ctx, -r * 0.06, -r * 0.48, r * 0.05);
-    }
-
-    // --- SKIER ---
-    drawSkier(ctx, r, color) {
-        // Skis (blue, horizontal)
-        this.pill(ctx, -r * 0.12, r * 0.7, r * 0.04, r * 0.5, "#1e90ff");
-        this.pill(ctx, r * 0.12, r * 0.7, r * 0.04, r * 0.5, "#1e90ff");
-        // Legs
-        this.pill(ctx, -r * 0.1, r * 0.35, r * 0.07, r * 0.2, "#222");
-        this.pill(ctx, r * 0.1, r * 0.35, r * 0.07, r * 0.2, "#222");
-        // Boots
-        this.pill(ctx, -r * 0.1, r * 0.52, r * 0.09, r * 0.06, "#444");
-        this.pill(ctx, r * 0.1, r * 0.52, r * 0.09, r * 0.06, "#444");
-        // Body (puffer jacket)
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.0, r * 0.25, r * 0.28, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, 0, r * 0.26, "#e74c3c");
-        // Arms (holding poles)
-        this.pill(ctx, -r * 0.32, -r * 0.05, r * 0.06, r * 0.2, "#e74c3c");
-        this.pill(ctx, r * 0.32, -r * 0.05, r * 0.06, r * 0.2, "#e74c3c");
-        // Poles
-        ctx.strokeStyle = "#888"; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(-r * 0.35, -r * 0.2); ctx.lineTo(-r * 0.4, r * 0.7); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(r * 0.35, -r * 0.2); ctx.lineTo(r * 0.4, r * 0.7); ctx.stroke();
-        // Head
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.35, r * 0.18, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.35, r * 0.18, "#fdd9b5");
-        // Goggles
-        ctx.fillStyle = "#ffa500";
-        ctx.beginPath(); ctx.ellipse(0, -r * 0.37, r * 0.16, r * 0.06, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#333";
-        ctx.beginPath(); ctx.ellipse(0, -r * 0.37, r * 0.14, r * 0.04, 0, 0, Math.PI * 2); ctx.fill();
-        // Beanie
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.45, r * 0.14, Math.PI, 0);
-        ctx.fillStyle = "#e74c3c"; ctx.fill();
-        // Pom pom
-        ctx.beginPath(); ctx.arc(0, -r * 0.58, r * 0.04, 0, Math.PI * 2);
-        ctx.fillStyle = "#fff"; ctx.fill();
-        this.specular(ctx, -r * 0.06, -r * 0.52, r * 0.04);
-    }
-
-    // --- HOVERBOARD ---
-    drawHoverboard(ctx, r, color) {
-        // Hover glow
-        ctx.beginPath(); ctx.ellipse(0, r * 0.65, r * 0.4, r * 0.08, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0,200,255,0.2)"; ctx.fill();
-        // Board (neon gradient)
-        ctx.beginPath(); ctx.ellipse(0, r * 0.5, r * 0.4, r * 0.06, 0, 0, Math.PI * 2);
-        var bg = ctx.createLinearGradient(-r * 0.4, 0, r * 0.4, 0);
-        bg.addColorStop(0, "#7b2ff7"); bg.addColorStop(0.5, "#00d2ff"); bg.addColorStop(1, "#ff6b81");
-        ctx.fillStyle = bg; ctx.fill();
-        // Glow under
-        ctx.beginPath(); ctx.ellipse(0, r * 0.55, r * 0.3, r * 0.04, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0,210,255,0.4)"; ctx.fill();
-        // Legs
-        this.pill(ctx, -r * 0.08, r * 0.28, r * 0.06, r * 0.18, "#222");
-        this.pill(ctx, r * 0.08, r * 0.28, r * 0.06, r * 0.18, "#222");
-        // Body (futuristic suit)
-        ctx.beginPath();
-        ctx.ellipse(0, -r * 0.05, r * 0.22, r * 0.28, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.05, r * 0.25, "#2c3e50");
-        // Glowing chest piece
-        ctx.beginPath(); ctx.arc(0, -r * 0.05, r * 0.08, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0,210,255,0.6)"; ctx.fill();
-        // Arms
-        this.pill(ctx, -r * 0.28, -r * 0.08, r * 0.06, r * 0.15, "#2c3e50");
-        this.pill(ctx, r * 0.28, -r * 0.08, r * 0.06, r * 0.15, "#2c3e50");
-        // Head (helmet)
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.38, r * 0.18, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.38, r * 0.18, "#1a252f");
-        // Visor
-        ctx.beginPath(); ctx.ellipse(0, -r * 0.36, r * 0.14, r * 0.08, 0, 0, Math.PI * 2);
-        var vg = ctx.createLinearGradient(0, -r * 0.44, 0, -r * 0.28);
-        vg.addColorStop(0, "#00d2ff"); vg.addColorStop(1, "#7b2ff7");
-        ctx.fillStyle = vg; ctx.fill();
-        this.specular(ctx, -r * 0.06, -r * 0.48, r * 0.05);
-    }
-
-    // --- ASTRONAUT ---
-    drawAstronaut(ctx, r, color) {
-        // Backpack
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.1, r * 0.2, r * 0.3, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, r * 0.1, r * 0.25, "#888");
-        // Legs (white suit)
-        this.pill(ctx, -r * 0.12, r * 0.45, r * 0.08, r * 0.2, "#ddd");
-        this.pill(ctx, r * 0.12, r * 0.45, r * 0.08, r * 0.2, "#ddd");
-        // Boots
-        this.pill(ctx, -r * 0.12, r * 0.6, r * 0.1, r * 0.06, "#777");
-        this.pill(ctx, r * 0.12, r * 0.6, r * 0.1, r * 0.06, "#777");
-        // Body (white puffy suit)
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.05, r * 0.28, r * 0.32, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, r * 0.05, r * 0.3, "#eee");
-        // Arms
-        this.pill(ctx, -r * 0.35, r * 0.0, r * 0.08, r * 0.2, "#ddd");
-        this.pill(ctx, r * 0.35, r * 0.0, r * 0.08, r * 0.2, "#ddd");
-        // Gloves
-        ctx.fillStyle = "#aaa";
-        ctx.beginPath(); ctx.arc(-r * 0.35, r * 0.18, r * 0.06, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.35, r * 0.18, r * 0.06, 0, Math.PI * 2); ctx.fill();
-        // Helmet (big sphere)
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.3, r * 0.25, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.3, r * 0.25, "#fff");
-        // Visor (dark blue/reflective)
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.28, r * 0.18, 0, Math.PI * 2);
-        var hg = ctx.createLinearGradient(0, -r * 0.45, 0, -r * 0.12);
-        hg.addColorStop(0, "#1a1a4e");
-        hg.addColorStop(0.5, "#2a4a8a");
-        hg.addColorStop(1, "#4a90d9");
-        ctx.fillStyle = hg; ctx.fill();
-        // Stars in visor
-        ctx.fillStyle = "rgba(255,255,255,0.5)";
-        ctx.beginPath(); ctx.arc(-r * 0.06, -r * 0.35, r * 0.02, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(r * 0.08, -r * 0.25, r * 0.015, 0, Math.PI * 2); ctx.fill();
-        // Flag patch on arm
-        ctx.fillStyle = "#cc0000";
-        ctx.fillRect(-r * 0.4, -r * 0.05, r * 0.1, r * 0.06);
-        this.specular(ctx, -r * 0.08, -r * 0.45, r * 0.06);
-    }
-
-    // --- NINJA ---
-    drawNinja(ctx, r, color) {
-        // Legs
-        this.pill(ctx, -r * 0.1, r * 0.4, r * 0.08, r * 0.2, "#1a1a2e");
-        this.pill(ctx, r * 0.1, r * 0.4, r * 0.08, r * 0.2, "#1a1a2e");
-        // Body (dark)
-        ctx.beginPath();
-        ctx.ellipse(0, r * 0.05, r * 0.25, r * 0.3, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, r * 0.05, r * 0.27, "#2f3542");
-        // Belt
-        ctx.fillStyle = "#555";
-        ctx.fillRect(-r * 0.25, r * 0.12, r * 0.5, r * 0.04);
-        // Arms
-        this.pill(ctx, -r * 0.32, -r * 0.05, r * 0.06, r * 0.2, "#2f3542");
-        this.pill(ctx, r * 0.32, -r * 0.05, r * 0.06, r * 0.2, "#2f3542");
-        // Sword on back (diagonal)
-        ctx.strokeStyle = "#999"; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(r * 0.15, -r * 0.6); ctx.lineTo(-r * 0.1, r * 0.3); ctx.stroke();
-        ctx.fillStyle = "#c0a000";
-        ctx.beginPath(); ctx.arc(r * 0.12, -r * 0.45, r * 0.03, 0, Math.PI * 2); ctx.fill();
-        // Head (masked)
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.32, r * 0.2, 0, Math.PI * 2);
-        this.fill3D(ctx, 0, -r * 0.32, r * 0.2, "#2f3542");
-        // Headband (red)
-        ctx.fillStyle = "#ff4757";
-        ctx.fillRect(-r * 0.2, -r * 0.36, r * 0.4, r * 0.05);
-        // Headband tails
-        ctx.strokeStyle = "#ff4757"; ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.moveTo(r * 0.2, -r * 0.34);
-        ctx.quadraticCurveTo(r * 0.4, -r * 0.4, r * 0.45, -r * 0.28);
-        ctx.stroke();
-        // Eyes (narrow slits, glowing)
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(-r * 0.12, -r * 0.34, r * 0.08, r * 0.03);
-        ctx.fillRect(r * 0.04, -r * 0.34, r * 0.08, r * 0.03);
-        this.specular(ctx, -r * 0.06, -r * 0.46, r * 0.04);
-    }
-
-    // ===================
-    // HELPER METHODS
-    // ===================
-
-    /** Draw a 3D-shaded filled shape (must have a path already begun) */
-    fill3D(ctx, cx, cy, r, color) {
-        var grad = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.4, r * 0.05, cx, cy, r * 1.1);
-        grad.addColorStop(0, this.lighten(color, 0.5));
-        grad.addColorStop(0.2, this.lighten(color, 0.2));
-        grad.addColorStop(0.5, color);
-        grad.addColorStop(0.8, this.darken(color, 0.7));
-        grad.addColorStop(1, this.darken(color, 0.4));
-        ctx.fillStyle = grad;
-        ctx.fill();
-    }
-
-    /** Draw a pill/capsule shape (rounded rect) */
-    pill(ctx, x, y, rx, ry, color) {
-        ctx.beginPath();
-        ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
-        this.fill3D(ctx, x, y, Math.max(rx, ry), color);
-    }
-
-    /** Draw cute eyes */
-    drawEyes(ctx, spacing, centerX, centerY) {
-        var ex = spacing / 2;
-        // White
-        ctx.fillStyle = "#fff";
-        ctx.beginPath(); ctx.arc(centerX - ex, centerY, spacing * 0.2, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(centerX + ex, centerY, spacing * 0.2, 0, Math.PI * 2); ctx.fill();
-        // Pupil
-        ctx.fillStyle = "#111";
-        ctx.beginPath(); ctx.arc(centerX - ex + 1, centerY + 1, spacing * 0.12, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(centerX + ex + 1, centerY + 1, spacing * 0.12, 0, Math.PI * 2); ctx.fill();
-        // Highlight
-        ctx.fillStyle = "#fff";
-        ctx.beginPath(); ctx.arc(centerX - ex - 1, centerY - 1, spacing * 0.06, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(centerX + ex - 1, centerY - 1, spacing * 0.06, 0, Math.PI * 2); ctx.fill();
-    }
-
-    /** Specular highlight */
-    specular(ctx, x, y, r) {
-        var grad = ctx.createRadialGradient(x, y, 0, x, y, r);
-        grad.addColorStop(0, "rgba(255,255,255,0.6)");
-        grad.addColorStop(0.6, "rgba(255,255,255,0.15)");
-        grad.addColorStop(1, "rgba(255,255,255,0)");
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fillStyle = grad;
-        ctx.fill();
-    }
-
-    /** Lighten a color */
     lighten(color, amount) {
         var r, g, b;
-        if (color.startsWith("rgb")) {
-            var m = color.match(/\d+/g);
-            r = parseInt(m[0]); g = parseInt(m[1]); b = parseInt(m[2]);
-        } else {
+        if (color[0] === "#") {
             r = parseInt(color.slice(1, 3), 16);
             g = parseInt(color.slice(3, 5), 16);
             b = parseInt(color.slice(5, 7), 16);
+        } else {
+            var m = color.match(/\d+/g);
+            if (!m) return color;
+            r = parseInt(m[0]); g = parseInt(m[1]); b = parseInt(m[2]);
         }
         r = Math.min(255, r + Math.floor(255 * amount));
         g = Math.min(255, g + Math.floor(255 * amount));
@@ -647,16 +405,16 @@ class Skins3DRenderer {
         return "rgb(" + r + "," + g + "," + b + ")";
     }
 
-    /** Darken a color */
     darken(color, factor) {
         var r, g, b;
-        if (color.startsWith("rgb")) {
-            var m = color.match(/\d+/g);
-            r = parseInt(m[0]); g = parseInt(m[1]); b = parseInt(m[2]);
-        } else {
+        if (color[0] === "#") {
             r = parseInt(color.slice(1, 3), 16);
             g = parseInt(color.slice(3, 5), 16);
             b = parseInt(color.slice(5, 7), 16);
+        } else {
+            var m = color.match(/\d+/g);
+            if (!m) return color;
+            r = parseInt(m[0]); g = parseInt(m[1]); b = parseInt(m[2]);
         }
         return "rgb(" + Math.floor(r * factor) + "," + Math.floor(g * factor) + "," + Math.floor(b * factor) + ")";
     }

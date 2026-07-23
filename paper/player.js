@@ -220,8 +220,14 @@ class Player {
     }
 
     respawn(engine) {
-        this.x = 1000 + Math.random() * (WORLD_SIZE - 2000);
-        this.y = 1000 + Math.random() * (WORLD_SIZE - 2000);
+        // Spawn inside arena circle at random position
+        var cx = WORLD_SIZE / 2;
+        var cy = WORLD_SIZE / 2;
+        var maxR = (this.arenaRadius || WORLD_SIZE / 2) - this.spawnRadius - 500;
+        var angle = Math.random() * Math.PI * 2;
+        var dist = Math.random() * maxR * 0.7; // stay well inside
+        this.x = cx + Math.cos(angle) * dist;
+        this.y = cy + Math.sin(angle) * dist;
         this.alive = true;
         this.isInOwnTerritory = true;
         this.trail = [];
