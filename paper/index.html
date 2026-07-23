@@ -15,7 +15,7 @@ permalink: /paper/
     <meta name="theme-color" content="#1a1a2e">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Paper Conquest</title>
-    <link rel="stylesheet" href="/paper/style.css?v=20260723c">
+    <link rel="stylesheet" href="/paper/style.css?v=20260723d">
 </head>
 <body>
     <!-- Auth Gate -->
@@ -23,7 +23,8 @@ permalink: /paper/
         <div class="loading-screen">
             <h1>Paper Conquest</h1>
             <div class="loading-spinner"></div>
-            <p id="loading-status">Loading...</p>
+            <p id="loading-status">Loading v2023c...</p>
+            <p style="color:#666;font-size:10px;">Build: 2026-07-23 13:18</p>
             <button id="btn-skip-auth" class="btn btn-ghost" style="display:none;margin-top:16px;">Play as Guest</button>
         </div>
     </div>
@@ -120,25 +121,54 @@ permalink: /paper/
         </div>
     </div>
 
+    <!-- Inline diagnostic - runs before any external scripts -->
+    <script>
+    window._paperDbg = [];
+    window.onerror = function(m,s,l) {
+        var el = document.getElementById("loading-status");
+        if (el) el.textContent = "JS ERROR: " + m + " (line " + l + " in " + (s||"").split("/").pop() + ")";
+        window._paperDbg.push("ERR:" + m);
+        return false;
+    };
+    </script>
+
     <!-- Auth SDK (site-level) -->
     <script src="/assets/js/learn-auth-sdk.js"></script>
     <script src="/assets/js/auth-service.js"></script>
 
     <!-- Game Scripts -->
-    <script src="/paper/engine.js?v=20260723c"></script>
-    <script src="/paper/renderer.js?v=20260723c"></script>
-    <script src="/paper/levels.js?v=20260723c"></script>
-    <script src="/paper/skins3d.js?v=20260723c"></script>
-    <script src="/paper/characters.js?v=20260723c"></script>
-    <script src="/paper/effects.js?v=20260723c"></script>
-    <script src="/paper/minimap.js?v=20260723c"></script>
-    <script src="/paper/tokens.js?v=20260723c"></script>
-    <script src="/paper/jackpot.js?v=20260723c"></script>
-    <script src="/paper/toasts.js?v=20260723c"></script>
-    <script src="/paper/player.js?v=20260723c"></script>
-    <script src="/paper/ai.js?v=20260723c"></script>
-    <script src="/paper/joystick.js?v=20260723c"></script>
-    <script src="/paper/shop.js?v=20260723c"></script>
-    <script src="/paper/game.js?v=20260723c"></script>
+    <script src="/paper/engine.js?v=20260723d"></script>
+    <script src="/paper/renderer.js?v=20260723d"></script>
+    <script src="/paper/levels.js?v=20260723d"></script>
+    <script src="/paper/skins3d.js?v=20260723d"></script>
+    <script src="/paper/characters.js?v=20260723d"></script>
+    <script src="/paper/effects.js?v=20260723d"></script>
+    <script src="/paper/minimap.js?v=20260723d"></script>
+    <script src="/paper/tokens.js?v=20260723d"></script>
+    <script src="/paper/jackpot.js?v=20260723d"></script>
+    <script src="/paper/toasts.js?v=20260723d"></script>
+    <script src="/paper/player.js?v=20260723d"></script>
+    <script src="/paper/ai.js?v=20260723d"></script>
+    <script src="/paper/joystick.js?v=20260723d"></script>
+    <script src="/paper/shop.js?v=20260723d"></script>
+    <script src="/paper/game.js?v=20260723d"></script>
+    <script>
+    // Post-load check
+    (function() {
+        var el = document.getElementById("loading-status");
+        var missing = [];
+        if (typeof Engine === "undefined") missing.push("Engine");
+        if (typeof Renderer === "undefined") missing.push("Renderer");
+        if (typeof Skins3DRenderer === "undefined") missing.push("Skins3D");
+        if (typeof Player === "undefined") missing.push("Player");
+        if (typeof Game === "undefined") missing.push("Game");
+        if (typeof SKIN_CATALOG === "undefined") missing.push("Shop");
+        if (missing.length > 0) {
+            if (el) el.textContent = "FAILED TO LOAD: " + missing.join(", ");
+        } else {
+            if (el) el.textContent = "All scripts loaded OK";
+        }
+    })();
+    </script>
 </body>
 </html>

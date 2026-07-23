@@ -43,23 +43,27 @@ class Game {
         this.isAdmin = this.checkAdmin(user);
 
         const key = "paper_data_" + this.userId;
-        const saved = localStorage.getItem(key);
-        if (saved) {
-            try {
+        try {
+            const saved = localStorage.getItem(key);
+            if (saved) {
                 const d = JSON.parse(saved);
                 this.coins = d.coins || 0;
                 this.unlockedSkins = d.unlockedSkins || ["default"];
                 this.equippedColor = d.equippedColor || "#00d2ff";
                 this.equippedPattern = d.equippedPattern || "solid";
                 this.equippedShape = d.equippedShape || "droplet";
-                // Validate shape exists in catalog
-                if (!SKIN_CATALOG.shapes.find(s => s.id === this.equippedShape)) {
-                    this.equippedShape = "droplet";
-                }
                 this.equippedPowerup = d.equippedPowerup || "none";
                 this.stats = d.stats || this.stats;
                 this.currentLevel = d.currentLevel || 1;
-            } catch (e) {}
+                // Validate shape
+                if (typeof SKIN_CATALOG !== "undefined" && !SKIN_CATALOG.shapes.find(s => s.id === this.equippedShape)) {
+                    this.equippedShape = "droplet";
+                }
+            }
+        } catch (e) {
+            // Corrupted data - reset
+            localStorage.removeItem(key);
+            dbg("localStorage reset");
         }
 
         // Admins get everything unlocked

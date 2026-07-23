@@ -118,7 +118,7 @@ class Renderer {
         for (const p of players) {
             if (!p.alive) continue;
             const { x, y } = this.worldToScreen(p.x, p.y);
-            const r = PLAYER_RADIUS * this.scale * 5.0; // 5x bigger than trail
+            const r = PLAYER_RADIUS * this.scale * 5.0;
 
             // Shadow
             ctx.beginPath();
@@ -126,30 +126,32 @@ class Renderer {
             ctx.fillStyle = "rgba(0,0,0,0.25)";
             ctx.fill();
 
-            // Draw 3D skin
+            // Draw skin (with fallback to simple circle)
             const skinId = p.shape || "droplet";
-            if (skins3d) {
-                skins3d.draw(ctx, x, y, r, p.angle, skinId, p.color);
-            } else {
-                // Fallback droplet
-                ctx.save();
-                ctx.translate(x, y);
-                ctx.rotate(p.angle);
-                ctx.beginPath();
-                ctx.moveTo(r * 0.9, 0);
-                ctx.quadraticCurveTo(r * 0.3, -r * 0.7, -r * 0.6, -r * 0.3);
-                ctx.quadraticCurveTo(-r * 1.0, 0, -r * 0.6, r * 0.3);
-                ctx.quadraticCurveTo(r * 0.3, r * 0.7, r * 0.9, 0);
-                ctx.closePath();
-                const grad = ctx.createRadialGradient(-r * 0.1, -r * 0.2, 0, 0, 0, r);
-                grad.addColorStop(0, "#fff");
-                grad.addColorStop(0.25, p.color);
-                grad.addColorStop(1, this.darken(p.color, 0.4));
-                ctx.fillStyle = grad;
-                ctx.fill();
-                ctx.restore();
+            try {
+                if (skins3d && skinId !== "droplet") {
+                    skins3d.draw(ctx, x, y, r, p.angle, skinId, p.color);
+                } else {
+                    this._drawSimplePlayer(ctx, x, y, r, p);
+                }
+            } catch (e) {
+                this._drawSimplePlayer(ctx, x, y, r, p);
             }
         }
+    }
+
+    _drawSimplePlayer(ctx, x, y, r, p) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(p.angle);
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.6, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
     }
 
     renderBorder(arenaRadius) {
