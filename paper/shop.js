@@ -44,7 +44,11 @@ const SKIN_CATALOG = {
     ],
     powerups: [
         { id: "none", name: "None", price: 0, desc: "No powerup equipped" },
-        { id: "big_start", name: "Big Start", price: 200, desc: "60% bigger starting territory" },
+        { id: "big_start_1", name: "Big Start I", price: 100, desc: "20% bigger starting territory", tier: 1 },
+        { id: "big_start_2", name: "Big Start II", price: 250, desc: "40% bigger starting territory", tier: 2, requires: "big_start_1" },
+        { id: "big_start_3", name: "Big Start III", price: 500, desc: "70% bigger starting territory", tier: 3, requires: "big_start_2" },
+        { id: "big_start_4", name: "Big Start IV", price: 1000, desc: "100% bigger starting territory", tier: 4, requires: "big_start_3" },
+        { id: "big_start_5", name: "Big Start V", price: 2000, desc: "150% bigger starting territory", tier: 5, requires: "big_start_4" },
         { id: "magnet", name: "Magnet", price: 300, desc: "Tokens attracted from 2x range" },
         { id: "shield", name: "Shield", price: 500, desc: "Survive one trail hit" },
         { id: "thick_trail", name: "Wide Trail", price: 250, desc: "Trail is 50% wider (harder to dodge)" },
@@ -73,11 +77,13 @@ class Shop {
             const owned = this.game.unlockedSkins.includes(item.id);
             const equipped = this.isEquipped(item);
             const canAfford = this.game.coins >= item.price;
+            const prereqMet = !item.requires || this.game.unlockedSkins.includes(item.requires);
 
             let stateClass = "";
             let stateText = "";
             if (equipped) { stateClass = "equipped"; stateText = "Equipped"; }
             else if (owned) { stateClass = "owned"; stateText = "Owned"; }
+            else if (!prereqMet) { stateClass = "locked"; stateText = "Requires " + (item.requires || "").replace(/_/g, " "); }
             else if (canAfford) { stateText = `● ${item.price}`; }
             else { stateClass = "locked"; stateText = `● ${item.price}`; }
 
@@ -157,13 +163,20 @@ class Shop {
         if (owned) {
             // Equip it
             this.equip(item, tab);
-        } else if (this.game.coins >= item.price) {
-            // Purchase
-            this.game.coins -= item.price;
-            this.game.unlockedSkins.push(id);
-            this.equip(item, tab);
-            this.game.saveUserData();
-            this.game.updateCoinDisplays();
+        } else {
+            // Check prerequisite
+            if (item.requires && !this.game.unlockedSkins.includes(item.requires)) {
+                // Can't buy - need prerequisite first
+                return;
+            }
+            if (this.game.coins >= item.price) {
+                // Purchase
+                this.game.coins -= item.price;
+                this.game.unlockedSkins.push(id);
+                this.equip(item, tab);
+                this.game.saveUserData();
+                this.game.updateCoinDisplays();
+            }
         }
 
         this.render();

@@ -173,9 +173,11 @@ class Game {
         // Apply powerups
         if (this.equippedPowerup === "heart_1") this.humanPlayer.hearts = 1;
         else if (this.equippedPowerup === "heart_3") this.humanPlayer.hearts = 3;
-        else if (this.equippedPowerup === "big_start") {
-            this.humanPlayer.spawnRadius = 800; // 60% bigger
-        }
+        else if (this.equippedPowerup === "big_start_1") this.humanPlayer.spawnRadius = 600;
+        else if (this.equippedPowerup === "big_start_2") this.humanPlayer.spawnRadius = 700;
+        else if (this.equippedPowerup === "big_start_3") this.humanPlayer.spawnRadius = 850;
+        else if (this.equippedPowerup === "big_start_4") this.humanPlayer.spawnRadius = 1000;
+        else if (this.equippedPowerup === "big_start_5") this.humanPlayer.spawnRadius = 1250;
         this.humanPlayer.spawnTerritory(this.engine);
         this.players.push(this.humanPlayer);
 
