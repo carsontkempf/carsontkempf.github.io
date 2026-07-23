@@ -187,11 +187,13 @@ class Game {
     }
 
     startGame() {
+        dbg("startGame called");
         try {
             this._startGameInner();
+            dbg("startGame done");
         } catch (e) {
-            console.error("startGame FAILED:", e);
-            alert("Game start error: " + e.message);
+            dbg("startGame FAIL:" + e.message);
+            console.error("startGame error:", e);
         }
     }
 
@@ -322,6 +324,13 @@ class Game {
 
     render(dt) {
         if (!this.renderer) return;
+        // Debug overlay
+        if (!this._fc) this._fc = 0;
+        this._fc++;
+        if (this._fc % 30 === 0) {
+            const dEl = document.getElementById("debug-overlay");
+            if (dEl) dEl.textContent = "F:" + this._fc + " T:" + this.engine.gameTime.toFixed(1) + " P:" + this.players.length + " R:" + this.engine.running;
+        }
         this.effects.update(dt);
         this.renderer.setCameraTarget(this.humanPlayer.x, this.humanPlayer.y);
         // Dynamic zoom based on territory
@@ -422,44 +431,59 @@ class Game {
 // Boot
 let game;
 
-// Global error handler - shows errors on screen
-window.onerror = function(msg, src, line) {
+// On-screen debug log
+const _dbg = [];
+function dbg(msg) {
+    _dbg.push(msg);
+    console.log("[DBG]", msg);
     const el = document.getElementById("loading-status");
-    if (el) el.textContent = "Error: " + msg + " (line " + line + ")";
-    console.error("GLOBAL ERROR:", msg, src, line);
+    if (el) el.textContent = _dbg.slice(-5).join(" | ");
+}
+
+window.onerror = function(msg, src, line) {
+    dbg("ERR:" + msg + " L" + line);
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-    const gate = document.getElementById("auth-gate");
-    const app = document.getElementById("app");
-    const status = document.getElementById("loading-status");
-    const skipBtn = document.getElementById("btn-skip-auth");
+    dbg("DOM ready");
 
     try {
         game = new Game();
-        game.init();
+        dbg("Game created");
     } catch (e) {
-        console.error("Game init failed:", e);
-        if (status) status.textContent = "Init Error: " + e.message;
-        if (skipBtn) skipBtn.style.display = "inline-block";
+        dbg("Game FAIL:" + e.message);
         return;
     }
+
+    try {
+        game.init();
+        dbg("init OK");
+    } catch (e) {
+        dbg("init FAIL:" + e.message);
+        return;
+    }
+
+    const gate = document.getElementById("auth-gate");
+    const app = document.getElementById("app");
+    const skipBtn = document.getElementById("btn-skip-auth");
 
     function showApp(user) {
         try {
             gate.style.display = "none";
             app.classList.remove("hidden");
             if (user) game.loadUserData(user);
+            dbg("showApp OK");
         } catch (e) {
-            console.error("showApp error:", e);
+            dbg("showApp FAIL:" + e.message);
             gate.style.display = "none";
             app.classList.remove("hidden");
         }
     }
 
-    skipBtn.addEventListener("click", () => {
-        showApp({ name: "Guest", email: "guest@local" });
-    });
+    if (skipBtn) {
+        skipBtn.addEventListener("click", () => showApp({ name: "Guest", email: "guest@local" }));
+        skipBtn.addEventListener("touchend", (e) => { e.preventDefault(); showApp({ name: "Guest", email: "guest@local" }); });
+    }
 
     let authResolved = false;
 
@@ -467,7 +491,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (authResolved) return;
         try {
             if (window.authService) {
-                status.textContent = "Checking login...";
                 const authed = await window.authService.isAuthenticated();
                 if (authed) {
                     authResolved = true;
@@ -477,10 +500,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         } catch (e) {
-            console.warn("Auth check failed:", e);
+            dbg("auth err:" + e.message);
         }
-        status.textContent = "Not logged in";
-        skipBtn.style.display = "inline-block";
+        if (skipBtn) { skipBtn.style.display = "inline-block"; skipBtn.textContent = "Play"; }
     }
 
     window.addEventListener("auth:ready", async (ev) => {
@@ -494,18 +516,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 showApp({ name: "Player", email: "unknown" });
             }
         } else {
-            status.textContent = "Not logged in";
-            skipBtn.style.display = "inline-block";
+            if (skipBtn) { skipBtn.style.display = "inline-block"; skipBtn.textContent = "Play"; }
         }
     });
 
-    // Always show play button quickly
     setTimeout(() => { if (!authResolved) checkAuth(); }, 1000);
     setTimeout(() => {
-        if (!authResolved) {
+        if (!authResolved && skipBtn) {
             skipBtn.style.display = "inline-block";
             skipBtn.textContent = "Play";
-            status.textContent = "";
         }
     }, 3000);
 });

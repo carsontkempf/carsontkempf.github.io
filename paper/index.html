@@ -15,7 +15,7 @@ permalink: /paper/
     <meta name="theme-color" content="#1a1a2e">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Paper Conquest</title>
-    <link rel="stylesheet" href="/paper/style.css?v=20260723b">
+    <link rel="stylesheet" href="/paper/style.css?v=20260723c">
 </head>
 <body>
     <!-- Auth Gate -->
@@ -60,6 +60,8 @@ permalink: /paper/
         <!-- Game Screen -->
         <div id="screen-game" class="screen">
             <canvas id="game-canvas"></canvas>
+            <!-- Debug overlay -->
+            <div id="debug-overlay" style="position:absolute;top:40px;left:8px;color:#0f0;font:11px monospace;z-index:999;pointer-events:none;background:rgba(0,0,0,0.7);padding:4px 8px;border-radius:4px;"></div>
             <!-- HUD -->
             <div id="hud">
                 <div class="hud-top">
@@ -123,20 +125,20 @@ permalink: /paper/
     <script src="/assets/js/auth-service.js"></script>
 
     <!-- Game Scripts -->
-    <script src="/paper/engine.js?v=20260723b"></script>
-    <script src="/paper/renderer.js?v=20260723b"></script>
-    <script src="/paper/levels.js?v=20260723b"></script>
-    <script src="/paper/skins3d.js?v=20260723b"></script>
-    <script src="/paper/characters.js?v=20260723b"></script>
-    <script src="/paper/effects.js?v=20260723b"></script>
-    <script src="/paper/minimap.js?v=20260723b"></script>
-    <script src="/paper/tokens.js?v=20260723b"></script>
-    <script src="/paper/jackpot.js?v=20260723b"></script>
-    <script src="/paper/toasts.js?v=20260723b"></script>
-    <script src="/paper/player.js?v=20260723b"></script>
-    <script src="/paper/ai.js?v=20260723b"></script>
-    <script src="/paper/joystick.js?v=20260723b"></script>
-    <script src="/paper/shop.js?v=20260723b"></script>
-    <script src="/paper/game.js?v=20260723b"></script>
+    <script src="/paper/engine.js?v=20260723c"></script>
+    <script src="/paper/renderer.js?v=20260723c"></script>
+    <script src="/paper/levels.js?v=20260723c"></script>
+    <script src="/paper/skins3d.js?v=20260723c"></script>
+    <script src="/paper/characters.js?v=20260723c"></script>
+    <script src="/paper/effects.js?v=20260723c"></script>
+    <script src="/paper/minimap.js?v=20260723c"></script>
+    <script src="/paper/tokens.js?v=20260723c"></script>
+    <script src="/paper/jackpot.js?v=20260723c"></script>
+    <script src="/paper/toasts.js?v=20260723c"></script>
+    <script src="/paper/player.js?v=20260723c"></script>
+    <script src="/paper/ai.js?v=20260723c"></script>
+    <script src="/paper/joystick.js?v=20260723c"></script>
+    <script src="/paper/shop.js?v=20260723c"></script>
+    <script src="/paper/game.js?v=20260723c"></script>
 </body>
 </html>

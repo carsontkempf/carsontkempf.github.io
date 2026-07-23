@@ -243,10 +243,14 @@ class Engine {
             if (this.onUpdate) this.onUpdate(dt);
             if (this.onRender) this.onRender(dt);
         } catch (e) {
-            console.error("Game loop error:", e);
+            console.error("Loop error:", e);
+            if (typeof dbg === "function") dbg("LOOP ERR:" + e.message);
             this.running = false;
             return;
         }
+        if (!this._frameCount) this._frameCount = 0;
+        this._frameCount++;
+        if (this._frameCount === 1 && typeof dbg === "function") dbg("frame1 OK");
         this.animFrameId = requestAnimationFrame(() => this._loop());
     }
 }
