@@ -313,7 +313,7 @@ class Game {
         // AI players (from level config)
         const aiCount = level.aiCount;
         const aiTypes = level.aiTypes;
-        const spawns = this.getSpawnsCircular(aiCount, center, arenaRadius * 0.6);
+        const spawns = this.getSpawnsCircular(aiCount, center, arenaRadius * 0.45);
         for (let i = 0; i < aiCount; i++) {
             const bot = new Player(i + 1, AI_NAMES[i % AI_NAMES.length], PLAYER_COLORS[(i + 1) % PLAYER_COLORS.length], spawns[i].x, spawns[i].y);
             bot.shape = ["droplet", "bunny", "penguin", "fox", "panda", "chick"][i % 6];
@@ -444,20 +444,6 @@ class Game {
         this.jackpot.render(this.renderer.ctx, this.renderer.screenW, this.renderer.screenH);
         this.toasts.update(dt);
         this.toasts.render(this.renderer.ctx, this.renderer.screenW, this.renderer.screenH);
-
-        // DEBUG: Draw directly to canvas to confirm it works
-        const ctx = this.renderer.ctx;
-        ctx.fillStyle = "#0f0";
-        ctx.font = "12px monospace";
-        ctx.fillText("F:" + this._fc + " Scale:" + this.renderer.scale.toFixed(4) + " Cam:" + Math.round(this.renderer.cameraX) + "," + Math.round(this.renderer.cameraY), 10, 60);
-        ctx.fillText("W:" + this.renderer.screenW + " H:" + this.renderer.screenH + " Canvas:" + this.renderer.canvas.width + "x" + this.renderer.canvas.height, 10, 75);
-        ctx.fillText("Player:" + Math.round(this.humanPlayer.x) + "," + Math.round(this.humanPlayer.y) + " Shape:" + this.humanPlayer.shape, 10, 90);
-        ctx.fillText("Territory cells:" + this.engine.countTerritory(0) + " Alive:" + this.players.filter(p=>p.alive).length, 10, 105);
-        // Draw a visible marker at player screen position
-        const pp = this.renderer.worldToScreen(this.humanPlayer.x, this.humanPlayer.y);
-        ctx.fillStyle = "#ff0";
-        ctx.fillRect(pp.x - 5, pp.y - 5, 10, 10);
-        ctx.fillText("ME", pp.x - 8, pp.y - 10);
     }
 
     updateHUD() {

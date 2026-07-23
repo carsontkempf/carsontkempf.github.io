@@ -64,12 +64,15 @@ class Player {
         this.x += dx;
         this.y += dy;
 
-        // Boundary check - die at circular arena edge
+        // Boundary check - clamp to circular arena edge (don't die)
         const cx = WORLD_SIZE / 2, cy = WORLD_SIZE / 2;
         const distFromCenter = Math.sqrt((this.x - cx) ** 2 + (this.y - cy) ** 2);
-        if (distFromCenter > (this.arenaRadius || WORLD_SIZE / 2) - PLAYER_RADIUS) {
-            this.die(engine);
-            return "died";
+        const maxDist = (this.arenaRadius || WORLD_SIZE / 2) - PLAYER_RADIUS;
+        if (distFromCenter > maxDist) {
+            // Push back inside
+            const angle = Math.atan2(this.y - cy, this.x - cx);
+            this.x = cx + Math.cos(angle) * maxDist;
+            this.y = cy + Math.sin(angle) * maxDist;
         }
 
         // Check if we crossed another player's trail (using line intersection)

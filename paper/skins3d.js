@@ -52,6 +52,12 @@ class Skins3DRenderer {
         ctx.save();
         ctx.translate(x, y);
 
+        // 3D ground shadow (ellipse below and behind)
+        ctx.beginPath();
+        ctx.ellipse(2, r * 0.5, r * 0.7, r * 0.2, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.fill();
+
         switch (skinId) {
             case "bunny": this.drawBunny(ctx, r, angle, color); break;
             case "penguin": this.drawPenguin(ctx, r, angle, color); break;
@@ -67,6 +73,13 @@ class Skins3DRenderer {
             case "ninja": this.drawNinja(ctx, r, angle, color); break;
             default: this.drawDroplet(ctx, r, angle, color); break;
         }
+
+        // 3D rim light (top edge glow)
+        ctx.beginPath();
+        ctx.arc(0, -r * 0.1, r * 0.5, Math.PI * 1.2, Math.PI * 1.8);
+        ctx.strokeStyle = "rgba(255,255,255,0.2)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
 
         ctx.restore();
     }
@@ -369,18 +382,41 @@ class Skins3DRenderer {
 
     // --- HELPERS ---
     fillBody(ctx, r, color) {
-        const grad = ctx.createRadialGradient(-r * 0.2, -r * 0.3, 0, 0, 0, r);
+        // 3D sphere gradient: bright top-left highlight, dark bottom-right
+        const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.4, r * 0.1, 0, 0, r * 1.1);
         grad.addColorStop(0, "#fff");
-        grad.addColorStop(0.3, color);
-        grad.addColorStop(1, this.darkenColor(color, 0.5));
+        grad.addColorStop(0.15, this.lightenColor(color, 0.4));
+        grad.addColorStop(0.4, color);
+        grad.addColorStop(0.75, this.darkenColor(color, 0.6));
+        grad.addColorStop(1, this.darkenColor(color, 0.3));
         ctx.fillStyle = grad;
         ctx.fill();
+        // Bottom rim shadow
+        ctx.strokeStyle = this.darkenColor(color, 0.4);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+    }
+
+    lightenColor(color, amount) {
+        if (color.startsWith("rgb")) {
+            const [r, g, b] = color.match(/\d+/g).map(Number);
+            return "rgb(" + Math.min(255, r + Math.floor(255*amount)) + "," + Math.min(255, g + Math.floor(255*amount)) + "," + Math.min(255, b + Math.floor(255*amount)) + ")";
+        }
+        const r = Math.min(255, parseInt(color.slice(1, 3), 16) + Math.floor(255 * amount));
+        const g = Math.min(255, parseInt(color.slice(3, 5), 16) + Math.floor(255 * amount));
+        const b = Math.min(255, parseInt(color.slice(5, 7), 16) + Math.floor(255 * amount));
+        return "rgb(" + r + "," + g + "," + b + ")";
     }
 
     highlight(ctx, x, y, r) {
+        // Specular highlight (bright spot)
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+        grad.addColorStop(0, "rgba(255,255,255,0.7)");
+        grad.addColorStop(0.5, "rgba(255,255,255,0.2)");
+        grad.addColorStop(1, "rgba(255,255,255,0)");
         ctx.beginPath();
         ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255,255,255,0.4)";
+        ctx.fillStyle = grad;
         ctx.fill();
     }
 
