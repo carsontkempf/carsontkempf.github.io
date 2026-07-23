@@ -295,7 +295,7 @@ class Game {
         const arenaRadius = level.radius;
         const center = WORLD_SIZE / 2;
 
-        // Human player (center)
+        // Human player (center of arena)
         this.humanPlayer = new Player(0, this.userName || "You", this.equippedColor, center, center);
         this.humanPlayer.shape = this.equippedShape || "droplet";
         this.humanPlayer.arenaRadius = arenaRadius;
@@ -310,12 +310,22 @@ class Game {
         this.humanPlayer.spawnTerritory(this.engine);
         this.players.push(this.humanPlayer);
 
-        // AI players (from level config)
+        // AI players - spawn in ring around center, well inside arena
         const aiCount = level.aiCount;
         const aiTypes = level.aiTypes;
-        const spawns = this.getSpawnsCircular(aiCount, center, arenaRadius * 0.45);
+        // Spawn distance: far enough from center to not overlap human territory,
+        // but inside arena with room for their own territory
+        const humanTerritoryRadius = this.humanPlayer.spawnRadius || 500;
+        const aiTerritoryRadius = 500;
+        const minSpawnDist = humanTerritoryRadius + aiTerritoryRadius + 200;
+        const maxSpawnDist = arenaRadius - aiTerritoryRadius - 200;
+        const spawnDist = Math.min(maxSpawnDist, Math.max(minSpawnDist, arenaRadius * 0.4));
+
         for (let i = 0; i < aiCount; i++) {
-            const bot = new Player(i + 1, AI_NAMES[i % AI_NAMES.length], PLAYER_COLORS[(i + 1) % PLAYER_COLORS.length], spawns[i].x, spawns[i].y);
+            const angle = (Math.PI * 2 * i) / aiCount + Math.PI / 4;
+            const sx = center + Math.cos(angle) * spawnDist;
+            const sy = center + Math.sin(angle) * spawnDist;
+            const bot = new Player(i + 1, AI_NAMES[i % AI_NAMES.length], PLAYER_COLORS[(i + 1) % PLAYER_COLORS.length], sx, sy);
             bot.shape = ["droplet", "bunny", "penguin", "fox", "panda", "chick"][i % 6];
             bot.arenaRadius = arenaRadius;
             bot.spawnTerritory(this.engine);
