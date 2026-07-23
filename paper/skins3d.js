@@ -186,90 +186,139 @@ class Skins3DRenderer {
         var model = MODELS[skinId] || MODELS.droplet;
         var palette = PALETTES[skinId] || PALETTES.droplet;
 
-        // Determine which faces are visible based on angle
+        // Smooth 360 rotation
         var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
         var cosA = Math.cos(a);
         var sinA = Math.sin(a);
 
         // Ground shadow
         ctx.beginPath();
-        ctx.ellipse(x, y + r * 0.8, r * 0.5, r * 0.15, 0, 0, Math.PI * 2);
+        ctx.ellipse(x, y + r * 0.85, r * 0.45, r * 0.12, 0, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(0,0,0,0.3)";
         ctx.fill();
 
-        // Sort boxes by depth (back to front based on angle)
-        var sorted = model.slice().sort(function(a2, b2) {
-            var da = -a2.x * sinA + a2.z * cosA;
-            var db = -b2.x * sinA + b2.z * cosA;
-            return da - db;
+        // Sort boxes back-to-front based on rotated Z position
+        var sorted = model.slice().sort(function(ba, bb) {
+            var za = -ba.x * sinA + ba.z * cosA + ba.y * 0.1;
+            var zb = -bb.x * sinA + bb.z * cosA + bb.y * 0.1;
+            return za - zb;
         });
 
         for (var i = 0; i < sorted.length; i++) {
             var box = sorted[i];
             var color = palette[box.c] || playerColor;
             if (box.c === "body" && skinId === "droplet") color = playerColor;
+            if (box.c === "body" && skinId === "skateboard") color = playerColor;
 
-            // Rotate box position based on angle
+            // Rotate box center around Y axis
             var rx = box.x * cosA + box.z * sinA;
             var rz = -box.x * sinA + box.z * cosA;
 
-            // Project to screen (isometric-ish)
-            var screenX = x + rx * r;
-            var screenY = y + box.y * r - rz * r * 0.2;
+            // Isometric projection: X maps to screen X, Z tilts up, Y maps down
+            var sx = x + rx * r * 1.2;
+            var sy = y + box.y * r * 1.1 - rz * r * 0.4;
 
-            var bw = box.w * r;
+            // Rotate box dimensions for width on screen
+            var bw = (box.w * Math.abs(cosA) + box.d * Math.abs(sinA)) * r;
             var bh = box.h * r;
-            var bd = box.d * r * 0.4; // depth shown as vertical offset
+            var bd = (box.d * Math.abs(cosA) + box.w * Math.abs(sinA)) * r * 0.4;
 
-            this._drawBox(ctx, screenX, screenY, bw, bh, bd, color, cosA, sinA);
+            this._drawBox3D(ctx, sx, sy, bw, bh, bd, color, cosA, sinA);
         }
     }
 
-    _drawBox(ctx, x, y, w, h, d, color, cosA, sinA) {
-        var topColor = color;
-        var frontColor = this._darken(color, 0.6);
-        var sideColor = this._darken(color, 0.75);
-        var highlightColor = this._lighten(color, 0.15);
+    _drawBox3D(ctx, x, y, w, h, d, color, cosA, sinA) {
+        var topColor = this._lighten(color, 0.2);
+        var frontColor = color;
+        var leftColor = this._darken(color, 0.65);
+        var rightColor = this._darken(color, 0.75);
 
-        // TOP FACE (parallelogram - always visible from above)
-        ctx.beginPath();
-        ctx.moveTo(x - w, y - h);
-        ctx.lineTo(x + w, y - h);
-        ctx.lineTo(x + w + d * 0.3, y - h - d * 0.5);
-        ctx.lineTo(x - w + d * 0.3, y - h - d * 0.5);
-        ctx.closePath();
-        ctx.fillStyle = highlightColor;
-        ctx.fill();
+        // Determine side offset direction based on viewing angle
+        var sideOffX = d * cosA;
+        var sideOffY = -d * 0.6;
 
-        // FRONT FACE (rectangle)
+        // BACK-MOST FACE (drawn first, may be hidden)
+        // Draw the side that faces away - only if we can see it
+        
+        // LEFT FACE (visible when cosA > 0, i.e. looking from right)
+        if (cosA > 0.05) {
+            ctx.beginPath();
+            ctx.moveTo(x - w, y - h);
+            ctx.lineTo(x - w - d * cosA * 0.35, y - h + sideOffY);
+            ctx.lineTo(x - w - d * cosA * 0.35, y + h + sideOffY);
+            ctx.lineTo(x - w, y + h);
+            ctx.closePath();
+            ctx.fillStyle = leftColor;
+            ctx.fill();
+        }
+
+        // RIGHT FACE (visible when cosA < 0, i.e. looking from left)
+        if (cosA < -0.05) {
+            ctx.beginPath();
+            ctx.moveTo(x + w, y - h);
+            ctx.lineTo(x + w - d * cosA * 0.35, y - h + sideOffY);
+            ctx.lineTo(x + w - d * cosA * 0.35, y + h + sideOffY);
+            ctx.lineTo(x + w, y + h);
+            ctx.closePath();
+            ctx.fillStyle = rightColor;
+            ctx.fill();
+        }
+
+        // BACK FACE (visible when sinA < 0)
+        if (sinA < -0.05) {
+            ctx.beginPath();
+            ctx.moveTo(x - w, y + h);
+            ctx.lineTo(x + w, y + h);
+            ctx.lineTo(x + w, y + h + d * 0.3);
+            ctx.lineTo(x - w, y + h + d * 0.3);
+            ctx.closePath();
+            ctx.fillStyle = this._darken(color, 0.5);
+            ctx.fill();
+        }
+
+        // FRONT FACE (main visible face)
         ctx.beginPath();
         ctx.moveTo(x - w, y - h);
         ctx.lineTo(x + w, y - h);
         ctx.lineTo(x + w, y + h);
         ctx.lineTo(x - w, y + h);
         ctx.closePath();
+        ctx.fillStyle = frontColor;
+        ctx.fill();
+
+        // TOP FACE (always visible - we look from above)
+        ctx.beginPath();
+        ctx.moveTo(x - w, y - h);
+        ctx.lineTo(x + w, y - h);
+        ctx.lineTo(x + w + d * sinA * 0.3, y - h - d * 0.35);
+        ctx.lineTo(x - w + d * sinA * 0.3, y - h - d * 0.35);
+        ctx.closePath();
         ctx.fillStyle = topColor;
         ctx.fill();
 
-        // RIGHT SIDE FACE (parallelogram)
-        ctx.beginPath();
-        ctx.moveTo(x + w, y - h);
-        ctx.lineTo(x + w + d * 0.3, y - h - d * 0.5);
-        ctx.lineTo(x + w + d * 0.3, y + h - d * 0.5);
-        ctx.lineTo(x + w, y + h);
-        ctx.closePath();
-        ctx.fillStyle = sideColor;
-        ctx.fill();
+        // RIGHT SIDE visible when looking from left side (sinA > 0)
+        if (sinA > 0.05) {
+            ctx.beginPath();
+            ctx.moveTo(x + w, y - h);
+            ctx.lineTo(x + w + d * sinA * 0.3, y - h - d * 0.35);
+            ctx.lineTo(x + w + d * sinA * 0.3, y + h - d * 0.35);
+            ctx.lineTo(x + w, y + h);
+            ctx.closePath();
+            ctx.fillStyle = rightColor;
+            ctx.fill();
+        }
 
-        // BOTTOM FACE (front-facing depth)
-        ctx.beginPath();
-        ctx.moveTo(x - w, y + h);
-        ctx.lineTo(x + w, y + h);
-        ctx.lineTo(x + w + d * 0.3, y + h - d * 0.5);
-        ctx.lineTo(x - w + d * 0.3, y + h - d * 0.5);
-        ctx.closePath();
-        ctx.fillStyle = frontColor;
-        ctx.fill();
+        // LEFT SIDE visible when looking from right side (sinA < 0)
+        if (sinA < -0.05) {
+            ctx.beginPath();
+            ctx.moveTo(x - w, y - h);
+            ctx.lineTo(x - w + d * sinA * 0.3, y - h - d * 0.35);
+            ctx.lineTo(x - w + d * sinA * 0.3, y + h - d * 0.35);
+            ctx.lineTo(x - w, y + h);
+            ctx.closePath();
+            ctx.fillStyle = leftColor;
+            ctx.fill();
+        }
     }
 
     _lighten(color, amount) {
