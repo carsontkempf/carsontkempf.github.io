@@ -13,7 +13,8 @@ class AIController {
     constructor(player, type) {
         this.player = player;
         this.type = type || ["cautious", "aggressive", "expansive"][Math.floor(Math.random() * 3)];
-        this.maxTrailTime = this.type === "cautious" ? 3 : this.type === "expansive" ? 6 : 4;
+        this.maxTrailTime = this.type === "cautious" ? 1.5 : this.type === "expansive" ? 3.5 : 2.5;
+        this.maxTrailLength = this.type === "cautious" ? 15 : this.type === "expansive" ? 35 : 25;
         this.wanderAngle = 0;
         this.wanderTimer = 0;
         this.trailTime = 0; // how long we've been outside territory
@@ -39,8 +40,9 @@ class AIController {
             return;
         }
 
-        // Priority 2: Return home if trail is too long
-        if (this.trailTime > this.maxTrailTime && !p.isInOwnTerritory) {
+        // Priority 2: Return home if trail is too long OR too much time outside
+        const shouldReturn = (this.trailTime > this.maxTrailTime || p.trail.length > this.maxTrailLength) && !p.isInOwnTerritory;
+        if (shouldReturn) {
             const homeAngle = this.angleToOwnTerritory(engine, p);
             if (homeAngle !== null) {
                 p.setTargetAngle(homeAngle);
@@ -49,10 +51,13 @@ class AIController {
         }
 
         // Priority 3: Hunt enemy trails (all bots try to kill player)
-        const huntAngle = this.findEnemyTrail(allPlayers, p);
-        if (huntAngle !== null) {
-            p.setTargetAngle(huntAngle);
-            return;
+        // Only hunt if we're not too far from home
+        if (this.trailTime < this.maxTrailTime * 0.6) {
+            const huntAngle = this.findEnemyTrail(allPlayers, p);
+            if (huntAngle !== null) {
+                p.setTargetAngle(huntAngle);
+                return;
+            }
         }
 
         // Priority 4: Wander with smooth curves
@@ -79,11 +84,11 @@ class AIController {
     }
 
     angleToOwnTerritory(engine, p) {
-        // Scan in 8 directions for own territory
+        // Scan in 16 directions for own territory (longer range)
         let bestAngle = null;
         let bestDist = Infinity;
-        for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
-            for (let dist = 100; dist < 2000; dist += 80) {
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+            for (let dist = 80; dist < 5000; dist += 60) {
                 const tx = p.x + Math.cos(a) * dist;
                 const ty = p.y + Math.sin(a) * dist;
                 if (engine.isInTerritory(tx, ty, p.id)) {
