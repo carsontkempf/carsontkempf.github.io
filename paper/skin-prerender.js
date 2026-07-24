@@ -166,11 +166,163 @@ droplet: {
 };
 
 // Aliases
-CHAR_MODELS.astronaut = CHAR_MODELS.droplet;
-CHAR_MODELS.ninja = CHAR_MODELS.fox;
-CHAR_MODELS.skateboard = CHAR_MODELS.bunny;
-CHAR_MODELS.skis = CHAR_MODELS.penguin;
-CHAR_MODELS.hoverboard = CHAR_MODELS.chick;
+CHAR_MODELS.skateboard = {
+    palette: { body: 0x3498db, belly: 0xf0f0f0, dark: 0x222222, eye: 0x111111, eye_w: 0xffffff, hair: 0xf39c12, board: 0xc0392b, wheel: 0x333333 },
+    parts: [
+        { geo: "box", pos: [0, 0.5, 0], size: [0.4, 0.45, 0.3], color: "body" },
+        { geo: "box", pos: [0, 0.45, 0.1], size: [0.22, 0.25, 0.06], color: "belly" },
+        { geo: "box", pos: [0, 1.0, 0], size: [0.32, 0.32, 0.28], color: "belly" },
+        { geo: "box", pos: [0, 1.22, 0], size: [0.28, 0.12, 0.24], color: "hair" },
+        { geo: "box", pos: [-0.2, 0.55, 0], size: [0.08, 0.22, 0.08], color: "body" },
+        { geo: "box", pos: [0.2, 0.55, 0], size: [0.08, 0.22, 0.08], color: "body" },
+        { geo: "box", pos: [-0.1, 0.1, 0], size: [0.1, 0.2, 0.1], color: "dark" },
+        { geo: "box", pos: [0.1, 0.1, 0], size: [0.1, 0.2, 0.1], color: "dark" },
+        { geo: "sphere", pos: [-0.08, 1.02, 0.14], size: [0.05], color: "eye_w" },
+        { geo: "sphere", pos: [0.08, 1.02, 0.14], size: [0.05], color: "eye_w" },
+        { geo: "sphere", pos: [-0.08, 1.02, 0.17], size: [0.03], color: "eye" },
+        { geo: "sphere", pos: [0.08, 1.02, 0.17], size: [0.03], color: "eye" },
+        { geo: "box", pos: [0, -0.05, 0], size: [0.12, 0.03, 0.45], color: "board" },
+        { geo: "sphere", pos: [0, -0.06, 0.15], size: [0.03], color: "wheel" },
+        { geo: "sphere", pos: [0, -0.06, -0.15], size: [0.03], color: "wheel" },
+    ],
+};
+
+CHAR_MODELS.hoverboard = {
+    palette: { body: 0x2c3e50, belly: 0x2c3e50, dark: 0x1a252f, eye: 0x00ffcc, eye_w: 0xffffff, glow: 0x00d2ff, board: 0x7b2ff7 },
+    parts: [
+        { geo: "box", pos: [0, 0.6, 0], size: [0.38, 0.45, 0.3], color: "body" },
+        { geo: "box", pos: [0, 1.05, 0], size: [0.3, 0.3, 0.26], color: "body" },
+        { geo: "box", pos: [0, 1.22, 0], size: [0.32, 0.05, 0.28], color: "glow" },
+        { geo: "box", pos: [-0.22, 0.65, 0], size: [0.07, 0.2, 0.08], color: "body" },
+        { geo: "box", pos: [0.22, 0.65, 0], size: [0.07, 0.2, 0.08], color: "body" },
+        { geo: "box", pos: [-0.1, 0.2, 0], size: [0.09, 0.25, 0.09], color: "dark" },
+        { geo: "box", pos: [0.1, 0.2, 0], size: [0.09, 0.25, 0.09], color: "dark" },
+        { geo: "sphere", pos: [-0.08, 1.08, 0.13], size: [0.05], color: "eye_w" },
+        { geo: "sphere", pos: [0.08, 1.08, 0.13], size: [0.05], color: "eye_w" },
+        { geo: "sphere", pos: [-0.08, 1.08, 0.16], size: [0.035], color: "eye" },
+        { geo: "sphere", pos: [0.08, 1.08, 0.16], size: [0.035], color: "eye" },
+        { geo: "box", pos: [0, 0.0, 0], size: [0.15, 0.04, 0.5], color: "board" },
+        { geo: "box", pos: [0, -0.02, 0], size: [0.12, 0.02, 0.45], color: "glow" },
+    ],
+};
+
+CHAR_MODELS.skis = {
+    palette: { body: 0xe74c3c, belly: 0xf0f0f0, dark: 0x222222, eye: 0x111111, eye_w: 0xffffff, ski: 0x1e90ff, pole: 0x888888 },
+    parts: [
+        { geo: "box", pos: [0, 0.5, 0], size: [0.42, 0.48, 0.32], color: "body" },
+        { geo: "box", pos: [0, 0.45, 0.1], size: [0.24, 0.28, 0.06], color: "belly" },
+        { geo: "box", pos: [0, 1.0, 0], size: [0.32, 0.32, 0.28], color: "belly" },
+        { geo: "sphere", pos: [0, 1.2, 0], size: [0.15], color: "body" },
+        { geo: "box", pos: [-0.24, 0.6, 0], size: [0.06, 0.18, 0.06], color: "body" },
+        { geo: "box", pos: [0.24, 0.6, 0], size: [0.06, 0.18, 0.06], color: "body" },
+        { geo: "box", pos: [-0.1, 0.12, 0], size: [0.09, 0.22, 0.09], color: "dark" },
+        { geo: "box", pos: [0.1, 0.12, 0], size: [0.09, 0.22, 0.09], color: "dark" },
+        { geo: "sphere", pos: [-0.08, 1.02, 0.14], size: [0.04], color: "eye_w" },
+        { geo: "sphere", pos: [0.08, 1.02, 0.14], size: [0.04], color: "eye_w" },
+        { geo: "sphere", pos: [-0.08, 1.02, 0.17], size: [0.03], color: "eye" },
+        { geo: "sphere", pos: [0.08, 1.02, 0.17], size: [0.03], color: "eye" },
+        { geo: "box", pos: [-0.08, -0.02, 0], size: [0.04, 0.02, 0.55], color: "ski" },
+        { geo: "box", pos: [0.08, -0.02, 0], size: [0.04, 0.02, 0.55], color: "ski" },
+        { geo: "cylinder", pos: [-0.3, 0.4, 0], size: [0.01, 0.01, 0.9], color: "pole" },
+        { geo: "cylinder", pos: [0.3, 0.4, 0], size: [0.01, 0.01, 0.9], color: "pole" },
+    ],
+};
+
+CHAR_MODELS.ninja = {
+    palette: { body: 0x2f3542, belly: 0x2f3542, dark: 0x111111, eye: 0xffffff, eye_w: 0x2f3542, band: 0xff4757, sword: 0xcccccc },
+    parts: [
+        { geo: "box", pos: [0, 0.5, 0], size: [0.42, 0.5, 0.32], color: "body" },
+        { geo: "box", pos: [0, 1.0, 0], size: [0.32, 0.32, 0.28], color: "body" },
+        { geo: "box", pos: [0, 1.05, 0.02], size: [0.34, 0.08, 0.3], color: "band" },
+        { geo: "box", pos: [0.2, 1.05, -0.12], size: [0.04, 0.04, 0.12], color: "band" },
+        { geo: "box", pos: [-0.22, 0.5, 0], size: [0.08, 0.24, 0.08], color: "body" },
+        { geo: "box", pos: [0.22, 0.5, 0], size: [0.08, 0.24, 0.08], color: "body" },
+        { geo: "box", pos: [-0.1, 0.1, 0], size: [0.1, 0.2, 0.1], color: "dark" },
+        { geo: "box", pos: [0.1, 0.1, 0], size: [0.1, 0.2, 0.1], color: "dark" },
+        { geo: "sphere", pos: [-0.08, 1.04, 0.14], size: [0.04], color: "eye" },
+        { geo: "sphere", pos: [0.08, 1.04, 0.14], size: [0.04], color: "eye" },
+        { geo: "box", pos: [0.05, 0.6, -0.2], size: [0.02, 0.02, 0.35], color: "sword" },
+        { geo: "box", pos: [0.05, 0.6, -0.36], size: [0.04, 0.08, 0.02], color: "dark" },
+    ],
+};
+
+CHAR_MODELS.astronaut = {
+    palette: { body: 0xeeeeee, belly: 0xcccccc, dark: 0x666666, eye: 0x44aaff, eye_w: 0x222244, visor: 0x3399ff, pack: 0x888888 },
+    parts: [
+        { geo: "box", pos: [0, 0.5, 0], size: [0.45, 0.5, 0.35], color: "body" },
+        { geo: "box", pos: [0, 0.45, 0.1], size: [0.2, 0.2, 0.06], color: "dark" },
+        { geo: "sphere", pos: [0, 1.05, 0], size: [0.25], color: "body" },
+        { geo: "box", pos: [0, 1.02, 0.15], size: [0.2, 0.15, 0.06], color: "visor" },
+        { geo: "sphere", pos: [-0.06, 1.04, 0.19], size: [0.03], color: "eye" },
+        { geo: "sphere", pos: [0.06, 1.04, 0.19], size: [0.03], color: "eye" },
+        { geo: "box", pos: [-0.28, 0.55, 0], size: [0.1, 0.22, 0.1], color: "body" },
+        { geo: "box", pos: [0.28, 0.55, 0], size: [0.1, 0.22, 0.1], color: "body" },
+        { geo: "box", pos: [-0.12, 0.1, 0], size: [0.1, 0.2, 0.1], color: "body" },
+        { geo: "box", pos: [0.12, 0.1, 0], size: [0.1, 0.2, 0.1], color: "body" },
+        { geo: "box", pos: [0, 0.5, -0.2], size: [0.2, 0.3, 0.12], color: "pack" },
+    ],
+};
+
+CHAR_MODELS.pirate = {
+    palette: { body: 0x8B4513, belly: 0xf5deb3, dark: 0x222222, eye: 0x111111, eye_w: 0xffffff, hat: 0x1a1a1a, gold: 0xffd700, patch: 0x111111 },
+    parts: [
+        { geo: "box", pos: [0, 0.5, 0], size: [0.42, 0.48, 0.32], color: "body" },
+        { geo: "box", pos: [0, 0.45, 0.1], size: [0.24, 0.28, 0.06], color: "belly" },
+        { geo: "box", pos: [0, 1.0, 0.02], size: [0.32, 0.32, 0.28], color: "belly" },
+        { geo: "box", pos: [0, 1.25, 0], size: [0.36, 0.12, 0.32], color: "hat" },
+        { geo: "box", pos: [0, 1.32, 0], size: [0.2, 0.12, 0.2], color: "hat" },
+        { geo: "box", pos: [0, 1.32, 0.1], size: [0.06, 0.06, 0.02], color: "gold" },
+        { geo: "box", pos: [-0.22, 0.5, 0], size: [0.08, 0.22, 0.08], color: "body" },
+        { geo: "box", pos: [0.22, 0.5, 0], size: [0.08, 0.22, 0.08], color: "body" },
+        { geo: "box", pos: [-0.1, 0.1, 0], size: [0.1, 0.2, 0.1], color: "dark" },
+        { geo: "box", pos: [0.1, 0.1, 0], size: [0.1, 0.2, 0.1], color: "dark" },
+        { geo: "sphere", pos: [-0.08, 1.03, 0.15], size: [0.05], color: "eye_w" },
+        { geo: "sphere", pos: [-0.08, 1.03, 0.18], size: [0.03], color: "eye" },
+        { geo: "box", pos: [0.08, 1.02, 0.14], size: [0.05, 0.05, 0.02], color: "patch" },
+    ],
+};
+
+CHAR_MODELS.dog = {
+    palette: { body: 0xc68642, belly: 0xf5deb3, dark: 0x8B5E3C, eye: 0x111111, eye_w: 0xffffff, nose: 0x222222, tongue: 0xff6b81 },
+    parts: [
+        { geo: "box", pos: [0, 0.45, 0], size: [0.44, 0.5, 0.36], color: "body" },
+        { geo: "box", pos: [0, 0.4, 0.12], size: [0.26, 0.3, 0.08], color: "belly" },
+        { geo: "box", pos: [0, 0.95, 0.04], size: [0.34, 0.34, 0.3], color: "body" },
+        { geo: "box", pos: [0, 0.85, 0.18], size: [0.18, 0.12, 0.08], color: "belly" },
+        { geo: "box", pos: [-0.18, 1.18, -0.02], size: [0.1, 0.14, 0.06], color: "dark" },
+        { geo: "box", pos: [0.18, 1.18, -0.02], size: [0.1, 0.14, 0.06], color: "dark" },
+        { geo: "box", pos: [-0.12, 0.1, 0], size: [0.09, 0.2, 0.09], color: "body" },
+        { geo: "box", pos: [0.12, 0.1, 0], size: [0.09, 0.2, 0.09], color: "body" },
+        { geo: "box", pos: [0, 0.5, -0.25], size: [0.06, 0.06, 0.18], color: "body" },
+        { geo: "sphere", pos: [-0.09, 1.0, 0.15], size: [0.06], color: "eye_w" },
+        { geo: "sphere", pos: [0.09, 1.0, 0.15], size: [0.06], color: "eye_w" },
+        { geo: "sphere", pos: [-0.09, 1.0, 0.19], size: [0.035], color: "eye" },
+        { geo: "sphere", pos: [0.09, 1.0, 0.19], size: [0.035], color: "eye" },
+        { geo: "sphere", pos: [0, 0.88, 0.22], size: [0.04], color: "nose" },
+        { geo: "box", pos: [0, 0.8, 0.2], size: [0.03, 0.06, 0.02], color: "tongue" },
+    ],
+};
+
+CHAR_MODELS.cat = {
+    palette: { body: 0x555555, belly: 0xf0f0f0, dark: 0x333333, eye: 0x44dd44, eye_w: 0xffffff, nose: 0xffaaaa, ear: 0xff88aa },
+    parts: [
+        { geo: "box", pos: [0, 0.45, 0], size: [0.4, 0.48, 0.32], color: "body" },
+        { geo: "box", pos: [0, 0.4, 0.1], size: [0.24, 0.28, 0.06], color: "belly" },
+        { geo: "box", pos: [0, 0.95, 0.02], size: [0.34, 0.32, 0.3], color: "body" },
+        { geo: "cone", pos: [-0.14, 1.2, 0], size: [0.06, 0.14, 4], color: "body" },
+        { geo: "cone", pos: [0.14, 1.2, 0], size: [0.06, 0.14, 4], color: "body" },
+        { geo: "cone", pos: [-0.14, 1.18, 0.01], size: [0.035, 0.08, 4], color: "ear" },
+        { geo: "cone", pos: [0.14, 1.18, 0.01], size: [0.035, 0.08, 4], color: "ear" },
+        { geo: "box", pos: [-0.12, 0.1, 0], size: [0.08, 0.18, 0.08], color: "body" },
+        { geo: "box", pos: [0.12, 0.1, 0], size: [0.08, 0.18, 0.08], color: "body" },
+        { geo: "box", pos: [0.05, 0.5, -0.25], size: [0.04, 0.04, 0.3], color: "dark" },
+        { geo: "sphere", pos: [-0.09, 0.98, 0.15], size: [0.06], color: "eye_w" },
+        { geo: "sphere", pos: [0.09, 0.98, 0.15], size: [0.06], color: "eye_w" },
+        { geo: "sphere", pos: [-0.09, 0.98, 0.19], size: [0.04], color: "eye" },
+        { geo: "sphere", pos: [0.09, 0.98, 0.19], size: [0.04], color: "eye" },
+        { geo: "sphere", pos: [0, 0.88, 0.17], size: [0.03], color: "nose" },
+    ],
+};
 
 class SkinPrerenderer {
     constructor(size) {

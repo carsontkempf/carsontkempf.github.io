@@ -37,14 +37,17 @@ class Engine {
         return { gx: Math.floor(wx / CELL_SIZE), gy: Math.floor(wy / CELL_SIZE) };
     }
 
-    setTerritoryCircle(wx, wy, radius, playerId) {
+    setTerritoryCircle(wx, wy, radius, playerId, force) {
         const { gx: cx, gy: cy } = this.worldToGrid(wx, wy);
         const gr = Math.ceil(radius / CELL_SIZE);
         for (let dy = -gr; dy <= gr; dy++) {
             for (let dx = -gr; dx <= gr; dx++) {
                 const x = cx + dx, y = cy + dy;
                 if (x >= 0 && x < GRID_RES && y >= 0 && y < GRID_RES && dx * dx + dy * dy <= gr * gr) {
-                    this.grid[y][x] = playerId;
+                    // Only claim unowned cells unless forced (human player initial spawn)
+                    if (force || this.grid[y][x] === -1) {
+                        this.grid[y][x] = playerId;
+                    }
                 }
             }
         }

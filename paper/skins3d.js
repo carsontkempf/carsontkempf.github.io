@@ -17,4 +17,7 @@ const SKINS_3D = {
     hoverboard: { name: "Hoverboard", price: 500 },
     astronaut: { name: "Astronaut", price: 600 },
     ninja: { name: "Ninja", price: 500 },
+    pirate: { name: "Pirate", price: 550 },
+    dog: { name: "Dog", price: 300 },
+    cat: { name: "Cat", price: 300 },
 };

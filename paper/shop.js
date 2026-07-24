@@ -41,6 +41,9 @@ const SKIN_CATALOG = {
         { id: "hoverboard", name: "Hoverboard", price: 500 },
         { id: "ninja", name: "Ninja", price: 500 },
         { id: "astronaut", name: "Astronaut", price: 600 },
+        { id: "pirate", name: "Pirate", price: 550 },
+        { id: "dog", name: "Dog", price: 300 },
+        { id: "cat", name: "Cat", price: 300 },
     ],
     powerups: [
         { id: "none", name: "None", price: 0, desc: "No powerup equipped" },
