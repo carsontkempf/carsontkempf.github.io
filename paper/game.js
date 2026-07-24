@@ -40,21 +40,24 @@ class Game {
 
     /** Initialize 3D character pre-renderer */
     initSkins() {
+        dbg("initSkins: THREE=" + (typeof THREE) + " SkinPrerenderer=" + (typeof SkinPrerenderer));
         if (typeof SkinPrerenderer === "undefined" || typeof THREE === "undefined") {
             dbg("No THREE/SkinPrerenderer - using fallback");
             return;
         }
         try {
             this.skinPrerenderer = new SkinPrerenderer(128);
+            dbg("initSkins: prerenderer created");
             if (this.skinPrerenderer.init()) {
+                dbg("initSkins: GL init OK, rendering all...");
                 this.skinPrerenderer.renderAll();
-                this.skins3d = this.skinPrerenderer; // duck-type: has .draw(ctx, x, y, r, angle, skinId)
-                dbg("3D skins prerendered OK");
+                this.skins3d = this.skinPrerenderer;
+                dbg("initSkins: done, cached " + Object.keys(this.skinPrerenderer.cache).length + " skins");
             } else {
                 dbg("SkinPrerenderer init failed");
             }
         } catch (e) {
-            dbg("3D skin err: " + e.message);
+            dbg("3D skin err: " + e.message + " | " + e.stack);
         }
     }
 
