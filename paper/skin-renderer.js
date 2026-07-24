@@ -39,8 +39,8 @@ bunny: {
         // Tail
         { geo: "sphere", pos: [0, 0.4, -0.25], size: [0.08], color: "body" },
         // Eyes
-        { geo: "sphere", pos: [-0.1, 1.05, 0.19], size: [0.045], color: "eye" },
-        { geo: "sphere", pos: [0.1, 1.05, 0.19], size: [0.045], color: "eye" },
+        { geo: "sphere", pos: [-0.1, 1.05, 0.19], size: [0.07], color: "eye" },
+        { geo: "sphere", pos: [0.1, 1.05, 0.19], size: [0.07], color: "eye" },
         // Nose
         { geo: "sphere", pos: [0, 0.95, 0.2], size: [0.035], color: "nose" },
     ],
@@ -103,8 +103,8 @@ fox: {
         { geo: "box", pos: [-0.12, 0.0, 0.03], size: [0.1, 0.04, 0.12], color: "dark" },
         { geo: "box", pos: [0.12, 0.0, 0.03], size: [0.1, 0.04, 0.12], color: "dark" },
         // Eyes
-        { geo: "sphere", pos: [-0.1, 1.05, 0.17], size: [0.04], color: "eye" },
-        { geo: "sphere", pos: [0.1, 1.05, 0.17], size: [0.04], color: "eye" },
+        { geo: "sphere", pos: [-0.1, 1.05, 0.17], size: [0.065], color: "eye" },
+        { geo: "sphere", pos: [0.1, 1.05, 0.17], size: [0.065], color: "eye" },
         // Nose
         { geo: "sphere", pos: [0, 0.92, 0.26], size: [0.03], color: "dark" },
     ],
@@ -127,8 +127,8 @@ CHARACTER_MODELS.panda = {
         { geo: "sphere", pos: [0.18, 1.2, 0], size: [0.09], color: "dark" },
         { geo: "box", pos: [-0.1, 1.02, 0.12], size: [0.1, 0.1, 0.04], color: "dark" },
         { geo: "box", pos: [0.1, 1.02, 0.12], size: [0.1, 0.1, 0.04], color: "dark" },
-        { geo: "sphere", pos: [-0.1, 1.03, 0.16], size: [0.035], color: "eye" },
-        { geo: "sphere", pos: [0.1, 1.03, 0.16], size: [0.035], color: "eye" },
+        { geo: "sphere", pos: [-0.1, 1.03, 0.16], size: [0.055], color: "eye" },
+        { geo: "sphere", pos: [0.1, 1.03, 0.16], size: [0.055], color: "eye" },
         { geo: "sphere", pos: [-0.1, 1.03, 0.18], size: [0.02], color: "pupil" },
         { geo: "sphere", pos: [0.1, 1.03, 0.18], size: [0.02], color: "pupil" },
         { geo: "sphere", pos: [0, 0.93, 0.2], size: [0.04], color: "nose" },
@@ -184,8 +184,8 @@ CHARACTER_MODELS.chick = {
         { geo: "box", pos: [0, 1.15, 0], size: [0.03, 0.1, 0.03], color: "dark" },
         { geo: "box", pos: [-0.05, 1.12, 0], size: [0.025, 0.07, 0.025], color: "dark" },
         { geo: "box", pos: [0.05, 1.12, 0], size: [0.025, 0.07, 0.025], color: "dark" },
-        { geo: "sphere", pos: [-0.09, 0.92, 0.16], size: [0.04], color: "eye" },
-        { geo: "sphere", pos: [0.09, 0.92, 0.16], size: [0.04], color: "eye" },
+        { geo: "sphere", pos: [-0.09, 0.92, 0.16], size: [0.065], color: "eye" },
+        { geo: "sphere", pos: [0.09, 0.92, 0.16], size: [0.065], color: "eye" },
         { geo: "cone", pos: [0, 0.82, 0.2], size: [0.05, 0.08, 4], color: "beak", rot: [Math.PI/2, 0, 0] },
         { geo: "box", pos: [-0.08, 0.0, 0.04], size: [0.08, 0.04, 0.1], color: "feet" },
         { geo: "box", pos: [0.08, 0.0, 0.04], size: [0.08, 0.04, 0.1], color: "feet" },
@@ -193,13 +193,13 @@ CHARACTER_MODELS.chick = {
 };
 
 CHARACTER_MODELS.droplet = {
-    palette: { body: 0x00d2ff, dark: 0x0088aa, eye: 0x111111 },
+    palette: { body: 0x00d2ff, eye: 0x111111 },
     parts: [
         { geo: "sphere", pos: [0, 0.45, 0], size: [0.3], color: "body" },
         { geo: "box", pos: [0, 0.75, 0], size: [0.22, 0.22, 0.2], color: "body" },
         { geo: "cone", pos: [0, 1.05, 0], size: [0.15, 0.2, 8], color: "body" },
-        { geo: "sphere", pos: [-0.08, 0.5, 0.28], size: [0.04], color: "eye" },
-        { geo: "sphere", pos: [0.08, 0.5, 0.28], size: [0.04], color: "eye" },
+        { geo: "sphere", pos: [-0.08, 0.5, 0.28], size: [0.065], color: "eye" },
+        { geo: "sphere", pos: [0.08, 0.5, 0.28], size: [0.065], color: "eye" },
     ],
 };
 
