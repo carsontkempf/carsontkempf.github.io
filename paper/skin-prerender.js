@@ -77,15 +77,15 @@ fox: {
     ],
 },
 panda: {
-    palette: { body: 0xffffff, belly: 0xf5e6d0, dark: 0x222222, eye: 0xffffff, pupil: 0x111111, nose: 0x333333 },
+    palette: { body: 0x111111, belly: 0xffffff, dark: 0x000000, eye: 0xffffff, pupil: 0x111111, nose: 0x333333 },
     parts: [
         { geo: "box", pos: [0, 0.45, 0], size: [0.5, 0.58, 0.42], color: "body" },
-        { geo: "box", pos: [0, 0.4, 0.21], size: [0.32, 0.42, 0.08], color: "belly" },
+        { geo: "box", pos: [0, 0.4, 0.21], size: [0.34, 0.44, 0.08], color: "belly" },
         { geo: "box", pos: [-0.28, 0.5, 0], size: [0.12, 0.28, 0.12], color: "dark" },
         { geo: "box", pos: [0.28, 0.5, 0], size: [0.12, 0.28, 0.12], color: "dark" },
         { geo: "box", pos: [-0.14, 0.1, 0], size: [0.12, 0.2, 0.12], color: "dark" },
         { geo: "box", pos: [0.14, 0.1, 0], size: [0.12, 0.2, 0.12], color: "dark" },
-        { geo: "box", pos: [0, 1.0, 0], size: [0.42, 0.4, 0.38], color: "body" },
+        { geo: "box", pos: [0, 1.0, 0], size: [0.42, 0.4, 0.38], color: "belly" },
         { geo: "sphere", pos: [-0.18, 1.2, 0], size: [0.09], color: "dark" },
         { geo: "sphere", pos: [0.18, 1.2, 0], size: [0.09], color: "dark" },
         { geo: "box", pos: [-0.1, 1.02, 0.12], size: [0.1, 0.1, 0.04], color: "dark" },

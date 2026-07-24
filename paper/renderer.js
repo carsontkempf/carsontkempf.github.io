@@ -65,10 +65,11 @@ class Renderer {
         const cs = cellWorld * this.scale;
         if (cs < 0.3) return;
 
-        // Hex geometry (flat-top)
-        const hexW = cs * 1.05; // slightly wider than cell to overlap
-        const hexH = hexW * 0.866; // sqrt(3)/2
-        const rowH = hexH * 0.75; // vertical spacing (overlap 25%)
+        // Hex geometry (pointy-top, tiles with staggered rows)
+        const hexR = cs * 0.6; // hex radius
+        const hexW = hexR * 1.732; // width = sqrt(3) * radius
+        const hexH = hexR * 2; // height = 2 * radius
+        const rowH = hexR * 1.5; // row spacing = 1.5 * radius (overlap for tiling)
         const depth = Math.max(2, cs * 0.4);
 
         for (const p of players) {
@@ -86,13 +87,12 @@ class Renderer {
                     if (!this._hexHasNeighborBelow(engine, gx, gy, p.id)) {
                         const hc = this._hexCenter(gx, gy, cs, hexW, rowH);
                         if (hc.x > this.screenW + hexW || hc.x < -hexW || hc.y > this.screenH + hexH + depth || hc.y < -hexH) continue;
-                        // Draw side trapezoid below bottom edge of hex
+                        // Draw side trapezoid below bottom vertex of pointy-top hex
                         const hw = hexW * 0.5;
-                        const hh = hexH * 0.5;
-                        ctx.moveTo(hc.x - hw * 0.5, hc.y + hh);
-                        ctx.lineTo(hc.x + hw * 0.5, hc.y + hh);
-                        ctx.lineTo(hc.x + hw * 0.5, hc.y + hh + depth);
-                        ctx.lineTo(hc.x - hw * 0.5, hc.y + hh + depth);
+                        ctx.moveTo(hc.x - hw, hc.y + hexR * 0.5);
+                        ctx.lineTo(hc.x + hw, hc.y + hexR * 0.5);
+                        ctx.lineTo(hc.x + hw, hc.y + hexR * 0.5 + depth);
+                        ctx.lineTo(hc.x - hw, hc.y + hexR * 0.5 + depth);
                         ctx.closePath();
                     }
                 }
@@ -108,7 +108,7 @@ class Renderer {
                     if (engine.grid[gy][gx] !== p.id) continue;
                     const hc = this._hexCenter(gx, gy, cs, hexW, rowH);
                     if (hc.x > this.screenW + hexW || hc.x < -hexW || hc.y > this.screenH + hexH || hc.y < -hexH) continue;
-                    this._flatHex(ctx, hc.x, hc.y, hexW * 0.52, hexH * 0.52);
+                    this._flatHex(ctx, hc.x, hc.y, hexW * 0.5, hexR);
                 }
             }
             ctx.fill();
@@ -125,7 +125,7 @@ class Renderer {
                         if (engine.grid[gy][gx] !== p.id) continue;
                         const hc = this._hexCenter(gx, gy, cs, hexW, rowH);
                         if (hc.x > this.screenW + hexW || hc.x < -hexW || hc.y > this.screenH + hexH || hc.y < -hexH) continue;
-                        this._flatHex(ctx, hc.x, hc.y, hexW * 0.52, hexH * 0.52);
+                        this._flatHex(ctx, hc.x, hc.y, hexW * 0.5, hexR);
                     }
                 }
                 ctx.stroke();
@@ -157,14 +157,17 @@ class Renderer {
     }
 
     /** Draw a flat-top hexagon path at center (cx, cy) with half-width hw and half-height hh */
+    /** Draw a pointy-top hexagon at center (cx, cy) with radius r.
+     *  Pointy-top hexes tile correctly with staggered (offset) rows. */
     _flatHex(ctx, cx, cy, hw, hh) {
-        // Flat-top hex: 6 vertices starting from top-right going clockwise
-        ctx.moveTo(cx + hw * 0.5, cy - hh);
-        ctx.lineTo(cx + hw, cy);
-        ctx.lineTo(cx + hw * 0.5, cy + hh);
-        ctx.lineTo(cx - hw * 0.5, cy + hh);
-        ctx.lineTo(cx - hw, cy);
-        ctx.lineTo(cx - hw * 0.5, cy - hh);
+        // Pointy-top hex: vertex at top, flat sides on left/right
+        // 6 vertices starting from top, going clockwise
+        ctx.moveTo(cx, cy - hh);
+        ctx.lineTo(cx + hw, cy - hh * 0.5);
+        ctx.lineTo(cx + hw, cy + hh * 0.5);
+        ctx.lineTo(cx, cy + hh);
+        ctx.lineTo(cx - hw, cy + hh * 0.5);
+        ctx.lineTo(cx - hw, cy - hh * 0.5);
         ctx.closePath();
     }
 
