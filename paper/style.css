@@ -366,11 +366,13 @@ html, body {
     background: rgba(0,0,0,0.4);
     border: 1px solid rgba(255,255,255,0.2);
     color: #fff;
-    font-size: 0.75em;
-    padding: 4px 8px;
-    border-radius: 6px;
+    font-size: 0.6em;
+    padding: 3px 6px;
+    border-radius: 4px;
     cursor: pointer;
     margin-left: auto;
+    min-width: 0;
+    line-height: 1;
 }
 #pause-overlay {
     position: absolute;

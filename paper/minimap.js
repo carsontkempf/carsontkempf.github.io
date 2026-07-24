@@ -1,5 +1,5 @@
 /**
- * MiniMap - Overview of the arena in top-right corner.
+ * MiniMap - Circular overview of the arena.
  */
 
 class MiniMap {
@@ -10,17 +10,23 @@ class MiniMap {
 
     render(ctx, engine, players, screenW) {
         const screenH = window.innerHeight;
-        const x = screenW - this.size - this.padding;
-        const y = screenH - this.size - this.padding - 20; // bottom-right
+        const r = this.size / 2;
+        const cx = screenW - r - this.padding;
+        const cy = screenH - r - this.padding - 20;
         const cellSize = this.size / GRID_RES;
         const step = Math.max(2, Math.floor(GRID_RES / 40));
 
-        // Background
+        // Clip to circle
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, r + 2, 0, Math.PI * 2);
+        ctx.clip();
+
+        // Background circle
         ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(x - 2, y - 2, this.size + 4, this.size + 4);
-        ctx.strokeStyle = "rgba(255,255,255,0.2)";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x - 2, y - 2, this.size + 4, this.size + 4);
+        ctx.beginPath();
+        ctx.arc(cx, cy, r + 2, 0, Math.PI * 2);
+        ctx.fill();
 
         // Territory
         for (let gy = 0; gy < GRID_RES; gy += step) {
@@ -30,15 +36,15 @@ class MiniMap {
                 const player = players.find(p => p.id === owner);
                 if (!player) continue;
                 ctx.fillStyle = player.color;
-                ctx.fillRect(x + gx * cellSize, y + gy * cellSize, cellSize * step, cellSize * step);
+                ctx.fillRect(cx - r + gx * cellSize, cy - r + gy * cellSize, cellSize * step + 0.5, cellSize * step + 0.5);
             }
         }
 
         // Player dots
         for (const p of players) {
             if (!p.alive) continue;
-            const px = x + (p.x / WORLD_SIZE) * this.size;
-            const py = y + (p.y / WORLD_SIZE) * this.size;
+            const px = cx - r + (p.x / WORLD_SIZE) * this.size;
+            const py = cy - r + (p.y / WORLD_SIZE) * this.size;
             ctx.beginPath();
             ctx.arc(px, py, 2.5, 0, Math.PI * 2);
             ctx.fillStyle = "#fff";
@@ -48,5 +54,14 @@ class MiniMap {
             ctx.fillStyle = p.color;
             ctx.fill();
         }
+
+        ctx.restore();
+
+        // Circle border
+        ctx.beginPath();
+        ctx.arc(cx, cy, r + 1, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255,255,255,0.25)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
     }
 }
