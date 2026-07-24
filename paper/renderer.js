@@ -93,29 +93,8 @@ class Renderer {
             }
             ctx.fill();
             ctx.globalAlpha = 1;
-            ctx.globalAlpha = 1;
 
-            // Pass 2: Hex outline on outer-facing edges ONLY
-            // This draws only the outer contour as hex segments
-            if (cs >= 1.5) {
-                ctx.strokeStyle = borderColor;
-                ctx.lineWidth = Math.max(2, cs * 0.12);
-                ctx.lineJoin = "bevel";
-                ctx.beginPath();
-                for (let gy = 0; gy < GRID_RES; gy++) {
-                    for (let gx = 0; gx < GRID_RES; gx++) {
-                        if (engine.grid[gy][gx] !== p.id) continue;
-                        if (!this._isEdgeCell(engine, gx, gy, p.id)) continue;
-                        const sx = gx * cs - this.cameraX + this.screenW / 2;
-                        const sy = gy * cs - this.cameraY + this.screenH / 2;
-                        if (sx > this.screenW + cs * 2 || sx < -cs * 2 || sy > this.screenH + cs * 2 || sy < -cs * 2) continue;
-                        this._drawHexBorder(ctx, engine, gx, gy, p.id, sx, sy, cs);
-                    }
-                }
-                ctx.stroke();
-            }
-
-            // Pass 3: 3D depth below bottom edge cells
+            // Pass 2: 3D depth below bottom edge cells
             ctx.fillStyle = sideColor;
             ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
