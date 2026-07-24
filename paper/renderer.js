@@ -65,44 +65,22 @@ class Renderer {
         const cs = cellWorld * this.scale;
         if (cs < 0.3) return;
 
-        const depth = Math.max(4, cs * 0.8);
-        const hexR = cs * 0.55;
+        const depth = Math.max(5, cs * 1.0);
 
         for (const p of players) {
             const baseColor = p.territoryColor || p.color;
-            const sideColor = this.darken(baseColor, 0.4);
-            const edgeColor = this.darken(baseColor, 0.55);
+            const sideColor = this.darken(baseColor, 0.35);
+            const edgeColor = this.darken(baseColor, 0.5);
+            const lightColor = this.lighten(baseColor, 0.1);
 
-            // Pass 1: Hex-shaped depth on bottom edge cells
-            ctx.fillStyle = sideColor;
-            ctx.beginPath();
-            for (let gy = 0; gy < GRID_RES; gy++) {
-                for (let gx = 0; gx < GRID_RES; gx++) {
-                    if (engine.grid[gy][gx] !== p.id) continue;
-                    if (gy + 1 < GRID_RES && engine.grid[gy + 1][gx] === p.id) continue;
-                    const sx = gx * cs - this.cameraX + this.screenW / 2;
-                    const sy = gy * cs - this.cameraY + this.screenH / 2;
-                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs + depth || sy < -cs) continue;
-                    // Hex-shaped depth (pentagon pointing down)
-                    const cx = sx + cs * 0.5;
-                    const top = sy + cs;
-                    ctx.moveTo(cx - hexR * 0.5, top);
-                    ctx.lineTo(cx + hexR * 0.5, top);
-                    ctx.lineTo(cx + hexR * 0.5, top + depth * 0.6);
-                    ctx.lineTo(cx, top + depth);
-                    ctx.lineTo(cx - hexR * 0.5, top + depth * 0.6);
-                    ctx.closePath();
-                }
-            }
-            ctx.fill();
-
-            // Pass 2: Solid interior fill (full rectangles, NO gaps)
+            // Pass 1: Solid interior fill for non-edge cells
             ctx.fillStyle = baseColor;
             ctx.globalAlpha = 0.6;
             ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
+                    if (this._isEdgeCell(engine, gx, gy, p.id)) continue; // skip edges
                     const sx = gx * cs - this.cameraX + this.screenW / 2;
                     const sy = gy * cs - this.cameraY + this.screenH / 2;
                     if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
@@ -112,11 +90,28 @@ class Renderer {
             ctx.fill();
             ctx.globalAlpha = 1;
 
-            // Pass 3: Hex outlines ONLY on edge cells (interior is clean)
+            // Pass 2: Edge cells filled as hexagons
+            ctx.fillStyle = baseColor;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            for (let gy = 0; gy < GRID_RES; gy++) {
+                for (let gx = 0; gx < GRID_RES; gx++) {
+                    if (engine.grid[gy][gx] !== p.id) continue;
+                    if (!this._isEdgeCell(engine, gx, gy, p.id)) continue;
+                    const sx = gx * cs - this.cameraX + this.screenW / 2;
+                    const sy = gy * cs - this.cameraY + this.screenH / 2;
+                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
+                    this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.58);
+                }
+            }
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Pass 3: Hex stroke on edge cells
             if (cs >= 2) {
                 ctx.strokeStyle = edgeColor;
-                ctx.lineWidth = Math.max(1, cs * 0.08);
-                ctx.globalAlpha = 0.5;
+                ctx.lineWidth = Math.max(1, cs * 0.06);
+                ctx.globalAlpha = 0.6;
                 ctx.beginPath();
                 for (let gy = 0; gy < GRID_RES; gy++) {
                     for (let gx = 0; gx < GRID_RES; gx++) {
@@ -125,12 +120,36 @@ class Renderer {
                         const sx = gx * cs - this.cameraX + this.screenW / 2;
                         const sy = gy * cs - this.cameraY + this.screenH / 2;
                         if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                        this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, hexR);
+                        this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.58);
                     }
                 }
                 ctx.stroke();
                 ctx.globalAlpha = 1;
             }
+
+            // Pass 4: 3D depth below bottom edge cells (drawn LAST so visible)
+            ctx.fillStyle = sideColor;
+            ctx.beginPath();
+            for (let gy = 0; gy < GRID_RES; gy++) {
+                for (let gx = 0; gx < GRID_RES; gx++) {
+                    if (engine.grid[gy][gx] !== p.id) continue;
+                    if (gy + 1 < GRID_RES && engine.grid[gy + 1][gx] === p.id) continue;
+                    const sx = gx * cs - this.cameraX + this.screenW / 2;
+                    const sy = gy * cs - this.cameraY + this.screenH / 2;
+                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs + depth || sy < -cs) continue;
+                    // Full-width hex depth shape
+                    const cx = sx + cs * 0.5;
+                    const top = sy + cs;
+                    const hw = cs * 0.55;
+                    ctx.moveTo(cx - hw, top);
+                    ctx.lineTo(cx + hw, top);
+                    ctx.lineTo(cx + hw, top + depth * 0.65);
+                    ctx.lineTo(cx, top + depth);
+                    ctx.lineTo(cx - hw, top + depth * 0.65);
+                    ctx.closePath();
+                }
+            }
+            ctx.fill();
         }
     }
 
