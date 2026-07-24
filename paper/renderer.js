@@ -72,17 +72,35 @@ class Renderer {
             const sideColor = this.darken(baseColor, 0.35);
             const borderColor = this.darken(baseColor, 0.6);
 
-            // Pass 1: Fill ALL territory cells with rects (solid, no gaps)
+            // Pass 1: Fill INTERIOR cells with rects (no edges)
             ctx.fillStyle = baseColor;
             ctx.globalAlpha = 0.6;
             ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
+                    if (this._isEdgeCell(engine, gx, gy, p.id)) continue;
                     const sx = gx * cs - this.cameraX + this.screenW / 2;
                     const sy = gy * cs - this.cameraY + this.screenH / 2;
                     if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
                     ctx.rect(sx, sy, cs + 0.5, cs + 0.5);
+                }
+            }
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Pass 2: Fill EDGE cells with hexagons (same color, overlaps interior)
+            ctx.fillStyle = baseColor;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            for (let gy = 0; gy < GRID_RES; gy++) {
+                for (let gx = 0; gx < GRID_RES; gx++) {
+                    if (engine.grid[gy][gx] !== p.id) continue;
+                    if (!this._isEdgeCell(engine, gx, gy, p.id)) continue;
+                    const sx = gx * cs - this.cameraX + this.screenW / 2;
+                    const sy = gy * cs - this.cameraY + this.screenH / 2;
+                    if (sx > this.screenW + cs * 2 || sx < -cs * 2 || sy > this.screenH + cs * 2 || sy < -cs * 2) continue;
+                    this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.62);
                 }
             }
             ctx.fill();

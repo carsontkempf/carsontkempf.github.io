@@ -1,10 +1,8 @@
 /**
- * Slot Machine - Popup overlay after game ends.
- * Each token collected = one spin.
- * User must click/tap the lever to spin.
+ * Slot Machine - Center popup after game ends.
+ * Each token = one spin. User drags/clicks lever to spin.
+ * Tokens are only spent when user pulls the lever.
  * Three of a kind = coin reward.
- *
- * Symbols: 7 (cherry=25), BAR (bar=75), $ (jackpot=200)
  */
 
 const SLOT_REWARDS = [25, 75, 200];
@@ -23,20 +21,24 @@ class Jackpot {
         // Reel state
         this.reels = [0, 0, 0];
         this.reelTargets = [0, 0, 0];
-        this.reelSpeeds = [0, 0, 0];
         this.spinning = false;
         this.spinStartTime = 0;
         this.reelStopTimes = [0, 0, 0];
         this.showResult = false;
-        this.resultTimer = 0;
 
-        // Lever state
-        this.leverPulled = false;
-        this.leverAngle = 0; // 0 = up, 1 = pulled down
-        this.leverAnimating = false;
+        // Lever state (0 = up, 1 = fully down)
+        this.leverPos = 0;
+        this.leverDragging = false;
+        this.leverReleased = false;
+        this.leverReturnSpeed = 0;
 
-        // Click handling
-        this._clickHandler = null;
+        // Layout (computed on render)
+        this._layout = null;
+
+        // Input handlers
+        this._pointerDown = null;
+        this._pointerMove = null;
+        this._pointerUp = null;
     }
 
     start(collectedTokens, onComplete) {
@@ -46,11 +48,12 @@ class Jackpot {
         this.onComplete = onComplete;
         this.spinning = false;
         this.showResult = false;
-        this.leverPulled = false;
-        this.leverAngle = 0;
+        this.leverPos = 0;
+        this.leverDragging = false;
+        this.leverReleased = false;
         this.spinsRemaining = collectedTokens.length;
 
-        // Pre-generate all spin results
+        // Pre-generate spin results
         this.spins = [];
         for (let i = 0; i < collectedTokens.length; i++) {
             const reels = [
@@ -58,7 +61,6 @@ class Jackpot {
                 Math.floor(Math.random() * 3),
                 Math.floor(Math.random() * 3)
             ];
-            // 20% chance of jackpot (all same)
             if (Math.random() < 0.2) {
                 const val = Math.floor(Math.random() * 3);
                 reels[0] = val; reels[1] = val; reels[2] = val;
@@ -73,257 +75,354 @@ class Jackpot {
             return;
         }
 
-        // Bind click/tap
-        this._clickHandler = (e) => this._handleClick(e);
-        document.addEventListener("pointerdown", this._clickHandler);
+        // Bind pointer events
+        this._pointerDown = (e) => this._onDown(e);
+        this._pointerMove = (e) => this._onMove(e);
+        this._pointerUp = (e) => this._onUp(e);
+        document.addEventListener("pointerdown", this._pointerDown);
+        document.addEventListener("pointermove", this._pointerMove);
+        document.addEventListener("pointerup", this._pointerUp);
     }
 
-    _handleClick(e) {
+    _getLayout(screenW, screenH) {
+        const mw = Math.min(300, screenW * 0.8);
+        const mh = 320;
+        const mx = (screenW - mw) / 2;
+        const my = (screenH - mh) / 2;
+        // Lever hitbox (right side)
+        const leverX = mx + mw - 30;
+        const leverTop = my + 80;
+        const leverH = 120;
+        return { mx, my, mw, mh, leverX, leverTop, leverH };
+    }
+
+    _onDown(e) {
         if (!this.visible || this.spinning || this.showResult) return;
-
-        // Check if click is on the lever area or anywhere (tap to spin)
-        this.pullLever();
-    }
-
-    pullLever() {
-        if (this.spinning || this.currentSpin >= this.spins.length) return;
-
-        this.leverPulled = true;
-        this.leverAnimating = true;
-        this.leverAngle = 0;
-
-        // Animate lever down then start spin
-        const self = this;
-        const leverStart = performance.now();
-        function animLever() {
-            const t = (performance.now() - leverStart) / 300;
-            if (t < 1) {
-                self.leverAngle = t;
-                requestAnimationFrame(animLever);
-            } else {
-                self.leverAngle = 1;
-                setTimeout(() => {
-                    self.leverAngle = 0;
-                    self.leverAnimating = false;
-                    self._startSpin();
-                }, 200);
-            }
+        if (this.spinsRemaining <= 0) {
+            this._finish();
+            return;
         }
-        animLever();
+        const lay = this._layout;
+        if (!lay) return;
+        const x = e.clientX, y = e.clientY;
+        // Check if pointer is near lever
+        if (Math.abs(x - lay.leverX) < 40 && y >= lay.leverTop - 10 && y <= lay.leverTop + lay.leverH + 20) {
+            this.leverDragging = true;
+            this._dragStartY = y;
+        }
     }
 
-    _startSpin() {
-        const spin = this.spins[this.currentSpin];
+    _onMove(e) {
+        if (!this.leverDragging) return;
+        const lay = this._layout;
+        if (!lay) return;
+        const dy = e.clientY - this._dragStartY;
+        this.leverPos = Math.max(0, Math.min(1, dy / lay.leverH));
+    }
+
+    _onUp(e) {
+        if (!this.leverDragging) return;
+        this.leverDragging = false;
+        // If pulled past 70%, trigger spin
+        if (this.leverPos >= 0.7) {
+            this.leverReleased = true;
+            this._triggerSpin();
+        } else {
+            // Snap back
+            this.leverReleased = false;
+            this.leverReturnSpeed = 4;
+        }
+    }
+
+    _triggerSpin() {
+        if (this.currentSpin >= this.spins.length) return;
         this.spinning = true;
         this.showResult = false;
+        this.spinsRemaining--;
+        const spin = this.spins[this.currentSpin];
         this.reelTargets = spin.reels;
         this.reels = [Math.random() * 3, Math.random() * 3, Math.random() * 3];
-        this.reelSpeeds = [14, 14, 14];
         this.spinStartTime = performance.now();
-        // Stagger stop times
-        this.reelStopTimes = [800, 1200, 1600];
+        this.reelStopTimes = [700, 1100, 1500];
+        // Lever returns to top
+        this.leverReturnSpeed = 3;
     }
 
     update() {
         if (!this.visible) return;
+
+        // Lever return animation
+        if (!this.leverDragging && this.leverPos > 0) {
+            this.leverPos -= 0.05 * (this.leverReturnSpeed || 2);
+            if (this.leverPos < 0) this.leverPos = 0;
+        }
+
         if (!this.spinning) return;
 
         const elapsed = performance.now() - this.spinStartTime;
 
         for (let i = 0; i < 3; i++) {
             if (elapsed < this.reelStopTimes[i]) {
-                // Still spinning
-                this.reels[i] += 0.25;
+                this.reels[i] += 0.3;
                 if (this.reels[i] >= 3) this.reels[i] -= 3;
             } else {
-                // Stopped - snap to target
                 this.reels[i] = this.reelTargets[i];
             }
         }
 
-        // All reels stopped
-        if (elapsed > this.reelStopTimes[2] + 400) {
+        // All stopped
+        if (elapsed > this.reelStopTimes[2] + 300) {
             this.spinning = false;
             this.showResult = true;
-            this.resultTimer = performance.now();
-
             const spin = this.spins[this.currentSpin];
             if (spin.win) this.totalWon += spin.reward;
-            this.spinsRemaining--;
-
-            // Auto-advance after delay
-            setTimeout(() => {
-                this.showResult = false;
-                this.currentSpin++;
-                if (this.currentSpin >= this.spins.length) {
-                    // All done
-                    setTimeout(() => this._finish(), 500);
-                }
-                // Otherwise wait for next lever pull
-            }, 1800);
+            this.currentSpin++;
+            // Clear result after delay
+            setTimeout(() => { this.showResult = false; }, 2000);
         }
     }
 
     _finish() {
         this.visible = false;
-        if (this._clickHandler) {
-            document.removeEventListener("pointerdown", this._clickHandler);
-            this._clickHandler = null;
-        }
+        if (this._pointerDown) document.removeEventListener("pointerdown", this._pointerDown);
+        if (this._pointerMove) document.removeEventListener("pointermove", this._pointerMove);
+        if (this._pointerUp) document.removeEventListener("pointerup", this._pointerUp);
+        this._pointerDown = null;
+        this._pointerMove = null;
+        this._pointerUp = null;
         if (this.onComplete) this.onComplete(this.totalWon);
     }
 
     render(ctx, screenW, screenH) {
         if (!this.visible) return;
 
-        // Darken background
-        ctx.fillStyle = "rgba(0,0,0,0.8)";
+        const lay = this._getLayout(screenW, screenH);
+        this._layout = lay;
+        const { mx, my, mw, mh, leverX, leverTop, leverH } = lay;
+        const cx = mx + mw / 2;
+
+        // Semi-transparent background (game still visible)
+        ctx.fillStyle = "rgba(0,0,0,0.7)";
         ctx.fillRect(0, 0, screenW, screenH);
 
-        const cx = screenW / 2;
-        const cy = screenH / 2;
+        // Machine body - 3D effect with gradient and shadow
+        // Shadow
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.beginPath();
+        ctx.roundRect(mx + 4, my + 6, mw, mh, 14);
+        ctx.fill();
 
-        // Machine body (popup card)
-        const mw = Math.min(320, screenW * 0.85);
-        const mh = 280;
-        const mx = cx - mw / 2;
-        const my = cy - mh / 2;
+        // Main body (dark gradient look)
+        const grad = ctx.createLinearGradient(mx, my, mx, my + mh);
+        grad.addColorStop(0, "#2a1a3e");
+        grad.addColorStop(0.5, "#1a1a2e");
+        grad.addColorStop(1, "#0a0a1e");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.roundRect(mx, my, mw, mh, 14);
+        ctx.fill();
 
-        // Machine background
-        ctx.fillStyle = "#1a1a2e";
+        // Gold trim
         ctx.strokeStyle = "#ffd700";
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.roundRect(mx, my, mw, mh, 16);
-        ctx.fill();
+        ctx.roundRect(mx, my, mw, mh, 14);
         ctx.stroke();
 
-        // Top banner
+        // Top plate (3D raised)
         ctx.fillStyle = "#ffd700";
-        ctx.fillRect(mx + 10, my + 10, mw - 20, 36);
+        ctx.beginPath();
+        ctx.roundRect(mx + 12, my + 10, mw - 24, 32, 6);
+        ctx.fill();
+        ctx.fillStyle = "#8B6914";
+        ctx.fillRect(mx + 12, my + 34, mw - 24, 4);
+
+        // Title
         ctx.fillStyle = "#1a1a2e";
-        ctx.font = "bold 18px monospace";
+        ctx.font = "bold 16px monospace";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("SLOT MACHINE", cx, my + 28);
+        ctx.fillText("SLOT MACHINE", cx - 10, my + 26);
 
-        // Spins remaining
-        ctx.fillStyle = "#aaa";
-        ctx.font = "12px monospace";
-        ctx.fillText("Spins: " + this.spinsRemaining + " remaining", cx, my + 56);
+        // Spins display
+        ctx.fillStyle = "#ffd700";
+        ctx.font = "bold 12px monospace";
+        ctx.fillText("SPINS: " + this.spinsRemaining, cx - 10, my + 56);
 
-        // Reels
-        const reelW = mw * 0.22;
-        const reelH = 70;
-        const reelGap = mw * 0.04;
-        const reelsStartX = cx - (reelW * 3 + reelGap * 2) / 2;
-        const reelY = my + 72;
+        // Reel area (3D inset)
+        const reelAreaX = mx + 15;
+        const reelAreaY = my + 68;
+        const reelAreaW = mw - 70;
+        const reelAreaH = 80;
 
+        // Inset shadow
+        ctx.fillStyle = "#000";
+        ctx.beginPath();
+        ctx.roundRect(reelAreaX, reelAreaY, reelAreaW, reelAreaH, 8);
+        ctx.fill();
+        ctx.fillStyle = "#0a0a1a";
+        ctx.beginPath();
+        ctx.roundRect(reelAreaX + 2, reelAreaY + 2, reelAreaW - 4, reelAreaH - 4, 6);
+        ctx.fill();
+
+        // Individual reels
+        const reelW = (reelAreaW - 20) / 3;
+        const reelGap = 5;
         for (let i = 0; i < 3; i++) {
-            const rx = reelsStartX + i * (reelW + reelGap);
+            const rx = reelAreaX + 5 + i * (reelW + reelGap);
+            const ry = reelAreaY + 5;
+            const rh = reelAreaH - 10;
 
-            // Reel border
-            ctx.fillStyle = "#0a0a1a";
-            ctx.strokeStyle = "#555";
-            ctx.lineWidth = 2;
+            // Reel bg
+            ctx.fillStyle = "#111122";
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.roundRect(rx, reelY, reelW, reelH, 8);
+            ctx.roundRect(rx, ry, reelW, rh, 4);
             ctx.fill();
             ctx.stroke();
 
             // Symbol
             const val = Math.floor(this.reels[i]) % 3;
-            const sym = SLOT_SYMBOLS[val];
-            const col = SLOT_COLORS[val];
-
-            ctx.fillStyle = col;
+            ctx.fillStyle = SLOT_COLORS[val];
             ctx.font = "bold " + (reelW * 0.5) + "px monospace";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(sym, rx + reelW / 2, reelY + reelH / 2);
+            ctx.fillText(SLOT_SYMBOLS[val], rx + reelW / 2, ry + rh / 2);
 
-            // Spinning blur effect
+            // Spinning blur
             if (this.spinning && (performance.now() - this.spinStartTime) < this.reelStopTimes[i]) {
-                ctx.fillStyle = "rgba(10,10,26,0.4)";
-                ctx.fillRect(rx + 2, reelY + 2, reelW - 4, reelH - 4);
+                ctx.fillStyle = "rgba(10,10,26,0.5)";
+                ctx.fillRect(rx + 1, ry + 1, reelW - 2, rh - 2);
+                // Show blurred next symbol
+                const val2 = (val + 1) % 3;
+                ctx.globalAlpha = 0.3;
+                ctx.fillStyle = SLOT_COLORS[val2];
+                ctx.fillText(SLOT_SYMBOLS[val2], rx + reelW / 2, ry + rh / 2 - 15);
+                ctx.globalAlpha = 1;
             }
         }
 
         // Win line
         ctx.strokeStyle = "#ffd700";
         ctx.lineWidth = 2;
-        ctx.setLineDash([4, 4]);
+        ctx.setLineDash([3, 3]);
         ctx.beginPath();
-        ctx.moveTo(reelsStartX - 5, reelY + reelH / 2);
-        ctx.lineTo(reelsStartX + reelW * 3 + reelGap * 2 + 5, reelY + reelH / 2);
+        ctx.moveTo(reelAreaX, reelAreaY + reelAreaH / 2);
+        ctx.lineTo(reelAreaX + reelAreaW, reelAreaY + reelAreaH / 2);
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Result text
-        const resultY = reelY + reelH + 25;
-        if (this.showResult && this.spins[this.currentSpin]) {
-            const spin = this.spins[this.currentSpin];
-            if (spin.win) {
-                ctx.fillStyle = "#2ed573";
-                ctx.font = "bold 18px monospace";
-                ctx.fillText("WIN! +" + spin.reward + " coins", cx, resultY);
-            } else {
-                ctx.fillStyle = "#666";
-                ctx.font = "14px monospace";
-                ctx.fillText("No match - try again!", cx, resultY);
-            }
-        } else if (!this.spinning && this.currentSpin < this.spins.length) {
-            ctx.fillStyle = "#ffd700";
-            ctx.font = "bold 14px monospace";
-            ctx.fillText("TAP ANYWHERE TO PULL LEVER", cx, resultY);
-        }
+        // LEVER (3D, right side of machine)
+        const leverSlotX = mx + mw - 38;
+        const leverSlotTop = leverTop;
+        const leverSlotH = leverH;
+        const handleY = leverSlotTop + this.leverPos * leverSlotH;
 
-        // Total won display
-        if (this.totalWon > 0) {
-            ctx.fillStyle = "#ffd700";
-            ctx.font = "bold 14px monospace";
-            ctx.fillText("Total: +" + this.totalWon + " coins", cx, resultY + 24);
-        }
-
-        // Lever (right side of machine)
-        const leverX = mx + mw - 25;
-        const leverBaseY = reelY + 10;
-        const leverH = reelH - 20;
-
-        // Lever track
-        ctx.fillStyle = "#333";
-        ctx.fillRect(leverX - 3, leverBaseY, 6, leverH);
-
-        // Lever handle (moves based on leverAngle)
-        const handleY = leverBaseY + this.leverAngle * (leverH - 12);
-        ctx.fillStyle = "#ff4757";
+        // Lever track (3D groove)
+        ctx.fillStyle = "#222";
         ctx.beginPath();
-        ctx.arc(leverX, handleY + 6, 8, 0, Math.PI * 2);
+        ctx.roundRect(leverSlotX - 4, leverSlotTop - 5, 8, leverSlotH + 10, 4);
         ctx.fill();
-        ctx.strokeStyle = "#cc0000";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#444";
+        ctx.lineWidth = 1;
         ctx.stroke();
 
         // Lever shaft
         ctx.strokeStyle = "#888";
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(leverX, handleY + 14);
-        ctx.lineTo(leverX, leverBaseY + leverH);
+        ctx.moveTo(leverSlotX, handleY + 10);
+        ctx.lineTo(leverSlotX, leverSlotTop + leverSlotH);
         ctx.stroke();
 
-        // Close button (if all spins done)
-        if (this.currentSpin >= this.spins.length) {
-            const btnW = 120, btnH = 36;
-            const btnX = cx - btnW / 2;
-            const btnY = my + mh - 50;
+        // Lever handle (3D ball)
+        const ballR = 12;
+        const ballGrad = ctx.createRadialGradient(
+            leverSlotX - 2, handleY - 2, 2,
+            leverSlotX, handleY, ballR
+        );
+        ballGrad.addColorStop(0, "#ff6b6b");
+        ballGrad.addColorStop(0.7, "#cc0000");
+        ballGrad.addColorStop(1, "#800000");
+        ctx.fillStyle = ballGrad;
+        ctx.beginPath();
+        ctx.arc(leverSlotX, handleY, ballR, 0, Math.PI * 2);
+        ctx.fill();
+        // Highlight
+        ctx.fillStyle = "rgba(255,255,255,0.3)";
+        ctx.beginPath();
+        ctx.arc(leverSlotX - 3, handleY - 4, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Arrow hint on lever
+        if (!this.spinning && !this.showResult && this.spinsRemaining > 0 && this.leverPos < 0.1) {
+            ctx.fillStyle = "#ffd700";
+            ctx.font = "10px monospace";
+            ctx.textAlign = "center";
+            ctx.fillText("PULL", leverSlotX, leverSlotTop - 12);
+            ctx.fillText("v", leverSlotX, leverSlotTop + leverSlotH + 18);
+        }
+
+        // Result display area
+        const resultY = reelAreaY + reelAreaH + 15;
+
+        if (this.showResult) {
+            const spin = this.spins[this.currentSpin - 1];
+            if (spin && spin.win) {
+                ctx.fillStyle = "#2ed573";
+                ctx.font = "bold 16px monospace";
+                ctx.textAlign = "center";
+                ctx.fillText("WIN! +" + spin.reward + " coins!", cx - 10, resultY + 10);
+            } else {
+                ctx.fillStyle = "#777";
+                ctx.font = "14px monospace";
+                ctx.textAlign = "center";
+                ctx.fillText("No match", cx - 10, resultY + 10);
+            }
+        } else if (!this.spinning && this.spinsRemaining > 0) {
+            ctx.fillStyle = "#ccc";
+            ctx.font = "12px monospace";
+            ctx.textAlign = "center";
+            ctx.fillText("Drag lever down to spin!", cx - 10, resultY + 10);
+        } else if (!this.spinning && this.spinsRemaining <= 0) {
+            ctx.fillStyle = "#ffd700";
+            ctx.font = "bold 13px monospace";
+            ctx.textAlign = "center";
+            ctx.fillText("All spins used!", cx - 10, resultY + 10);
+        }
+
+        // Total won
+        if (this.totalWon > 0) {
+            ctx.fillStyle = "#ffd700";
+            ctx.font = "bold 14px monospace";
+            ctx.textAlign = "center";
+            ctx.fillText("Total: +" + this.totalWon + " coins", cx - 10, resultY + 32);
+        }
+
+        // Collect button (when all spins done)
+        if (this.spinsRemaining <= 0 && !this.spinning && !this.showResult) {
+            const btnW = 130, btnH = 36;
+            const btnX = cx - 10 - btnW / 2;
+            const btnY = my + mh - 52;
+            // 3D button
+            ctx.fillStyle = "#1a8c4e";
+            ctx.beginPath();
+            ctx.roundRect(btnX, btnY + 3, btnW, btnH, 8);
+            ctx.fill();
             ctx.fillStyle = "#2ed573";
             ctx.beginPath();
             ctx.roundRect(btnX, btnY, btnW, btnH, 8);
             ctx.fill();
             ctx.fillStyle = "#000";
             ctx.font = "bold 14px monospace";
-            ctx.fillText("COLLECT", cx, btnY + btnH / 2);
+            ctx.textAlign = "center";
+            ctx.fillText("COLLECT", cx - 10, btnY + btnH / 2);
         }
+
+        // Machine base (3D feet)
+        ctx.fillStyle = "#333";
+        ctx.fillRect(mx + 20, my + mh - 6, 30, 6);
+        ctx.fillRect(mx + mw - 50, my + mh - 6, 30, 6);
     }
 }
