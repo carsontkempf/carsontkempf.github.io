@@ -169,8 +169,8 @@ class Renderer {
 
             // Shadow
             ctx.beginPath();
-            ctx.ellipse(x + 1, y + r * 0.3, r * 0.7, r * 0.25, 0, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(0,0,0,0.25)";
+            ctx.ellipse(x + 1, y + r * 0.3, r * 0.3, r * 0.08, 0, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(0,0,0,0.2)";
             ctx.fill();
 
             // Draw skin

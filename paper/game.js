@@ -342,9 +342,9 @@ class Game {
         // but inside arena with room for their own territory
         const humanTerritoryRadius = this.humanPlayer.spawnRadius || 500;
         const aiTerritoryRadius = 500;
-        const minSpawnDist = humanTerritoryRadius + aiTerritoryRadius + 200;
+        const minSpawnDist = humanTerritoryRadius + aiTerritoryRadius + 1500;
         const maxSpawnDist = arenaRadius - aiTerritoryRadius - 200;
-        const spawnDist = Math.min(maxSpawnDist, Math.max(minSpawnDist, arenaRadius * 0.4));
+        const spawnDist = Math.min(maxSpawnDist, Math.max(minSpawnDist, arenaRadius * 0.5));
 
         for (let i = 0; i < aiCount; i++) {
             const angle = (Math.PI * 2 * i) / aiCount + Math.PI / 4;
