@@ -55,7 +55,9 @@ class Renderer {
     }
 
     /**
-     * Render territories with hex texture and 3D edge depth.
+     * Render territories as tiled flat-top hexagons with 3D depth on bottom edges.
+     * Hex grid is offset: odd rows shift right by half hex width.
+     * Hexagons overlap to fill without gaps.
      */
     renderTerritories(engine, players) {
         const ctx = this.ctx;
@@ -63,56 +65,67 @@ class Renderer {
         const cs = cellWorld * this.scale;
         if (cs < 0.3) return;
 
-        const depth = Math.max(3, cs * 0.5);
+        // Hex geometry (flat-top)
+        const hexW = cs * 1.05; // slightly wider than cell to overlap
+        const hexH = hexW * 0.866; // sqrt(3)/2
+        const rowH = hexH * 0.75; // vertical spacing (overlap 25%)
+        const depth = Math.max(2, cs * 0.4);
 
         for (const p of players) {
             const baseColor = p.territoryColor || p.color;
             const sideColor = this.darken(baseColor, 0.4);
+            const edgeColor = this.darken(baseColor, 0.6);
 
-            // Pass 1: Side depth on outer bottom edge
+            // Pass 1: Side depth faces (only on cells with no owned neighbor below)
             ctx.fillStyle = sideColor;
             ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
-                    if (gy + 1 < GRID_RES && engine.grid[gy + 1][gx] === p.id) continue;
-                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
-                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
-                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs * 2 || sy < -cs) continue;
-                    ctx.rect(sx, sy + cs, cs + 0.5, depth);
+                    // Check if bottom edge is exposed
+                    if (!this._hexHasNeighborBelow(engine, gx, gy, p.id)) {
+                        const hc = this._hexCenter(gx, gy, cs, hexW, rowH);
+                        if (hc.x > this.screenW + hexW || hc.x < -hexW || hc.y > this.screenH + hexH + depth || hc.y < -hexH) continue;
+                        // Draw side trapezoid below bottom edge of hex
+                        const hw = hexW * 0.5;
+                        const hh = hexH * 0.5;
+                        ctx.moveTo(hc.x - hw * 0.5, hc.y + hh);
+                        ctx.lineTo(hc.x + hw * 0.5, hc.y + hh);
+                        ctx.lineTo(hc.x + hw * 0.5, hc.y + hh + depth);
+                        ctx.lineTo(hc.x - hw * 0.5, hc.y + hh + depth);
+                        ctx.closePath();
+                    }
                 }
             }
             ctx.fill();
 
-            // Pass 2: Solid top fill
+            // Pass 2: Hex top faces (filled, batched)
             ctx.fillStyle = baseColor;
             ctx.globalAlpha = 0.65;
             ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
-                    const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
-                    const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
-                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                    ctx.rect(sx, sy, cs + 0.5, cs + 0.5);
+                    const hc = this._hexCenter(gx, gy, cs, hexW, rowH);
+                    if (hc.x > this.screenW + hexW || hc.x < -hexW || hc.y > this.screenH + hexH || hc.y < -hexH) continue;
+                    this._flatHex(ctx, hc.x, hc.y, hexW * 0.52, hexH * 0.52);
                 }
             }
             ctx.fill();
             ctx.globalAlpha = 1;
 
-            // Pass 3: Hex grid lines
+            // Pass 3: Hex borders (subtle grid lines)
             if (cs >= 3) {
-                ctx.strokeStyle = this.darken(baseColor, 0.5);
-                ctx.lineWidth = Math.max(0.8, cs * 0.06);
-                ctx.globalAlpha = 0.4;
+                ctx.strokeStyle = edgeColor;
+                ctx.lineWidth = Math.max(0.5, cs * 0.04);
+                ctx.globalAlpha = 0.3;
                 ctx.beginPath();
                 for (let gy = 0; gy < GRID_RES; gy++) {
                     for (let gx = 0; gx < GRID_RES; gx++) {
                         if (engine.grid[gy][gx] !== p.id) continue;
-                        const sx = gx * cellWorld * this.scale - this.cameraX + this.screenW / 2;
-                        const sy = gy * cellWorld * this.scale - this.cameraY + this.screenH / 2;
-                        if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                        this._hexTop(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.46);
+                        const hc = this._hexCenter(gx, gy, cs, hexW, rowH);
+                        if (hc.x > this.screenW + hexW || hc.x < -hexW || hc.y > this.screenH + hexH || hc.y < -hexH) continue;
+                        this._flatHex(ctx, hc.x, hc.y, hexW * 0.52, hexH * 0.52);
                     }
                 }
                 ctx.stroke();
@@ -121,14 +134,37 @@ class Renderer {
         }
     }
 
-    _hexTop(ctx, cx, cy, r) {
-        for (var i = 0; i < 6; i++) {
-            var angle = Math.PI / 6 + (Math.PI / 3) * i;
-            var hx = cx + r * Math.cos(angle);
-            var hy = cy + r * Math.sin(angle) * 0.6;
-            if (i === 0) ctx.moveTo(hx, hy);
-            else ctx.lineTo(hx, hy);
-        }
+    /** Compute screen center of hex cell at grid position gx,gy */
+    _hexCenter(gx, gy, cs, hexW, rowH) {
+        // Map grid cell to screen, with hex offset for odd rows
+        const offset = (gy % 2) * hexW * 0.5;
+        const wx = gx * cs + offset;
+        const wy = gy * cs; // keep same Y as square grid (don't use rowH for positioning)
+        const sx = wx - this.cameraX + this.screenW / 2 + cs * 0.5;
+        const sy = wy - this.cameraY + this.screenH / 2 + cs * 0.5;
+        return { x: sx, y: sy };
+    }
+
+    /** Check if hex at (gx,gy) has an owned neighbor below (accounting for hex offset) */
+    _hexHasNeighborBelow(engine, gx, gy, pid) {
+        if (gy + 1 >= GRID_RES) return false;
+        // Direct below
+        if (engine.grid[gy + 1][gx] === pid) return true;
+        // Offset neighbor (depends on odd/even row)
+        const offsetCol = (gy % 2 === 0) ? gx - 1 : gx + 1;
+        if (offsetCol >= 0 && offsetCol < GRID_RES && engine.grid[gy + 1][offsetCol] === pid) return true;
+        return false;
+    }
+
+    /** Draw a flat-top hexagon path at center (cx, cy) with half-width hw and half-height hh */
+    _flatHex(ctx, cx, cy, hw, hh) {
+        // Flat-top hex: 6 vertices starting from top-right going clockwise
+        ctx.moveTo(cx + hw * 0.5, cy - hh);
+        ctx.lineTo(cx + hw, cy);
+        ctx.lineTo(cx + hw * 0.5, cy + hh);
+        ctx.lineTo(cx - hw * 0.5, cy + hh);
+        ctx.lineTo(cx - hw, cy);
+        ctx.lineTo(cx - hw * 0.5, cy - hh);
         ctx.closePath();
     }
 

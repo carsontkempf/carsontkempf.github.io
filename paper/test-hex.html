@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Hex Tiling Test</title>
+    <style>
+        body { background: #0a0a1a; color: #fff; font-family: monospace; padding: 16px; }
+        canvas { border: 1px solid #333; display: block; margin: 16px auto; }
+        .results { max-width: 600px; margin: 0 auto; font-size: 12px; }
+        .pass { color: #2ed573; }
+        .fail { color: #ff4757; }
+        h2 { text-align: center; }
+    </style>
+</head>
+<body>
+    <h2>Hex Tiling System Test</h2>
+    <canvas id="hex-test" width="600" height="400"></canvas>
+    <div class="results" id="results"></div>
+    <script>
+    var results = document.getElementById("results");
+    function log(msg, pass) {
+        var d = document.createElement("div");
+        d.className = pass ? "pass" : "fail";
+        d.textContent = (pass ? "PASS" : "FAIL") + ": " + msg;
+        results.appendChild(d);
+    }
+    function assert(cond, msg) { log(msg, !!cond); }
+
+    // ========================
+    // Hex geometry helpers (same as renderer)
+    // ========================
+    function hexCenter(gx, gy, cs, hexW, rowH, offsetX, offsetY) {
+        var offset = (gy % 2) * hexW * 0.5;
+        return {
+            x: gx * cs + offset + cs * 0.5 + offsetX,
+            y: gy * rowH + cs * 0.5 + offsetY
+        };
+    }
+
+    function hasNeighborBelow(grid, gx, gy, pid, gridRes) {
+        if (gy + 1 >= gridRes) return false;
+        if (grid[gy + 1][gx] === pid) return true;
+        var offsetCol = (gy % 2 === 0) ? gx - 1 : gx + 1;
+        if (offsetCol >= 0 && offsetCol < gridRes && grid[gy + 1][offsetCol] === pid) return true;
+        return false;
+    }
+
+    function drawFlatHex(ctx, cx, cy, hw, hh) {
+        ctx.moveTo(cx + hw * 0.5, cy - hh);
+        ctx.lineTo(cx + hw, cy);
+        ctx.lineTo(cx + hw * 0.5, cy + hh);
+        ctx.lineTo(cx - hw * 0.5, cy + hh);
+        ctx.lineTo(cx - hw, cy);
+        ctx.lineTo(cx - hw * 0.5, cy - hh);
+        ctx.closePath();
+    }
+
+    // ========================
+    // Test 1: Hex centers offset correctly
+    // ========================
+    (function testHexOffsets() {
+        var cs = 20, hexW = cs * 1.05, rowH = hexW * 0.866 * 0.75;
+        var c00 = hexCenter(0, 0, cs, hexW, rowH, 0, 0);
+        var c10 = hexCenter(1, 0, cs, hexW, rowH, 0, 0);
+        var c01 = hexCenter(0, 1, cs, hexW, rowH, 0, 0);
+        var c11 = hexCenter(1, 1, cs, hexW, rowH, 0, 0);
+
+        assert(c10.x > c00.x, "Col 1 is right of col 0 (same row)");
+        assert(Math.abs(c10.x - c00.x - cs) < 1, "Col spacing ~= cell size (" + (c10.x - c00.x).toFixed(1) + ")");
+        assert(c01.x > c00.x, "Odd row is offset right");
+        assert(Math.abs(c01.x - c00.x - hexW * 0.5) < 1, "Odd row offset = half hexW (" + (c01.x - c00.x).toFixed(1) + ")");
+        assert(c01.y > c00.y, "Row 1 is below row 0");
+        assert(c01.y - c00.y < cs, "Rows overlap (spacing " + (c01.y - c00.y).toFixed(1) + " < cs " + cs + ")");
+    })();
+
+    // ========================
+    // Test 2: Neighbor detection
+    // ========================
+    (function testNeighbors() {
+        // Create a 5x5 test grid
+        var grid = [];
+        for (var i = 0; i < 5; i++) { grid.push([0,0,0,0,0]); }
+        grid[0][2] = 1; // owned
+        grid[1][2] = 1; // owned (below)
+        grid[2][2] = 1; // owned (bottom edge)
+
+        assert(hasNeighborBelow(grid, 2, 0, 1, 5) === true, "Cell (2,0) has neighbor below at (2,1)");
+        assert(hasNeighborBelow(grid, 2, 1, 1, 5) === true, "Cell (2,1) has neighbor below at (2,2)");
+        assert(hasNeighborBelow(grid, 2, 2, 1, 5) === false, "Cell (2,2) has NO neighbor below (bottom edge)");
+
+        // Test offset neighbor
+        grid[2][1] = 0; grid[2][2] = 0; grid[2][3] = 0;
+        grid[1][2] = 1;
+        // Row 0 is even, offset neighbor below is at col gx-1 in row+1
+        grid[1][1] = 1; // this is the offset neighbor for (2,0)
+        assert(hasNeighborBelow(grid, 2, 0, 1, 5) === true, "Cell (2,0) even row has offset neighbor at (1,1)");
+    })();
+
+    // ========================
+    // Test 3: Visual rendering (no gaps)
+    // ========================
+    (function testVisualTiling() {
+        var canvas = document.getElementById("hex-test");
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#0a0a1a";
+        ctx.fillRect(0, 0, 600, 400);
+
+        var cs = 30;
+        var hexW = cs * 1.05;
+        var hexH = hexW * 0.866;
+        var rowH = hexH * 0.75;
+        var depth = 6;
+        var hw = hexW * 0.52;
+        var hh = hexH * 0.52;
+
+        // Draw a 10x12 block of territory
+        var gridW = 12, gridH = 10;
+        var grid = [];
+        for (var y = 0; y < gridH; y++) {
+            grid.push([]);
+            for (var x = 0; x < gridW; x++) {
+                // Create a blob shape
+                var dx = x - 6, dy = y - 5;
+                grid[y].push((dx*dx + dy*dy < 20) ? 1 : 0);
+            }
+        }
+
+        var ox = 100, oy = 50;
+
+        // Pass 1: Side depth
+        ctx.fillStyle = "#006688";
+        ctx.beginPath();
+        for (var gy = 0; gy < gridH; gy++) {
+            for (var gx = 0; gx < gridW; gx++) {
+                if (grid[gy][gx] !== 1) continue;
+                if (!hasNeighborBelow(grid, gx, gy, 1, gridH)) {
+                    var hc = hexCenter(gx, gy, cs, hexW, rowH, ox, oy);
+                    ctx.moveTo(hc.x - hw * 0.5, hc.y + hh);
+                    ctx.lineTo(hc.x + hw * 0.5, hc.y + hh);
+                    ctx.lineTo(hc.x + hw * 0.5, hc.y + hh + depth);
+                    ctx.lineTo(hc.x - hw * 0.5, hc.y + hh + depth);
+                    ctx.closePath();
+                }
+            }
+        }
+        ctx.fill();
+
+        // Pass 2: Hex fills
+        ctx.fillStyle = "#00d2ff";
+        ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        for (var gy = 0; gy < gridH; gy++) {
+            for (var gx = 0; gx < gridW; gx++) {
+                if (grid[gy][gx] !== 1) continue;
+                var hc = hexCenter(gx, gy, cs, hexW, rowH, ox, oy);
+                drawFlatHex(ctx, hc.x, hc.y, hw, hh);
+            }
+        }
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Pass 3: Hex borders
+        ctx.strokeStyle = "#005577";
+        ctx.lineWidth = 0.8;
+        ctx.globalAlpha = 0.4;
+        ctx.beginPath();
+        for (var gy = 0; gy < gridH; gy++) {
+            for (var gx = 0; gx < gridW; gx++) {
+                if (grid[gy][gx] !== 1) continue;
+                var hc = hexCenter(gx, gy, cs, hexW, rowH, ox, oy);
+                drawFlatHex(ctx, hc.x, hc.y, hw, hh);
+            }
+        }
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        // Check for gaps: sample pixels inside territory area
+        var imgData = ctx.getImageData(0, 0, 600, 400);
+        var gapCount = 0;
+        var territoryPixels = 0;
+        // Sample the middle of the territory blob
+        for (var py = 120; py < 250; py += 2) {
+            for (var px = 180; px < 350; px += 2) {
+                var idx = (py * 600 + px) * 4;
+                var r = imgData.data[idx], g = imgData.data[idx+1], b = imgData.data[idx+2], a = imgData.data[idx+3];
+                if (a > 0 && (r > 0 || g > 0 || b > 0)) {
+                    territoryPixels++;
+                } else {
+                    gapCount++;
+                }
+            }
+        }
+        var gapPercent = (gapCount / (gapCount + territoryPixels) * 100).toFixed(1);
+        assert(gapPercent < 15, "Gap percentage in territory center: " + gapPercent + "% (want <15%)");
+        assert(territoryPixels > 1000, "Territory has " + territoryPixels + " filled pixels (want >1000)");
+
+        // Check depth strip exists (sample below territory)
+        var depthPixels = 0;
+        for (var px = 180; px < 350; px += 3) {
+            var idx = (270 * 600 + px) * 4;
+            if (imgData.data[idx+3] > 0) depthPixels++;
+        }
+        assert(depthPixels > 5, "Depth strip visible below territory (" + depthPixels + " pixels)");
+
+        // Draw labels
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "#fff";
+        ctx.font = "12px monospace";
+        ctx.fillText("Hex Tiling Visual Test", ox, oy - 10);
+        ctx.fillText("Gaps: " + gapPercent + "% | Territory pixels: " + territoryPixels, ox, 340);
+        ctx.fillText("Depth pixels: " + depthPixels, ox, 356);
+
+        log("Visual render complete - check canvas above", true);
+    })();
+
+    // ========================
+    // Summary
+    // ========================
+    var passes = document.querySelectorAll(".pass").length;
+    var fails = document.querySelectorAll(".fail").length;
+    var s = document.createElement("div");
+    s.style.marginTop = "12px";
+    s.style.fontWeight = "bold";
+    s.style.color = fails === 0 ? "#2ed573" : "#ff4757";
+    s.textContent = "TOTAL: " + passes + " passed, " + fails + " failed";
+    results.appendChild(s);
+    </script>
+</body>
+</html>
