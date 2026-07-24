@@ -10,10 +10,12 @@ import * as THREE from "three";
 const CHARACTER_MODELS = {
 
 bunny: {
-    palette: { body: 0xffffff, accent: 0xffaacc, dark: 0xdddddd, eye: 0x111111, nose: 0xff6688 },
+    palette: { body: 0xffffff, belly: 0xffccdd, accent: 0xffaacc, dark: 0xdddddd, eye: 0x111111, nose: 0xff6688 },
     parts: [
         // Body
         { geo: "box", pos: [0, 0.45, 0], size: [0.5, 0.55, 0.45], color: "body" },
+        // Belly
+        { geo: "box", pos: [0, 0.4, 0.15], size: [0.3, 0.35, 0.08], color: "belly" },
         // Head
         { geo: "box", pos: [0, 1.0, 0.02], size: [0.42, 0.42, 0.38], color: "body" },
         // Left ear
@@ -45,7 +47,7 @@ bunny: {
 },
 
 penguin: {
-    palette: { body: 0x1a1a2e, belly: 0xf5f5f5, accent: 0xff8c00, eye: 0xffffff, pupil: 0x111111 },
+    palette: { body: 0x1a1a2e, belly: 0xccefff, accent: 0xff8c00, eye: 0xffffff, pupil: 0x111111 },
     parts: [
         // Body
         { geo: "box", pos: [0, 0.45, 0], size: [0.45, 0.6, 0.4], color: "body" },
@@ -73,7 +75,7 @@ penguin: {
 },
 
 fox: {
-    palette: { body: 0xf07020, belly: 0xffffff, dark: 0x222222, eye: 0x111111, accent: 0xffccaa },
+    palette: { body: 0xf07020, belly: 0xffeebb, dark: 0x222222, eye: 0x111111, accent: 0xffccaa },
     parts: [
         // Body
         { geo: "box", pos: [0, 0.45, 0], size: [0.45, 0.55, 0.38], color: "body" },
@@ -111,9 +113,11 @@ fox: {
 };
 
 CHARACTER_MODELS.panda = {
-    palette: { body: 0xffffff, dark: 0x222222, eye: 0xffffff, pupil: 0x111111, nose: 0x333333 },
+    palette: { body: 0xffffff, belly: 0xe8d0f0, dark: 0x222222, eye: 0xffffff, pupil: 0x111111, nose: 0x333333 },
     parts: [
         { geo: "box", pos: [0, 0.45, 0], size: [0.5, 0.58, 0.42], color: "body" },
+        // Belly
+        { geo: "box", pos: [0, 0.4, 0.14], size: [0.3, 0.38, 0.08], color: "belly" },
         { geo: "box", pos: [-0.28, 0.5, 0], size: [0.12, 0.28, 0.12], color: "dark" },
         { geo: "box", pos: [0.28, 0.5, 0], size: [0.12, 0.28, 0.12], color: "dark" },
         { geo: "box", pos: [-0.14, 0.1, 0], size: [0.12, 0.2, 0.12], color: "dark" },
@@ -132,7 +136,7 @@ CHARACTER_MODELS.panda = {
 };
 
 CHARACTER_MODELS.owl = {
-    palette: { body: 0x8B5E3C, belly: 0xd4a574, dark: 0x5B3E1C, eye: 0xff8c00, pupil: 0x111111, beak: 0xff9800, disc: 0xf0dcc0 },
+    palette: { body: 0x8B5E3C, belly: 0xb8e8d0, dark: 0x5B3E1C, eye: 0xff8c00, pupil: 0x111111, beak: 0xff9800, disc: 0xf0dcc0 },
     parts: [
         { geo: "box", pos: [0, 0.45, 0], size: [0.42, 0.55, 0.38], color: "body" },
         { geo: "box", pos: [0, 0.35, 0.1], size: [0.25, 0.3, 0.08], color: "belly" },
