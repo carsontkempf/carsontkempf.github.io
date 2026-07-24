@@ -262,13 +262,17 @@ class Engine {
         try {
             if (this.onUpdate) this.onUpdate(dt);
             if (this.onRender) this.onRender(dt);
+            this._errCount = 0; // reset on successful frame
         } catch (e) {
             console.error("Loop error:", e);
             if (typeof dbg === "function") dbg("LOOP ERR:" + e.message);
-            // Don't freeze - just skip this frame and continue
             if (!this._errCount) this._errCount = 0;
             this._errCount++;
-            if (this._errCount > 60) { this.running = false; return; } // only stop after 60 consecutive errors
+            if (this._errCount > 120) {
+                this.running = false;
+                if (this.onGameEnd) this.onGameEnd();
+                return;
+            }
         }
         if (!this._frameCount) this._frameCount = 0;
         this._frameCount++;

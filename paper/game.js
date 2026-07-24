@@ -486,10 +486,10 @@ class Game {
     }
 
     updateHUD() {
-        // Stopwatch (counts up)
-        const elapsed = Math.floor(this.engine.gameTime);
-        const mins = Math.floor(elapsed / 60);
-        const secs = elapsed % 60;
+        // Countdown timer
+        const remaining = Math.max(0, Math.ceil(GAME_DURATION - this.engine.gameTime));
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
         document.getElementById("hud-timer").textContent = `${mins}:${secs.toString().padStart(2, "0")}`;
         document.getElementById("hud-territory").textContent = this.engine.getTerritoryPercent(0) + "%";
         document.getElementById("hud-kills").textContent = this.humanPlayer.kills + "K";
@@ -510,7 +510,9 @@ class Game {
     }
 
     gameEnd() {
+        dbg("gameEnd called! gameTime=" + (this.engine.gameTime || 0).toFixed(1));
         this.engine.stop();
+        this.state = "ended";
         const scores = this.players.map(p => ({
             name: p.name, territory: parseFloat(this.engine.getTerritoryPercent(p.id)),
             kills: p.kills, isHuman: p.id === 0,
@@ -525,10 +527,37 @@ class Game {
         if (collected.length >= 1) {
             this.jackpot.start(collected, (jackpotCoins) => {
                 coins += jackpotCoins;
+                this._stopJackpotLoop();
                 this.showResults(h, rank, won, coins, collected.length);
             });
+            // Start dedicated jackpot render loop (game loop is stopped)
+            this._runJackpotLoop();
         } else {
             this.showResults(h, rank, won, coins, collected.length);
+        }
+    }
+
+    _runJackpotLoop() {
+        const self = this;
+        function tick() {
+            if (!self.jackpot.visible) return;
+            self.jackpot.update();
+            // Render on game canvas
+            const ctx = self.renderer.ctx;
+            const sw = self.renderer.screenW;
+            const sh = self.renderer.screenH;
+            ctx.fillStyle = "rgba(0,0,0,0.85)";
+            ctx.fillRect(0, 0, sw, sh);
+            self.jackpot.render(ctx, sw, sh);
+            self._jackpotFrame = requestAnimationFrame(tick);
+        }
+        tick();
+    }
+
+    _stopJackpotLoop() {
+        if (this._jackpotFrame) {
+            cancelAnimationFrame(this._jackpotFrame);
+            this._jackpotFrame = null;
         }
     }
 
