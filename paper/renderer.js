@@ -83,7 +83,7 @@ class Renderer {
                     const sx = gx * cs - this.cameraX + this.screenW / 2;
                     const sy = gy * cs - this.cameraY + this.screenH / 2;
                     if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                    ctx.rect(sx - 0.5, sy - 0.5, cs + 1.5, cs + 1.5);
+                    ctx.rect(sx - cs * 0.3, sy - cs * 0.3, cs + cs * 0.6, cs + cs * 0.6);
                 }
             }
             ctx.fill();
