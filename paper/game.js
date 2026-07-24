@@ -504,10 +504,10 @@ class Game {
     }
 
     updateHUD() {
-        // Countdown timer
-        const remaining = Math.max(0, Math.ceil(GAME_DURATION - this.engine.gameTime));
-        const mins = Math.floor(remaining / 60);
-        const secs = remaining % 60;
+        // Timer (counts up)
+        const elapsed = Math.floor(this.engine.gameTime);
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
         document.getElementById("hud-timer").textContent = `${mins}:${secs.toString().padStart(2, "0")}`;
         document.getElementById("hud-territory").textContent = this.engine.getTerritoryPercent(0) + "%";
         document.getElementById("hud-kills").textContent = this.humanPlayer.kills + "K";
