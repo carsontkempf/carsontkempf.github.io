@@ -265,8 +265,10 @@ class Engine {
         } catch (e) {
             console.error("Loop error:", e);
             if (typeof dbg === "function") dbg("LOOP ERR:" + e.message);
-            this.running = false;
-            return;
+            // Don't freeze - just skip this frame and continue
+            if (!this._errCount) this._errCount = 0;
+            this._errCount++;
+            if (this._errCount > 60) { this.running = false; return; } // only stop after 60 consecutive errors
         }
         if (!this._frameCount) this._frameCount = 0;
         this._frameCount++;
