@@ -45,8 +45,11 @@ class Player {
      */
     update(engine, allPlayers, dt) {
         if (!this.alive) {
-            this.deathTimer -= dt;
-            if (this.deathTimer <= 0) this.respawn(engine);
+            // Only AI bots respawn - human player stays dead (game ends)
+            if (this.id !== 0) {
+                this.deathTimer -= dt;
+                if (this.deathTimer <= 0) this.respawn(engine);
+            }
             return null;
         }
 
