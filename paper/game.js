@@ -452,6 +452,13 @@ class Game {
             return;
         }
 
+        // Check if human died (from any cause - AI cutting trail, etc)
+        if (!this.humanPlayer.alive) {
+            dbg("Human died (alive=false) - ending game");
+            this.gameEnd();
+            return;
+        }
+
         // Update AI
         for (const ai of this.aiControllers) {
             ai.update(this.engine, this.players, dt);
