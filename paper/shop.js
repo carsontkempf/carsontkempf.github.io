@@ -97,6 +97,7 @@ class Shop {
 
         container.innerHTML = html;
         this.bindShopEvents(container);
+        this.animate3DPreviews();
     }
 
     renderTabs() {
@@ -123,8 +124,7 @@ class Shop {
         } else if (t === "powerups") {
             return `<div class="shape-preview" style="font-size:1.4em;">⚡</div>`;
         } else if (t === "shapes") {
-            const icons = { droplet:"💧", bunny:"🐰", penguin:"🐧", fox:"🦊", panda:"🐼", owl:"🦉", frog:"🐸", chick:"🐣", skateboard:"🛹", skis:"⛷", hoverboard:"🛸", ninja:"🥷", astronaut:"🧑‍🚀" };
-            return `<div class="shape-preview" style="font-size:1.8em;">${icons[item.id] || "🔵"}</div>`;
+            return `<canvas class="shape-preview-3d" data-skin="${item.id}" width="80" height="80" style="display:block;margin:0 auto;"></canvas>`;
         } else {
             return `<div class="shape-preview shape-${item.id}"></div>`;
         }
@@ -267,5 +267,29 @@ class Shop {
                 this.renderLoadout();
             });
         });
+        this.animate3DPreviews();
+    }
+
+    /** Animate all .shape-preview-3d canvases with rotating 3D characters */
+    animate3DPreviews() {
+        if (this._3dAnimFrame) cancelAnimationFrame(this._3dAnimFrame);
+        var self = this;
+        var prerenderer = this.game.skinPrerenderer;
+        if (!prerenderer || !prerenderer.ready) return;
+
+        function tick() {
+            var canvases = document.querySelectorAll(".shape-preview-3d");
+            if (canvases.length === 0) return; // stop if no canvases visible
+            var t = performance.now() * 0.002;
+            for (var i = 0; i < canvases.length; i++) {
+                var c = canvases[i];
+                var skinId = c.dataset.skin;
+                var ctx = c.getContext("2d");
+                ctx.clearRect(0, 0, 80, 80);
+                prerenderer.draw(ctx, 40, 44, 36, t + i * 0.5, skinId);
+            }
+            self._3dAnimFrame = requestAnimationFrame(tick);
+        }
+        tick();
     }
 }
