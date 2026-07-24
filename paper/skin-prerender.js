@@ -14,42 +14,65 @@ const CHAR_MODELS = {
 bunny: {
     palette: { body: 0xffffff, belly: 0xffccdd, accent: 0xffaacc, dark: 0xdddddd, eye: 0x111111, eye_w: 0xffffff, nose: 0xff6688 },
     parts: [
-        { geo: "box", pos: [0, 0.45, 0], size: [0.5, 0.55, 0.45], color: "body" },
-        { geo: "box", pos: [0, 0.4, 0.22], size: [0.32, 0.38, 0.08], color: "belly" },
-        { geo: "box", pos: [0, 1.0, 0.02], size: [0.42, 0.42, 0.38], color: "body" },
-        { geo: "box", pos: [-0.1, 1.5, 0], size: [0.08, 0.38, 0.06], color: "body" },
-        { geo: "box", pos: [0.1, 1.5, 0], size: [0.08, 0.38, 0.06], color: "body" },
-        { geo: "box", pos: [-0.1, 1.48, 0.02], size: [0.04, 0.28, 0.02], color: "accent" },
-        { geo: "box", pos: [0.1, 1.48, 0.02], size: [0.04, 0.28, 0.02], color: "accent" },
-        { geo: "box", pos: [-0.3, 0.5, 0], size: [0.1, 0.25, 0.1], color: "body" },
-        { geo: "box", pos: [0.3, 0.5, 0], size: [0.1, 0.25, 0.1], color: "body" },
-        { geo: "box", pos: [-0.12, 0.1, 0], size: [0.12, 0.2, 0.14], color: "body" },
-        { geo: "box", pos: [0.12, 0.1, 0], size: [0.12, 0.2, 0.14], color: "body" },
-        { geo: "box", pos: [-0.12, 0.0, 0.04], size: [0.13, 0.05, 0.16], color: "accent" },
-        { geo: "box", pos: [0.12, 0.0, 0.04], size: [0.13, 0.05, 0.16], color: "accent" },
-        { geo: "sphere", pos: [0, 0.4, -0.25], size: [0.08], color: "body" },
-        { geo: "sphere", pos: [-0.1, 1.05, 0.19], size: [0.07], color: "eye_w" },
-        { geo: "sphere", pos: [0.1, 1.05, 0.19], size: [0.07], color: "eye_w" },
-        { geo: "sphere", pos: [-0.1, 1.05, 0.24], size: [0.045], color: "eye" },
-        { geo: "sphere", pos: [0.1, 1.05, 0.24], size: [0.045], color: "eye" },
-        { geo: "sphere", pos: [0, 0.95, 0.2], size: [0.035], color: "nose" },
+        // Body (rounded)
+        { geo: "sphere", pos: [0, 0.45, 0], size: [0.28], color: "body" },
+        { geo: "box", pos: [0, 0.45, 0], size: [0.42, 0.5, 0.38], color: "body" },
+        { geo: "sphere", pos: [0, 0.4, 0.16], size: [0.18], color: "belly" },
+        // Head (sphere)
+        { geo: "sphere", pos: [0, 0.95, 0.02], size: [0.24], color: "body" },
+        // Ears (rounded with accent inside)
+        { geo: "box", pos: [-0.08, 1.4, 0], size: [0.07, 0.35, 0.05], color: "body" },
+        { geo: "box", pos: [0.08, 1.4, 0], size: [0.07, 0.35, 0.05], color: "body" },
+        { geo: "sphere", pos: [-0.08, 1.55, 0], size: [0.035], color: "body" },
+        { geo: "sphere", pos: [0.08, 1.55, 0], size: [0.035], color: "body" },
+        { geo: "box", pos: [-0.08, 1.38, 0.02], size: [0.035, 0.25, 0.02], color: "accent" },
+        { geo: "box", pos: [0.08, 1.38, 0.02], size: [0.035, 0.25, 0.02], color: "accent" },
+        // Arms (rounded)
+        { geo: "sphere", pos: [-0.28, 0.5, 0], size: [0.08], color: "body" },
+        { geo: "sphere", pos: [0.28, 0.5, 0], size: [0.08], color: "body" },
+        // Legs (rounded)
+        { geo: "sphere", pos: [-0.12, 0.12, 0.04], size: [0.09], color: "body" },
+        { geo: "sphere", pos: [0.12, 0.12, 0.04], size: [0.09], color: "body" },
+        { geo: "box", pos: [-0.12, 0.03, 0.06], size: [0.1, 0.04, 0.14], color: "accent" },
+        { geo: "box", pos: [0.12, 0.03, 0.06], size: [0.1, 0.04, 0.14], color: "accent" },
+        // Tail (fluffy sphere)
+        { geo: "sphere", pos: [0, 0.35, -0.22], size: [0.08], color: "body" },
+        // Eyes
+        { geo: "sphere", pos: [-0.09, 0.99, 0.2], size: [0.06], color: "eye_w" },
+        { geo: "sphere", pos: [0.09, 0.99, 0.2], size: [0.06], color: "eye_w" },
+        { geo: "sphere", pos: [-0.09, 0.99, 0.24], size: [0.04], color: "eye" },
+        { geo: "sphere", pos: [0.09, 0.99, 0.24], size: [0.04], color: "eye" },
+        // Nose
+        { geo: "sphere", pos: [0, 0.9, 0.22], size: [0.03], color: "nose" },
     ],
 },
 penguin: {
     palette: { body: 0x1a1a2e, belly: 0xffffff, accent: 0xff8c00, eye: 0xffffff, pupil: 0x111111 },
     parts: [
-        { geo: "box", pos: [0, 0.45, 0], size: [0.45, 0.6, 0.4], color: "body" },
-        { geo: "box", pos: [0, 0.45, 0.2], size: [0.32, 0.5, 0.1], color: "belly" },
-        { geo: "box", pos: [0, 1.0, 0], size: [0.38, 0.38, 0.35], color: "body" },
-        { geo: "box", pos: [-0.28, 0.5, 0], size: [0.07, 0.3, 0.15], color: "body", rot: [0, 0, 0.2] },
-        { geo: "box", pos: [0.28, 0.5, 0], size: [0.07, 0.3, 0.15], color: "body", rot: [0, 0, -0.2] },
-        { geo: "box", pos: [-0.12, 0.0, 0.06], size: [0.14, 0.06, 0.16], color: "accent" },
-        { geo: "box", pos: [0.12, 0.0, 0.06], size: [0.14, 0.06, 0.16], color: "accent" },
-        { geo: "cone", pos: [0, 0.92, 0.2], size: [0.06, 0.1, 8], color: "accent", rot: [1.57, 0, 0] },
-        { geo: "sphere", pos: [-0.1, 1.05, 0.17], size: [0.07], color: "eye" },
-        { geo: "sphere", pos: [0.1, 1.05, 0.17], size: [0.07], color: "eye" },
-        { geo: "sphere", pos: [-0.1, 1.05, 0.23], size: [0.045], color: "pupil" },
-        { geo: "sphere", pos: [0.1, 1.05, 0.23], size: [0.045], color: "pupil" },
+        // Body (rounded oval)
+        { geo: "sphere", pos: [0, 0.45, 0], size: [0.26], color: "body" },
+        { geo: "box", pos: [0, 0.45, 0], size: [0.4, 0.55, 0.35], color: "body" },
+        { geo: "sphere", pos: [0, 0.42, 0.14], size: [0.18], color: "belly" },
+        { geo: "box", pos: [0, 0.42, 0.16], size: [0.26, 0.4, 0.06], color: "belly" },
+        // Head (sphere)
+        { geo: "sphere", pos: [0, 0.92, 0], size: [0.22], color: "body" },
+        // Wings (flippers)
+        { geo: "box", pos: [-0.26, 0.5, 0], size: [0.06, 0.25, 0.12], color: "body", rot: [0, 0, 0.15] },
+        { geo: "box", pos: [0.26, 0.5, 0], size: [0.06, 0.25, 0.12], color: "body", rot: [0, 0, -0.15] },
+        { geo: "sphere", pos: [-0.28, 0.36, 0], size: [0.04], color: "body" },
+        { geo: "sphere", pos: [0.28, 0.36, 0], size: [0.04], color: "body" },
+        // Feet (orange)
+        { geo: "box", pos: [-0.1, 0.02, 0.06], size: [0.1, 0.04, 0.14], color: "accent" },
+        { geo: "box", pos: [0.1, 0.02, 0.06], size: [0.1, 0.04, 0.14], color: "accent" },
+        { geo: "sphere", pos: [-0.1, 0.02, 0.12], size: [0.03], color: "accent" },
+        { geo: "sphere", pos: [0.1, 0.02, 0.12], size: [0.03], color: "accent" },
+        // Beak (orange cone)
+        { geo: "cone", pos: [0, 0.86, 0.22], size: [0.05, 0.1, 8], color: "accent", rot: [1.57, 0, 0] },
+        // Eyes
+        { geo: "sphere", pos: [-0.08, 0.96, 0.17], size: [0.06], color: "eye" },
+        { geo: "sphere", pos: [0.08, 0.96, 0.17], size: [0.06], color: "eye" },
+        { geo: "sphere", pos: [-0.08, 0.96, 0.22], size: [0.04], color: "pupil" },
+        { geo: "sphere", pos: [0.08, 0.96, 0.22], size: [0.04], color: "pupil" },
     ],
 },
 fox: {
@@ -167,6 +190,7 @@ droplet: {
 
 // Aliases
 CHAR_MODELS.skateboard = {
+    camY: 0.12, camDist: 2.5,
     palette: { body: 0xc0392b, deck: 0x8B4513, grip: 0x222222, truck: 0xaaaaaa, wheel: 0xf5f5dc, accent: 0xf39c12 },
     parts: [
         // Deck (rounded with multiple layers)
@@ -195,6 +219,7 @@ CHAR_MODELS.skateboard = {
 };
 
 CHAR_MODELS.hoverboard = {
+    camY: 0.14, camDist: 2.5,
     palette: { body: 0x7b2ff7, glow: 0x00d2ff, accent: 0xff00ff, dark: 0x1a1a2e, light: 0xccccff, pad: 0x333355 },
     parts: [
         // Main board body (sleek, rounded)
@@ -225,6 +250,7 @@ CHAR_MODELS.hoverboard = {
 };
 
 CHAR_MODELS.skis = {
+    camY: 0.2, camDist: 2.8,
     palette: { body: 0x1e90ff, accent: 0xe74c3c, dark: 0x222222, metal: 0xcccccc, tip: 0xffd700, binding: 0x444444 },
     parts: [
         // Left ski
@@ -450,6 +476,11 @@ class SkinPrerenderer {
         if (!modelDef) return null;
         var group = this.buildModel(modelDef, playerColor);
         this.scene.add(group);
+        // Adjust camera for low models (vehicles)
+        var camY = modelDef.camY !== undefined ? modelDef.camY : 0.55;
+        var camDist = modelDef.camDist !== undefined ? modelDef.camDist : 4.5;
+        this.camera.position.set(0, camY + 1.6, camDist);
+        this.camera.lookAt(0, camY, 0);
         var frames = [];
         for (var i = 0; i < this.frames; i++) {
             group.rotation.y = (i / this.frames) * Math.PI * 2;
