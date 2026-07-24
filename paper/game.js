@@ -33,8 +33,29 @@ class Game {
         this.tokenManager = new TokenManager();
         this.jackpot = new Jackpot();
         this.toasts = new Toasts();
-        this.skins3d = new Skins3DRenderer();
+        this.skins3d = null; // will be set after prerender
+        this.skinPrerenderer = null;
         this.currentLevel = 1;
+    }
+
+    /** Initialize 3D character pre-renderer */
+    initSkins() {
+        if (typeof SkinPrerenderer === "undefined" || typeof THREE === "undefined") {
+            dbg("No THREE/SkinPrerenderer - using fallback");
+            return;
+        }
+        try {
+            this.skinPrerenderer = new SkinPrerenderer(128);
+            if (this.skinPrerenderer.init()) {
+                this.skinPrerenderer.renderAll();
+                this.skins3d = this.skinPrerenderer; // duck-type: has .draw(ctx, x, y, r, angle, skinId)
+                dbg("3D skins prerendered OK");
+            } else {
+                dbg("SkinPrerenderer init failed");
+            }
+        } catch (e) {
+            dbg("3D skin err: " + e.message);
+        }
     }
 
     loadUserData(user) {
@@ -114,6 +135,7 @@ class Game {
             this.shop = { render: ()=>{}, renderLoadout: ()=>{} };
         }
         this.bindUI();
+        this.initSkins();
         this.showScreen("menu");
         window.addEventListener("resize", () => { if (this.renderer) this.renderer.resize(); });
     }

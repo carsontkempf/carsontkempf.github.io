@@ -176,8 +176,10 @@ class Renderer {
             // Draw skin
             const skinId = p.shape || "droplet";
             try {
-                if (skins3d) {
-                    skins3d.draw(ctx, x, y, r, p.angle, skinId, p.color);
+                if (skins3d && skins3d.draw) {
+                    if (!skins3d.draw(ctx, x, y, r, p.angle, skinId)) {
+                        this._drawSimplePlayer(ctx, x, y, r, p);
+                    }
                 } else {
                     this._drawSimplePlayer(ctx, x, y, r, p);
                 }

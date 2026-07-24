@@ -1,0 +1,269 @@
+/**
+ * skin-prerender.js - Pre-renders 3D characters using Three.js into sprite cache.
+ * Non-module version for use with regular <script> tags.
+ * Requires THREE to be loaded globally before this script.
+ * 
+ * Usage:
+ *   const prerenderer = new SkinPrerenderer();
+ *   await prerenderer.init(); // sets up Three.js
+ *   await prerenderer.renderAll(); // caches all skins at 64 angles
+ *   prerenderer.draw(ctx, x, y, r, angle, skinId); // draws cached sprite
+ */
+
+const CHAR_MODELS = {
+bunny: {
+    palette: { body: 0xffffff, belly: 0xffccdd, accent: 0xffaacc, dark: 0xdddddd, eye: 0x111111, nose: 0xff6688 },
+    parts: [
+        { geo: "box", pos: [0, 0.45, 0], size: [0.5, 0.55, 0.45], color: "body" },
+        { geo: "box", pos: [0, 0.4, 0.15], size: [0.3, 0.35, 0.08], color: "belly" },
+        { geo: "box", pos: [0, 1.0, 0.02], size: [0.42, 0.42, 0.38], color: "body" },
+        { geo: "box", pos: [-0.1, 1.5, 0], size: [0.08, 0.38, 0.06], color: "body" },
+        { geo: "box", pos: [0.1, 1.5, 0], size: [0.08, 0.38, 0.06], color: "body" },
+        { geo: "box", pos: [-0.1, 1.48, 0.02], size: [0.04, 0.28, 0.02], color: "accent" },
+        { geo: "box", pos: [0.1, 1.48, 0.02], size: [0.04, 0.28, 0.02], color: "accent" },
+        { geo: "box", pos: [-0.3, 0.5, 0], size: [0.1, 0.25, 0.1], color: "body" },
+        { geo: "box", pos: [0.3, 0.5, 0], size: [0.1, 0.25, 0.1], color: "body" },
+        { geo: "box", pos: [-0.12, 0.1, 0], size: [0.12, 0.2, 0.14], color: "body" },
+        { geo: "box", pos: [0.12, 0.1, 0], size: [0.12, 0.2, 0.14], color: "body" },
+        { geo: "box", pos: [-0.12, 0.0, 0.04], size: [0.13, 0.05, 0.16], color: "accent" },
+        { geo: "box", pos: [0.12, 0.0, 0.04], size: [0.13, 0.05, 0.16], color: "accent" },
+        { geo: "sphere", pos: [0, 0.4, -0.25], size: [0.08], color: "body" },
+        { geo: "sphere", pos: [-0.1, 1.05, 0.19], size: [0.045], color: "eye" },
+        { geo: "sphere", pos: [0.1, 1.05, 0.19], size: [0.045], color: "eye" },
+        { geo: "sphere", pos: [0, 0.95, 0.2], size: [0.035], color: "nose" },
+    ],
+},
+penguin: {
+    palette: { body: 0x1a1a2e, belly: 0xccefff, accent: 0xff8c00, eye: 0xffffff, pupil: 0x111111 },
+    parts: [
+        { geo: "box", pos: [0, 0.45, 0], size: [0.45, 0.6, 0.4], color: "body" },
+        { geo: "box", pos: [0, 0.45, 0.12], size: [0.3, 0.45, 0.1], color: "belly" },
+        { geo: "box", pos: [0, 1.0, 0], size: [0.38, 0.38, 0.35], color: "body" },
+        { geo: "box", pos: [-0.28, 0.5, 0], size: [0.07, 0.3, 0.15], color: "body", rot: [0, 0, 0.2] },
+        { geo: "box", pos: [0.28, 0.5, 0], size: [0.07, 0.3, 0.15], color: "body", rot: [0, 0, -0.2] },
+        { geo: "box", pos: [-0.12, 0.0, 0.06], size: [0.14, 0.06, 0.16], color: "accent" },
+        { geo: "box", pos: [0.12, 0.0, 0.06], size: [0.14, 0.06, 0.16], color: "accent" },
+        { geo: "cone", pos: [0, 0.92, 0.2], size: [0.06, 0.1, 8], color: "accent", rot: [1.57, 0, 0] },
+        { geo: "sphere", pos: [-0.1, 1.05, 0.17], size: [0.05], color: "eye" },
+        { geo: "sphere", pos: [0.1, 1.05, 0.17], size: [0.05], color: "eye" },
+        { geo: "sphere", pos: [-0.1, 1.05, 0.2], size: [0.03], color: "pupil" },
+        { geo: "sphere", pos: [0.1, 1.05, 0.2], size: [0.03], color: "pupil" },
+    ],
+},
+fox: {
+    palette: { body: 0xf07020, belly: 0xffeebb, dark: 0x222222, eye: 0x111111, accent: 0xffccaa },
+    parts: [
+        { geo: "box", pos: [0, 0.45, 0], size: [0.45, 0.55, 0.38], color: "body" },
+        { geo: "box", pos: [0, 0.4, 0.1], size: [0.25, 0.3, 0.08], color: "belly" },
+        { geo: "box", pos: [0, 1.0, 0.03], size: [0.38, 0.35, 0.34], color: "body" },
+        { geo: "box", pos: [0, 0.9, 0.2], size: [0.15, 0.1, 0.1], color: "belly" },
+        { geo: "cone", pos: [-0.14, 1.3, 0], size: [0.07, 0.16, 4], color: "body" },
+        { geo: "cone", pos: [0.14, 1.3, 0], size: [0.07, 0.16, 4], color: "body" },
+        { geo: "cone", pos: [-0.14, 1.28, 0.01], size: [0.04, 0.1, 4], color: "accent" },
+        { geo: "cone", pos: [0.14, 1.28, 0.01], size: [0.04, 0.1, 4], color: "accent" },
+        { geo: "box", pos: [0, 0.35, -0.35], size: [0.12, 0.12, 0.25], color: "body" },
+        { geo: "box", pos: [0, 0.35, -0.5], size: [0.08, 0.08, 0.1], color: "belly" },
+        { geo: "box", pos: [-0.12, 0.12, 0], size: [0.09, 0.2, 0.09], color: "body" },
+        { geo: "box", pos: [0.12, 0.12, 0], size: [0.09, 0.2, 0.09], color: "body" },
+        { geo: "box", pos: [-0.12, 0.0, 0.03], size: [0.1, 0.04, 0.12], color: "dark" },
+        { geo: "box", pos: [0.12, 0.0, 0.03], size: [0.1, 0.04, 0.12], color: "dark" },
+        { geo: "sphere", pos: [-0.1, 1.05, 0.17], size: [0.04], color: "eye" },
+        { geo: "sphere", pos: [0.1, 1.05, 0.17], size: [0.04], color: "eye" },
+        { geo: "sphere", pos: [0, 0.92, 0.26], size: [0.03], color: "dark" },
+    ],
+},
+panda: {
+    palette: { body: 0xffffff, belly: 0xe8d0f0, dark: 0x222222, eye: 0xffffff, pupil: 0x111111, nose: 0x333333 },
+    parts: [
+        { geo: "box", pos: [0, 0.45, 0], size: [0.5, 0.58, 0.42], color: "body" },
+        { geo: "box", pos: [0, 0.4, 0.14], size: [0.3, 0.38, 0.08], color: "belly" },
+        { geo: "box", pos: [-0.28, 0.5, 0], size: [0.12, 0.28, 0.12], color: "dark" },
+        { geo: "box", pos: [0.28, 0.5, 0], size: [0.12, 0.28, 0.12], color: "dark" },
+        { geo: "box", pos: [-0.14, 0.1, 0], size: [0.12, 0.2, 0.12], color: "dark" },
+        { geo: "box", pos: [0.14, 0.1, 0], size: [0.12, 0.2, 0.12], color: "dark" },
+        { geo: "box", pos: [0, 1.0, 0], size: [0.42, 0.4, 0.38], color: "body" },
+        { geo: "sphere", pos: [-0.18, 1.2, 0], size: [0.09], color: "dark" },
+        { geo: "sphere", pos: [0.18, 1.2, 0], size: [0.09], color: "dark" },
+        { geo: "box", pos: [-0.1, 1.02, 0.12], size: [0.1, 0.1, 0.04], color: "dark" },
+        { geo: "box", pos: [0.1, 1.02, 0.12], size: [0.1, 0.1, 0.04], color: "dark" },
+        { geo: "sphere", pos: [-0.1, 1.03, 0.16], size: [0.035], color: "eye" },
+        { geo: "sphere", pos: [0.1, 1.03, 0.16], size: [0.035], color: "eye" },
+        { geo: "sphere", pos: [-0.1, 1.03, 0.18], size: [0.02], color: "pupil" },
+        { geo: "sphere", pos: [0.1, 1.03, 0.18], size: [0.02], color: "pupil" },
+        { geo: "sphere", pos: [0, 0.93, 0.2], size: [0.04], color: "nose" },
+    ],
+},
+owl: {
+    palette: { body: 0x8B5E3C, belly: 0xb8e8d0, dark: 0x5B3E1C, eye: 0xff8c00, pupil: 0x111111, beak: 0xff9800, disc: 0xf0dcc0 },
+    parts: [
+        { geo: "box", pos: [0, 0.45, 0], size: [0.42, 0.55, 0.38], color: "body" },
+        { geo: "box", pos: [0, 0.35, 0.1], size: [0.25, 0.3, 0.08], color: "belly" },
+        { geo: "box", pos: [-0.25, 0.5, 0], size: [0.08, 0.32, 0.14], color: "dark" },
+        { geo: "box", pos: [0.25, 0.5, 0], size: [0.08, 0.32, 0.14], color: "dark" },
+        { geo: "box", pos: [0, 1.0, 0], size: [0.4, 0.38, 0.35], color: "body" },
+        { geo: "cone", pos: [-0.16, 1.3, 0], size: [0.06, 0.14, 4], color: "dark" },
+        { geo: "cone", pos: [0.16, 1.3, 0], size: [0.06, 0.14, 4], color: "dark" },
+        { geo: "sphere", pos: [-0.11, 1.02, 0.15], size: [0.08], color: "disc" },
+        { geo: "sphere", pos: [0.11, 1.02, 0.15], size: [0.08], color: "disc" },
+        { geo: "sphere", pos: [-0.11, 1.02, 0.2], size: [0.05], color: "eye" },
+        { geo: "sphere", pos: [0.11, 1.02, 0.2], size: [0.05], color: "eye" },
+        { geo: "sphere", pos: [-0.11, 1.02, 0.23], size: [0.025], color: "pupil" },
+        { geo: "sphere", pos: [0.11, 1.02, 0.23], size: [0.025], color: "pupil" },
+        { geo: "cone", pos: [0, 0.9, 0.2], size: [0.04, 0.08, 4], color: "beak", rot: [1.57, 0, 0] },
+        { geo: "box", pos: [-0.08, 0.0, 0.04], size: [0.07, 0.05, 0.1], color: "beak" },
+        { geo: "box", pos: [0.08, 0.0, 0.04], size: [0.07, 0.05, 0.1], color: "beak" },
+    ],
+},
+frog: {
+    palette: { body: 0x2ecc71, belly: 0xa8e6cf, dark: 0x1a7a40, eye_w: 0xffffff, pupil: 0x111111 },
+    parts: [
+        { geo: "box", pos: [0, 0.3, 0], size: [0.5, 0.35, 0.42], color: "body" },
+        { geo: "box", pos: [0, 0.3, 0.12], size: [0.35, 0.25, 0.08], color: "belly" },
+        { geo: "box", pos: [0, 0.7, 0], size: [0.48, 0.3, 0.38], color: "body" },
+        { geo: "sphere", pos: [-0.18, 0.95, 0.05], size: [0.1], color: "eye_w" },
+        { geo: "sphere", pos: [0.18, 0.95, 0.05], size: [0.1], color: "eye_w" },
+        { geo: "sphere", pos: [-0.18, 0.95, 0.12], size: [0.05], color: "pupil" },
+        { geo: "sphere", pos: [0.18, 0.95, 0.12], size: [0.05], color: "pupil" },
+        { geo: "box", pos: [-0.28, 0.15, 0], size: [0.14, 0.18, 0.14], color: "body" },
+        { geo: "box", pos: [0.28, 0.15, 0], size: [0.14, 0.18, 0.14], color: "body" },
+        { geo: "box", pos: [-0.15, 0.0, 0.05], size: [0.15, 0.04, 0.18], color: "dark" },
+        { geo: "box", pos: [0.15, 0.0, 0.05], size: [0.15, 0.04, 0.18], color: "dark" },
+    ],
+},
+chick: {
+    palette: { body: 0xffd700, dark: 0xf0a000, beak: 0xff6600, eye: 0x111111, feet: 0xff8c00 },
+    parts: [
+        { geo: "box", pos: [0, 0.4, 0], size: [0.4, 0.45, 0.38], color: "body" },
+        { geo: "box", pos: [0, 0.88, 0], size: [0.35, 0.35, 0.32], color: "body" },
+        { geo: "box", pos: [-0.22, 0.45, 0], size: [0.06, 0.2, 0.12], color: "body" },
+        { geo: "box", pos: [0.22, 0.45, 0], size: [0.06, 0.2, 0.12], color: "body" },
+        { geo: "box", pos: [0, 1.15, 0], size: [0.03, 0.1, 0.03], color: "dark" },
+        { geo: "box", pos: [-0.05, 1.12, 0], size: [0.025, 0.07, 0.025], color: "dark" },
+        { geo: "box", pos: [0.05, 1.12, 0], size: [0.025, 0.07, 0.025], color: "dark" },
+        { geo: "sphere", pos: [-0.09, 0.92, 0.16], size: [0.04], color: "eye" },
+        { geo: "sphere", pos: [0.09, 0.92, 0.16], size: [0.04], color: "eye" },
+        { geo: "cone", pos: [0, 0.82, 0.2], size: [0.05, 0.08, 4], color: "beak", rot: [1.57, 0, 0] },
+        { geo: "box", pos: [-0.08, 0.0, 0.04], size: [0.08, 0.04, 0.1], color: "feet" },
+        { geo: "box", pos: [0.08, 0.0, 0.04], size: [0.08, 0.04, 0.1], color: "feet" },
+    ],
+},
+droplet: {
+    palette: { body: 0x00d2ff, dark: 0x0088aa, eye: 0x111111 },
+    parts: [
+        { geo: "sphere", pos: [0, 0.45, 0], size: [0.3], color: "body" },
+        { geo: "box", pos: [0, 0.75, 0], size: [0.22, 0.22, 0.2], color: "body" },
+        { geo: "cone", pos: [0, 1.05, 0], size: [0.15, 0.2, 8], color: "body" },
+        { geo: "sphere", pos: [-0.08, 0.5, 0.28], size: [0.04], color: "eye" },
+        { geo: "sphere", pos: [0.08, 0.5, 0.28], size: [0.04], color: "eye" },
+    ],
+},
+};
+
+// Aliases
+CHAR_MODELS.astronaut = CHAR_MODELS.droplet;
+CHAR_MODELS.ninja = CHAR_MODELS.fox;
+CHAR_MODELS.skateboard = CHAR_MODELS.bunny;
+CHAR_MODELS.skis = CHAR_MODELS.penguin;
+CHAR_MODELS.hoverboard = CHAR_MODELS.chick;
+
+class SkinPrerenderer {
+    constructor(size) {
+        this.size = size || 128;
+        this.frames = 64;
+        this.cache = {};
+        this.ready = false;
+    }
+
+    init() {
+        if (typeof THREE === "undefined") {
+            console.error("SkinPrerenderer: THREE not loaded");
+            return false;
+        }
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+        this.camera.position.set(0, 2.2, 4.5);
+        this.camera.lookAt(0, 0.55, 0);
+
+        this.scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+        var dir = new THREE.DirectionalLight(0xffffff, 0.7);
+        dir.position.set(3, 5, 4);
+        this.scene.add(dir);
+        var fill = new THREE.DirectionalLight(0xaaccff, 0.3);
+        fill.position.set(-2, 1, -1);
+        this.scene.add(fill);
+
+        this.glRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        this.glRenderer.setSize(this.size, this.size);
+        this.glRenderer.setClearColor(0x000000, 0);
+
+        this.ready = true;
+        return true;
+    }
+
+    buildModel(modelDef, playerColor) {
+        var group = new THREE.Group();
+        var palette = modelDef.palette;
+        for (var i = 0; i < modelDef.parts.length; i++) {
+            var part = modelDef.parts[i];
+            var geometry;
+            if (part.geo === "box") geometry = new THREE.BoxGeometry(part.size[0], part.size[1], part.size[2]);
+            else if (part.geo === "sphere") geometry = new THREE.SphereGeometry(part.size[0], 12, 8);
+            else if (part.geo === "cone") geometry = new THREE.ConeGeometry(part.size[0], part.size[1], part.size[2] || 8);
+            else if (part.geo === "cylinder") geometry = new THREE.CylinderGeometry(part.size[0], part.size[1], part.size[2], 8);
+            else geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+
+            var colorHex = palette[part.color] !== undefined ? palette[part.color] : 0xcccccc;
+            if (part.color === "body" && playerColor) colorHex = playerColor;
+
+            var material = new THREE.MeshLambertMaterial({ color: colorHex });
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(part.pos[0], part.pos[1], part.pos[2]);
+            if (part.rot) mesh.rotation.set(part.rot[0], part.rot[1], part.rot[2]);
+            group.add(mesh);
+        }
+        return group;
+    }
+
+    preRenderSkin(skinId, playerColor) {
+        var modelDef = CHAR_MODELS[skinId];
+        if (!modelDef) return null;
+        var group = this.buildModel(modelDef, playerColor);
+        this.scene.add(group);
+        var frames = [];
+        for (var i = 0; i < this.frames; i++) {
+            group.rotation.y = (i / this.frames) * Math.PI * 2;
+            this.glRenderer.render(this.scene, this.camera);
+            var c = document.createElement("canvas");
+            c.width = c.height = this.size;
+            c.getContext("2d").drawImage(this.glRenderer.domElement, 0, 0);
+            frames.push(c);
+        }
+        this.scene.remove(group);
+        group.traverse(function(obj) { if (obj.geometry) obj.geometry.dispose(); if (obj.material) obj.material.dispose(); });
+        this.cache[skinId] = frames;
+        return frames;
+    }
+
+    renderAll(playerColor) {
+        for (var key in CHAR_MODELS) {
+            if (CHAR_MODELS.hasOwnProperty(key)) {
+                this.preRenderSkin(key, playerColor);
+            }
+        }
+    }
+
+    draw(ctx, x, y, r, angle, skinId) {
+        var frames = this.cache[skinId];
+        if (!frames) return false;
+        var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+        var idx = Math.floor(a / (Math.PI * 2) * this.frames) % this.frames;
+        ctx.drawImage(frames[idx], x - r, y - r, r * 2, r * 2);
+        return true;
+    }
+
+    dispose() {
+        if (this.glRenderer) { this.glRenderer.dispose(); this.glRenderer = null; }
+        this.cache = {};
+        this.ready = false;
+    }
+}
