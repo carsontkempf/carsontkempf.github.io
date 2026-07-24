@@ -57,7 +57,7 @@ class Renderer {
     /**
      * Render territories as tiled flat-top hexagons with 3D depth on bottom edges.
      * Hex grid is offset: odd rows shift right by half hex width.
-     * Solid territory interior + hex edges + hex-shaped depth on bottom.
+     * Solid territory fill + hex-shaped outer border + hex depth on bottom.
      */
     renderTerritories(engine, players) {
         const ctx = this.ctx;
@@ -70,17 +70,15 @@ class Renderer {
         for (const p of players) {
             const baseColor = p.territoryColor || p.color;
             const sideColor = this.darken(baseColor, 0.35);
-            const edgeColor = this.darken(baseColor, 0.5);
-            const lightColor = this.lighten(baseColor, 0.1);
+            const borderColor = this.darken(baseColor, 0.6);
 
-            // Pass 1: Solid interior fill for non-edge cells
+            // Pass 1: Solid fill ALL territory cells (rects, no gaps)
             ctx.fillStyle = baseColor;
             ctx.globalAlpha = 0.6;
             ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
-                    if (this._isEdgeCell(engine, gx, gy, p.id)) continue; // skip edges
                     const sx = gx * cs - this.cameraX + this.screenW / 2;
                     const sy = gy * cs - this.cameraY + this.screenH / 2;
                     if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
@@ -90,24 +88,27 @@ class Renderer {
             ctx.fill();
             ctx.globalAlpha = 1;
 
-            // Pass 2: Edge cells filled as hexagons
-            ctx.fillStyle = baseColor;
-            ctx.globalAlpha = 0.6;
-            ctx.beginPath();
-            for (let gy = 0; gy < GRID_RES; gy++) {
-                for (let gx = 0; gx < GRID_RES; gx++) {
-                    if (engine.grid[gy][gx] !== p.id) continue;
-                    if (!this._isEdgeCell(engine, gx, gy, p.id)) continue;
-                    const sx = gx * cs - this.cameraX + this.screenW / 2;
-                    const sy = gy * cs - this.cameraY + this.screenH / 2;
-                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                    this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.58);
+            // Pass 2: Draw hex-shaped border segments on outer edges only
+            // For each edge cell, only draw the sides that face non-owned cells
+            if (cs >= 1.5) {
+                ctx.strokeStyle = borderColor;
+                ctx.lineWidth = Math.max(1.5, cs * 0.12);
+                ctx.lineCap = "round";
+                ctx.beginPath();
+                for (let gy = 0; gy < GRID_RES; gy++) {
+                    for (let gx = 0; gx < GRID_RES; gx++) {
+                        if (engine.grid[gy][gx] !== p.id) continue;
+                        if (!this._isEdgeCell(engine, gx, gy, p.id)) continue;
+                        const sx = gx * cs - this.cameraX + this.screenW / 2;
+                        const sy = gy * cs - this.cameraY + this.screenH / 2;
+                        if (sx > this.screenW + cs * 2 || sx < -cs * 2 || sy > this.screenH + cs * 2 || sy < -cs * 2) continue;
+                        this._drawOuterEdges(ctx, engine, gx, gy, p.id, sx, sy, cs);
+                    }
                 }
+                ctx.stroke();
             }
-            ctx.fill();
-            ctx.globalAlpha = 1;
 
-            // Pass 3: 3D depth below bottom edge cells (drawn LAST so visible)
+            // Pass 3: 3D depth below bottom edge cells
             ctx.fillStyle = sideColor;
             ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
@@ -117,7 +118,7 @@ class Renderer {
                     const sx = gx * cs - this.cameraX + this.screenW / 2;
                     const sy = gy * cs - this.cameraY + this.screenH / 2;
                     if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs + depth || sy < -cs) continue;
-                    // Full-width hex depth shape
+                    // Hex-shaped depth
                     const cx = sx + cs * 0.5;
                     const top = sy + cs;
                     const hw = cs * 0.55;
@@ -130,6 +131,36 @@ class Renderer {
                 }
             }
             ctx.fill();
+        }
+    }
+
+    /** Draw only the outer-facing edges of a border cell as hex-like segments */
+    _drawOuterEdges(ctx, engine, gx, gy, pid, sx, sy, cs) {
+        const cx = sx + cs * 0.5;
+        const cy = sy + cs * 0.5;
+        const r = cs * 0.55;
+        // Check each of 4 cardinal directions for non-owned neighbors
+        // Top edge
+        if (gy <= 0 || engine.grid[gy-1][gx] !== pid) {
+            ctx.moveTo(cx - r, cy - r * 0.6);
+            ctx.lineTo(cx, cy - r);
+            ctx.lineTo(cx + r, cy - r * 0.6);
+        }
+        // Bottom edge
+        if (gy >= GRID_RES-1 || engine.grid[gy+1][gx] !== pid) {
+            ctx.moveTo(cx - r, cy + r * 0.6);
+            ctx.lineTo(cx, cy + r);
+            ctx.lineTo(cx + r, cy + r * 0.6);
+        }
+        // Left edge
+        if (gx <= 0 || engine.grid[gy][gx-1] !== pid) {
+            ctx.moveTo(cx - r, cy - r * 0.6);
+            ctx.lineTo(cx - r, cy + r * 0.6);
+        }
+        // Right edge
+        if (gx >= GRID_RES-1 || engine.grid[gy][gx+1] !== pid) {
+            ctx.moveTo(cx + r, cy - r * 0.6);
+            ctx.lineTo(cx + r, cy + r * 0.6);
         }
     }
 
