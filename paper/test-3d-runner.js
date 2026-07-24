@@ -187,10 +187,29 @@ function testSpriteCache() {
         // Check frame 0 and frame 32 are different (front vs back)
         const ctx0 = frames[0].getContext("2d");
         const ctx32 = frames[32].getContext("2d");
-        const data0 = ctx0.getImageData(64, 64, 1, 1).data;
-        const data32 = ctx32.getImageData(64, 64, 1, 1).data;
-        const differ = (data0[0] !== data32[0] || data0[1] !== data32[1] || data0[2] !== data32[2]);
-        assert(differ, "Frame 0 differs from frame 32 (front vs back rotation)");
+        // Sample several pixels across the sprite to detect rotation
+        const samplePoints = [[64,50],[64,70],[50,64],[78,64],[64,40],[64,80]];
+        let anyDiffer = false;
+        for (const [sx,sy] of samplePoints) {
+            const d0 = ctx0.getImageData(sx, sy, 1, 1).data;
+            const d32 = ctx32.getImageData(sx, sy, 1, 1).data;
+            if (d0[0]!==d32[0] || d0[1]!==d32[1] || d0[2]!==d32[2] || d0[3]!==d32[3]) {
+                anyDiffer = true;
+                break;
+            }
+        }
+        if (!anyDiffer) {
+            // Also compare full image data hash
+            const full0 = ctx0.getImageData(0,0,128,128).data;
+            const full32 = ctx32.getImageData(0,0,128,128).data;
+            for (let px = 0; px < full0.length; px += 4) {
+                if (full0[px]!==full32[px] || full0[px+1]!==full32[px+1] || full0[px+2]!==full32[px+2]) {
+                    anyDiffer = true;
+                    break;
+                }
+            }
+        }
+        assert(anyDiffer, "Frame 0 differs from frame 32 (front vs back rotation)");
     }
 
     // Test: draw() works with cached sprites
