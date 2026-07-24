@@ -335,24 +335,28 @@ class Game {
         this.humanPlayer.spawnTerritory(this.engine);
         this.players.push(this.humanPlayer);
 
-        // AI players - spawn in ring around center, well inside arena
+        // AI players - spawn in ring far from human territory
         const aiCount = level.aiCount;
         const aiTypes = level.aiTypes;
-        // Spawn distance: far enough from center to not overlap human territory,
-        // but inside arena with room for their own territory
         const humanTerritoryRadius = this.humanPlayer.spawnRadius || 500;
-        const aiTerritoryRadius = 500;
-        const minSpawnDist = humanTerritoryRadius + aiTerritoryRadius + 1500;
-        const maxSpawnDist = arenaRadius - aiTerritoryRadius - 200;
-        const spawnDist = Math.min(maxSpawnDist, Math.max(minSpawnDist, arenaRadius * 0.5));
+        const aiTerritoryRadius = 400;
+        // Must be far enough that AI territory circle doesn't overlap human territory
+        const minSpawnDist = humanTerritoryRadius + aiTerritoryRadius + 2000;
+        const maxSpawnDist = arenaRadius - aiTerritoryRadius - 500;
+        const spawnDist = Math.min(maxSpawnDist, Math.max(minSpawnDist, arenaRadius * 0.6));
 
         for (let i = 0; i < aiCount; i++) {
             const angle = (Math.PI * 2 * i) / aiCount + Math.PI / 4;
             const sx = center + Math.cos(angle) * spawnDist;
             const sy = center + Math.sin(angle) * spawnDist;
+
+            // Verify spawn location has enough free space
+            if (!this.engine.hasFreeCells(sx, sy, aiTerritoryRadius, 0.5)) continue;
+
             const bot = new Player(i + 1, AI_NAMES[i % AI_NAMES.length], PLAYER_COLORS[(i + 1) % PLAYER_COLORS.length], sx, sy);
-            bot.shape = ["droplet", "bunny", "penguin", "fox", "panda", "chick"][i % 6];
+            bot.shape = ["droplet", "bunny", "penguin", "fox", "panda", "chick", "dog", "cat"][i % 8];
             bot.arenaRadius = arenaRadius;
+            bot.spawnRadius = aiTerritoryRadius;
             bot.spawnTerritory(this.engine);
             this.players.push(bot);
             this.aiControllers.push(new AIController(bot, aiTypes[i] || "expansive"));

@@ -220,14 +220,30 @@ class Player {
     }
 
     respawn(engine) {
-        // Spawn inside arena circle at random position
+        // Spawn inside arena circle at a position with enough free space
         var cx = WORLD_SIZE / 2;
         var cy = WORLD_SIZE / 2;
-        var maxR = (this.arenaRadius || WORLD_SIZE / 2) - this.spawnRadius - 500;
-        var angle = Math.random() * Math.PI * 2;
-        var dist = Math.random() * maxR * 0.7; // stay well inside
-        this.x = cx + Math.cos(angle) * dist;
-        this.y = cy + Math.sin(angle) * dist;
+        var maxR = (this.arenaRadius || WORLD_SIZE / 2) - (this.spawnRadius || 500) - 500;
+        var spawned = false;
+        // Try up to 12 random positions
+        for (var attempt = 0; attempt < 12; attempt++) {
+            var angle = Math.random() * Math.PI * 2;
+            var dist = (0.3 + Math.random() * 0.5) * maxR;
+            var tx = cx + Math.cos(angle) * dist;
+            var ty = cy + Math.sin(angle) * dist;
+            // Check if location has at least 50% free cells
+            if (typeof engine.hasFreeCells === "function" && !engine.hasFreeCells(tx, ty, this.spawnRadius || 400, 0.5)) continue;
+            this.x = tx;
+            this.y = ty;
+            spawned = true;
+            break;
+        }
+        if (!spawned) {
+            // No free space - stay dead longer
+            this.alive = false;
+            this.deathTimer = 5;
+            return;
+        }
         this.alive = true;
         this.isInOwnTerritory = true;
         this.trail = [];

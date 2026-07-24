@@ -66,11 +66,11 @@ class Renderer {
         if (cs < 0.3) return;
 
         // Hex geometry (pointy-top, tiles with staggered rows)
-        const hexR = cs * 0.6; // hex radius
+        const hexR = cs * 0.45; // smaller hex radius
         const hexW = hexR * 1.732; // width = sqrt(3) * radius
         const hexH = hexR * 2; // height = 2 * radius
         const rowH = hexR * 1.5; // row spacing = 1.5 * radius (overlap for tiling)
-        const depth = Math.max(2, cs * 0.4);
+        const depth = Math.max(4, cs * 0.8); // thicker 3D depth
 
         for (const p of players) {
             const baseColor = p.territoryColor || p.color;

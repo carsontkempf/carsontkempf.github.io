@@ -53,6 +53,23 @@ class Engine {
         }
     }
 
+    /** Check if at least `minRatio` of cells in a circle are free (unowned) */
+    hasFreeCells(wx, wy, radius, minRatio) {
+        const { gx: cx, gy: cy } = this.worldToGrid(wx, wy);
+        const gr = Math.ceil(radius / CELL_SIZE);
+        let total = 0, free = 0;
+        for (let dy = -gr; dy <= gr; dy += 2) {
+            for (let dx = -gr; dx <= gr; dx += 2) {
+                if (dx * dx + dy * dy > gr * gr) continue;
+                const x = cx + dx, y = cy + dy;
+                total++;
+                if (x < 0 || x >= GRID_RES || y < 0 || y >= GRID_RES) continue;
+                if (this.grid[y][x] === -1) free++;
+            }
+        }
+        return total > 0 && (free / total) >= minRatio;
+    }
+
     isInTerritory(wx, wy, playerId) {
         const { gx, gy } = this.worldToGrid(wx, wy);
         if (gx < 0 || gx >= GRID_RES || gy < 0 || gy >= GRID_RES) return false;
