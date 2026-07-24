@@ -67,36 +67,40 @@ class Renderer {
 
         const depth = Math.max(3, cs * 0.7);
 
+        // Compute visible grid bounds (skip cells not on screen)
+        const gxMin = Math.max(0, Math.floor((this.cameraX - this.screenW / 2) / cs) - 1);
+        const gxMax = Math.min(GRID_RES, Math.ceil((this.cameraX + this.screenW / 2) / cs) + 1);
+        const gyMin = Math.max(0, Math.floor((this.cameraY - this.screenH / 2) / cs) - 1);
+        const gyMax = Math.min(GRID_RES, Math.ceil((this.cameraY + this.screenH / 2) / cs) + 2);
+
         for (const p of players) {
             const baseColor = p.territoryColor || p.color;
             const sideColor = this.darken(baseColor, 0.35);
 
-            // Pass 1: Fill all territory cells as tiny squares
+            // Pass 1: Fill visible territory cells
             ctx.fillStyle = baseColor;
             ctx.globalAlpha = 0.6;
             ctx.beginPath();
-            for (let gy = 0; gy < GRID_RES; gy++) {
-                for (let gx = 0; gx < GRID_RES; gx++) {
+            for (let gy = gyMin; gy < gyMax; gy++) {
+                for (let gx = gxMin; gx < gxMax; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
                     const sx = gx * cs - this.cameraX + this.screenW / 2;
                     const sy = gy * cs - this.cameraY + this.screenH / 2;
-                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
                     ctx.rect(sx, sy, cs + 0.5, cs + 0.5);
                 }
             }
             ctx.fill();
             ctx.globalAlpha = 1;
 
-            // Pass 2: Shadow/depth on bottom edge cells
+            // Pass 2: Shadow/depth on bottom edge cells (visible only)
             ctx.fillStyle = sideColor;
             ctx.beginPath();
-            for (let gy = 0; gy < GRID_RES; gy++) {
-                for (let gx = 0; gx < GRID_RES; gx++) {
+            for (let gy = gyMin; gy < gyMax; gy++) {
+                for (let gx = gxMin; gx < gxMax; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
                     if (gy + 1 < GRID_RES && engine.grid[gy + 1][gx] === p.id) continue;
                     const sx = gx * cs - this.cameraX + this.screenW / 2;
                     const sy = gy * cs - this.cameraY + this.screenH / 2;
-                    if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs + depth || sy < -cs) continue;
                     ctx.rect(sx, sy + cs, cs + 0.5, depth);
                 }
             }
