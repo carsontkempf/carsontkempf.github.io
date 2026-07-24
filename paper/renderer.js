@@ -86,17 +86,17 @@ class Renderer {
                         // Edge cell: draw as hexagon
                         this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.58);
                     } else {
-                        // Interior cell: draw as expanded rounded rect (50% radius)
-                        const rw = cs + cs * 0.6;
+                        // Interior cell: draw as expanded rounded rect (50% further outside)
+                        const rw = cs + cs * 1.0;
                         const rr = rw * 0.5;
-                        ctx.roundRect(sx - cs * 0.3, sy - cs * 0.3, rw, rw, rr);
+                        ctx.roundRect(sx - cs * 0.5, sy - cs * 0.5, rw, rw, rr);
                     }
                 }
             }
             ctx.fill();
             ctx.globalAlpha = 1;
 
-            // Pass 2: 3D depth below bottom edge cells
+            // Pass 2: 3D depth below bottom edge cells (connected to hex bottom)
             ctx.fillStyle = sideColor;
             ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
@@ -106,15 +106,16 @@ class Renderer {
                     const sx = gx * cs - this.cameraX + this.screenW / 2;
                     const sy = gy * cs - this.cameraY + this.screenH / 2;
                     if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs + depth || sy < -cs) continue;
-                    // Hex-shaped depth
+                    // Depth starts at hex bottom vertex and extends down
                     const cx = sx + cs * 0.5;
-                    const top = sy + cs;
-                    const hw = cs * 0.55;
-                    ctx.moveTo(cx - hw, top);
-                    ctx.lineTo(cx + hw, top);
-                    ctx.lineTo(cx + hw, top + depth * 0.65);
-                    ctx.lineTo(cx, top + depth);
-                    ctx.lineTo(cx - hw, top + depth * 0.65);
+                    const hexR = cs * 0.58;
+                    const top = sy + cs * 0.5 + hexR; // bottom of hex
+                    const hw = hexR * 0.866; // hex half-width at bottom edge
+                    ctx.moveTo(cx - hw, top - hexR * 0.5);
+                    ctx.lineTo(cx + hw, top - hexR * 0.5);
+                    ctx.lineTo(cx + hw, top - hexR * 0.5 + depth * 0.65);
+                    ctx.lineTo(cx, top - hexR * 0.5 + depth);
+                    ctx.lineTo(cx - hw, top - hexR * 0.5 + depth * 0.65);
                     ctx.closePath();
                 }
             }
