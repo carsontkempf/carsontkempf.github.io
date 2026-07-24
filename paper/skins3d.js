@@ -180,140 +180,115 @@ const PALETTES = {
 };
 
 class Skins3DRenderer {
-    constructor() {}
+    constructor() {
+        // Camera: 30 degrees from horizontal (mostly front, some top visible)
+        this.camTilt = Math.PI / 6; // 30 degrees
+        this.cosT = Math.cos(this.camTilt); // ~0.866 (how much front face shows)
+        this.sinT = Math.sin(this.camTilt); // ~0.5 (how much top face shows)
+    }
 
     draw(ctx, x, y, r, angle, skinId, playerColor) {
         var model = MODELS[skinId] || MODELS.droplet;
         var palette = PALETTES[skinId] || PALETTES.droplet;
 
-        // Smooth 360 rotation
+        // Character rotation around vertical axis (Y)
         var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
         var cosA = Math.cos(a);
         var sinA = Math.sin(a);
 
         // Ground shadow
         ctx.beginPath();
-        ctx.ellipse(x, y + r * 0.85, r * 0.45, r * 0.12, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.ellipse(x, y + r * 0.75, r * 0.4, r * 0.12, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.25)";
         ctx.fill();
 
-        // Sort boxes back-to-front based on rotated Z position
-        var sorted = model.slice().sort(function(ba, bb) {
-            var za = -ba.x * sinA + ba.z * cosA + ba.y * 0.1;
-            var zb = -bb.x * sinA + bb.z * cosA + bb.y * 0.1;
-            return za - zb;
-        });
-
-        for (var i = 0; i < sorted.length; i++) {
-            var box = sorted[i];
+        // Transform and sort all boxes
+        var projected = [];
+        for (var i = 0; i < model.length; i++) {
+            var box = model[i];
             var color = palette[box.c] || playerColor;
-            if (box.c === "body" && skinId === "droplet") color = playerColor;
-            if (box.c === "body" && skinId === "skateboard") color = playerColor;
+            if (box.c === "body" && (skinId === "droplet" || skinId === "skateboard")) color = playerColor;
 
-            // Rotate box center around Y axis
+            // Rotate around Y axis by character angle
             var rx = box.x * cosA + box.z * sinA;
+            var ry = box.y;
             var rz = -box.x * sinA + box.z * cosA;
 
-            // Isometric projection: X maps to screen X, Z tilts up, Y maps down
-            var sx = x + rx * r * 1.2;
-            var sy = y + box.y * r * 1.1 - rz * r * 0.4;
+            // Project: camera at 30deg tilt looking at character
+            // screenX = rx (sideways stays same)
+            // screenY = ry * cosT - rz * sinT (Y compressed by tilt, Z lifts up)
+            var sx = x + rx * r * 1.3;
+            var sy = y + (ry * this.cosT - rz * this.sinT) * r * 1.3;
 
-            // Rotate box dimensions for width on screen
-            var bw = (box.w * Math.abs(cosA) + box.d * Math.abs(sinA)) * r;
-            var bh = box.h * r;
-            var bd = (box.d * Math.abs(cosA) + box.w * Math.abs(sinA)) * r * 0.4;
+            // Sort depth: things further from camera drawn first
+            var depthSort = rz * this.cosT + ry * this.sinT;
 
-            this._drawBox3D(ctx, sx, sy, bw, bh, bd, color, cosA, sinA);
+            projected.push({
+                sx: sx, sy: sy,
+                w: box.w * r * 1.3,
+                h: box.h * r * 1.3 * this.cosT, // height compressed by viewing angle
+                d: box.d * r * 1.3 * this.sinT,  // depth visible as vertical from tilt
+                color: color,
+                depth: depthSort,
+                rx: rx, rz: rz,
+            });
+        }
+
+        // Sort back-to-front
+        projected.sort(function(a2, b2) { return a2.depth - b2.depth; });
+
+        // Draw each box
+        for (var i = 0; i < projected.length; i++) {
+            var p = projected[i];
+            this._drawBox3D(ctx, p.sx, p.sy, p.w, p.h, p.d, p.color, sinA, cosA);
         }
     }
 
-    _drawBox3D(ctx, x, y, w, h, d, color, cosA, sinA) {
-        var topColor = this._lighten(color, 0.2);
+    _drawBox3D(ctx, x, y, w, h, topH, color, sinA, cosA) {
+        // topH = how much of the top face is visible (from camera tilt)
+        var topColor = this._lighten(color, 0.25);
         var frontColor = color;
-        var leftColor = this._darken(color, 0.65);
-        var rightColor = this._darken(color, 0.75);
+        var rightColor = this._darken(color, 0.7);
+        var leftColor = this._darken(color, 0.6);
 
-        // Determine side offset direction based on viewing angle
-        var sideOffX = d * cosA;
-        var sideOffY = -d * 0.6;
-
-        // BACK-MOST FACE (drawn first, may be hidden)
-        // Draw the side that faces away - only if we can see it
-        
-        // LEFT FACE (visible when cosA > 0, i.e. looking from right)
-        if (cosA > 0.05) {
+        // TOP FACE (always visible at 30deg camera)
+        if (topH > 0.5) {
             ctx.beginPath();
             ctx.moveTo(x - w, y - h);
-            ctx.lineTo(x - w - d * cosA * 0.35, y - h + sideOffY);
-            ctx.lineTo(x - w - d * cosA * 0.35, y + h + sideOffY);
-            ctx.lineTo(x - w, y + h);
+            ctx.lineTo(x + w, y - h);
+            ctx.lineTo(x + w, y - h - topH);
+            ctx.lineTo(x - w, y - h - topH);
             ctx.closePath();
-            ctx.fillStyle = leftColor;
+            ctx.fillStyle = topColor;
             ctx.fill();
         }
 
-        // RIGHT FACE (visible when cosA < 0, i.e. looking from left)
-        if (cosA < -0.05) {
-            ctx.beginPath();
-            ctx.moveTo(x + w, y - h);
-            ctx.lineTo(x + w - d * cosA * 0.35, y - h + sideOffY);
-            ctx.lineTo(x + w - d * cosA * 0.35, y + h + sideOffY);
-            ctx.lineTo(x + w, y + h);
-            ctx.closePath();
-            ctx.fillStyle = rightColor;
-            ctx.fill();
-        }
-
-        // BACK FACE (visible when sinA < 0)
-        if (sinA < -0.05) {
-            ctx.beginPath();
-            ctx.moveTo(x - w, y + h);
-            ctx.lineTo(x + w, y + h);
-            ctx.lineTo(x + w, y + h + d * 0.3);
-            ctx.lineTo(x - w, y + h + d * 0.3);
-            ctx.closePath();
-            ctx.fillStyle = this._darken(color, 0.5);
-            ctx.fill();
-        }
-
-        // FRONT FACE (main visible face)
+        // FRONT FACE (main rectangle - always visible)
         ctx.beginPath();
-        ctx.moveTo(x - w, y - h);
-        ctx.lineTo(x + w, y - h);
-        ctx.lineTo(x + w, y + h);
-        ctx.lineTo(x - w, y + h);
-        ctx.closePath();
+        ctx.rect(x - w, y - h, w * 2, h * 2);
         ctx.fillStyle = frontColor;
         ctx.fill();
 
-        // TOP FACE (always visible - we look from above)
-        ctx.beginPath();
-        ctx.moveTo(x - w, y - h);
-        ctx.lineTo(x + w, y - h);
-        ctx.lineTo(x + w + d * sinA * 0.3, y - h - d * 0.35);
-        ctx.lineTo(x - w + d * sinA * 0.3, y - h - d * 0.35);
-        ctx.closePath();
-        ctx.fillStyle = topColor;
-        ctx.fill();
-
-        // RIGHT SIDE visible when looking from left side (sinA > 0)
-        if (sinA > 0.05) {
+        // RIGHT SIDE (visible based on character rotation)
+        if (sinA > 0.1) {
+            var sideW = w * 0.6 * sinA;
             ctx.beginPath();
-            ctx.moveTo(x + w, y - h);
-            ctx.lineTo(x + w + d * sinA * 0.3, y - h - d * 0.35);
-            ctx.lineTo(x + w + d * sinA * 0.3, y + h - d * 0.35);
+            ctx.moveTo(x + w, y - h - topH);
+            ctx.lineTo(x + w + sideW, y - h - topH * 0.7);
+            ctx.lineTo(x + w + sideW, y + h - topH * 0.7);
             ctx.lineTo(x + w, y + h);
             ctx.closePath();
             ctx.fillStyle = rightColor;
             ctx.fill();
         }
 
-        // LEFT SIDE visible when looking from right side (sinA < 0)
-        if (sinA < -0.05) {
+        // LEFT SIDE (visible based on character rotation)
+        if (sinA < -0.1) {
+            var sideW = w * 0.6 * (-sinA);
             ctx.beginPath();
-            ctx.moveTo(x - w, y - h);
-            ctx.lineTo(x - w + d * sinA * 0.3, y - h - d * 0.35);
-            ctx.lineTo(x - w + d * sinA * 0.3, y + h - d * 0.35);
+            ctx.moveTo(x - w, y - h - topH);
+            ctx.lineTo(x - w - sideW, y - h - topH * 0.7);
+            ctx.lineTo(x - w - sideW, y + h - topH * 0.7);
             ctx.lineTo(x - w, y + h);
             ctx.closePath();
             ctx.fillStyle = leftColor;
