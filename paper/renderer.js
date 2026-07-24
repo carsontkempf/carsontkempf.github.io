@@ -57,7 +57,7 @@ class Renderer {
     /**
      * Render territories as tiled flat-top hexagons with 3D depth on bottom edges.
      * Hex grid is offset: odd rows shift right by half hex width.
-     * Territory: solid rect interior + hex-filled edges + hex border + depth.
+     * Territory: solid fill + hex outer border stroke + depth.
      */
     renderTerritories(engine, players) {
         const ctx = this.ctx;
@@ -66,21 +66,19 @@ class Renderer {
         if (cs < 0.3) return;
 
         const depth = Math.max(5, cs * 1.0);
-        const hexR = cs * 0.58;
 
         for (const p of players) {
             const baseColor = p.territoryColor || p.color;
             const sideColor = this.darken(baseColor, 0.35);
             const borderColor = this.darken(baseColor, 0.6);
 
-            // Pass 1: Fill INTERIOR cells only with rects (solid, no gaps inside)
+            // Pass 1: Fill ALL territory cells with rects (solid, no gaps)
             ctx.fillStyle = baseColor;
             ctx.globalAlpha = 0.6;
             ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
-                    if (this._isEdgeCell(engine, gx, gy, p.id)) continue;
                     const sx = gx * cs - this.cameraX + this.screenW / 2;
                     const sy = gy * cs - this.cameraY + this.screenH / 2;
                     if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
@@ -90,24 +88,8 @@ class Renderer {
             ctx.fill();
             ctx.globalAlpha = 1;
 
-            // Pass 2: Fill EDGE cells with hexagons (gives hex-shaped boundary)
-            ctx.fillStyle = baseColor;
-            ctx.globalAlpha = 0.6;
-            ctx.beginPath();
-            for (let gy = 0; gy < GRID_RES; gy++) {
-                for (let gx = 0; gx < GRID_RES; gx++) {
-                    if (engine.grid[gy][gx] !== p.id) continue;
-                    if (!this._isEdgeCell(engine, gx, gy, p.id)) continue;
-                    const sx = gx * cs - this.cameraX + this.screenW / 2;
-                    const sy = gy * cs - this.cameraY + this.screenH / 2;
-                    if (sx > this.screenW + cs * 2 || sx < -cs * 2 || sy > this.screenH + cs * 2 || sy < -cs * 2) continue;
-                    this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, hexR);
-                }
-            }
-            ctx.fill();
-            ctx.globalAlpha = 1;
-
-            // Pass 3: Hex border stroke on edge cells
+            // Pass 2: Hex outline on outer-facing edges ONLY
+            // This draws only the outer contour as hex segments
             if (cs >= 1.5) {
                 ctx.strokeStyle = borderColor;
                 ctx.lineWidth = Math.max(2, cs * 0.12);
