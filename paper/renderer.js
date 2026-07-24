@@ -57,7 +57,7 @@ class Renderer {
     /**
      * Render territories as tiled flat-top hexagons with 3D depth on bottom edges.
      * Hex grid is offset: odd rows shift right by half hex width.
-     * Territory: all cells as hexagons + depth on bottom edges.
+     * Territory: solid rect fill everywhere + hex overlay on edges.
      */
     renderTerritories(engine, players) {
         const ctx = this.ctx;
@@ -66,25 +66,43 @@ class Renderer {
         if (cs < 0.3) return;
 
         const depth = Math.max(5, cs * 1.0);
-        // Hex radius large enough to overlap neighbors (no gaps)
-        const hexR = cs * 0.62;
 
         for (const p of players) {
             const baseColor = p.territoryColor || p.color;
             const sideColor = this.darken(baseColor, 0.35);
             const borderColor = this.darken(baseColor, 0.6);
 
-            // Single pass: Fill ALL territory cells as hexagons
+            // Pass 1: Fill NON-EDGE cells with rects (guaranteed solid interior)
             ctx.fillStyle = baseColor;
             ctx.globalAlpha = 0.6;
             ctx.beginPath();
             for (let gy = 0; gy < GRID_RES; gy++) {
                 for (let gx = 0; gx < GRID_RES; gx++) {
                     if (engine.grid[gy][gx] !== p.id) continue;
+                    if (this._isEdgeCell(engine, gx, gy, p.id)) continue;
                     const sx = gx * cs - this.cameraX + this.screenW / 2;
                     const sy = gy * cs - this.cameraY + this.screenH / 2;
                     if (sx > this.screenW + cs || sx < -cs || sy > this.screenH + cs || sy < -cs) continue;
-                    this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, hexR);
+                    ctx.rect(sx, sy, cs + 0.5, cs + 0.5);
+                }
+            }
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Pass 2: Fill EDGE cells with large hexagons only (no rects)
+            // Radius 0.58 makes hex wider than cell (covers side gaps)
+            // Adjacent interior rects overlap INTO this hex area (same color = seamless)
+            ctx.fillStyle = baseColor;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            for (let gy = 0; gy < GRID_RES; gy++) {
+                for (let gx = 0; gx < GRID_RES; gx++) {
+                    if (engine.grid[gy][gx] !== p.id) continue;
+                    if (!this._isEdgeCell(engine, gx, gy, p.id)) continue;
+                    const sx = gx * cs - this.cameraX + this.screenW / 2;
+                    const sy = gy * cs - this.cameraY + this.screenH / 2;
+                    if (sx > this.screenW + cs * 2 || sx < -cs * 2 || sy > this.screenH + cs * 2 || sy < -cs * 2) continue;
+                    this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.58);
                 }
             }
             ctx.fill();
@@ -181,11 +199,6 @@ class Renderer {
         if (engine.grid[gy+1][gx] !== pid) return true;
         if (engine.grid[gy][gx-1] !== pid) return true;
         if (engine.grid[gy][gx+1] !== pid) return true;
-        // Also check diagonals (corners of rect would be visible)
-        if (engine.grid[gy-1][gx-1] !== pid) return true;
-        if (engine.grid[gy-1][gx+1] !== pid) return true;
-        if (engine.grid[gy+1][gx-1] !== pid) return true;
-        if (engine.grid[gy+1][gx+1] !== pid) return true;
         return false;
     }
 
