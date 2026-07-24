@@ -15,7 +15,7 @@ bunny: {
     palette: { body: 0xffffff, belly: 0xffccdd, accent: 0xffaacc, dark: 0xdddddd, eye: 0x111111, nose: 0xff6688 },
     parts: [
         { geo: "box", pos: [0, 0.45, 0], size: [0.5, 0.55, 0.45], color: "body" },
-        { geo: "box", pos: [0, 0.4, 0.15], size: [0.3, 0.35, 0.08], color: "belly" },
+        { geo: "box", pos: [0, 0.4, 0.16], size: [0.32, 0.38, 0.08], color: "belly" },
         { geo: "box", pos: [0, 1.0, 0.02], size: [0.42, 0.42, 0.38], color: "body" },
         { geo: "box", pos: [-0.1, 1.5, 0], size: [0.08, 0.38, 0.06], color: "body" },
         { geo: "box", pos: [0.1, 1.5, 0], size: [0.08, 0.38, 0.06], color: "body" },
@@ -34,10 +34,10 @@ bunny: {
     ],
 },
 penguin: {
-    palette: { body: 0x1a1a2e, belly: 0xccefff, accent: 0xff8c00, eye: 0xffffff, pupil: 0x111111 },
+    palette: { body: 0x1a1a2e, belly: 0xffffff, accent: 0xff8c00, eye: 0xffffff, pupil: 0x111111 },
     parts: [
         { geo: "box", pos: [0, 0.45, 0], size: [0.45, 0.6, 0.4], color: "body" },
-        { geo: "box", pos: [0, 0.45, 0.12], size: [0.3, 0.45, 0.1], color: "belly" },
+        { geo: "box", pos: [0, 0.45, 0.13], size: [0.32, 0.5, 0.1], color: "belly" },
         { geo: "box", pos: [0, 1.0, 0], size: [0.38, 0.38, 0.35], color: "body" },
         { geo: "box", pos: [-0.28, 0.5, 0], size: [0.07, 0.3, 0.15], color: "body", rot: [0, 0, 0.2] },
         { geo: "box", pos: [0.28, 0.5, 0], size: [0.07, 0.3, 0.15], color: "body", rot: [0, 0, -0.2] },
@@ -54,7 +54,7 @@ fox: {
     palette: { body: 0xf07020, belly: 0xffeebb, dark: 0x222222, eye: 0x111111, accent: 0xffccaa },
     parts: [
         { geo: "box", pos: [0, 0.45, 0], size: [0.45, 0.55, 0.38], color: "body" },
-        { geo: "box", pos: [0, 0.4, 0.1], size: [0.25, 0.3, 0.08], color: "belly" },
+        { geo: "box", pos: [0, 0.4, 0.12], size: [0.28, 0.35, 0.08], color: "belly" },
         { geo: "box", pos: [0, 1.0, 0.03], size: [0.38, 0.35, 0.34], color: "body" },
         { geo: "box", pos: [0, 0.9, 0.2], size: [0.15, 0.1, 0.1], color: "belly" },
         { geo: "cone", pos: [-0.14, 1.3, 0], size: [0.07, 0.16, 4], color: "body" },
@@ -73,10 +73,10 @@ fox: {
     ],
 },
 panda: {
-    palette: { body: 0xffffff, belly: 0xe8d0f0, dark: 0x222222, eye: 0xffffff, pupil: 0x111111, nose: 0x333333 },
+    palette: { body: 0xffffff, belly: 0xf5e6d0, dark: 0x222222, eye: 0xffffff, pupil: 0x111111, nose: 0x333333 },
     parts: [
         { geo: "box", pos: [0, 0.45, 0], size: [0.5, 0.58, 0.42], color: "body" },
-        { geo: "box", pos: [0, 0.4, 0.14], size: [0.3, 0.38, 0.08], color: "belly" },
+        { geo: "box", pos: [0, 0.4, 0.15], size: [0.32, 0.42, 0.08], color: "belly" },
         { geo: "box", pos: [-0.28, 0.5, 0], size: [0.12, 0.28, 0.12], color: "dark" },
         { geo: "box", pos: [0.28, 0.5, 0], size: [0.12, 0.28, 0.12], color: "dark" },
         { geo: "box", pos: [-0.14, 0.1, 0], size: [0.12, 0.2, 0.12], color: "dark" },
@@ -97,7 +97,7 @@ owl: {
     palette: { body: 0x8B5E3C, belly: 0xb8e8d0, dark: 0x5B3E1C, eye: 0xff8c00, pupil: 0x111111, beak: 0xff9800, disc: 0xf0dcc0 },
     parts: [
         { geo: "box", pos: [0, 0.45, 0], size: [0.42, 0.55, 0.38], color: "body" },
-        { geo: "box", pos: [0, 0.35, 0.1], size: [0.25, 0.3, 0.08], color: "belly" },
+        { geo: "box", pos: [0, 0.38, 0.12], size: [0.28, 0.35, 0.08], color: "belly" },
         { geo: "box", pos: [-0.25, 0.5, 0], size: [0.08, 0.32, 0.14], color: "dark" },
         { geo: "box", pos: [0.25, 0.5, 0], size: [0.08, 0.32, 0.14], color: "dark" },
         { geo: "box", pos: [0, 1.0, 0], size: [0.4, 0.38, 0.35], color: "body" },
@@ -255,7 +255,8 @@ class SkinPrerenderer {
     draw(ctx, x, y, r, angle, skinId) {
         var frames = this.cache[skinId];
         if (!frames) return false;
-        var a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+        // Negate angle: game uses CW (right=0,down=PI/2) but Three.js Y rotation is CCW
+        var a = ((-angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
         var idx = Math.floor(a / (Math.PI * 2) * this.frames) % this.frames;
         ctx.drawImage(frames[idx], x - r, y - r, r * 2, r * 2);
         return true;
