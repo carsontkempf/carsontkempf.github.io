@@ -86,8 +86,10 @@ class Renderer {
                         // Edge cell: draw as hexagon
                         this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.58);
                     } else {
-                        // Interior cell: draw as expanded rect
-                        ctx.rect(sx - cs * 0.3, sy - cs * 0.3, cs + cs * 0.6, cs + cs * 0.6);
+                        // Interior cell: draw as expanded rounded rect (50% radius)
+                        const rw = cs + cs * 0.6;
+                        const rr = rw * 0.5;
+                        ctx.roundRect(sx - cs * 0.3, sy - cs * 0.3, rw, rw, rr);
                     }
                 }
             }
