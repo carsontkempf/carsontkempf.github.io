@@ -88,33 +88,11 @@ class Renderer {
             ctx.fill();
             ctx.globalAlpha = 1;
 
-            // Pass 2: Clip edge cells to hex shape
-            // Draw edge cells as hex fills ON TOP of the rect fill
-            // The hex is bigger than the rect to fully cover it, and the hex shape
-            // becomes the visible outer boundary
-            ctx.fillStyle = baseColor;
-            ctx.globalAlpha = 0.6;
-            ctx.beginPath();
-            for (let gy = 0; gy < GRID_RES; gy++) {
-                for (let gx = 0; gx < GRID_RES; gx++) {
-                    if (engine.grid[gy][gx] !== p.id) continue;
-                    if (!this._isEdgeCell(engine, gx, gy, p.id)) continue;
-                    const sx = gx * cs - this.cameraX + this.screenW / 2;
-                    const sy = gy * cs - this.cameraY + this.screenH / 2;
-                    if (sx > this.screenW + cs * 2 || sx < -cs * 2 || sy > this.screenH + cs * 2 || sy < -cs * 2) continue;
-                    this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.6);
-                }
-            }
-            ctx.fill();
-            ctx.globalAlpha = 1;
-
-            // Now erase the rect overflow on edge cells so only hex shape remains
-            // by drawing the background color where hex doesn't cover
-            // Actually: composite approach - draw the edge hex outlines as a visible border
+            // Pass 2: Hex-zigzag outer border (only on outer-facing edges)
             if (cs >= 1.5) {
                 ctx.strokeStyle = borderColor;
-                ctx.lineWidth = Math.max(2, cs * 0.15);
-                ctx.lineJoin = "round";
+                ctx.lineWidth = Math.max(2, cs * 0.14);
+                ctx.lineJoin = "bevel";
                 ctx.beginPath();
                 for (let gy = 0; gy < GRID_RES; gy++) {
                     for (let gx = 0; gx < GRID_RES; gx++) {
@@ -123,7 +101,7 @@ class Renderer {
                         const sx = gx * cs - this.cameraX + this.screenW / 2;
                         const sy = gy * cs - this.cameraY + this.screenH / 2;
                         if (sx > this.screenW + cs * 2 || sx < -cs * 2 || sy > this.screenH + cs * 2 || sy < -cs * 2) continue;
-                        this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.6);
+                        this._drawHexBorder(ctx, engine, gx, gy, p.id, sx, sy, cs);
                     }
                 }
                 ctx.stroke();
@@ -155,33 +133,41 @@ class Renderer {
         }
     }
 
-    /** Draw only the outer-facing edges of a border cell as hex-like segments */
-    _drawOuterEdges(ctx, engine, gx, gy, pid, sx, sy, cs) {
+    /** Draw hex-shaped border only on sides facing non-owned cells */
+    _drawHexBorder(ctx, engine, gx, gy, pid, sx, sy, cs) {
+        // Hex vertices for this cell (pointy-top hex inscribed in the cell)
         const cx = sx + cs * 0.5;
         const cy = sy + cs * 0.5;
-        const r = cs * 0.55;
-        // Check each of 4 cardinal directions for non-owned neighbors
-        // Top edge
+        const r = cs * 0.52;
+        // 6 vertices of pointy-top hex (starting at top, clockwise)
+        const v = [];
+        for (let i = 0; i < 6; i++) {
+            const a = -Math.PI / 2 + (Math.PI / 3) * i;
+            v.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+        }
+        // v[0]=top, v[1]=top-right, v[2]=bottom-right, v[3]=bottom, v[4]=bottom-left, v[5]=top-left
+
+        // Top side (edge 5->0->1): draw if no neighbor above
         if (gy <= 0 || engine.grid[gy-1][gx] !== pid) {
-            ctx.moveTo(cx - r, cy - r * 0.6);
-            ctx.lineTo(cx, cy - r);
-            ctx.lineTo(cx + r, cy - r * 0.6);
+            ctx.moveTo(v[5].x, v[5].y);
+            ctx.lineTo(v[0].x, v[0].y);
+            ctx.lineTo(v[1].x, v[1].y);
         }
-        // Bottom edge
-        if (gy >= GRID_RES-1 || engine.grid[gy+1][gx] !== pid) {
-            ctx.moveTo(cx - r, cy + r * 0.6);
-            ctx.lineTo(cx, cy + r);
-            ctx.lineTo(cx + r, cy + r * 0.6);
-        }
-        // Left edge
-        if (gx <= 0 || engine.grid[gy][gx-1] !== pid) {
-            ctx.moveTo(cx - r, cy - r * 0.6);
-            ctx.lineTo(cx - r, cy + r * 0.6);
-        }
-        // Right edge
+        // Right side (edge 1->2): draw if no neighbor to the right
         if (gx >= GRID_RES-1 || engine.grid[gy][gx+1] !== pid) {
-            ctx.moveTo(cx + r, cy - r * 0.6);
-            ctx.lineTo(cx + r, cy + r * 0.6);
+            ctx.moveTo(v[1].x, v[1].y);
+            ctx.lineTo(v[2].x, v[2].y);
+        }
+        // Bottom side (edge 2->3->4): draw if no neighbor below
+        if (gy >= GRID_RES-1 || engine.grid[gy+1][gx] !== pid) {
+            ctx.moveTo(v[2].x, v[2].y);
+            ctx.lineTo(v[3].x, v[3].y);
+            ctx.lineTo(v[4].x, v[4].y);
+        }
+        // Left side (edge 4->5): draw if no neighbor to the left
+        if (gx <= 0 || engine.grid[gy][gx-1] !== pid) {
+            ctx.moveTo(v[4].x, v[4].y);
+            ctx.lineTo(v[5].x, v[5].y);
         }
     }
 

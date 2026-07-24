@@ -446,9 +446,8 @@ class Game {
             }
         }
 
-        // Check for 100% territory win
-        const myPercent = parseFloat(this.engine.getTerritoryPercent(0));
-        if (myPercent >= 100) {
+        // Check for 100% territory win (virtually impossible but handles it)
+        if (this.engine.countTerritory(0) >= GRID_RES * GRID_RES) {
             this.gameEnd();
             return;
         }

@@ -87,8 +87,8 @@ class Player {
 
         // Check if we crossed our own trail
         if (this.trail.length > 5 && this.crossesOwnTrail(prevX, prevY)) {
-            this.die(engine);
-            return "died";
+            if (this.die(engine)) return "died";
+            return null;
         }
 
         // Territory logic
@@ -197,12 +197,13 @@ class Player {
             this.isInOwnTerritory = true;
             // Teleport back to own territory
             this._returnToTerritory(engine);
-            return;
+            return false; // survived
         }
         this.alive = false;
         this.deathTimer = 1.5;
         this.trail = [];
         engine.clearTerritory(this.id);
+        return true; // actually died
     }
 
     _returnToTerritory(engine) {
