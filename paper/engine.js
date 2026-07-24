@@ -6,7 +6,7 @@
  */
 
 const WORLD_SIZE = 40000;
-const GRID_RES = 300;
+const GRID_RES = 600;
 const CELL_SIZE = WORLD_SIZE / GRID_RES;
 const GAME_DURATION = 120;
 const PLAYER_SPEED = 2000;
