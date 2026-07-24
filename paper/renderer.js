@@ -88,12 +88,33 @@ class Renderer {
             ctx.fill();
             ctx.globalAlpha = 1;
 
-            // Pass 2: Draw hex-shaped border segments on outer edges only
-            // For each edge cell, only draw the sides that face non-owned cells
+            // Pass 2: Clip edge cells to hex shape
+            // Draw edge cells as hex fills ON TOP of the rect fill
+            // The hex is bigger than the rect to fully cover it, and the hex shape
+            // becomes the visible outer boundary
+            ctx.fillStyle = baseColor;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            for (let gy = 0; gy < GRID_RES; gy++) {
+                for (let gx = 0; gx < GRID_RES; gx++) {
+                    if (engine.grid[gy][gx] !== p.id) continue;
+                    if (!this._isEdgeCell(engine, gx, gy, p.id)) continue;
+                    const sx = gx * cs - this.cameraX + this.screenW / 2;
+                    const sy = gy * cs - this.cameraY + this.screenH / 2;
+                    if (sx > this.screenW + cs * 2 || sx < -cs * 2 || sy > this.screenH + cs * 2 || sy < -cs * 2) continue;
+                    this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.6);
+                }
+            }
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Now erase the rect overflow on edge cells so only hex shape remains
+            // by drawing the background color where hex doesn't cover
+            // Actually: composite approach - draw the edge hex outlines as a visible border
             if (cs >= 1.5) {
                 ctx.strokeStyle = borderColor;
-                ctx.lineWidth = Math.max(1.5, cs * 0.12);
-                ctx.lineCap = "round";
+                ctx.lineWidth = Math.max(2, cs * 0.15);
+                ctx.lineJoin = "round";
                 ctx.beginPath();
                 for (let gy = 0; gy < GRID_RES; gy++) {
                     for (let gx = 0; gx < GRID_RES; gx++) {
@@ -102,7 +123,7 @@ class Renderer {
                         const sx = gx * cs - this.cameraX + this.screenW / 2;
                         const sy = gy * cs - this.cameraY + this.screenH / 2;
                         if (sx > this.screenW + cs * 2 || sx < -cs * 2 || sy > this.screenH + cs * 2 || sy < -cs * 2) continue;
-                        this._drawOuterEdges(ctx, engine, gx, gy, p.id, sx, sy, cs);
+                        this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.6);
                     }
                 }
                 ctx.stroke();

@@ -433,12 +433,24 @@ class Game {
                 const { x, y } = this.renderer.worldToScreen(p.x, p.y);
                 this.effects.shake(8);
                 this.effects.spawnParticles(x, y, p.color, 20, "burst");
-                if (p.id === 0) this.effects.vibrate(100);
+                if (p.id === 0) {
+                    this.effects.vibrate(100);
+                    // Human died - end the game
+                    this.gameEnd();
+                    return;
+                }
             }
             // Kill toast
             if (p.id === 0 && p.kills > prevKills) {
-                this.toasts.show("💀 Eliminated an opponent!", "#ff4757");
+                this.toasts.show("Eliminated an opponent!", "#ff4757");
             }
+        }
+
+        // Check for 100% territory win
+        const myPercent = parseFloat(this.engine.getTerritoryPercent(0));
+        if (myPercent >= 100) {
+            this.gameEnd();
+            return;
         }
 
         // Update AI
