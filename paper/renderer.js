@@ -100,7 +100,7 @@ class Renderer {
                     const sx = gx * cs - this.cameraX + this.screenW / 2;
                     const sy = gy * cs - this.cameraY + this.screenH / 2;
                     if (sx > this.screenW + cs * 2 || sx < -cs * 2 || sy > this.screenH + cs * 2 || sy < -cs * 2) continue;
-                    this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.62);
+                    this._pointyHex(ctx, sx + cs * 0.5, sy + cs * 0.5, cs * 0.72);
                 }
             }
             ctx.fill();
@@ -197,6 +197,11 @@ class Renderer {
         if (engine.grid[gy+1][gx] !== pid) return true;
         if (engine.grid[gy][gx-1] !== pid) return true;
         if (engine.grid[gy][gx+1] !== pid) return true;
+        // Also check diagonals (corners of rect would be visible)
+        if (engine.grid[gy-1][gx-1] !== pid) return true;
+        if (engine.grid[gy-1][gx+1] !== pid) return true;
+        if (engine.grid[gy+1][gx-1] !== pid) return true;
+        if (engine.grid[gy+1][gx+1] !== pid) return true;
         return false;
     }
 

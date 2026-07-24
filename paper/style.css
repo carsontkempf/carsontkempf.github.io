@@ -293,6 +293,18 @@ html, body {
     line-height: 2;
 }
 
+#screen-results {
+    background: rgba(0,0,0,0.75);
+}
+#screen-results .menu-container {
+    background: rgba(20,20,40,0.95);
+    border-radius: 16px;
+    border: 2px solid rgba(255,215,0,0.4);
+    padding: 24px;
+    max-width: 320px;
+    width: 85%;
+}
+
 /* ===========================
    SHOP TABS & PREVIEWS
    =========================== */
