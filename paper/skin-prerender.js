@@ -167,64 +167,89 @@ droplet: {
 
 // Aliases
 CHAR_MODELS.skateboard = {
-    palette: { body: 0x3498db, belly: 0xf0f0f0, dark: 0x222222, eye: 0x111111, eye_w: 0xffffff, hair: 0xf39c12, board: 0xc0392b, wheel: 0x333333 },
+    palette: { body: 0xc0392b, deck: 0x8B4513, grip: 0x222222, truck: 0xaaaaaa, wheel: 0xf5f5dc, accent: 0xf39c12 },
     parts: [
-        { geo: "box", pos: [0, 0.5, 0], size: [0.4, 0.45, 0.3], color: "body" },
-        { geo: "box", pos: [0, 0.45, 0.1], size: [0.22, 0.25, 0.06], color: "belly" },
-        { geo: "box", pos: [0, 1.0, 0], size: [0.32, 0.32, 0.28], color: "belly" },
-        { geo: "box", pos: [0, 1.22, 0], size: [0.28, 0.12, 0.24], color: "hair" },
-        { geo: "box", pos: [-0.2, 0.55, 0], size: [0.08, 0.22, 0.08], color: "body" },
-        { geo: "box", pos: [0.2, 0.55, 0], size: [0.08, 0.22, 0.08], color: "body" },
-        { geo: "box", pos: [-0.1, 0.1, 0], size: [0.1, 0.2, 0.1], color: "dark" },
-        { geo: "box", pos: [0.1, 0.1, 0], size: [0.1, 0.2, 0.1], color: "dark" },
-        { geo: "sphere", pos: [-0.08, 1.02, 0.14], size: [0.05], color: "eye_w" },
-        { geo: "sphere", pos: [0.08, 1.02, 0.14], size: [0.05], color: "eye_w" },
-        { geo: "sphere", pos: [-0.08, 1.02, 0.17], size: [0.03], color: "eye" },
-        { geo: "sphere", pos: [0.08, 1.02, 0.17], size: [0.03], color: "eye" },
-        { geo: "box", pos: [0, -0.05, 0], size: [0.12, 0.03, 0.45], color: "board" },
-        { geo: "sphere", pos: [0, -0.06, 0.15], size: [0.03], color: "wheel" },
-        { geo: "sphere", pos: [0, -0.06, -0.15], size: [0.03], color: "wheel" },
+        // Deck (rounded with multiple layers)
+        { geo: "box", pos: [0, 0.18, 0], size: [0.22, 0.04, 0.6], color: "deck" },
+        { geo: "box", pos: [0, 0.21, 0], size: [0.2, 0.02, 0.56], color: "grip" },
+        // Nose and tail kick (curved up)
+        { geo: "cylinder", pos: [0, 0.22, 0.3], size: [0.1, 0.1, 0.04], color: "deck" },
+        { geo: "cylinder", pos: [0, 0.22, -0.3], size: [0.1, 0.1, 0.04], color: "deck" },
+        // Graphic on bottom
+        { geo: "box", pos: [0, 0.16, 0], size: [0.16, 0.01, 0.3], color: "body" },
+        { geo: "sphere", pos: [0, 0.16, 0], size: [0.06], color: "accent" },
+        // Trucks (front and back)
+        { geo: "box", pos: [0, 0.1, 0.2], size: [0.16, 0.03, 0.04], color: "truck" },
+        { geo: "box", pos: [0, 0.1, -0.2], size: [0.16, 0.03, 0.04], color: "truck" },
+        // Wheels (4 wheels)
+        { geo: "cylinder", pos: [-0.1, 0.06, 0.2], size: [0.04, 0.04, 0.03], color: "wheel" },
+        { geo: "cylinder", pos: [0.1, 0.06, 0.2], size: [0.04, 0.04, 0.03], color: "wheel" },
+        { geo: "cylinder", pos: [-0.1, 0.06, -0.2], size: [0.04, 0.04, 0.03], color: "wheel" },
+        { geo: "cylinder", pos: [0.1, 0.06, -0.2], size: [0.04, 0.04, 0.03], color: "wheel" },
+        // Wheel bolts
+        { geo: "sphere", pos: [-0.1, 0.06, 0.2], size: [0.015], color: "truck" },
+        { geo: "sphere", pos: [0.1, 0.06, 0.2], size: [0.015], color: "truck" },
+        { geo: "sphere", pos: [-0.1, 0.06, -0.2], size: [0.015], color: "truck" },
+        { geo: "sphere", pos: [0.1, 0.06, -0.2], size: [0.015], color: "truck" },
     ],
 };
 
 CHAR_MODELS.hoverboard = {
-    palette: { body: 0x2c3e50, belly: 0x2c3e50, dark: 0x1a252f, eye: 0x00ffcc, eye_w: 0xffffff, glow: 0x00d2ff, board: 0x7b2ff7 },
+    palette: { body: 0x7b2ff7, glow: 0x00d2ff, accent: 0xff00ff, dark: 0x1a1a2e, light: 0xccccff, pad: 0x333355 },
     parts: [
-        { geo: "box", pos: [0, 0.6, 0], size: [0.38, 0.45, 0.3], color: "body" },
-        { geo: "box", pos: [0, 1.05, 0], size: [0.3, 0.3, 0.26], color: "body" },
-        { geo: "box", pos: [0, 1.22, 0], size: [0.32, 0.05, 0.28], color: "glow" },
-        { geo: "box", pos: [-0.22, 0.65, 0], size: [0.07, 0.2, 0.08], color: "body" },
-        { geo: "box", pos: [0.22, 0.65, 0], size: [0.07, 0.2, 0.08], color: "body" },
-        { geo: "box", pos: [-0.1, 0.2, 0], size: [0.09, 0.25, 0.09], color: "dark" },
-        { geo: "box", pos: [0.1, 0.2, 0], size: [0.09, 0.25, 0.09], color: "dark" },
-        { geo: "sphere", pos: [-0.08, 1.08, 0.13], size: [0.05], color: "eye_w" },
-        { geo: "sphere", pos: [0.08, 1.08, 0.13], size: [0.05], color: "eye_w" },
-        { geo: "sphere", pos: [-0.08, 1.08, 0.16], size: [0.035], color: "eye" },
-        { geo: "sphere", pos: [0.08, 1.08, 0.16], size: [0.035], color: "eye" },
-        { geo: "box", pos: [0, 0.0, 0], size: [0.15, 0.04, 0.5], color: "board" },
-        { geo: "box", pos: [0, -0.02, 0], size: [0.12, 0.02, 0.45], color: "glow" },
+        // Main board body (sleek, rounded)
+        { geo: "box", pos: [0, 0.15, 0], size: [0.24, 0.05, 0.6], color: "body" },
+        { geo: "sphere", pos: [0, 0.15, 0.28], size: [0.11], color: "body" },
+        { geo: "sphere", pos: [0, 0.15, -0.28], size: [0.11], color: "body" },
+        // Top deck surface
+        { geo: "box", pos: [0, 0.19, 0], size: [0.2, 0.02, 0.5], color: "dark" },
+        // Foot pads
+        { geo: "box", pos: [0, 0.2, 0.15], size: [0.14, 0.015, 0.12], color: "pad" },
+        { geo: "box", pos: [0, 0.2, -0.15], size: [0.14, 0.015, 0.12], color: "pad" },
+        // Glow strips (sides)
+        { geo: "box", pos: [-0.12, 0.14, 0], size: [0.015, 0.02, 0.5], color: "glow" },
+        { geo: "box", pos: [0.12, 0.14, 0], size: [0.015, 0.02, 0.5], color: "glow" },
+        // Bottom glow (hover effect)
+        { geo: "box", pos: [0, 0.08, 0], size: [0.18, 0.02, 0.45], color: "glow" },
+        // Hover engines (bottom spheres)
+        { geo: "sphere", pos: [-0.06, 0.06, 0.2], size: [0.035], color: "glow" },
+        { geo: "sphere", pos: [0.06, 0.06, 0.2], size: [0.035], color: "glow" },
+        { geo: "sphere", pos: [-0.06, 0.06, -0.2], size: [0.035], color: "glow" },
+        { geo: "sphere", pos: [0.06, 0.06, -0.2], size: [0.035], color: "glow" },
+        // Center accent
+        { geo: "sphere", pos: [0, 0.2, 0], size: [0.04], color: "accent" },
+        // Edge trim
+        { geo: "box", pos: [0, 0.17, 0.29], size: [0.12, 0.03, 0.02], color: "accent" },
+        { geo: "box", pos: [0, 0.17, -0.29], size: [0.12, 0.03, 0.02], color: "accent" },
     ],
 };
 
 CHAR_MODELS.skis = {
-    palette: { body: 0xe74c3c, belly: 0xf0f0f0, dark: 0x222222, eye: 0x111111, eye_w: 0xffffff, ski: 0x1e90ff, pole: 0x888888 },
+    palette: { body: 0x1e90ff, accent: 0xe74c3c, dark: 0x222222, metal: 0xcccccc, tip: 0xffd700, binding: 0x444444 },
     parts: [
-        { geo: "box", pos: [0, 0.5, 0], size: [0.42, 0.48, 0.32], color: "body" },
-        { geo: "box", pos: [0, 0.45, 0.1], size: [0.24, 0.28, 0.06], color: "belly" },
-        { geo: "box", pos: [0, 1.0, 0], size: [0.32, 0.32, 0.28], color: "belly" },
-        { geo: "sphere", pos: [0, 1.2, 0], size: [0.15], color: "body" },
-        { geo: "box", pos: [-0.24, 0.6, 0], size: [0.06, 0.18, 0.06], color: "body" },
-        { geo: "box", pos: [0.24, 0.6, 0], size: [0.06, 0.18, 0.06], color: "body" },
-        { geo: "box", pos: [-0.1, 0.12, 0], size: [0.09, 0.22, 0.09], color: "dark" },
-        { geo: "box", pos: [0.1, 0.12, 0], size: [0.09, 0.22, 0.09], color: "dark" },
-        { geo: "sphere", pos: [-0.08, 1.02, 0.14], size: [0.04], color: "eye_w" },
-        { geo: "sphere", pos: [0.08, 1.02, 0.14], size: [0.04], color: "eye_w" },
-        { geo: "sphere", pos: [-0.08, 1.02, 0.17], size: [0.03], color: "eye" },
-        { geo: "sphere", pos: [0.08, 1.02, 0.17], size: [0.03], color: "eye" },
-        { geo: "box", pos: [-0.08, -0.02, 0], size: [0.04, 0.02, 0.55], color: "ski" },
-        { geo: "box", pos: [0.08, -0.02, 0], size: [0.04, 0.02, 0.55], color: "ski" },
-        { geo: "cylinder", pos: [-0.3, 0.4, 0], size: [0.01, 0.01, 0.9], color: "pole" },
-        { geo: "cylinder", pos: [0.3, 0.4, 0], size: [0.01, 0.01, 0.9], color: "pole" },
+        // Left ski
+        { geo: "box", pos: [-0.08, 0.02, 0], size: [0.05, 0.02, 0.65], color: "body" },
+        { geo: "sphere", pos: [-0.08, 0.04, 0.32], size: [0.03], color: "tip" },
+        { geo: "box", pos: [-0.08, 0.02, -0.3], size: [0.04, 0.015, 0.05], color: "tip" },
+        // Right ski
+        { geo: "box", pos: [0.08, 0.02, 0], size: [0.05, 0.02, 0.65], color: "body" },
+        { geo: "sphere", pos: [0.08, 0.04, 0.32], size: [0.03], color: "tip" },
+        { geo: "box", pos: [0.08, 0.02, -0.3], size: [0.04, 0.015, 0.05], color: "tip" },
+        // Bindings
+        { geo: "box", pos: [-0.08, 0.06, 0.05], size: [0.04, 0.04, 0.06], color: "binding" },
+        { geo: "box", pos: [0.08, 0.06, 0.05], size: [0.04, 0.04, 0.06], color: "binding" },
+        // Poles
+        { geo: "cylinder", pos: [-0.2, 0.3, 0], size: [0.01, 0.01, 0.6], color: "metal" },
+        { geo: "cylinder", pos: [0.2, 0.3, 0], size: [0.01, 0.01, 0.6], color: "metal" },
+        // Pole handles
+        { geo: "sphere", pos: [-0.2, 0.6, 0], size: [0.025], color: "accent" },
+        { geo: "sphere", pos: [0.2, 0.6, 0], size: [0.025], color: "accent" },
+        // Pole baskets
+        { geo: "cylinder", pos: [-0.2, 0.02, 0], size: [0.03, 0.03, 0.01], color: "metal" },
+        { geo: "cylinder", pos: [0.2, 0.02, 0], size: [0.03, 0.03, 0.01], color: "metal" },
+        // Racing stripe on skis
+        { geo: "box", pos: [-0.08, 0.03, 0], size: [0.02, 0.01, 0.5], color: "accent" },
+        { geo: "box", pos: [0.08, 0.03, 0], size: [0.02, 0.01, 0.5], color: "accent" },
     ],
 };
 
@@ -285,42 +310,80 @@ CHAR_MODELS.pirate = {
 CHAR_MODELS.dog = {
     palette: { body: 0xc68642, belly: 0xf5deb3, dark: 0x8B5E3C, eye: 0x111111, eye_w: 0xffffff, nose: 0x222222, tongue: 0xff6b81 },
     parts: [
-        { geo: "box", pos: [0, 0.45, 0], size: [0.44, 0.5, 0.36], color: "body" },
-        { geo: "box", pos: [0, 0.4, 0.12], size: [0.26, 0.3, 0.08], color: "belly" },
-        { geo: "box", pos: [0, 0.95, 0.04], size: [0.34, 0.34, 0.3], color: "body" },
-        { geo: "box", pos: [0, 0.85, 0.18], size: [0.18, 0.12, 0.08], color: "belly" },
-        { geo: "box", pos: [-0.18, 1.18, -0.02], size: [0.1, 0.14, 0.06], color: "dark" },
-        { geo: "box", pos: [0.18, 1.18, -0.02], size: [0.1, 0.14, 0.06], color: "dark" },
-        { geo: "box", pos: [-0.12, 0.1, 0], size: [0.09, 0.2, 0.09], color: "body" },
-        { geo: "box", pos: [0.12, 0.1, 0], size: [0.09, 0.2, 0.09], color: "body" },
-        { geo: "box", pos: [0, 0.5, -0.25], size: [0.06, 0.06, 0.18], color: "body" },
-        { geo: "sphere", pos: [-0.09, 1.0, 0.15], size: [0.06], color: "eye_w" },
-        { geo: "sphere", pos: [0.09, 1.0, 0.15], size: [0.06], color: "eye_w" },
-        { geo: "sphere", pos: [-0.09, 1.0, 0.19], size: [0.035], color: "eye" },
-        { geo: "sphere", pos: [0.09, 1.0, 0.19], size: [0.035], color: "eye" },
-        { geo: "sphere", pos: [0, 0.88, 0.22], size: [0.04], color: "nose" },
-        { geo: "box", pos: [0, 0.8, 0.2], size: [0.03, 0.06, 0.02], color: "tongue" },
+        // Body (rounded using spheres + box)
+        { geo: "sphere", pos: [0, 0.45, 0], size: [0.28], color: "body" },
+        { geo: "box", pos: [0, 0.45, 0], size: [0.4, 0.42, 0.34], color: "body" },
+        { geo: "sphere", pos: [0, 0.4, 0.14], size: [0.18], color: "belly" },
+        // Head (sphere based)
+        { geo: "sphere", pos: [0, 0.9, 0.06], size: [0.22], color: "body" },
+        // Snout
+        { geo: "sphere", pos: [0, 0.82, 0.22], size: [0.1], color: "belly" },
+        { geo: "sphere", pos: [0, 0.84, 0.3], size: [0.05], color: "nose" },
+        // Floppy ears
+        { geo: "box", pos: [-0.2, 0.95, -0.02], size: [0.08, 0.18, 0.1], color: "dark" },
+        { geo: "box", pos: [0.2, 0.95, -0.02], size: [0.08, 0.18, 0.1], color: "dark" },
+        // Eyes
+        { geo: "sphere", pos: [-0.08, 0.94, 0.18], size: [0.05], color: "eye_w" },
+        { geo: "sphere", pos: [0.08, 0.94, 0.18], size: [0.05], color: "eye_w" },
+        { geo: "sphere", pos: [-0.08, 0.94, 0.22], size: [0.03], color: "eye" },
+        { geo: "sphere", pos: [0.08, 0.94, 0.22], size: [0.03], color: "eye" },
+        // Legs (rounded)
+        { geo: "cylinder", pos: [-0.12, 0.15, 0.08], size: [0.05, 0.04, 0.2], color: "body" },
+        { geo: "cylinder", pos: [0.12, 0.15, 0.08], size: [0.05, 0.04, 0.2], color: "body" },
+        { geo: "cylinder", pos: [-0.12, 0.15, -0.08], size: [0.05, 0.04, 0.2], color: "body" },
+        { geo: "cylinder", pos: [0.12, 0.15, -0.08], size: [0.05, 0.04, 0.2], color: "body" },
+        // Paws
+        { geo: "sphere", pos: [-0.12, 0.04, 0.08], size: [0.045], color: "dark" },
+        { geo: "sphere", pos: [0.12, 0.04, 0.08], size: [0.045], color: "dark" },
+        { geo: "sphere", pos: [-0.12, 0.04, -0.08], size: [0.045], color: "dark" },
+        { geo: "sphere", pos: [0.12, 0.04, -0.08], size: [0.045], color: "dark" },
+        // Tail (curved up)
+        { geo: "cylinder", pos: [0, 0.6, -0.25], size: [0.025, 0.02, 0.15], color: "body" },
+        { geo: "sphere", pos: [0, 0.68, -0.3], size: [0.03], color: "body" },
+        // Tongue
+        { geo: "box", pos: [0, 0.76, 0.28], size: [0.03, 0.05, 0.03], color: "tongue" },
     ],
 };
 
 CHAR_MODELS.cat = {
-    palette: { body: 0x555555, belly: 0xf0f0f0, dark: 0x333333, eye: 0x44dd44, eye_w: 0xffffff, nose: 0xffaaaa, ear: 0xff88aa },
+    palette: { body: 0x555555, belly: 0xf0f0f0, dark: 0x333333, eye: 0x44dd44, eye_w: 0xffffff, nose: 0xffaaaa, ear: 0xff88aa, whisker: 0xcccccc },
     parts: [
-        { geo: "box", pos: [0, 0.45, 0], size: [0.4, 0.48, 0.32], color: "body" },
-        { geo: "box", pos: [0, 0.4, 0.1], size: [0.24, 0.28, 0.06], color: "belly" },
-        { geo: "box", pos: [0, 0.95, 0.02], size: [0.34, 0.32, 0.3], color: "body" },
-        { geo: "cone", pos: [-0.14, 1.2, 0], size: [0.06, 0.14, 4], color: "body" },
-        { geo: "cone", pos: [0.14, 1.2, 0], size: [0.06, 0.14, 4], color: "body" },
-        { geo: "cone", pos: [-0.14, 1.18, 0.01], size: [0.035, 0.08, 4], color: "ear" },
-        { geo: "cone", pos: [0.14, 1.18, 0.01], size: [0.035, 0.08, 4], color: "ear" },
-        { geo: "box", pos: [-0.12, 0.1, 0], size: [0.08, 0.18, 0.08], color: "body" },
-        { geo: "box", pos: [0.12, 0.1, 0], size: [0.08, 0.18, 0.08], color: "body" },
-        { geo: "box", pos: [0.05, 0.5, -0.25], size: [0.04, 0.04, 0.3], color: "dark" },
-        { geo: "sphere", pos: [-0.09, 0.98, 0.15], size: [0.06], color: "eye_w" },
-        { geo: "sphere", pos: [0.09, 0.98, 0.15], size: [0.06], color: "eye_w" },
-        { geo: "sphere", pos: [-0.09, 0.98, 0.19], size: [0.04], color: "eye" },
-        { geo: "sphere", pos: [0.09, 0.98, 0.19], size: [0.04], color: "eye" },
-        { geo: "sphere", pos: [0, 0.88, 0.17], size: [0.03], color: "nose" },
+        // Body (rounded)
+        { geo: "sphere", pos: [0, 0.4, 0], size: [0.24], color: "body" },
+        { geo: "box", pos: [0, 0.4, 0], size: [0.36, 0.38, 0.3], color: "body" },
+        { geo: "sphere", pos: [0, 0.38, 0.1], size: [0.15], color: "belly" },
+        // Head (sphere)
+        { geo: "sphere", pos: [0, 0.85, 0.04], size: [0.2], color: "body" },
+        // Pointed ears
+        { geo: "cone", pos: [-0.12, 1.08, 0], size: [0.05, 0.12, 4], color: "body" },
+        { geo: "cone", pos: [0.12, 1.08, 0], size: [0.05, 0.12, 4], color: "body" },
+        { geo: "cone", pos: [-0.12, 1.06, 0.01], size: [0.03, 0.07, 4], color: "ear" },
+        { geo: "cone", pos: [0.12, 1.06, 0.01], size: [0.03, 0.07, 4], color: "ear" },
+        // Eyes (large, cat-like)
+        { geo: "sphere", pos: [-0.07, 0.88, 0.16], size: [0.055], color: "eye_w" },
+        { geo: "sphere", pos: [0.07, 0.88, 0.16], size: [0.055], color: "eye_w" },
+        { geo: "sphere", pos: [-0.07, 0.88, 0.2], size: [0.035], color: "eye" },
+        { geo: "sphere", pos: [0.07, 0.88, 0.2], size: [0.035], color: "eye" },
+        // Nose
+        { geo: "sphere", pos: [0, 0.82, 0.2], size: [0.025], color: "nose" },
+        // Whiskers (thin boxes)
+        { geo: "box", pos: [-0.15, 0.82, 0.16], size: [0.1, 0.005, 0.005], color: "whisker" },
+        { geo: "box", pos: [0.15, 0.82, 0.16], size: [0.1, 0.005, 0.005], color: "whisker" },
+        { geo: "box", pos: [-0.14, 0.8, 0.16], size: [0.1, 0.005, 0.005], color: "whisker" },
+        { geo: "box", pos: [0.14, 0.8, 0.16], size: [0.1, 0.005, 0.005], color: "whisker" },
+        // Legs (cylinders)
+        { geo: "cylinder", pos: [-0.1, 0.14, 0.06], size: [0.04, 0.035, 0.18], color: "body" },
+        { geo: "cylinder", pos: [0.1, 0.14, 0.06], size: [0.04, 0.035, 0.18], color: "body" },
+        { geo: "cylinder", pos: [-0.1, 0.14, -0.06], size: [0.04, 0.035, 0.18], color: "body" },
+        { geo: "cylinder", pos: [0.1, 0.14, -0.06], size: [0.04, 0.035, 0.18], color: "body" },
+        // Paws
+        { geo: "sphere", pos: [-0.1, 0.04, 0.06], size: [0.035], color: "dark" },
+        { geo: "sphere", pos: [0.1, 0.04, 0.06], size: [0.035], color: "dark" },
+        { geo: "sphere", pos: [-0.1, 0.04, -0.06], size: [0.035], color: "dark" },
+        { geo: "sphere", pos: [0.1, 0.04, -0.06], size: [0.035], color: "dark" },
+        // Long tail (curved)
+        { geo: "cylinder", pos: [0.04, 0.5, -0.22], size: [0.025, 0.02, 0.2], color: "dark" },
+        { geo: "sphere", pos: [0.06, 0.6, -0.3], size: [0.025], color: "dark" },
     ],
 };
 
