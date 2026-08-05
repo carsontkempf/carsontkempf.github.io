@@ -65,6 +65,13 @@ permalink: /practice-tests/
           <span class="pt-toggle-slider"></span>
         </span>
       </label>
+      <label class="pt-toggle-wrap" for="pt-randomize-answers">
+        <span>Randomize answers</span>
+        <span class="pt-toggle-switch">
+          <input type="checkbox" id="pt-randomize-answers" checked>
+          <span class="pt-toggle-slider"></span>
+        </span>
+      </label>
       <button id="pt-start-btn" class="pt-btn pt-btn-primary" disabled>Start</button>
     </div>
   </div>
@@ -151,10 +158,11 @@ permalink: /practice-tests/
     if (!checked) return;
     var key = checked.value;
     var randomize = document.getElementById('pt-randomize').checked;
+    var randomizeAnswers = document.getElementById('pt-randomize-answers').checked;
     var labelEl = checked.closest('label');
     var label = labelEl ? labelEl.querySelector('.pt-radio-label').textContent : key;
 
-    QuizEngine.startQuiz(key, randomize, label);
+    QuizEngine.startQuiz(key, randomize, randomizeAnswers, label);
 
     if (QuizEngine.state.total === 0) {
       alert('No questions found for this set.');

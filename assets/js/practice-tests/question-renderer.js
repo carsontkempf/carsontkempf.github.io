@@ -148,10 +148,10 @@
 
       var keySpan = document.createElement('span');
       keySpan.className = 'pt-choice-key';
-      keySpan.textContent = (i + 1) + '.';
+      keySpan.textContent = key + '.';
 
       var textSpan = document.createElement('span');
-      textSpan.textContent = key + '. ' + question.choices[key];
+      textSpan.textContent = question.choices[key];
 
       label.appendChild(input);
       label.appendChild(keySpan);

@@ -67,11 +67,51 @@
     });
   }
 
-  function startQuiz(dataKey, randomize, label) {
+  function shuffleQuestionChoices(question) {
+    var slotKeys = ['A', 'B', 'C', 'D', 'E', 'F'];
+    var origKeys = Object.keys(question.choices);
+    var shuffled = shuffle(origKeys);
+    var keyMap = {};
+    var newChoices = {};
+    shuffled.forEach(function(oldKey, i) {
+      var newKey = slotKeys[i];
+      keyMap[oldKey] = newKey;
+      newChoices[newKey] = question.choices[oldKey];
+    });
+    var newCorrect = question.correct.map(function(k) { return keyMap[k]; });
+    var newIncorrect = (question.incorrect || []).map(function(k) { return keyMap[k]; });
+    var newExplanations = null;
+    if (question.explanations) {
+      newExplanations = {};
+      if (question.explanations.correct) {
+        newExplanations.correct = {};
+        Object.keys(question.explanations.correct).forEach(function(k) {
+          newExplanations.correct[keyMap[k]] = question.explanations.correct[k];
+        });
+      }
+      if (question.explanations.incorrect) {
+        newExplanations.incorrect = {};
+        Object.keys(question.explanations.incorrect).forEach(function(k) {
+          newExplanations.incorrect[keyMap[k]] = question.explanations.incorrect[k];
+        });
+      }
+    }
+    return Object.assign({}, question, {
+      choices: newChoices,
+      correct: newCorrect,
+      incorrect: newIncorrect,
+      explanations: newExplanations !== null ? newExplanations : question.explanations
+    });
+  }
+
+  function startQuiz(dataKey, randomize, randomizeAnswers, label) {
     stopTimer();
     var questions = loadSet(dataKey);
     if (randomize) {
       questions = shuffle(questions);
+    }
+    if (randomizeAnswers) {
+      questions = questions.map(shuffleQuestionChoices);
     }
     state.questions = questions;
     state.currentIndex = 0;
